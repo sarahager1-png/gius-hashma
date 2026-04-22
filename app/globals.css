@@ -1,26 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #F2F0F8;
+  --foreground: #1A0A3C;
+  --card: #ffffff;
+  --card-foreground: #1A0A3C;
+  --border: #DDD8EE;
+  --input: #DDD8EE;
+  --ring: #5B3AAB;
+  --muted: #F5F3FC;
+  --muted-foreground: #6B5B8A;
+  --radius: 0.75rem;
+  --purple: #5B3AAB;
+  --purple-dark: #3D2480;
+  --purple-light: #EDE9FE;
+  --cyan: #00B4CC;
+  --cyan-light: #E0F7FA;
+  --gold: #C9A84C;
+  --gold-light: #FFF8E6;
+  --success: #1A7A4A;
+  --success-light: #E8F8EE;
+  --danger: #C8251D;
+  --danger-light: #FEF2F2;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-purple: var(--purple);
+  --color-cyan: var(--cyan);
+  --color-gold: var(--gold);
+  --font-sans: 'Rubik', system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+*, *::before, *::after { box-sizing: border-box; }
 
-body {
+html, body {
+  font-family: 'Rubik', system-ui, -apple-system, sans-serif;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  direction: rtl;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.02em;
+  font-weight: 800;
 }
