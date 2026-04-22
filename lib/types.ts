@@ -10,8 +10,12 @@ export type AvailabilityStatus =
 export type JobStatus = 'פעילה' | 'מושהית' | 'אוישה' | 'בוטלה' | 'פג תוקפה'
 export type JobType = "סטאג'" | 'חלקי' | 'מלא'
 export type ApplicationStatus = 'ממתינה' | 'נצפתה' | 'התקבלה' | 'נדחתה' | 'בוטלה'
-export type Specialization = 'גן ילדים' | 'יסודי' | 'שניהם'
-export type AcademicLevel = "סטאג'" | 'בוגרת' | 'מנוסה'
+export type Specialization = 'יסודי'
+export type AcademicLevel =
+  | "שנה ב' - סטאג'"
+  | "שנה ג' - סטאג'"
+  | 'תואר ראשון'
+  | 'תואר שני'
 
 export interface Profile {
   id: string
@@ -29,6 +33,7 @@ export interface Candidate {
   graduation_year: number | null
   specialization: Specialization | null
   academic_level: AcademicLevel | null
+  years_experience: number | null
   availability_status: AvailabilityStatus
   bio: string | null
   cv_url: string | null

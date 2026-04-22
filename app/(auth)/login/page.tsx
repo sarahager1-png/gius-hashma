@@ -39,7 +39,7 @@ export default function LoginPage() {
             <span className="text-white text-2xl font-bold">ג</span>
           </div>
           <h1 className="text-2xl font-bold" style={{ color: '#5B3AAB' }}>גיוס והשמה</h1>
-          <p className="text-sm text-gray-500 mt-1">רשת שלוחי חב"ד</p>
+          <p className="text-sm text-gray-500 mt-1">רשת אהלי יוסף יצחק</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

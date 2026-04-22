@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { SPECIALIZATIONS, ACADEMIC_LEVELS } from '@/lib/constants'
+import { ACADEMIC_LEVELS, ACADEMIC_LEVELS_WITH_EXPERIENCE } from '@/lib/constants'
 
 export default function RegisterCandidatePage() {
   const router = useRouter()
@@ -16,7 +16,7 @@ export default function RegisterCandidatePage() {
   const [form, setForm] = useState({
     email: '', password: '', full_name: '', phone: '',
     city: '', college: '', graduation_year: '',
-    specialization: '', academic_level: '',
+    academic_level: '', years_experience: '',
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -24,6 +24,8 @@ export default function RegisterCandidatePage() {
   function set(key: string, value: string) {
     setForm(f => ({ ...f, [key]: value }))
   }
+
+  const showExperience = ACADEMIC_LEVELS_WITH_EXPERIENCE.includes(form.academic_level as never)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -52,8 +54,9 @@ export default function RegisterCandidatePage() {
           city: form.city || null,
           college: form.college || null,
           graduation_year: form.graduation_year ? parseInt(form.graduation_year) : null,
-          specialization: form.specialization || null,
+          specialization: 'יסודי',
           academic_level: form.academic_level || null,
+          years_experience: form.years_experience ? parseInt(form.years_experience) : null,
         },
       }),
     })
@@ -106,7 +109,7 @@ export default function RegisterCandidatePage() {
               <Input value={form.city} onChange={e => set('city', e.target.value)} />
             </div>
             <div className="space-y-1">
-              <Label>מכללה</Label>
+              <Label>מכללה / אוניברסיטה</Label>
               <Input value={form.college} onChange={e => set('college', e.target.value)} />
             </div>
           </div>
@@ -117,25 +120,29 @@ export default function RegisterCandidatePage() {
               <Input type="number" value={form.graduation_year} onChange={e => set('graduation_year', e.target.value)} placeholder="2025" dir="ltr" />
             </div>
             <div className="space-y-1">
-              <Label>התמחות</Label>
-              <Select onValueChange={v => set('specialization', v)}>
+              <Label>רמה אקדמית</Label>
+              <Select onValueChange={v => set('academic_level', v)}>
                 <SelectTrigger><SelectValue placeholder="בחרי" /></SelectTrigger>
                 <SelectContent>
-                  {SPECIALIZATIONS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  {ACADEMIC_LEVELS.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <div className="space-y-1">
-            <Label>רמה אקדמית</Label>
-            <Select onValueChange={v => set('academic_level', v)}>
-              <SelectTrigger><SelectValue placeholder="בחרי" /></SelectTrigger>
-              <SelectContent>
-                {ACADEMIC_LEVELS.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
+          {showExperience && (
+            <div className="space-y-1">
+              <Label>שנות ותק</Label>
+              <Input
+                type="number"
+                min={0}
+                value={form.years_experience}
+                onChange={e => set('years_experience', e.target.value)}
+                dir="ltr"
+                placeholder="מספר שנות ניסיון"
+              />
+            </div>
+          )}
 
           {error && <p className="text-sm text-red-600">{error}</p>}
 

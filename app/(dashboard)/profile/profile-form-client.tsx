@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { AVAILABILITY_STATUSES, SPECIALIZATIONS, ACADEMIC_LEVELS } from '@/lib/constants'
+import { AVAILABILITY_STATUSES, ACADEMIC_LEVELS, ACADEMIC_LEVELS_WITH_EXPERIENCE } from '@/lib/constants'
 import type { Profile, Candidate } from '@/lib/types'
 
 interface Props {
@@ -23,9 +23,9 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
     city: candidate?.city ?? '',
     college: candidate?.college ?? '',
     graduation_year: candidate?.graduation_year?.toString() ?? '',
-    specialization: candidate?.specialization ?? '',
     academic_level: candidate?.academic_level ?? '',
-    availability_status: candidate?.availability_status ?? 'מחפשת סטאג\'',
+    years_experience: candidate?.years_experience?.toString() ?? '',
+    availability_status: candidate?.availability_status ?? "מחפשת סטאג'",
     bio: candidate?.bio ?? '',
     cv_url: candidate?.cv_url ?? '',
   })
@@ -34,6 +34,8 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
 
   function setP(k: string, v: string) { setProfileForm(f => ({ ...f, [k]: v })) }
   function setC(k: string, v: string) { setCandForm(f => ({ ...f, [k]: v })) }
+
+  const showExperience = ACADEMIC_LEVELS_WITH_EXPERIENCE.includes(candForm.academic_level as never)
 
   async function handleSave() {
     setSaving(true)
@@ -45,6 +47,7 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
         candidate: {
           ...candForm,
           graduation_year: candForm.graduation_year ? parseInt(candForm.graduation_year) : null,
+          years_experience: candForm.years_experience ? parseInt(candForm.years_experience) : null,
         },
       }),
     })
@@ -85,12 +88,12 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
         </div>
       </section>
 
-      {/* אקדמי */}
+      {/* השכלה */}
       <section>
         <h2 className="font-semibold text-gray-700 mb-4">השכלה</h2>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
-            <Label>מכללה</Label>
+            <Label>מכללה / אוניברסיטה</Label>
             <Input value={candForm.college} onChange={e => setC('college', e.target.value)} />
           </div>
           <div className="space-y-1">
@@ -98,27 +101,31 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
             <Input type="number" value={candForm.graduation_year} onChange={e => setC('graduation_year', e.target.value)} dir="ltr" />
           </div>
           <div className="space-y-1">
-            <Label>התמחות</Label>
-            <Select value={candForm.specialization ?? ''} onValueChange={v => setC('specialization', v)}>
-              <SelectTrigger><SelectValue placeholder="בחרי" /></SelectTrigger>
-              <SelectContent>
-                {SPECIALIZATIONS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1">
             <Label>רמה אקדמית</Label>
-            <Select value={candForm.academic_level ?? ''} onValueChange={v => setC('academic_level', v)}>
+            <Select value={candForm.academic_level} onValueChange={v => setC('academic_level', v)}>
               <SelectTrigger><SelectValue placeholder="בחרי" /></SelectTrigger>
               <SelectContent>
                 {ACADEMIC_LEVELS.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
+          {showExperience && (
+            <div className="space-y-1">
+              <Label>שנות ותק</Label>
+              <Input
+                type="number"
+                min={0}
+                value={candForm.years_experience}
+                onChange={e => setC('years_experience', e.target.value)}
+                dir="ltr"
+                placeholder="מספר שנים"
+              />
+            </div>
+          )}
         </div>
       </section>
 
-      {/* ביוגרפיה */}
+      {/* אודות */}
       <section>
         <h2 className="font-semibold text-gray-700 mb-4">אודות</h2>
         <div className="space-y-1">
@@ -131,12 +138,7 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
         </div>
       </section>
 
-      <Button
-        onClick={handleSave}
-        disabled={saving}
-        className="text-white"
-        style={{ background: '#5B3AAB' }}
-      >
+      <Button onClick={handleSave} disabled={saving} className="text-white" style={{ background: '#5B3AAB' }}>
         {saved ? 'נשמר ✓' : saving ? 'שומר...' : 'שמירה'}
       </Button>
     </div>

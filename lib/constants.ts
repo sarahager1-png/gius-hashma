@@ -8,11 +8,18 @@ export const JOB_STATUSES: JobStatus[] = ['פעילה', 'מושהית', 'אוי�
 
 export const JOB_TYPES: JobType[] = ["סטאג'", 'חלקי', 'מלא']
 
-export const SPECIALIZATIONS: Specialization[] = ['גן ילדים', 'יסודי', 'שניהם']
+export const SPECIALIZATIONS: Specialization[] = ['יסודי']
 
-export const ACADEMIC_LEVELS: AcademicLevel[] = ["סטאג'", 'בוגרת', 'מנוסה']
+export const ACADEMIC_LEVELS: AcademicLevel[] = [
+  "שנה ב' - סטאג'",
+  "שנה ג' - סטאג'",
+  'תואר ראשון',
+  'תואר שני',
+]
 
-export const INSTITUTION_TYPES = ['גן ילדים', 'בית ספר יסודי', 'מוסד אחר']
+export const ACADEMIC_LEVELS_WITH_EXPERIENCE: AcademicLevel[] = ['תואר ראשון', 'תואר שני']
+
+export const INSTITUTION_TYPES = ['בית ספר יסודי']
 
 export const APPLICATION_STATUS_LABELS: Record<string, string> = {
   ממתינה: 'ממתינה',
