@@ -248,6 +248,248 @@ CREATE POLICY "admins can read all applications"
 
 
 -- ============================================================
+-- candidates — extended columns
+-- ============================================================
+ALTER TABLE candidates
+  ADD COLUMN IF NOT EXISTS district text,
+  ADD COLUMN IF NOT EXISTS address text,
+  ADD COLUMN IF NOT EXISTS birth_year int,
+  ADD COLUMN IF NOT EXISTS marital_status text,
+  ADD COLUMN IF NOT EXISTS maiden_name text,
+  ADD COLUMN IF NOT EXISTS seniority_years text,
+  ADD COLUMN IF NOT EXISTS handwriting_font text,
+  ADD COLUMN IF NOT EXISTS technical_skills text,
+  ADD COLUMN IF NOT EXISTS interpersonal_skills text,
+  ADD COLUMN IF NOT EXISTS experiences jsonb,
+  ADD COLUMN IF NOT EXISTS practical_work jsonb,
+  ADD COLUMN IF NOT EXISTS shlichut_location text,
+  ADD COLUMN IF NOT EXISTS shlichut_years text,
+  ADD COLUMN IF NOT EXISTS past_projects text,
+  ADD COLUMN IF NOT EXISTS personal_note text,
+  ADD COLUMN IF NOT EXISTS availability_from date,
+  ADD COLUMN IF NOT EXISTS availability_to date,
+  ADD COLUMN IF NOT EXISTS placement_location text,
+  ADD COLUMN IF NOT EXISTS prev_employer text,
+  ADD COLUMN IF NOT EXISTS prev_role text,
+  ADD COLUMN IF NOT EXISTS years_experience int;
+
+-- ============================================================
+-- jobs — extended columns
+-- ============================================================
+ALTER TABLE jobs
+  ADD COLUMN IF NOT EXISTS start_date date,
+  ADD COLUMN IF NOT EXISTS placement_type text,
+  ADD COLUMN IF NOT EXISTS district text;
+
+-- ============================================================
+-- applications — extended columns
+-- ============================================================
+ALTER TABLE applications
+  ADD COLUMN IF NOT EXISTS placement_date date;
+
+-- ============================================================
+-- candidate_requests
+-- ============================================================
+CREATE TABLE IF NOT EXISTS candidate_requests (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  full_name text NOT NULL,
+  phone text NOT NULL,
+  email text,
+  district text,
+  city text,
+  address text,
+  birth_year int,
+  marital_status text,
+  maiden_name text,
+  college text,
+  specialization text,
+  academic_level text,
+  graduation_year int,
+  seniority_years text,
+  handwriting_font text,
+  experiences jsonb,
+  practical_work jsonb,
+  shlichut_location text,
+  shlichut_years text,
+  technical_skills text,
+  interpersonal_skills text,
+  past_projects text,
+  personal_note text,
+  availability_from date,
+  availability_to date,
+  status text NOT NULL DEFAULT 'ממתינה'
+    CHECK (status IN ('ממתינה', 'אושרה', 'נדחתה')),
+  access_code text,
+  profile_id uuid REFERENCES profiles(id) ON DELETE SET NULL,
+  created_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE candidate_requests ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY IF NOT EXISTS "admins can manage candidate requests"
+  ON candidate_requests FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid()
+        AND p.role IN ('מנהל רשת', 'אדמין מערכת')
+    )
+  );
+
+-- public submission via service role — no auth needed
+CREATE POLICY IF NOT EXISTS "service role can insert candidate requests"
+  ON candidate_requests FOR INSERT
+  WITH CHECK (true);
+
+-- ============================================================
+-- access_codes
+-- ============================================================
+CREATE TABLE IF NOT EXISTS access_codes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  code text NOT NULL UNIQUE,
+  label text,
+  used_by uuid REFERENCES profiles(id) ON DELETE SET NULL,
+  used_at timestamptz,
+  created_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE access_codes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY IF NOT EXISTS "admins can manage access codes"
+  ON access_codes FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid()
+        AND p.role IN ('מנהל רשת', 'אדמין מערכת')
+    )
+  );
+
+-- ============================================================
+-- notifications
+-- ============================================================
+CREATE TABLE IF NOT EXISTS notifications (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  profile_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  type text NOT NULL,
+  title text NOT NULL,
+  body text,
+  read boolean NOT NULL DEFAULT false,
+  related_id uuid,
+  created_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY IF NOT EXISTS "users can read own notifications"
+  ON notifications FOR SELECT
+  USING (auth.uid() = profile_id);
+
+CREATE POLICY IF NOT EXISTS "users can update own notifications"
+  ON notifications FOR UPDATE
+  USING (auth.uid() = profile_id);
+
+CREATE POLICY IF NOT EXISTS "service role can insert notifications"
+  ON notifications FOR INSERT
+  WITH CHECK (true);
+
+-- ============================================================
+-- invitations
+-- ============================================================
+CREATE TABLE IF NOT EXISTS invitations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  institution_id uuid NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,
+  candidate_id uuid NOT NULL REFERENCES candidates(id) ON DELETE CASCADE,
+  job_id uuid NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
+  status text NOT NULL DEFAULT 'ממתינה'
+    CHECK (status IN ('ממתינה', 'התקבלה', 'נדחתה')),
+  message text,
+  scheduled_at timestamptz,
+  created_at timestamptz DEFAULT now(),
+  UNIQUE(institution_id, candidate_id, job_id)
+);
+
+ALTER TABLE invitations ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY IF NOT EXISTS "candidate can manage own invitations"
+  ON invitations FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM candidates c
+      WHERE c.id = candidate_id AND c.profile_id = auth.uid()
+    )
+  );
+
+CREATE POLICY IF NOT EXISTS "institution can manage own invitations"
+  ON invitations FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM institutions i
+      WHERE i.id = institution_id AND i.profile_id = auth.uid()
+    )
+  );
+
+CREATE POLICY IF NOT EXISTS "admins can manage all invitations"
+  ON invitations FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid()
+        AND p.role IN ('מנהל רשת', 'אדמין מערכת')
+    )
+  );
+
+-- ============================================================
+-- interviews
+-- ============================================================
+CREATE TABLE IF NOT EXISTS interviews (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  application_id uuid NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
+  scheduled_at timestamptz NOT NULL,
+  location text,
+  notes text,
+  candidate_confirmed boolean,
+  created_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE interviews ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY IF NOT EXISTS "candidate can view own interviews"
+  ON interviews FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM applications a
+      JOIN candidates c ON c.id = a.candidate_id
+      WHERE a.id = application_id AND c.profile_id = auth.uid()
+    )
+  );
+
+CREATE POLICY IF NOT EXISTS "candidate can update own interviews"
+  ON interviews FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM applications a
+      JOIN candidates c ON c.id = a.candidate_id
+      WHERE a.id = application_id AND c.profile_id = auth.uid()
+    )
+  );
+
+CREATE POLICY IF NOT EXISTS "institution can view interviews for own jobs"
+  ON interviews FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM applications a
+      JOIN jobs j ON j.id = a.job_id
+      JOIN institutions i ON i.id = j.institution_id
+      WHERE a.id = application_id AND i.profile_id = auth.uid()
+    )
+  );
+
+CREATE POLICY IF NOT EXISTS "service role can insert and update interviews"
+  ON interviews FOR ALL
+  WITH CHECK (true);
+
+-- ============================================================
 -- auto-update updated_at triggers
 -- ============================================================
 CREATE OR REPLACE FUNCTION update_updated_at()
@@ -269,3 +511,52 @@ CREATE TRIGGER jobs_updated_at
 CREATE TRIGGER applications_updated_at
   BEFORE UPDATE ON applications
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ============================================================
+-- candidate_inquiries — candidate-initiated contact with institution
+-- ============================================================
+CREATE TABLE IF NOT EXISTS candidate_inquiries (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  candidate_id uuid NOT NULL REFERENCES candidates(id) ON DELETE CASCADE,
+  institution_id uuid NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,
+  job_id uuid REFERENCES jobs(id) ON DELETE SET NULL,
+  message text NOT NULL,
+  status text NOT NULL DEFAULT 'ממתינה'
+    CHECK (status IN ('ממתינה', 'נצפתה', 'נענתה')),
+  institution_reply text,
+  replied_at timestamptz,
+  created_at timestamptz DEFAULT now(),
+  UNIQUE(candidate_id, institution_id)
+);
+
+ALTER TABLE candidate_inquiries ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY IF NOT EXISTS "candidate can manage own inquiries"
+  ON candidate_inquiries FOR ALL
+  USING (
+    EXISTS (SELECT 1 FROM candidates c WHERE c.id = candidate_id AND c.profile_id = auth.uid())
+  );
+
+CREATE POLICY IF NOT EXISTS "institution can read and reply to own inquiries"
+  ON candidate_inquiries FOR ALL
+  USING (
+    EXISTS (SELECT 1 FROM institutions i WHERE i.id = institution_id AND i.profile_id = auth.uid())
+  );
+
+CREATE POLICY IF NOT EXISTS "admins can manage all inquiries"
+  ON candidate_inquiries FOR ALL
+  USING (
+    EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.role IN ('מנהל רשת', 'אדמין מערכת'))
+  );
+
+-- ============================================================
+-- migration: jobs end_date + candidates study_day
+-- ============================================================
+ALTER TABLE jobs
+  ADD COLUMN IF NOT EXISTS end_date date;
+
+ALTER TABLE candidates
+  ADD COLUMN IF NOT EXISTS study_day text;
+
+ALTER TABLE candidate_requests
+  ADD COLUMN IF NOT EXISTS study_day text;

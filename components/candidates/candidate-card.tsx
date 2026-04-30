@@ -1,4 +1,4 @@
-import { MapPin, GraduationCap, Phone } from 'lucide-react'
+﻿import { MapPin, GraduationCap, Phone } from 'lucide-react'
 import type { Candidate, Profile } from '@/lib/types'
 
 interface Props {
@@ -6,9 +6,9 @@ interface Props {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  "מחפשת סטאג'": '#5B3AAB',
+  "מחפשת סטאג'": 'var(--purple)',
   'משובצת': '#6B7280',
-  'בוגרת מחפשת משרה': '#00B4CC',
+  'בוגרת מחפשת משרה': 'var(--teal)',
   'פתוחה להצעות': '#15803D',
   'לא פעילה': '#9CA3AF',
 }
@@ -52,12 +52,12 @@ export default function CandidateCard({ candidate }: Props) {
 
       <div className="flex items-center gap-3 mt-auto pt-2 border-t border-gray-100">
         {profile?.phone && (
-          <a href={`tel:${profile.phone}`} className="flex items-center gap-1 text-sm" style={{ color: '#00B4CC' }}>
+          <a href={`tel:${profile.phone}`} className="flex items-center gap-1 text-sm" style={{ color: 'var(--teal)' }}>
             <Phone size={13} />{profile.phone}
           </a>
         )}
         {candidate.cv_url && (
-          <a href={candidate.cv_url} target="_blank" rel="noreferrer" className="text-xs mr-auto" style={{ color: '#5B3AAB' }}>
+          <a href={candidate.cv_url} target="_blank" rel="noreferrer" className="text-xs mr-auto" style={{ color: 'var(--purple)' }}>
             קורות חיים ↗
           </a>
         )}

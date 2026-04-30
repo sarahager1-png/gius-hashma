@@ -22,5 +22,16 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
     .eq('id', id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ ok: true })
+
+  const { data: inst } = await service
+    .from('institutions')
+    .select('institution_name, phone, profiles(full_name, phone)')
+    .eq('id', id)
+    .single()
+
+  const name = inst?.institution_name ?? ''
+  const profilePhone = (inst?.profiles as unknown as { phone: string | null } | null)?.phone ?? ''
+  const phone = inst?.phone ?? profilePhone
+
+  return NextResponse.json({ ok: true, name, phone })
 }

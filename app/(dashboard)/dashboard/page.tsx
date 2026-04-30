@@ -1,139 +1,234 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { Clock } from 'lucide-react'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
+import DashboardClient from './dashboard-client'
+import CandidateDashboard from './candidate-dashboard'
+import InstitutionDashboard from './institution-dashboard'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
-
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
+  const service = createServiceClient()
+  const { data: profile } = await service
+    .from('profiles').select('role, full_name').eq('id', user.id).single()
   if (!profile) redirect('/login')
 
-  const role = profile.role
+  /* ── הנהלה ── */
+  if (['מנהל רשת', 'אדמין מערכת'].includes(profile.role)) {
+    return <DashboardClient fullName={profile.full_name} />
+  }
 
-  if (role === 'מועמדת') {
-    const { data: candidate } = await supabase
-      .from('candidates')
-      .select('id')
-      .eq('profile_id', user.id)
-      .single()
+  /* ── מועמדת ── */
+  if (profile.role === 'מועמדת') {
+    const [
+      { data: candidateRow },
+      { count: totalJobs },
+    ] = await Promise.all([
+      service.from('candidates').select('id, availability_status, city, district, specialization, academic_level').eq('profile_id', user.id).single(),
+      service.from('jobs').select('*', { count: 'exact', head: true }).eq('status', 'פעילה'),
+    ])
 
-    const { count: jobsCount } = await supabase
+    const candidateId = candidateRow?.id ?? null
+
+    const profileFields = [
+      profile.full_name,
+      candidateRow?.city,
+      candidateRow?.district,
+      candidateRow?.specialization,
+      candidateRow?.academic_level,
+      candidateRow?.availability_status && candidateRow.availability_status !== 'לא פעילה'
+        ? candidateRow.availability_status : null,
+    ]
+    const profileScore = Math.round((profileFields.filter(Boolean).length / profileFields.length) * 100)
+
+    // Fetch all active jobs once, use for both matched + suggested
+    const { data: allActiveJobs } = await service
       .from('jobs')
-      .select('*', { count: 'exact', head: true })
+      .select('id, title, city, district, job_type, specialization, description, institutions(institution_name, institution_type, city)')
       .eq('status', 'פעילה')
+      .order('created_at', { ascending: false })
+      .limit(40)
 
-    const { count: appCount } = await supabase
-      .from('applications')
-      .select('*', { count: 'exact', head: true })
-      .eq('candidate_id', candidate?.id ?? '')
+    // Score jobs by candidate match (district, specialization, city)
+    type ActiveJob = typeof allActiveJobs extends (infer T)[] | null ? T : never
+    const scoreJob = (j: ActiveJob & Record<string, unknown>) => {
+      let s = 0
+      if (candidateRow?.specialization && j.specialization === candidateRow.specialization) s += 3
+      if (candidateRow?.district && j.district === candidateRow.district) s += 2
+      if (candidateRow?.city && j.city === candidateRow.city) s += 2
+      return s
+    }
+    const sorted = [...(allActiveJobs ?? [])].sort((a, b) =>
+      scoreJob(b as ActiveJob & Record<string, unknown>) - scoreJob(a as ActiveJob & Record<string, unknown>)
+    )
+    const matchedJobs = sorted.slice(0, 3)
+    const suggestedJobs = sorted.slice(0, 5)
+
+    const [appsRes, interviewsRes, notifsRes, invitationsRes] = await Promise.all([
+      candidateId
+        ? service
+            .from('applications')
+            .select('id, status, applied_at, jobs(title, city, institutions(institution_name))')
+            .eq('candidate_id', candidateId)
+            .order('applied_at', { ascending: false })
+            .limit(8)
+        : Promise.resolve({ data: [] }),
+      candidateId
+        ? service
+            .from('interviews')
+            .select('id, scheduled_at, location, notes, candidate_confirmed, applications!inner(candidate_id, jobs(title, institutions(institution_name)))')
+            .eq('applications.candidate_id', candidateId)
+            .gte('scheduled_at', new Date().toISOString())
+            .order('scheduled_at', { ascending: true })
+            .limit(3)
+        : Promise.resolve({ data: [] }),
+      service
+        .from('notifications')
+        .select('id, type, title, body, read, created_at')
+        .eq('profile_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10),
+      candidateId
+        ? service
+            .from('invitations')
+            .select('id, status, scheduled_at, created_at, jobs(title, city, job_type), institutions(institution_name)')
+            .eq('candidate_id', candidateId)
+            .eq('status', 'ממתינה')
+            .order('created_at', { ascending: false })
+            .limit(5)
+        : Promise.resolve({ data: [] }),
+    ])
 
     return (
-      <div className="p-8">
-        <h1 className="text-2xl font-bold mb-6" style={{ color: '#5B3AAB' }}>ברוכה הבאה</h1>
-        <div className="grid grid-cols-2 gap-4 max-w-md">
-          <StatCard label="משרות פעילות" value={jobsCount ?? 0} color="#5B3AAB" />
-          <StatCard label="הגשות שלי" value={appCount ?? 0} color="#00B4CC" />
-        </div>
-        <div className="mt-8">
-          <a href="/jobs" className="inline-block px-6 py-3 rounded-xl text-white font-medium" style={{ background: '#5B3AAB' }}>
-            עיון במשרות
-          </a>
-        </div>
-      </div>
+      <CandidateDashboard
+        fullName={profile.full_name}
+        availabilityStatus={candidateRow?.availability_status ?? 'לא פעילה'}
+        profileScore={profileScore}
+        totalJobs={totalJobs ?? 0}
+        myApplications={(appsRes.data ?? []) as unknown as Parameters<typeof CandidateDashboard>[0]['myApplications']}
+        matchedJobs={matchedJobs as unknown as Parameters<typeof CandidateDashboard>[0]['matchedJobs']}
+        suggestedJobs={suggestedJobs as unknown as Parameters<typeof CandidateDashboard>[0]['suggestedJobs']}
+        upcomingInterviews={(interviewsRes.data ?? []) as unknown as Parameters<typeof CandidateDashboard>[0]['upcomingInterviews']}
+        notifications={(notifsRes.data ?? []) as unknown as Parameters<typeof CandidateDashboard>[0]['notifications']}
+        pendingInvitations={(invitationsRes.data ?? []) as unknown as Parameters<typeof CandidateDashboard>[0]['pendingInvitations']}
+      />
     )
   }
 
-  if (role === 'מוסד') {
-    const { data: institution } = await supabase
-      .from('institutions')
-      .select('id, is_approved, institution_name')
-      .eq('profile_id', user.id)
-      .single()
+  /* ── מוסד ── */
+  if (profile.role === 'מוסד') {
+    const { data: institution } = await service
+      .from('institutions').select('id, institution_name, is_approved').eq('profile_id', user.id).single()
 
     if (!institution?.is_approved) {
-      return (
-        <div className="p-8">
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 max-w-md">
-            <h2 className="font-semibold text-amber-800 text-lg mb-2">ממתין לאישור</h2>
-            <p className="text-amber-700 text-sm">
-              חשבון המוסד שלך ממתין לאישור מנהל הרשת. לאחר האישור תוכלי לפרסם משרות ולגשת למאגר המועמדות.
-            </p>
-          </div>
-        </div>
-      )
+      return <PendingApproval fullName={profile.full_name} />
     }
 
-    const { count: jobsCount } = await supabase
-      .from('jobs')
-      .select('*', { count: 'exact', head: true })
-      .eq('institution_id', institution.id)
-      .eq('status', 'פעילה')
+    const oneWeekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString()
 
-    const { count: pendingApps } = await supabase
+    const [jobsRes, recentAppsRes] = await Promise.all([
+      service
+        .from('jobs')
+        .select('id, title, city, district, specialization, job_type, status, applications(count)')
+        .eq('institution_id', institution.id)
+        .order('created_at', { ascending: false })
+        .limit(8),
+      service
+        .from('applications')
+        .select('id, status, applied_at, job_id, jobs!inner(id, title, institution_id), candidates(profiles(full_name))')
+        .eq('jobs.institution_id', institution.id)
+        .order('applied_at', { ascending: false })
+        .limit(10),
+    ])
+
+    const newAppsRes = await service
       .from('applications')
-      .select('jobs!inner(institution_id)', { count: 'exact', head: true })
+      .select('job_id, applied_at, jobs!inner(institution_id)')
       .eq('jobs.institution_id', institution.id)
-      .eq('status', 'ממתינה')
+      .gte('applied_at', oneWeekAgo)
+
+    const newAppsByJob: Record<string, number> = {}
+    for (const a of newAppsRes.data ?? []) {
+      newAppsByJob[a.job_id] = (newAppsByJob[a.job_id] ?? 0) + 1
+    }
+
+    type RawJob = { id: string; title: string; city: string | null; district: string | null; specialization: string | null; job_type: string | null; status: string; applications: { count: number }[] }
+    const jobs = ((jobsRes.data ?? []) as RawJob[]).map(j => ({
+      id: j.id,
+      title: j.title,
+      city: j.city,
+      job_type: j.job_type,
+      status: j.status,
+      appCount: j.applications?.[0]?.count ?? 0,
+      newAppCount: newAppsByJob[j.id] ?? 0,
+    }))
+
+    // Fetch matched candidates for active jobs
+    const activeJobs = ((jobsRes.data ?? []) as RawJob[]).filter(j => j.status === 'פעילה')
+    const specs    = [...new Set(activeJobs.map(j => j.specialization).filter(Boolean))] as string[]
+    const districts= [...new Set(activeJobs.map(j => j.district).filter(Boolean))]       as string[]
+    const cities   = [...new Set(activeJobs.map(j => j.city).filter(Boolean))]           as string[]
+
+    let candQ = service
+      .from('candidates')
+      .select('id, city, district, specialization, academic_level, availability_status, profiles(id, full_name)')
+      .not('availability_status', 'in', '("לא פעילה","משובצת")')
+      .limit(40)
+
+    const { data: allCands } = await candQ
+
+    type CandRow = { id: unknown; city: unknown; district: unknown; specialization: unknown; academic_level: unknown; availability_status: unknown; profiles: unknown }
+    const scoreCand = (c: Record<string, unknown>) => {
+      let s = 0
+      if (specs.includes(String(c.specialization ?? '')))   s += 3
+      if (districts.includes(String(c.district ?? '')))     s += 2
+      if (cities.includes(String(c.city ?? '')))            s += 2
+      return s
+    }
+    const matchedCandidates = [...(allCands ?? [])]
+      .sort((a, b) => scoreCand(b as Record<string, unknown>) - scoreCand(a as Record<string, unknown>))
+      .slice(0, 3) as unknown as CandRow[]
 
     return (
-      <div className="p-8">
-        <h1 className="text-2xl font-bold mb-2" style={{ color: '#5B3AAB' }}>{institution.institution_name}</h1>
-        <div className="grid grid-cols-2 gap-4 max-w-md mb-8">
-          <StatCard label="משרות פעילות" value={jobsCount ?? 0} color="#5B3AAB" />
-          <StatCard label="הגשות ממתינות" value={pendingApps ?? 0} color="#C9A84C" />
-        </div>
-        <a href="/institution/jobs/new" className="inline-block px-6 py-3 rounded-xl text-white font-medium" style={{ background: '#00B4CC' }}>
-          + פרסמי משרה חדשה
-        </a>
-      </div>
+      <InstitutionDashboard
+        fullName={profile.full_name}
+        institutionName={institution.institution_name}
+        jobs={jobs}
+        matchedCandidates={matchedCandidates as unknown as Parameters<typeof InstitutionDashboard>[0]['matchedCandidates']}
+        recentApps={(recentAppsRes.data ?? []) as unknown as Parameters<typeof InstitutionDashboard>[0]['recentApps']}
+      />
     )
   }
 
-  // admin / מנהל רשת
-  const [
-    { count: candidateCount },
-    { count: institutionCount },
-    { count: pendingInstitutions },
-    { count: activeJobs },
-  ] = await Promise.all([
-    supabase.from('candidates').select('*', { count: 'exact', head: true }),
-    supabase.from('institutions').select('*', { count: 'exact', head: true }),
-    supabase.from('institutions').select('*', { count: 'exact', head: true }).eq('is_approved', false),
-    supabase.from('jobs').select('*', { count: 'exact', head: true }).eq('status', 'פעילה'),
-  ])
-
-  return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6" style={{ color: '#5B3AAB' }}>דשבורד מטה</h1>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="מועמדות" value={candidateCount ?? 0} color="#5B3AAB" />
-        <StatCard label="מוסדות" value={institutionCount ?? 0} color="#00B4CC" />
-        <StatCard label="ממתינים לאישור" value={pendingInstitutions ?? 0} color="#C9A84C" />
-        <StatCard label="משרות פעילות" value={activeJobs ?? 0} color="#15803D" />
-      </div>
-      {(pendingInstitutions ?? 0) > 0 && (
-        <div className="mt-6">
-          <a href="/admin/institutions" className="inline-block px-6 py-3 rounded-xl text-white font-medium" style={{ background: '#C9A84C' }}>
-            אשרי מוסדות ({pendingInstitutions})
-          </a>
-        </div>
-      )}
-    </div>
-  )
+  redirect('/login')
 }
 
-function StatCard({ label, value, color }: { label: string; value: number; color: string }) {
+function PendingApproval({ fullName }: { fullName: string | null }) {
+  const firstName = fullName?.split(' ')[0] ?? ''
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm">
-      <div className="text-3xl font-bold" style={{ color }}>{value}</div>
-      <div className="text-sm text-gray-500 mt-1">{label}</div>
+    <div className="flex items-center justify-center" style={{ minHeight: 'calc(100vh - 64px)' }}>
+      <div className="text-center max-w-sm px-6">
+        <div
+          className="w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center"
+          style={{ background: '#FDF3E3' }}
+        >
+          <Clock size={30} style={{ color: '#D97706' }} />
+        </div>
+        <h1
+          className="text-[22px] font-extrabold mb-2"
+          style={{ color: 'var(--ink)', letterSpacing: '-.01em' }}
+        >
+          {firstName ? `שלום, ${firstName}` : 'שלום'}
+        </h1>
+        <p className="text-[15px] mb-1" style={{ color: 'var(--ink-2)' }}>
+          החשבון שלך ממתין לאישור מנהל הרשת.
+        </p>
+        <p className="text-[13px]" style={{ color: 'var(--ink-4)' }}>
+          תקבלי הודעה בדוא&quot;ל ברגע שהחשבון יאושר.
+        </p>
+      </div>
     </div>
   )
 }

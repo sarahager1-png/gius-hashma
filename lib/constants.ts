@@ -1,5 +1,20 @@
 import type { AvailabilityStatus, JobStatus, JobType, Specialization, AcademicLevel } from './types'
 
+export const DISTRICTS = [
+  'ירושלים והסביבה',
+  'תל אביב והמרכז',
+  'חיפה והצפון',
+  'נתניה והשרון',
+  'פתח תקווה וסביבה',
+  'ראשון לציון והדרום',
+  'באר שבע והנגב',
+  'אשדוד ואשקלון',
+  'רחובות והסביבה',
+  'הגליל',
+  'יהודה ושומרון',
+  'אחר',
+]
+
 export const AVAILABILITY_STATUSES: AvailabilityStatus[] = [
   "מחפשת סטאג'", 'משובצת', 'בוגרת מחפשת משרה', 'פתוחה להצעות', 'לא פעילה',
 ]
@@ -8,7 +23,9 @@ export const JOB_STATUSES: JobStatus[] = ['פעילה', 'מושהית', 'אוי�
 
 export const JOB_TYPES: JobType[] = ["סטאג'", 'חלקי', 'מלא']
 
-export const SPECIALIZATIONS: Specialization[] = ['יסודי']
+export const SPECIALIZATIONS: Specialization[] = ['יסודי', 'חט"ב', 'מתמטיקה', 'אנגלית', 'חינוך מיוחד', 'אחר']
+
+export const PLACEMENT_TYPES = ['שיבוץ לשנה', 'שיבוץ קבוע', 'מילוי מקום לחופשת לידה']
 
 export const ACADEMIC_LEVELS: AcademicLevel[] = [
   "שנה ב' - סטאג'",
@@ -19,7 +36,7 @@ export const ACADEMIC_LEVELS: AcademicLevel[] = [
 
 export const ACADEMIC_LEVELS_WITH_EXPERIENCE: AcademicLevel[] = ['תואר ראשון', 'תואר שני']
 
-export const INSTITUTION_TYPES = ['בית ספר יסודי']
+export const INSTITUTION_TYPES = ['בית חינוך', 'קהילתי', 'שלהבות חב"ד']
 
 export const APPLICATION_STATUS_LABELS: Record<string, string> = {
   ממתינה: 'ממתינה',

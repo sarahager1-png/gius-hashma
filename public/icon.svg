@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0.25" y1="0" x2="0.75" y2="1">
+      <stop offset="0%" stop-color="#5E3FAE"/>
+      <stop offset="55%" stop-color="#3D2578"/>
+      <stop offset="100%" stop-color="#1A0B35"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.08)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="230" fill="url(#bg)"/>
+  <rect width="1024" height="1024" rx="230" fill="url(#glow)"/>
+
+  <!-- ── BOOK ── -->
+  <!-- Left page — trapezoid with rounded outer corners -->
+  <path d="M 512 820
+           L 260 800 Q 236 798 236 774
+           L 236 652 Q 236 628 260 630
+           L 512 644 Z"
+        fill="rgba(255,255,255,0.97)"/>
+
+  <!-- Right page — mirror -->
+  <path d="M 512 820
+           L 764 800 Q 788 798 788 774
+           L 788 652 Q 788 628 764 630
+           L 512 644 Z"
+        fill="rgba(255,255,255,0.97)"/>
+
+  <!-- Spine crease -->
+  <line x1="512" y1="644" x2="512" y2="820"
+        stroke="#2D1B5C" stroke-width="3" stroke-opacity="0.25"/>
+
+  <!-- ── NETWORK LINES ── -->
+  <!-- Single stem rising from spine -->
+  <line x1="512" y1="644" x2="512" y2="486"
+        stroke="white" stroke-width="7.5" stroke-linecap="round"/>
+
+  <!-- Branch left -->
+  <line x1="512" y1="486" x2="382" y2="356"
+        stroke="white" stroke-width="6.5" stroke-linecap="round"/>
+
+  <!-- Branch right -->
+  <line x1="512" y1="486" x2="642" y2="356"
+        stroke="white" stroke-width="6.5" stroke-linecap="round"/>
+
+  <!-- Triangle sides to apex dot -->
+  <line x1="382" y1="356" x2="512" y2="226"
+        stroke="rgba(255,255,255,0.82)" stroke-width="5.5" stroke-linecap="round"/>
+  <line x1="642" y1="356" x2="512" y2="226"
+        stroke="rgba(255,255,255,0.82)" stroke-width="5.5" stroke-linecap="round"/>
+
+  <!-- ── TURQUOISE DOTS ── -->
+  <circle cx="382" cy="356" r="24" fill="#00A7B5"/>
+  <circle cx="642" cy="356" r="24" fill="#00A7B5"/>
+  <circle cx="512" cy="226" r="24" fill="#00A7B5"/>
+
+</svg>

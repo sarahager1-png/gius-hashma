@@ -1,10 +1,12 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { UserRole } from './types'
+import { createServiceClient } from './supabase/server'
 
 const ADMIN_ROLES: UserRole[] = ['מנהל רשת', 'אדמין מערכת']
 
-export async function getProfile(supabase: SupabaseClient, userId: string) {
-  const { data } = await supabase
+export async function getProfile(_supabase: SupabaseClient, userId: string) {
+  const service = createServiceClient()
+  const { data } = await service
     .from('profiles')
     .select('*')
     .eq('id', userId)

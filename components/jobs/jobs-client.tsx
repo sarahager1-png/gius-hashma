@@ -11,10 +11,11 @@ interface Props {
   jobs: (Job & { institutions?: { institution_name: string; city: string | null; institution_type: string | null } })[]
   appliedJobIds: Set<string>
   candidateId: string | null
+  initialSearch?: string
 }
 
-export default function JobsClient({ jobs, appliedJobIds, candidateId }: Props) {
-  const [search, setSearch] = useState('')
+export default function JobsClient({ jobs, appliedJobIds, candidateId, initialSearch = '' }: Props) {
+  const [search, setSearch] = useState(initialSearch)
   const [specialization, setSpecialization] = useState('הכל')
   const [jobType, setJobType] = useState('הכל')
 

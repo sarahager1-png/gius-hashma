@@ -1,37 +1,42 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import CandidateCard from '@/components/candidates/candidate-card'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
+import type { Candidate } from '@/lib/types'
+import CandidateSearchClient from './candidates-search-client'
 
 export default async function SearchCandidatesPage() {
   const supabase = await createClient()
-
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: institution } = await supabase
-    .from('institutions')
-    .select('id, is_approved')
-    .eq('profile_id', user.id)
-    .single()
+  const service = createServiceClient()
 
+  const { data: institution } = await service
+    .from('institutions').select('id, institution_name, is_approved').eq('profile_id', user.id).single()
   if (!institution?.is_approved) redirect('/dashboard')
 
-  const { data: candidates } = await supabase
-    .from('candidates')
-    .select('*, profiles(full_name, phone)')
-    .neq('availability_status', 'לא פעילה')
-    .order('updated_at', { ascending: false })
+  const [candidatesRes, jobsRes] = await Promise.all([
+    service
+      .from('candidates')
+      .select('*, profiles(full_name, phone)')
+      .neq('availability_status', 'לא פעילה')
+      .order('updated_at', { ascending: false }),
+    service
+      .from('jobs')
+      .select('id, title')
+      .eq('institution_id', institution.id)
+      .eq('status', 'פעילה')
+      .order('created_at', { ascending: false }),
+  ])
+
+  const candidates = (candidatesRes.data ?? []) as Candidate[]
+  const activeJobs = (jobsRes.data ?? []) as { id: string; title: string }[]
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6" style={{ color: '#5B3AAB' }}>מאגר מועמדות</h1>
-      {!candidates?.length ? (
-        <p className="text-center text-gray-400 py-16">אין מועמדות במאגר</p>
-      ) : (
-        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
-          {candidates.map(c => <CandidateCard key={c.id} candidate={c} />)}
-        </div>
-      )}
-    </div>
+    <CandidateSearchClient
+      candidates={candidates}
+      institutionId={institution.id}
+      institutionName={institution.institution_name}
+      activeJobs={activeJobs}
+    />
   )
 }

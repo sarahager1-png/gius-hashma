@@ -3,58 +3,87 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { UserRole } from '@/lib/types'
 import {
-  LayoutDashboard, Briefcase, FileText, User, Search,
-  Building2, Users, BarChart3, LogOut, Menu, X,
+  LayoutDashboard, Users, Briefcase, Building2, BarChart3,
+  Settings, LogOut, ClipboardList, KeyRound, UserPlus, Sparkles,
+  ShieldCheck, Mail, History, HelpCircle, MessageCircle, Send, UserCog, Inbox,
 } from 'lucide-react'
 
 interface NavItem {
   href: string
   label: string
-  icon: React.ComponentType<{ className?: string }>
+  icon: React.ComponentType<{ size?: number; strokeWidth?: number }>
+  badge?: number
 }
 
-const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
+const NAV_MAIN: Record<UserRole, NavItem[]> = {
   'מועמדת': [
-    { href: '/dashboard', label: 'ראשי', icon: LayoutDashboard },
-    { href: '/jobs', label: 'משרות', icon: Briefcase },
-    { href: '/my-applications', label: 'הגשות שלי', icon: FileText },
-    { href: '/profile', label: 'הפרופיל שלי', icon: User },
+    { href: '/dashboard',       label: 'בית',            icon: LayoutDashboard },
+    { href: '/jobs',            label: 'משרות',          icon: Briefcase       },
+    { href: '/my-applications', label: 'הגשות שלי',      icon: ClipboardList   },
+    { href: '/my-invitations',  label: 'הזמנות לראיון',  icon: Mail            },
+    { href: '/history',         label: 'היסטוריה',       icon: History         },
+    { href: '/profile',         label: 'הפרופיל שלי',   icon: Users           },
+    { href: '/help',            label: 'הנחיות',         icon: HelpCircle      },
   ],
   'מוסד': [
-    { href: '/dashboard', label: 'ראשי', icon: LayoutDashboard },
-    { href: '/institution/jobs', label: 'המשרות שלי', icon: Briefcase },
-    { href: '/institution/candidates', label: 'חיפוש מועמדות', icon: Search },
+    { href: '/dashboard',                  label: 'בית',              icon: LayoutDashboard },
+    { href: '/institution/jobs',           label: 'משרות',            icon: Briefcase       },
+    { href: '/institution/candidates',     label: 'מועמדות',          icon: Users           },
+    { href: '/institution/inquiries',      label: 'פניות',            icon: Inbox           },
+    { href: '/institution/invitations',    label: 'הזמנות שנשלחו',   icon: Send            },
+    { href: '/history',                    label: 'היסטוריה',         icon: History         },
+    { href: '/institution/profile',        label: 'פרופיל המוסד',    icon: UserCog         },
+    { href: '/help',                       label: 'הנחיות',           icon: HelpCircle      },
   ],
   'מנהל רשת': [
-    { href: '/dashboard', label: 'דשבורד', icon: LayoutDashboard },
-    { href: '/admin/institutions', label: 'מוסדות', icon: Building2 },
-    { href: '/admin/candidates', label: 'מועמדות', icon: Users },
-    { href: '/admin/reports', label: 'דוחות', icon: BarChart3 },
+    { href: '/dashboard',                label: 'בית',           icon: LayoutDashboard },
+    { href: '/admin/candidate-requests', label: 'בקשות הצטרפות', icon: UserPlus        },
+    { href: '/admin/matches',            label: 'התאמות',        icon: Sparkles        },
+    { href: '/candidates',               label: 'מועמדות',       icon: Users           },
+    { href: '/jobs',                     label: 'משרות',         icon: Briefcase       },
+    { href: '/admin/institutions',       label: 'מוסדות',        icon: Building2       },
+    { href: '/messages',                 label: 'הודעות',        icon: MessageCircle   },
+    { href: '/admin/reports',            label: 'דוחות שיבוצים', icon: BarChart3       },
+    { href: '/admin/access-codes',       label: 'קודי גישה',     icon: KeyRound        },
+    { href: '/admin/admins',             label: 'מנהלי מערכת',   icon: ShieldCheck     },
+    { href: '/settings',                 label: 'הגדרות',        icon: Settings        },
+    { href: '/help',                     label: 'הנחיות',        icon: HelpCircle      },
   ],
   'אדמין מערכת': [
-    { href: '/dashboard', label: 'דשבורד', icon: LayoutDashboard },
-    { href: '/admin/institutions', label: 'מוסדות', icon: Building2 },
-    { href: '/admin/candidates', label: 'מועמדות', icon: Users },
-    { href: '/admin/reports', label: 'דוחות', icon: BarChart3 },
+    { href: '/dashboard',                label: 'בית',           icon: LayoutDashboard },
+    { href: '/admin/candidate-requests', label: 'בקשות הצטרפות', icon: UserPlus        },
+    { href: '/admin/matches',            label: 'התאמות',        icon: Sparkles        },
+    { href: '/candidates',               label: 'מועמדות',       icon: Users           },
+    { href: '/jobs',                     label: 'משרות',         icon: Briefcase       },
+    { href: '/admin/institutions',       label: 'מוסדות',        icon: Building2       },
+    { href: '/messages',                 label: 'הודעות',        icon: MessageCircle   },
+    { href: '/admin/reports',            label: 'דוחות שיבוצים', icon: BarChart3       },
+    { href: '/admin/access-codes',       label: 'קודי גישה',     icon: KeyRound        },
+    { href: '/admin/admins',             label: 'מנהלי מערכת',   icon: ShieldCheck     },
+    { href: '/settings',                 label: 'הגדרות',        icon: Settings        },
+    { href: '/help',                     label: 'הנחיות',        icon: HelpCircle      },
   ],
 }
 
 interface Props {
   role: UserRole
   fullName: string | null
+  pendingInstitutions?: number
 }
 
-export default function AppSidebar({ role, fullName }: Props) {
+export default function AppSidebar({ role, fullName: _fullName, pendingInstitutions = 0 }: Props) {
   const pathname = usePathname()
-  const router = useRouter()
+  const router   = useRouter()
   const supabase = createClient()
-  const [mobileOpen, setMobileOpen] = useState(false)
 
-  const nav = NAV_BY_ROLE[role] ?? []
+  const main = (NAV_MAIN[role] ?? []).map(item =>
+    item.href === '/admin/institutions' && pendingInstitutions > 0
+      ? { ...item, badge: pendingInstitutions }
+      : item
+  )
 
   async function signOut() {
     await supabase.auth.signOut()
@@ -62,117 +91,169 @@ export default function AppSidebar({ role, fullName }: Props) {
     router.refresh()
   }
 
-  const SidebarContent = () => (
-    <div className="flex h-full flex-col bg-gradient-to-b from-[#5B3AAB] to-[#3D2480]">
-      {/* Logo */}
+  function isActive(href: string) {
+    if (href === '/dashboard') return pathname === href
+    return pathname === href || pathname.startsWith(href + '/')
+  }
+
+  return (
+    <aside className="dashboard-sidebar flex flex-col" dir="rtl">
+      {/* Brand top strip */}
       <div
-        className="flex flex-col items-center px-5 py-5 gap-2"
-        style={{
-          background: 'linear-gradient(135deg, #4A2D90 0%, #5B3AAB 100%)',
-          borderBottom: '1px solid rgba(201,168,76,0.3)',
-        }}
+        className="h-[3px] w-full shrink-0"
+        style={{ background: 'linear-gradient(90deg, #4B2E83 0%, #00A7B5 100%)' }}
+      />
+
+      {/* Logo — dominant identity anchor */}
+      <div
+        className="px-3 pt-4 pb-3 shrink-0"
+        style={{ borderBottom: '1px solid rgba(255,255,255,.08)' }}
       >
-        <Image
-          src="/logo-chabad.png"
-          alt="רשת אהלי יוסף יצחק"
-          width={140}
-          height={56}
-          className="object-contain brightness-[5] opacity-95"
-        />
         <div
-          className="text-[10px] font-bold tracking-widest uppercase"
-          style={{ color: '#C9A84C' }}
+          className="flex items-center gap-3 px-3 py-3 rounded-[14px]"
+          style={{ background: 'rgba(255,255,255,.07)' }}
         >
-          גיוס והשמה
+          <div
+            className="w-11 h-11 rounded-[11px] flex items-center justify-center shrink-0"
+            style={{ background: 'rgba(255,255,255,.12)' }}
+          >
+            <Image
+              src="/logo-chabad.png"
+              alt="רשת חינוך חבד"
+              width={34}
+              height={34}
+              className="object-contain"
+              style={{ filter: 'brightness(10) saturate(0)' }}
+              onError={() => {}}
+            />
+          </div>
+          <div className="min-w-0">
+            <div
+              className="text-[15px] font-black leading-tight truncate"
+              style={{ color: '#fff', letterSpacing: '-.02em' }}
+            >
+              מערכת גיוס
+            </div>
+            <div
+              className="text-[11px] font-bold mt-0.5 truncate"
+              style={{ color: '#00A7B5', letterSpacing: '.04em' }}
+            >
+              גיוס והשמה
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
-        {nav.map(item => {
-          const Icon = item.icon
-          const isActive = pathname === item.href ||
-            (item.href !== '/dashboard' && pathname.startsWith(item.href + '/'))
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setMobileOpen(false)}
-              className={[
-                'flex items-center gap-3 px-3 py-2.5 rounded-full text-sm font-semibold transition-all duration-150 group',
-                isActive
-                  ? 'text-[#1A0A3C] shadow-md'
-                  : 'text-white/70 hover:bg-white/10 hover:text-white',
-              ].join(' ')}
-              style={isActive
-                ? { background: 'linear-gradient(90deg, #C9A84C, #F0D080)', boxShadow: '0 2px 12px rgba(201,168,76,0.4)' }
-                : {}}
-            >
-              <Icon className={['h-4 w-4 transition-all', isActive ? 'text-[#1A0A3C]' : 'text-white/60 group-hover:text-white'].join(' ')} />
-              <span>{item.label}</span>
-            </Link>
-          )
-        })}
+      <nav className="flex-1 px-3 py-4 overflow-y-auto">
+        <p
+          className="text-[9.5px] font-bold tracking-[.16em] uppercase px-2 mb-2.5"
+          style={{ color: 'rgba(255,255,255,.25)' }}
+        >
+          ניווט
+        </p>
+        <ul className="flex flex-col gap-0.5 list-none p-0 m-0">
+          {main.map(item => (
+            <NavItemRow key={item.href} item={item} active={isActive(item.href)} />
+          ))}
+        </ul>
       </nav>
 
-      {/* Footer */}
-      <div className="px-3 pb-4 pt-3" style={{ borderTop: '1px solid rgba(201,168,76,0.2)' }}>
-        <div className="px-3 py-2 mb-1">
-          <div className="text-white text-sm font-semibold truncate">{fullName ?? '—'}</div>
-          <div className="text-white/40 text-xs">{role}</div>
+      {/* Footer — logout */}
+      <div
+        className="px-3 pb-5 pt-3 shrink-0"
+        style={{ borderTop: '1px solid rgba(255,255,255,.06)' }}
+      >
+        <div
+          className="text-[10px] font-semibold mb-3 px-2"
+          style={{ color: 'rgba(255,255,255,.2)' }}
+        >
+          מערכת עלייה · תשפ״ה–תשפ״ו
         </div>
         <button
           onClick={signOut}
-          className="flex w-full items-center gap-3 px-3 py-2.5 rounded-full text-sm font-semibold text-white/50 hover:bg-red-500/20 hover:text-red-300 transition-all duration-150"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[13px] font-semibold transition-all"
+          style={{
+            color: 'rgba(255,255,255,.4)',
+            background: 'transparent',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = 'rgba(220,60,60,.15)'
+            e.currentTarget.style.color = '#FF6B6B'
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = 'transparent'
+            e.currentTarget.style.color = 'rgba(255,255,255,.4)'
+          }}
         >
-          <LogOut className="h-4 w-4" />
-          <span>התנתקות</span>
+          <LogOut size={15} strokeWidth={2} />
+          התנתקות
         </button>
       </div>
-    </div>
+    </aside>
   )
+}
+
+function NavItemRow({ item, active }: { item: NavItem; active: boolean }) {
+  const Icon = item.icon
+
+  function handleClick() {
+    window.dispatchEvent(new CustomEvent('sidebar-close', { detail: 'close' }))
+  }
 
   return (
-    <>
-      {/* Mobile toggle */}
-      <button
-        onClick={() => setMobileOpen(true)}
-        className="fixed top-4 right-4 z-50 flex md:hidden h-9 w-9 items-center justify-center rounded-xl bg-[#5B3AAB] text-white shadow-lg"
+    <li>
+      <Link
+        href={item.href}
+        onClick={handleClick}
+        className="flex items-center gap-3 px-3 py-[9px] rounded-[10px] text-[13.5px] font-semibold no-underline transition-all"
+        style={active ? {
+          background: 'linear-gradient(90deg, rgba(0,167,181,.18) 0%, rgba(255,255,255,.10) 100%)',
+          color: '#ffffff',
+          fontWeight: 700,
+          borderInlineEnd: '4px solid #00A7B5',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,.08), inset 0 -1px 0 rgba(0,0,0,.1)',
+        } : {
+          color: 'rgba(255,255,255,.58)',
+          background: 'transparent',
+        }}
+        onMouseEnter={e => {
+          if (!active) {
+            e.currentTarget.style.background = 'rgba(255,255,255,.09)'
+            e.currentTarget.style.color = 'rgba(255,255,255,.90)'
+          }
+        }}
+        onMouseLeave={e => {
+          if (!active) {
+            e.currentTarget.style.background = 'transparent'
+            e.currentTarget.style.color = 'rgba(255,255,255,.58)'
+          }
+        }}
       >
-        <Menu className="h-5 w-5" />
-      </button>
-
-      {/* Mobile overlay */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
-
-      {/* Mobile drawer */}
-      <div
-        className={[
-          'fixed top-0 right-0 z-50 h-full w-64 shadow-2xl transition-transform duration-300 md:hidden',
-          mobileOpen ? 'translate-x-0' : 'translate-x-full',
-        ].join(' ')}
-      >
-        <button
-          onClick={() => setMobileOpen(false)}
-          className="absolute top-4 left-4 flex h-8 w-8 items-center justify-center rounded-lg text-white/50 hover:text-white hover:bg-white/10 z-10"
-        >
-          <X className="h-4 w-4" />
-        </button>
-        <SidebarContent />
-      </div>
-
-      {/* Desktop sidebar */}
-      <aside
-        className="hidden md:flex h-full w-60 flex-shrink-0 flex-col overflow-y-auto"
-        style={{ boxShadow: '4px 0 24px rgba(201,168,76,0.25), 2px 0 8px rgba(201,168,76,0.15)' }}
-      >
-        <SidebarContent />
-      </aside>
-    </>
+        <span style={{
+          flexShrink: 0,
+          display: 'flex',
+          color: active ? '#00D4E8' : 'rgba(255,255,255,.32)',
+          transition: 'color 150ms',
+          filter: active ? 'drop-shadow(0 0 4px rgba(0,167,181,.6))' : 'none',
+        }}>
+          <Icon size={16} strokeWidth={active ? 2.5 : 2} />
+        </span>
+        <span className="truncate">{item.label}</span>
+        {item.badge != null && item.badge > 0 && (
+          <span
+            className="ms-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
+            style={{
+              background: 'var(--teal)',
+              color: '#fff',
+              minWidth: '18px',
+              textAlign: 'center',
+            }}
+          >
+            {item.badge}
+          </span>
+        )}
+      </Link>
+    </li>
   )
 }
