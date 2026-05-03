@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -24,7 +24,7 @@ interface Notif {
 const ROLE_LABELS: Record<string, string> = {
   'מועמדת':      'מועמדת',
   'מוסד':        'מוסד חינוך',
-  'מנהל רשת':   'מנהל מערכת',
+  'מנהלת מערכת':   'מנהל מערכת',
   'אדמין מערכת': 'אדמין מערכת',
 }
 
@@ -115,21 +115,22 @@ export default function AppHeader({ fullName, role }: Props) {
     router.refresh()
   }
 
-  const profileHref = role === 'מועמדת' ? '/profile' : '/settings'
-  const isAdmin = ['מנהל רשת', 'אדמין מערכת'].includes(role)
+  const profileHref = role === 'מועמדת' ? '/profile' : role === 'מוסד' ? '/institution/profile' : '/settings'
+  const profileLabel = role === 'מועמדת' ? 'הפרופיל שלי' : role === 'מוסד' ? 'פרופיל המוסד' : 'פרופיל'
+  const isAdmin = ['מנהלת מערכת', 'אדמין מערכת'].includes(role)
 
   return (
     <header
       className="dashboard-header flex items-center gap-3 px-4 md:gap-4 md:px-5"
       style={{
-        background: 'rgba(255,255,255,.94)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderBottom: '1px solid var(--line)',
+        background: 'rgba(14,7,28,.88)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(255,255,255,.07)',
         position: 'sticky',
         top: 0,
         zIndex: 50,
-        boxShadow: '0 1px 0 rgba(75,46,131,.07)',
+        boxShadow: '0 1px 0 rgba(0,0,0,.3)',
       }}
     >
       {/* Mobile hamburger */}
@@ -399,9 +400,9 @@ export default function AppHeader({ fullName, role }: Props) {
                 onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
               >
                 <User size={14} style={{ color: 'var(--ink-4)' }} />
-                {role === 'מועמדת' ? 'הפרופיל שלי' : 'הגדרות'}
+                {profileLabel}
               </Link>
-              {role !== 'מועמדת' && (
+              {isAdmin && (
                 <Link
                   href="/settings"
                   onClick={() => setUserOpen(false)}
