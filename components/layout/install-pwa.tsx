@@ -8,19 +8,24 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
+declare global {
+  interface Window {
+    __pwaPrompt?: BeforeInstallPromptEvent
+    __pwaInstalled?: boolean
+  }
+}
+
 export default function InstallPwa() {
   const [prompt, setPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [dismissed, setDismissed] = useState(false)
   const [installed, setInstalled] = useState(false)
 
   useEffect(() => {
-    // Register service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').catch(() => {})
     }
 
-    // Check if already running as installed PWA
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+    if (window.matchMedia('(display-mode: standalone)').matches || window.__pwaInstalled) {
       setInstalled(true)
       return
     }
@@ -30,6 +35,13 @@ export default function InstallPwa() {
       return
     }
 
+    // Event captured before React mounted (early script in <head>)
+    if (window.__pwaPrompt) {
+      setPrompt(window.__pwaPrompt)
+      return
+    }
+
+    // Fallback: listen for future event
     const handler = (e: Event) => {
       e.preventDefault()
       setPrompt(e as BeforeInstallPromptEvent)
@@ -63,14 +75,12 @@ export default function InstallPwa() {
         border: '1px solid rgba(255,255,255,.12)',
       }}
     >
-      {/* Icon */}
       <div className="w-12 h-12 rounded-[13px] overflow-hidden shrink-0"
         style={{ background: '#4B2E83', boxShadow: '0 2px 8px rgba(75,46,131,.4)' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/icon-192.png" alt="icon" className="w-full h-full object-cover" />
       </div>
 
-      {/* Text */}
       <div className="flex-1 min-w-0">
         <p className="text-[13.5px] font-extrabold leading-tight text-white">
           התקיני את האפליקציה
@@ -80,7 +90,6 @@ export default function InstallPwa() {
         </p>
       </div>
 
-      {/* Actions */}
       <div className="flex items-center gap-2 shrink-0">
         <button
           onClick={install}

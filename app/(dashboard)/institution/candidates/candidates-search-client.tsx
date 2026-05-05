@@ -1,12 +1,13 @@
 ﻿'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, MapPin, Paperclip, Send, X, Calendar, CheckCircle, MessageCircle, ChevronDown } from 'lucide-react'
+import { Search, MapPin, Paperclip, Send, X, Calendar, CheckCircle, MessageCircle, ChevronDown, Star } from 'lucide-react'
 import type { Candidate } from '@/lib/types'
 import { SPECIALIZATIONS, ACADEMIC_LEVELS } from '@/lib/constants'
 
-const STATUSES = ['הכל', "מחפשת סטאג'", 'פתוחה להצעות', 'בוגרת מחפשת משרה']
+const STATUSES = ['הכל', 'מועדפות', "מחפשת סטאג'", 'פתוחה להצעות', 'בוגרת מחפשת משרה']
+const LS_KEY = 'fav-candidates-institution'
 const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
   "מחפשת סטאג'":      { bg: '#EDE9FE', color: '#5B3E9E' },
   'פתוחה להצעות':      { bg: '#CCFBF1', color: '#0F766E' },
@@ -51,10 +52,29 @@ export default function CandidateSearchClient({ candidates, institutionId, insti
   const [invite, setInvite] = useState<InviteState | null>(null)
   const [saving, setSaving] = useState(false)
   const [invited, setInvited] = useState<Set<string>>(new Set())
+  const [favorites, setFavorites] = useState<Set<string>>(new Set())
   const router = useRouter()
 
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(LS_KEY)
+      if (stored) setFavorites(new Set(JSON.parse(stored) as string[]))
+    } catch {}
+  }, [])
+
+  function toggleFavorite(e: React.MouseEvent, id: string) {
+    e.stopPropagation()
+    setFavorites(prev => {
+      const s = new Set(prev)
+      s.has(id) ? s.delete(id) : s.add(id)
+      try { localStorage.setItem(LS_KEY, JSON.stringify([...s])) } catch {}
+      return s
+    })
+  }
+
   const filtered = candidates.filter(c => {
-    if (filter !== 'הכל' && c.availability_status !== filter) return false
+    if (filter === 'מועדפות' && !favorites.has(c.id)) return false
+    if (filter !== 'הכל' && filter !== 'מועדפות' && c.availability_status !== filter) return false
     if (specFilter !== 'הכל' && c.specialization !== specFilter) return false
     if (levelFilter !== 'הכל' && c.academic_level !== levelFilter) return false
     const name = (c.profiles as unknown as { full_name: string } | null)?.full_name ?? ''
@@ -85,8 +105,8 @@ export default function CandidateSearchClient({ candidates, institutionId, insti
 
   function waLink() {
     if (!invite) return ''
-    const phone = invite.candidatePhone.replace(/\D/g, '')
-    const base = phone ? `https://wa.me/972${phone.replace(/^0/, '')}` : 'https://wa.me'
+    const phone = invite.candidatePhone.replace(/\D/g, '').replace(/^972/, '').replace(/^0/, '')
+    const base = phone ? `https://wa.me/972${phone}` : 'https://wa.me'
     return `${base}?text=${encodeURIComponent(waText())}`
   }
 
@@ -138,11 +158,17 @@ export default function CandidateSearchClient({ candidates, institutionId, insti
         <div className="flex rounded-lg p-0.5 gap-0.5" style={{ background: 'var(--bg-2)' }}>
           {STATUSES.map(s => (
             <button key={s} onClick={() => setFilter(s)}
-              className="px-3 py-1.5 rounded-md text-[12.5px] font-semibold transition-all"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-md text-[12.5px] font-semibold transition-all"
               style={filter === s
-                ? { background: '#fff', color: 'var(--purple)', boxShadow: '0 1px 2px rgba(0,0,0,.05)' }
+                ? { background: '#fff', color: s === 'מועדפות' ? '#B45309' : 'var(--purple)', boxShadow: '0 1px 2px rgba(0,0,0,.05)' }
                 : { color: 'var(--ink-3)' }}>
+              {s === 'מועדפות' && <Star size={11} fill={filter === 'מועדפות' ? '#B45309' : 'none'} />}
               {s}
+              {s === 'מועדפות' && favorites.size > 0 && (
+                <span className="text-[10px] font-bold px-1 rounded-full" style={{ background: '#FDF3E3', color: '#B45309' }}>
+                  {favorites.size}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -211,9 +237,25 @@ export default function CandidateSearchClient({ candidates, institutionId, insti
                         </p>
                       </div>
                     </div>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0" style={sc}>
-                      {c.availability_status}
-                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        onClick={e => toggleFavorite(e, c.id)}
+                        title={favorites.has(c.id) ? 'הסירי ממועדפות' : 'הוסיפי למועדפות'}
+                        className="w-7 h-7 flex items-center justify-center rounded-full transition-all"
+                        style={{ background: favorites.has(c.id) ? '#FDF3E3' : 'transparent' }}
+                        onMouseEnter={e => { if (!favorites.has(c.id)) e.currentTarget.style.background = 'var(--bg-2)' }}
+                        onMouseLeave={e => { if (!favorites.has(c.id)) e.currentTarget.style.background = 'transparent' }}
+                      >
+                        <Star
+                          size={14}
+                          fill={favorites.has(c.id) ? '#B45309' : 'none'}
+                          style={{ color: favorites.has(c.id) ? '#B45309' : 'var(--ink-4)' }}
+                        />
+                      </button>
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={sc}>
+                        {c.availability_status}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-[12px] mb-3">

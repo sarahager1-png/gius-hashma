@@ -53,9 +53,9 @@ export default function AttentionTable() {
   return (
     <section className="rounded-[14px] border" style={{ background: '#fff', borderColor: 'var(--line)', boxShadow: 'var(--shadow-sm)', marginBottom: 24 }}>
       {/* Header */}
-      <div className="flex items-center gap-3 px-5 pb-3.5" style={{ paddingTop: 18 }}>
-        <div className="flex-1">
-          <h3 className="flex items-center gap-2.5 text-[16.5px] font-bold" style={{ color: 'var(--ink)' }}>
+      <div className="flex flex-wrap items-center gap-3 px-5 pb-3.5" style={{ paddingTop: 18 }}>
+        <div className="flex-1 min-w-0">
+          <h3 className="flex items-center gap-2.5 text-[15.5px] font-semibold" style={{ color: 'var(--ink)' }}>
             <span className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--red-bg)', color: 'var(--red)' }}>
               <AlertTriangle size={16} strokeWidth={2.2} />
             </span>
@@ -65,8 +65,7 @@ export default function AttentionTable() {
             {data.filter(i => i.status !== 'בתהליך').length} מוסדות עם מועמדות ממתינות מעל 10 ימים
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {/* Segmented */}
+        <div className="flex items-center gap-2 shrink-0">
           <div className="flex rounded-lg p-0.5 gap-0.5" style={{ background: 'var(--bg-2)' }}>
             {(['הכל', 'קריטי', 'דחוף', 'בתהליך'] as StatusFilter[]).map(s => (
               <button key={s} onClick={() => setFilter(s)}
@@ -81,8 +80,8 @@ export default function AttentionTable() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
+      {/* Desktop table */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full" style={{ borderCollapse: 'separate', borderSpacing: 0, fontSize: 14, fontWeight: 500 }}>
           <thead>
             <tr>
@@ -95,7 +94,7 @@ export default function AttentionTable() {
             </tr>
           </thead>
           <tbody>
-            {shown.map((inst, i) => {
+            {shown.map((inst) => {
               const isUrgent = inst.status !== 'בתהליך'
               return (
                 <tr key={inst.id}
@@ -123,8 +122,16 @@ export default function AttentionTable() {
                     <span style={{ color: 'var(--ink-3)' }}>מועמדות</span>
                   </td>
                   <td className="px-4 py-3.5" style={{ borderBottom: '1px solid var(--line-soft)' }}>
-                    <b style={{ color: DAYS_COLOR[inst.status] ?? 'var(--ink)' }}>{inst.daysWaiting}</b>{' '}
-                    <span style={{ color: 'var(--ink)' }}>ימים</span>
+                    <div className="flex items-center gap-2">
+                      <b style={{ color: DAYS_COLOR[inst.status] ?? 'var(--ink)', minWidth: 24 }}>{inst.daysWaiting}</b>
+                      <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-2)', maxWidth: 60 }}>
+                        <div className="h-full rounded-full"
+                          style={{
+                            width: `${Math.min(100, inst.daysWaiting / 21 * 100)}%`,
+                            background: inst.status === 'קריטי' ? 'var(--red)' : inst.status === 'דחוף' ? 'var(--amber)' : 'var(--teal)',
+                          }} />
+                      </div>
+                    </div>
                   </td>
                   <td className="px-4 py-3.5" style={{ borderBottom: '1px solid var(--line-soft)' }}>
                     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[12px] font-bold"
@@ -139,19 +146,14 @@ export default function AttentionTable() {
                         style={{ background: 'var(--purple)' }}
                         onMouseEnter={e => e.currentTarget.style.background = 'var(--purple-600)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'var(--purple)'}
-                        onClick={() => router.push(`/institutions/${inst.id}`)}
-                      >
-                        <Send size={14} />
-                        שלחי התייחסות
+                        onClick={() => router.push(`/institutions/${inst.id}`)}>
+                        <Send size={14} />שלחי התייחסות
                       </button>
                     ) : (
-                      <button
-                        className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border text-[13px] font-semibold transition-all"
+                      <button className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border text-[13px] font-semibold transition-all"
                         style={{ borderColor: 'var(--line)', color: 'var(--ink)', background: '#fff' }}
-                        onClick={() => router.push(`/admin/institutions`)}
-                      >
-                        <Edit2 size={14} />
-                        עדכן
+                        onClick={() => router.push(`/admin/institutions`)}>
+                        <Edit2 size={14} />עדכן
                       </button>
                     )}
                   </td>
@@ -160,6 +162,61 @@ export default function AttentionTable() {
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile cards */}
+      <div className="md:hidden">
+        {shown.map((inst) => {
+          const isUrgent = inst.status !== 'בתהליך'
+          return (
+            <div key={inst.id} className="px-4 py-3.5"
+              style={{ borderBottom: '1px solid var(--line-soft)', background: isUrgent ? '#FFF7F7' : 'transparent' }}>
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center text-[12px] font-extrabold shrink-0"
+                  style={MONOGRAM[inst.color]}>
+                  {inst.initials}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-bold text-[14px]" style={{ color: 'var(--ink)' }}>{inst.name}</span>
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-bold"
+                      style={CHIP[inst.status] ?? {}}>
+                      <span className="w-1 h-1 rounded-full" style={{ background: 'currentColor' }} />
+                      {inst.status}
+                    </span>
+                  </div>
+                  <div className="text-[12.5px] mt-0.5" style={{ color: 'var(--ink-3)' }}>
+                    מנהלת: {inst.principal} · {inst.city}
+                  </div>
+                  <div className="flex items-center gap-3 mt-1.5">
+                    <span className="text-[12px] font-semibold" style={{ color: 'var(--ink-3)' }}>
+                      <b style={{ color: DAYS_COLOR[inst.status] ?? 'var(--ink)' }}>{inst.pendingCandidates}</b> מועמדות
+                    </span>
+                    <span className="text-[12px] font-semibold"
+                      style={{ color: DAYS_COLOR[inst.status] ?? 'var(--ink-3)' }}>
+                      {inst.daysWaiting} ימים המתנה
+                    </span>
+                  </div>
+                </div>
+                <div className="shrink-0">
+                  {isUrgent ? (
+                    <button className="inline-flex items-center gap-1 h-8 px-2.5 rounded-lg text-[12px] font-semibold text-white"
+                      style={{ background: 'var(--purple)' }}
+                      onClick={() => router.push(`/institutions/${inst.id}`)}>
+                      <Send size={13} />התייחסות
+                    </button>
+                  ) : (
+                    <button className="inline-flex items-center gap-1 h-8 px-2.5 rounded-lg border text-[12px] font-semibold"
+                      style={{ borderColor: 'var(--line)', color: 'var(--ink)', background: '#fff' }}
+                      onClick={() => router.push(`/admin/institutions`)}>
+                      <Edit2 size={13} />עדכן
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )
+        })}
       </div>
 
       {/* Footer */}

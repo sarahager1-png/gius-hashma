@@ -31,7 +31,7 @@ export default function Funnel({ since, until, yearLabel }: Props) {
       {/* Header */}
       <div className="flex items-center gap-3 px-5 pb-3.5" style={{ paddingTop: 18 }}>
         <div className="flex-1">
-          <h3 className="text-[16.5px] font-bold" style={{ color: 'var(--ink)' }}>משפך תהליך השמה</h3>
+          <h3 className="text-[15.5px] font-semibold" style={{ color: 'var(--ink)' }}>משפך תהליך השמה</h3>
           <p className="text-[13px] font-medium mt-0.5" style={{ color: 'var(--ink-4)' }}>שנת {yearLabel}</p>
         </div>
         <button className="flex items-center gap-1.5 h-8 px-3 rounded-lg border text-[13px] font-semibold transition-all"
@@ -41,30 +41,48 @@ export default function Funnel({ since, until, yearLabel }: Props) {
         </button>
       </div>
 
-      <div className="px-5 pb-4">
+      <div className="px-5 pb-5">
         {/* Funnel stages */}
-        <div className="flex flex-col gap-2.5 mt-1.5">
-          {(data?.stages ?? []).map(stage => (
-            <div key={stage.label} className="grid items-center gap-3" style={{ gridTemplateColumns: '1fr 1.2fr 44px' }}>
-              <div className="flex justify-between gap-2">
-                <span className="text-[13px] font-semibold" style={{ color: 'var(--ink)' }}>{stage.label}</span>
-                <span className="text-[13px] font-medium" style={{ color: 'var(--ink-3)' }}>{stage.count}</span>
+        <div className="flex flex-col gap-1 mt-1">
+          {(data?.stages ?? []).map((stage, idx, arr) => {
+            const dropPct = idx > 0 ? Math.round((1 - stage.count / arr[idx - 1].count) * 100) : 0
+            return (
+              <div key={stage.label}>
+                {/* Drop indicator between stages */}
+                {idx > 0 && dropPct > 0 && (
+                  <div className="flex items-center gap-2 py-0.5 px-1">
+                    <div className="h-px flex-1" style={{ background: 'var(--line-soft)' }} />
+                    <span className="text-[10.5px] font-semibold" style={{ color: 'var(--red)', opacity: 0.7 }}>
+                      −{dropPct}%
+                    </span>
+                    <div className="h-px flex-1" style={{ background: 'var(--line-soft)' }} />
+                  </div>
+                )}
+                <div className="flex items-center gap-3 py-2">
+                  {/* Count badge */}
+                  <div className="text-[18px] font-black leading-none shrink-0 w-10 text-end"
+                    style={{ color: stage.color, letterSpacing: '-.02em' }}>
+                    {stage.count}
+                  </div>
+                  {/* Bar + label */}
+                  <div className="flex-1">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-[12.5px] font-semibold" style={{ color: 'var(--ink)' }}>{stage.label}</span>
+                      <span className="text-[12px] font-bold" style={{ color: stage.color }}>{stage.pct}%</span>
+                    </div>
+                    <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-2)' }}>
+                      <span className="block h-full rounded-full transition-all duration-700"
+                        style={{ width: `${stage.pct}%`, background: stage.color }} />
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="h-2.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-2)' }}>
-                <span
-                  className="block h-full rounded-full transition-all duration-700"
-                  style={{ width: `${stage.pct}%`, background: stage.color }}
-                />
-              </div>
-              <span className="text-[13px] font-bold text-start" style={{ color: 'var(--ink-3)' }}>
-                {stage.pct}%
-              </span>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* Summary metrics */}
-        <div className="grid grid-cols-2 gap-2.5 mt-4.5 pt-4" style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid var(--line-soft)' }}>
+        <div className="grid grid-cols-2 gap-3 mt-3 pt-4" style={{ borderTop: '1px solid var(--line-soft)' }}>
           <MetricMini
             label="שיעור המרה"
             value={`${data?.conversionRate ?? 0}%`}

@@ -1,5 +1,26 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+
+// PATCH — update phone number only (used by OTP no-phone flow)
+export async function PATCH(request: Request) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { phone } = await request.json()
+  if (!phone || typeof phone !== 'string') {
+    return NextResponse.json({ error: 'phone required' }, { status: 400 })
+  }
+
+  const service = createServiceClient()
+  const { error } = await service
+    .from('profiles')
+    .update({ phone: phone.trim() })
+    .eq('id', user.id)
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ ok: true })
+}
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -15,6 +36,14 @@ export async function POST(request: Request) {
 
   if (!role) {
     return NextResponse.json({ error: 'role required' }, { status: 400 })
+  }
+
+  // admin registration requires a secret code
+  if (role === 'מנהלת מערכת' || role === 'אדמין מערכת') {
+    const expected = process.env.ADMIN_REGISTRATION_CODE
+    if (!expected || body.admin_code !== expected) {
+      return NextResponse.json({ error: 'קוד מנהל שגוי — פנה למנהל המערכת' }, { status: 403 })
+    }
   }
 
   // upsert profile (handles duplicate if user tried registering before)
@@ -80,6 +109,7 @@ export async function POST(request: Request) {
         personal_note: reqData?.personal_note || null,
         availability_from: reqData?.availability_from || null,
         availability_to: reqData?.availability_to || null,
+        study_day: reqData?.study_day || null,
       })
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
@@ -98,7 +128,7 @@ export async function POST(request: Request) {
   }
 
   if (role === 'מוסד' && institution) {
-    const { institution_name, city, address, phone, institution_type } = institution
+    const { institution_name, city, address, phone, institution_type, district } = institution
     const { error } = await service
       .from('institutions')
       .insert({
@@ -108,6 +138,7 @@ export async function POST(request: Request) {
         address: address || null,
         phone: phone || null,
         institution_type: institution_type || null,
+        district: district || null,
         // is_approved deliberately omitted — must go through admin approval flow
       })
     if (error) {

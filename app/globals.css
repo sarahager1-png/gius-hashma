@@ -130,8 +130,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: subpixel-antialiased;
   text-rendering: optimizeLegibility;
   scroll-behavior: smooth;
 }
@@ -206,7 +205,7 @@ select { cursor: pointer; }
   display: grid;
   grid-template-columns: 232px 1fr;
   grid-template-rows: 60px 1fr;
-  min-height: 100vh;
+  height: 100vh;
   background: var(--bg);
 }
 .dashboard-header { grid-column: 1 / span 2; }
@@ -625,7 +624,7 @@ select { cursor: pointer; }
   .dashboard-header { height: 56px; }
   .dashboard-sidebar {
     position: fixed;
-    inset-inline-end: 0;
+    inset-inline-start: 0;
     top: 56px;
     width: 260px;
     height: calc(100vh - 56px);

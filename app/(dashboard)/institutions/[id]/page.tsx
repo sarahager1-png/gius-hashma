@@ -1,4 +1,4 @@
-import { redirect, notFound } from 'next/navigation'
+﻿import { redirect, notFound } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle, Clock, MapPin, Building2, Phone, Briefcase, MessageCircle } from 'lucide-react'
@@ -10,7 +10,7 @@ export default async function InstitutionDetailPage({ params }: { params: Promis
   if (!user) redirect('/login')
   const service = createServiceClient()
   const { data: profile } = await service.from('profiles').select('role, full_name').eq('id', user.id).single()
-  if (!profile || !['מנהל רשת', 'אדמין מערכת', 'מועמדת'].includes(profile.role)) redirect('/dashboard')
+  if (!profile || !['מנהלת מערכת', 'אדמין מערכת', 'מועמדת'].includes(profile.role)) redirect('/dashboard')
 
   const { data: institution } = await service
     .from('institutions')

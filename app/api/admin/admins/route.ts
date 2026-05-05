@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 async function requireAdmin() {
@@ -7,7 +7,7 @@ async function requireAdmin() {
   if (!user) return null
   const { data: profile } = await createServiceClient()
     .from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['מנהל רשת', 'אדמין מערכת'].includes(profile.role)) return null
+  if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)) return null
   return user
 }
 
@@ -20,7 +20,7 @@ export async function GET() {
     service
       .from('profiles')
       .select('id, full_name, role, created_at')
-      .in('role', ['מנהל רשת', 'אדמין מערכת'])
+      .in('role', ['מנהלת מערכת', 'אדמין מערכת'])
       .order('created_at', { ascending: true }),
     service.auth.admin.listUsers({ perPage: 1000 }),
   ])
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
   }
 
   const { data: existing } = await service.from('profiles').select('role').eq('id', found.id).single()
-  if (existing && ['מנהל רשת', 'אדמין מערכת'].includes(existing.role)) {
+  if (existing && ['מנהלת מערכת', 'אדמין מערכת'].includes(existing.role)) {
     return NextResponse.json({ error: 'משתמש זה כבר מנהל מערכת' }, { status: 409 })
   }
 
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
 
   const { error } = await service
     .from('profiles')
-    .upsert({ id: found.id, role: 'מנהל רשת', full_name: name }, { onConflict: 'id' })
+    .upsert({ id: found.id, role: 'מנהלת מערכת', full_name: name }, { onConflict: 'id' })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ success: true })

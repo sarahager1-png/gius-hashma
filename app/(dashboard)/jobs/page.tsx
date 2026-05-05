@@ -16,7 +16,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
   if (!profile) redirect('/login')
 
   const { q } = await searchParams
-  const isAdmin = ['מנהל רשת', 'אדמין מערכת'].includes(profile.role)
+  const isAdmin = ['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)
 
   if (isAdmin) {
     const { data: jobs } = await service

@@ -68,9 +68,9 @@ export default function ProcessTracker() {
       style={{ background: '#fff', borderColor: 'var(--line)', boxShadow: 'var(--shadow-sm)', marginBottom: 24 }}
     >
       {/* Header */}
-      <div className="flex items-center gap-3 px-5 pb-3.5" style={{ paddingTop: 18 }}>
-        <div className="flex-1">
-          <h3 className="flex items-center gap-2.5 text-[16.5px] font-bold" style={{ color: 'var(--ink)' }}>
+      <div className="flex flex-wrap items-center gap-3 px-5 pb-3.5" style={{ paddingTop: 18 }}>
+        <div className="flex-1 min-w-0">
+          <h3 className="flex items-center gap-2.5 text-[15.5px] font-semibold" style={{ color: 'var(--ink)' }}>
             <span className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
               style={{ background: 'var(--purple-050)', color: 'var(--purple)' }}>
               <Activity size={16} strokeWidth={2.2} />
@@ -78,12 +78,12 @@ export default function ProcessTracker() {
             מעקב תהליכים חי
           </h3>
           <p className="text-[13px] font-medium mt-0.5" style={{ color: 'var(--ink-4)', marginInlineStart: 38 }}>
-            {pendingCount} ממתינות · {viewedCount} נצפו · סה״כ {data.length} תהליכים פעילים
+            {pendingCount} ממתינות · {viewedCount} נצפו · סה״כ {data.length} תהליכים
           </p>
         </div>
 
         {/* Segmented filter */}
-        <div className="flex rounded-lg p-0.5 gap-0.5" style={{ background: 'var(--bg-2)' }}>
+        <div className="flex rounded-lg p-0.5 gap-0.5 shrink-0" style={{ background: 'var(--bg-2)' }}>
           {(['הכל', 'ממתינה', 'נצפתה'] as StatusFilter[]).map(s => (
             <button key={s} onClick={() => setFilter(s)}
               className="px-3 py-1.5 rounded-md text-[12.5px] font-semibold transition-all"
@@ -96,8 +96,8 @@ export default function ProcessTracker() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
+      {/* Desktop table */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full" style={{ borderCollapse: 'separate', borderSpacing: 0, fontSize: 13.5, fontWeight: 500 }}>
           <thead>
             <tr>
@@ -131,51 +131,31 @@ export default function ProcessTracker() {
                 onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-3)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
               >
-                {/* Candidate */}
                 <td className="px-4 py-3.5" style={{ borderBottom: '1px solid var(--line-soft)' }}>
-                  <div className="font-bold text-[13.5px]" style={{ color: 'var(--ink)' }}>
-                    {proc.candidateName}
-                  </div>
+                  <div className="font-bold text-[13.5px]" style={{ color: 'var(--ink)' }}>{proc.candidateName}</div>
                   <div className="flex items-center gap-2 mt-0.5">
                     {proc.candidateCity && (
                       <span className="text-[12px]" style={{ color: 'var(--ink-4)' }}>{proc.candidateCity}</span>
                     )}
                     {proc.candidatePhone && (
-                      <a
-                        href={`tel:${proc.candidatePhone}`}
-                        className="flex items-center gap-0.5 text-[12px]"
-                        style={{ color: 'var(--teal-600)', textDecoration: 'none' }}
-                      >
-                        <Phone size={10} />
-                        {proc.candidatePhone}
+                      <a href={`tel:${proc.candidatePhone}`} className="flex items-center gap-0.5 text-[12px]"
+                        style={{ color: 'var(--teal-600)', textDecoration: 'none' }}>
+                        <Phone size={10} />{proc.candidatePhone}
                       </a>
                     )}
                     {proc.candidateCvUrl && (
-                      <a
-                        href={proc.candidateCvUrl}
-                        target="_blank"
-                        rel="noreferrer"
+                      <a href={proc.candidateCvUrl} target="_blank" rel="noreferrer"
                         className="flex items-center gap-0.5 text-[12px]"
-                        style={{ color: 'var(--purple)', textDecoration: 'none' }}
-                      >
-                        <FileText size={10} />
-                        קו״ח
+                        style={{ color: 'var(--purple)', textDecoration: 'none' }}>
+                        <FileText size={10} />קו״ח
                       </a>
                     )}
                   </div>
                 </td>
-
-                {/* Job + Institution */}
                 <td className="px-4 py-3.5" style={{ borderBottom: '1px solid var(--line-soft)' }}>
-                  <div className="font-semibold text-[13.5px]" style={{ color: 'var(--ink)' }}>
-                    {proc.jobTitle}
-                  </div>
-                  <div className="text-[12px] mt-0.5" style={{ color: 'var(--ink-3)' }}>
-                    {proc.institutionName}
-                  </div>
+                  <div className="font-semibold text-[13.5px]" style={{ color: 'var(--ink)' }}>{proc.jobTitle}</div>
+                  <div className="text-[12px] mt-0.5" style={{ color: 'var(--ink-3)' }}>{proc.institutionName}</div>
                 </td>
-
-                {/* Status chip */}
                 <td className="px-4 py-3.5" style={{ borderBottom: '1px solid var(--line-soft)' }}>
                   <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[12px] font-bold"
                     style={STATUS_STYLE[proc.status] ?? {}}>
@@ -183,19 +163,13 @@ export default function ProcessTracker() {
                     {proc.status}
                   </span>
                 </td>
-
-                {/* Days waiting */}
                 <td className="px-4 py-3.5" style={{ borderBottom: '1px solid var(--line-soft)' }}>
-                  <span
-                    className="font-bold text-[14px]"
-                    style={{ color: proc.daysWaiting >= 14 ? 'var(--red)' : proc.daysWaiting >= 7 ? 'var(--amber)' : 'var(--ink)' }}
-                  >
+                  <span className="font-bold text-[14px]"
+                    style={{ color: proc.daysWaiting >= 14 ? 'var(--red)' : proc.daysWaiting >= 7 ? 'var(--amber)' : 'var(--ink)' }}>
                     {proc.daysWaiting}
                   </span>
                   <span className="text-[12px] mr-1" style={{ color: 'var(--ink-4)' }}>ימים</span>
                 </td>
-
-                {/* Interview */}
                 <td className="px-4 py-3.5" style={{ borderBottom: '1px solid var(--line-soft)' }}>
                   {proc.interviewDate ? (
                     <div>
@@ -203,10 +177,8 @@ export default function ProcessTracker() {
                         {fmtDateTime(proc.interviewDate)}
                       </div>
                       {proc.interviewStatus && (
-                        <span
-                          className="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0 rounded-full text-[11px] font-bold"
-                          style={IV_STYLE[proc.interviewStatus] ?? {}}
-                        >
+                        <span className="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0 rounded-full text-[11px] font-bold"
+                          style={IV_STYLE[proc.interviewStatus] ?? {}}>
                           {proc.interviewStatus}
                         </span>
                       )}
@@ -215,24 +187,17 @@ export default function ProcessTracker() {
                     <span className="text-[12px]" style={{ color: 'var(--ink-4)' }}>—</span>
                   )}
                 </td>
-
-                {/* Last updated */}
                 <td className="px-4 py-3.5 text-[12.5px]" style={{ borderBottom: '1px solid var(--line-soft)', color: 'var(--ink-3)' }}>
                   {fmtDate(proc.updatedAt)}
                 </td>
-
-                {/* Action */}
                 <td className="px-4 py-3.5 text-end" style={{ borderBottom: '1px solid var(--line-soft)' }}>
                   {proc.institutionId && proc.jobId ? (
-                    <button
-                      onClick={() => router.push(`/jobs/${proc.jobId}`)}
+                    <button onClick={() => router.push(`/jobs/${proc.jobId}`)}
                       className="inline-flex items-center gap-1 h-7 px-3 rounded-lg border text-[12px] font-semibold transition-all"
                       style={{ borderColor: 'var(--purple-200)', color: 'var(--purple)', background: 'var(--purple-050)' }}
                       onMouseEnter={e => e.currentTarget.style.background = 'var(--purple-100)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'var(--purple-050)'}
-                    >
-                      פתח
-                      <ChevronLeft size={12} />
+                      onMouseLeave={e => e.currentTarget.style.background = 'var(--purple-050)'}>
+                      פתח<ChevronLeft size={12} />
                     </button>
                   ) : (
                     <span style={{ color: 'var(--ink-4)' }}>—</span>
@@ -242,6 +207,75 @@ export default function ProcessTracker() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile cards */}
+      <div className="md:hidden divide-y" style={{ borderColor: 'var(--line-soft)' }}>
+        {isLoading && (
+          <div className="px-4 py-8 text-center text-[13px]" style={{ color: 'var(--ink-4)' }}>טוען נתונים...</div>
+        )}
+        {!isLoading && shown.length === 0 && (
+          <div className="px-4 py-8 text-center text-[13px]" style={{ color: 'var(--ink-4)' }}>אין תהליכים פעילים כרגע</div>
+        )}
+        {shown.map(proc => (
+          <div key={proc.id} className="px-4 py-3.5" style={{ borderBottom: '1px solid var(--line-soft)' }}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-bold text-[14px]" style={{ color: 'var(--ink)' }}>{proc.candidateName}</span>
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-bold"
+                    style={STATUS_STYLE[proc.status] ?? {}}>
+                    <span className="w-1 h-1 rounded-full" style={{ background: 'currentColor' }} />
+                    {proc.status}
+                  </span>
+                </div>
+                <div className="text-[12.5px] mt-0.5 font-semibold" style={{ color: 'var(--ink-3)' }}>
+                  {proc.jobTitle} · {proc.institutionName}
+                </div>
+                <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                  <span className="text-[12px] font-semibold"
+                    style={{ color: proc.daysWaiting >= 14 ? 'var(--red)' : proc.daysWaiting >= 7 ? 'var(--amber)' : 'var(--ink-3)' }}>
+                    {proc.daysWaiting} ימים המתנה
+                  </span>
+                  {proc.candidateCity && (
+                    <span className="text-[12px]" style={{ color: 'var(--ink-4)' }}>{proc.candidateCity}</span>
+                  )}
+                  {proc.candidatePhone && (
+                    <a href={`tel:${proc.candidatePhone}`} className="flex items-center gap-0.5 text-[12px]"
+                      style={{ color: 'var(--teal-600)', textDecoration: 'none' }}>
+                      <Phone size={10} />{proc.candidatePhone}
+                    </a>
+                  )}
+                  {proc.candidateCvUrl && (
+                    <a href={proc.candidateCvUrl} target="_blank" rel="noreferrer"
+                      className="flex items-center gap-0.5 text-[12px]"
+                      style={{ color: 'var(--purple)', textDecoration: 'none' }}>
+                      <FileText size={10} />קו״ח
+                    </a>
+                  )}
+                </div>
+                {proc.interviewDate && (
+                  <div className="mt-1 text-[12px]" style={{ color: 'var(--ink-3)' }}>
+                    ראיון: {fmtDateTime(proc.interviewDate)}
+                    {proc.interviewStatus && (
+                      <span className="inline-flex items-center gap-1 mr-2 px-1.5 rounded-full text-[11px] font-bold"
+                        style={IV_STYLE[proc.interviewStatus] ?? {}}>
+                        {proc.interviewStatus}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+              {proc.institutionId && proc.jobId && (
+                <button onClick={() => router.push(`/jobs/${proc.jobId}`)}
+                  className="shrink-0 inline-flex items-center gap-1 h-8 px-3 rounded-lg border text-[12px] font-semibold"
+                  style={{ borderColor: 'var(--purple-200)', color: 'var(--purple)', background: 'var(--purple-050)' }}>
+                  פתח<ChevronLeft size={12} />
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Footer */}

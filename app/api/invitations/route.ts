@@ -1,5 +1,7 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { sendInvitationEmail } from '@/lib/email'
+import { sendSms } from '@/lib/sms'
 
 // POST — institution invites a candidate to a job
 export async function POST(request: Request) {
@@ -14,7 +16,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'institution_id, candidate_id, job_id required' }, { status: 400 })
 
   const { data: callerProfile } = await service.from('profiles').select('role').eq('id', user.id).single()
-  const isAdmin = callerProfile?.role && ['מנהל רשת', 'אדמין מערכת'].includes(callerProfile.role)
+  const isAdmin = callerProfile?.role && ['מנהלת מערכת', 'אדמין מערכת'].includes(callerProfile.role)
 
   // verify institution belongs to caller (or caller is admin)
   const { data: inst } = await service
@@ -43,9 +45,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  // notify candidate
+  // notify candidate (in-app + email + SMS)
   const jobTitle = jobRow.title
-  const { data: cand } = await service.from('candidates').select('profile_id').eq('id', candidate_id).single()
+  const { data: cand } = await service
+    .from('candidates').select('profile_id, profiles(full_name, phone)').eq('id', candidate_id).single()
   if (cand?.profile_id) {
     const dt = scheduled_at ? new Date(scheduled_at).toLocaleString('he-IL', {
       day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
@@ -57,6 +60,23 @@ export async function POST(request: Request) {
       body: `${jobTitle}${dt ? ' · ' + dt : ''}. ניתן לאשר או לסרב בדשבורד.`,
       related_id: inv.id,
     })
+    const candidateName = (cand.profiles as unknown as { full_name: string | null } | null)?.full_name ?? 'מועמדת'
+    void sendInvitationEmail({
+      candidateProfileId: cand.profile_id,
+      candidateName,
+      jobTitle,
+      institutionName: inst.institution_name,
+      scheduledAt: scheduled_at,
+      message,
+    })
+    const candidatePhone = (cand.profiles as unknown as { phone: string | null } | null)?.phone
+    if (candidatePhone) {
+      const dtSms = scheduled_at ? new Date(scheduled_at).toLocaleString('he-IL', {
+        day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
+      }) : ''
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app'
+      void sendSms(candidatePhone, `שלום ${candidateName}! ${inst.institution_name} מזמינה אותך לראיון למשרת "${jobTitle}"${dtSms ? ' · ' + dtSms : ''}. לפרטים ולאישור: ${appUrl}/my-invitations`)
+    }
   }
 
   return NextResponse.json(inv, { status: 201 })

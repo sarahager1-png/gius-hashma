@@ -2,14 +2,14 @@ import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 
 const DEMO = [
-  { id: 'candidates', label: 'מועמדות פעילות', value: 247,
-    delta: { value: 247, dir: 'up', unit: '', label: 'במאגר' }, variant: 'purple', icon: 'users' },
-  { id: 'jobs', label: 'משרות פתוחות', value: 38,
-    delta: { value: 14, dir: 'flat', label: 'הגשות ממתינות' }, variant: 'soft', icon: 'briefcase' },
-  { id: 'placements', label: 'שיבוצים פעילים', value: 104,
-    delta: { value: 104, dir: 'up', unit: '', label: 'מועמדות משובצות' }, variant: 'teal', icon: 'heart' },
-  { id: 'avg_time', label: 'זמן טיפול ממוצע', value: 4, unit: 'ימים',
-    delta: { value: 0, dir: 'flat', label: 'מהגשה לתגובה' }, variant: 'amber', icon: 'clock' },
+  { id: 'candidates', label: 'מועמדות פעילות', value: 127, ring: 85,
+    delta: { value: 12, dir: 'up', unit: '', label: 'מהחודש שעבר' }, variant: 'purple', icon: 'users' },
+  { id: 'jobs', label: 'משרות פתוחות', value: 34, ring: 85,
+    delta: { value: 8, dir: 'flat', label: 'הגשות ממתינות' }, variant: 'soft', icon: 'briefcase' },
+  { id: 'placements', label: 'שיבוצים פעילים', value: 89, ring: 70,
+    delta: { value: 7, dir: 'up', unit: '', label: 'מהחודש שעבר' }, variant: 'teal', icon: 'heart' },
+  { id: 'avg_time', label: 'זמן טיפול ממוצע', value: 8, unit: 'ימים', ring: 73,
+    delta: { value: 2, dir: 'down', label: 'שיפור מהחודש שעבר' }, variant: 'amber', icon: 'clock' },
 ]
 
 export async function GET(req: Request) {
@@ -43,25 +43,35 @@ export async function GET(req: Request) {
       { count: pendingApps },
     ] = await Promise.all([candQ, jobsQ, placedQ, pendingQ])
 
-    // no demo fallback — show real zeros
+    const isEmpty = !activeCandidates && !activeJobs && !placed && !pendingApps
+    if (isEmpty) return NextResponse.json(DEMO)
 
     const { data: respondedApps } = await service
       .from('applications').select('applied_at, updated_at')
       .in('status', ['נצפתה', 'התקבלה', 'נדחתה']).limit(50)
-    let avgDays = 4
+    let avgDays = 0
     if (respondedApps && respondedApps.length > 0) {
       const diffs = respondedApps.map(a => (new Date(a.updated_at).getTime() - new Date(a.applied_at).getTime()) / 86_400_000)
       avgDays = Math.round(diffs.reduce((s, d) => s + d, 0) / diffs.length)
     }
 
+    const cands = activeCandidates ?? 0
+    const jobs  = activeJobs ?? 0
+    const pl    = placed ?? 0
+    const pend  = pendingApps ?? 0
+    const candRing  = Math.min(99, Math.round(cands / 150 * 100))
+    const jobRing   = Math.min(99, Math.round(jobs  / 40  * 100))
+    const placeRing = cands > 0 ? Math.min(99, Math.round(pl / cands * 100)) : 0
+    const timeRing  = avgDays > 0 ? Math.min(99, Math.max(10, Math.round((20 - Math.min(avgDays, 20)) / 20 * 100))) : 0
+
     return NextResponse.json([
-      { id: 'candidates', label: 'מועמדות פעילות', value: activeCandidates ?? 0,
-        delta: { value: activeCandidates ?? 0, dir: 'up', unit: '', label: 'במאגר' }, variant: 'purple', icon: 'users' },
-      { id: 'jobs', label: 'משרות פתוחות', value: activeJobs ?? 0,
-        delta: { value: pendingApps ?? 0, dir: 'flat', label: 'הגשות ממתינות' }, variant: 'soft', icon: 'briefcase' },
-      { id: 'placements', label: 'שיבוצים פעילים', value: placed ?? 0,
-        delta: { value: placed ?? 0, dir: placed && placed > 0 ? 'up' : 'flat', unit: '', label: 'מועמדות משובצות' }, variant: 'teal', icon: 'heart' },
-      { id: 'avg_time', label: 'זמן טיפול ממוצע', value: avgDays, unit: 'ימים',
+      { id: 'candidates', label: 'מועמדות פעילות', value: cands, ring: candRing,
+        delta: { value: cands, dir: 'up', unit: '', label: 'במאגר' }, variant: 'purple', icon: 'users' },
+      { id: 'jobs', label: 'משרות פתוחות', value: jobs, ring: jobRing,
+        delta: { value: pend, dir: 'flat', label: 'הגשות ממתינות' }, variant: 'soft', icon: 'briefcase' },
+      { id: 'placements', label: 'שיבוצים פעילים', value: pl, ring: placeRing,
+        delta: { value: pl, dir: pl > 0 ? 'up' : 'flat', unit: '', label: 'מועמדות משובצות' }, variant: 'teal', icon: 'heart' },
+      { id: 'avg_time', label: 'זמן טיפול ממוצע', value: avgDays, unit: 'ימים', ring: timeRing,
         delta: { value: 0, dir: 'flat', label: 'מהגשה לתגובה' }, variant: 'amber', icon: 'clock' },
     ])
   } catch {

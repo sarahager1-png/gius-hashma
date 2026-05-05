@@ -1,18 +1,14 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
-import { ShieldCheck, Building2, Users, BarChart2 } from 'lucide-react'
+import { Building2, Users, BarChart2 } from 'lucide-react'
+import InstallFooter from '@/components/landing/install-footer'
 
-const STATS = [
-  { n: '80+',  label: 'מוסדות ברשת' },
-  { n: '300+', label: 'מועמדות' },
-  { n: '500+', label: 'תהליכי גיוס' },
-]
 const FEATURES = [
   { icon: Building2, title: 'אישור מוסדות',  desc: 'פקחי ואשרי מוסדות חדשים שמבקשים להצטרף לרשת' },
-  { icon: Users,     title: 'ניהול מועמדות', desc: 'צפי בכלל המועמדות, הפעלי קודי גישה ועקבי אחר תהליכים' },
+  { icon: Users,     title: 'ניהול מועמדות', desc: 'צפי בכלל המועמדות, פעולות על מועמדות ועקיבה אחר תהליכים' },
   { icon: BarChart2, title: 'דוחות KPI',     desc: 'נתוני גיוס, השמות, זמני תגובה ומגמות לאורך זמן' },
 ]
 
@@ -42,35 +38,20 @@ export default function NehalLanding() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 0' }}>
             <a href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
               <div style={{ width: '32px', height: '32px', background: 'rgba(255,255,255,.15)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
               </div>
               <span style={{ color: 'rgba(255,255,255,.75)', fontSize: '13px', fontWeight: 600 }}>חזרה</span>
             </a>
-            <div style={{ width: '38px', height: '38px', background: 'rgba(255,255,255,.95)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,.15)' }}>
-              <Image src="/logo-chabad.png" alt="לוגו" width={28} height={28} className="object-contain" />
+            <div style={{ width: '52px', height: '52px', background: '#fff', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(0,0,0,.18)', padding: '4px' }}>
+              <Image src="/logo-chabad.png" alt="לוגו" width={44} height={44} className="object-contain" />
             </div>
           </div>
 
           {/* Content */}
-          <div style={{ padding: '20px 0 44px', textAlign: 'center' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: 'rgba(255,255,255,.15)', border: '1px solid rgba(255,255,255,.25)', borderRadius: '999px', padding: '5px 14px', marginBottom: '16px' }}>
-              <ShieldCheck size={13} color="white" />
-              <span style={{ fontSize: '12px', fontWeight: 700, color: 'white', letterSpacing: '.05em' }}>פורטל מנהל הרשת</span>
-            </div>
-            <h1 style={{ fontSize: '32px', fontWeight: 900, color: 'white', letterSpacing: '-.03em', lineHeight: 1.15, margin: '0 0 10px' }}>
-              ניהול ופיקוח<br />על כלל הרשת
+          <div style={{ padding: '20px 0 36px', textAlign: 'center' }}>
+            <h1 style={{ fontSize: '32px', fontWeight: 900, color: 'white', letterSpacing: '-.03em', lineHeight: 1.15, margin: 0 }}>
+              לוח בקרה וניהול
             </h1>
-            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,.75)', margin: '0 0 28px', lineHeight: 1.6 }}>
-              מרכז שליטה לניהול מוסדות, מועמדות ותהליכי גיוס בכל הרשת
-            </p>
-            <div style={{ display: 'flex', background: 'rgba(255,255,255,.12)', borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(255,255,255,.18)' }}>
-              {STATS.map((s, i) => (
-                <div key={s.label} style={{ flex: 1, padding: '13px 8px', textAlign: 'center', borderRight: i < 2 ? '1px solid rgba(255,255,255,.15)' : 'none' }}>
-                  <div style={{ fontSize: '20px', fontWeight: 900, color: 'white', letterSpacing: '-.02em' }}>{s.n}</div>
-                  <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.6)', marginTop: '2px', fontWeight: 600 }}>{s.label}</div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </div>
@@ -82,7 +63,7 @@ export default function NehalLanding() {
           <div style={{ height: '4px', background: 'linear-gradient(90deg, var(--purple-800), var(--purple), var(--teal))' }} />
           <div style={{ padding: '22px 24px 20px' }}>
             <h2 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--ink)', margin: '0 0 3px', letterSpacing: '-.01em' }}>כניסה למערכת</h2>
-            <p style={{ fontSize: '13px', color: 'var(--ink-3)', margin: '0 0 20px' }}>גישה מורשית לצוות המטה בלבד</p>
+            <p style={{ fontSize: '13px', color: 'var(--ink-3)', margin: '0 0 16px' }}>גישה מורשית לצוות המטה בלבד</p>
 
             {error && (
               <div style={{ background: 'var(--red-bg)', borderRadius: '8px', padding: '9px 12px', fontSize: '13px', color: 'var(--red)', fontWeight: 600, marginBottom: '14px' }}>{error}</div>
@@ -103,7 +84,6 @@ export default function NehalLanding() {
               )}
               {loading ? 'מתחבר...' : 'כניסה עם חשבון Google'}
             </button>
-
             <p style={{ textAlign: 'center', fontSize: '12px', color: 'var(--ink-4)', marginTop: '12px' }}>
               גישה מורשית בלבד — נדרש חשבון ארגוני
             </p>
@@ -111,7 +91,7 @@ export default function NehalLanding() {
         </div>
 
         {/* Feature cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', paddingBottom: '40px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
           {FEATURES.map(({ icon: Icon, title, desc }) => (
             <div key={title} style={{ background: 'white', borderRadius: '14px', padding: '14px 12px', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>
               <div style={{ width: '34px', height: '34px', background: 'var(--purple-050)', borderRadius: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
@@ -123,6 +103,8 @@ export default function NehalLanding() {
           ))}
         </div>
       </div>
+
+      <InstallFooter />
     </div>
   )
 }

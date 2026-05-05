@@ -105,9 +105,9 @@ export default function JobFormClient({ institutionId, job }: Props) {
       end_date:        form.end_date || null,
     }
 
-    const res = job
+    const res = job?.id
       ? await fetch(`/api/jobs/${job.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-      : await fetch('/api/jobs',            { method: 'POST',  headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      : await fetch('/api/jobs',           { method: 'POST',  headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
 
     setSaving(false)
     if (!res.ok) {
@@ -133,7 +133,7 @@ export default function JobFormClient({ institutionId, job }: Props) {
             onBlur={e => Object.assign(e.currentTarget.style, FB)} />
         </Field>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="סוג משרה (ניתן לבחור מספר)">
             <div className="flex flex-wrap gap-2 pt-1">
               {JOB_TYPE_OPTIONS.map(jt => {
@@ -171,7 +171,7 @@ export default function JobFormClient({ institutionId, job }: Props) {
       <div className="rounded-[16px] border p-5 space-y-4" style={{ background: '#fff', borderColor: 'var(--line)', boxShadow: 'var(--shadow-sm)' }}>
         <p className="text-[11.5px] font-bold uppercase tracking-[.1em]" style={{ color: 'var(--ink-4)' }}>מיקום</p>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="מחוז">
             <NativeSelect value={form.district} onChange={v => set('district', v)}
               placeholder="בחרי" options={DISTRICTS} />
@@ -189,7 +189,7 @@ export default function JobFormClient({ institutionId, job }: Props) {
       <div className="rounded-[16px] border p-5 space-y-4" style={{ background: '#fff', borderColor: 'var(--line)', boxShadow: 'var(--shadow-sm)' }}>
         <p className="text-[11.5px] font-bold uppercase tracking-[.1em]" style={{ color: 'var(--ink-4)' }}>תאריכים</p>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="תחילת המשרה">
             <input type="date" value={form.start_date} onChange={e => set('start_date', e.target.value)}
               className={FIELD} style={FS} dir="ltr"

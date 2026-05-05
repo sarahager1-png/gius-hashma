@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import CandidatesClient from './candidates-client'
 import type { Candidate } from '@/lib/types'
@@ -9,7 +9,7 @@ export default async function CandidatesPage({ searchParams }: { searchParams: P
   if (!user) redirect('/login')
   const service = createServiceClient()
   const { data: profile } = await service.from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['מנהל רשת', 'אדמין מערכת'].includes(profile.role)) redirect('/dashboard')
+  if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)) redirect('/dashboard')
 
   const { q } = await searchParams
 

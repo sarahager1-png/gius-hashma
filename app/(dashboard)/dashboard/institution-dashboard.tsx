@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { Briefcase, Users, Clock, CheckCircle, ArrowLeft, Plus, Bell, MapPin, GraduationCap } from 'lucide-react'
-import ChabadQuote from '@/components/dashboard/chabad-quote'
 
 interface Job {
   id: string
@@ -84,7 +83,7 @@ export default function InstitutionDashboard({ fullName, institutionName, jobs, 
   ]
 
   return (
-    <div className="p-4 md:p-8" style={{ minHeight: 'calc(100vh - 64px)' }}>
+    <div className="p-4 md:p-8">
       {/* Header */}
       <div className="flex items-end justify-between gap-4 mb-6" style={{ flexWrap: 'wrap' }}>
         <div>
@@ -110,7 +109,6 @@ export default function InstitutionDashboard({ fullName, institutionName, jobs, 
       </div>
 
       {/* ציטוט יומי */}
-      <ChabadQuote />
 
       {/* KPI row */}
       <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>

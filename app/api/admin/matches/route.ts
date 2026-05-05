@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 interface ScoredMatch {
@@ -28,7 +28,7 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data: profile } = await createServiceClient().from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['מנהל רשת', 'אדמין מערכת'].includes(profile.role))
+  if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role))
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const service = createServiceClient()

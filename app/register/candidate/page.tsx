@@ -493,15 +493,14 @@ export default function RegisterCandidatePage() {
         </div>
         <h2 className="text-[24px] font-extrabold mb-2" style={{ color: '#166534' }}>הבקשה נשלחה!</h2>
         <p className="text-[14px] leading-relaxed" style={{ color: 'var(--ink-3)' }}>
-          בקשתך התקבלה בהצלחה.<br />ישלח לך אישור עם קוד גישה בהקדם.
+          בקשתך התקבלה בהצלחה.<br />
+          מנהלת הרשת תאשר את הצטרפותך בהקדם.<br />
+          תישלח אליך הודעה עם אישור.
         </p>
-        <a href="/login"
+        <a href="/"
           className="block mt-7 py-3 rounded-[12px] text-[14px] font-extrabold text-white transition-all"
           style={{ background: 'linear-gradient(135deg,var(--purple),var(--teal))', boxShadow: '0 4px 14px rgba(91,58,171,.3)' }}>
-          כניסה למערכת ←
-        </a>
-        <a href="/login" className="block mt-3 text-[13px] font-medium" style={{ color: 'var(--ink-4)' }}>
-          כבר קיבלת קוד? לחצי כאן
+          חזרה לדף הבית ←
         </a>
       </div>
     </div>
@@ -592,6 +591,25 @@ export default function RegisterCandidatePage() {
 
           {/* Step content */}
           <div className="px-6 py-5">
+            {step === 0 && (
+              <div className="rounded-[12px] p-3.5 mb-5"
+                style={{ background: 'var(--purple-050)', border: '1px solid var(--purple-200)' }}>
+                <p className="text-[12px] font-extrabold mb-2" style={{ color: 'var(--purple)' }}>איך זה עובד?</p>
+                <div className="flex flex-col gap-1.5">
+                  {[
+                    'מלאי את הטופס ושלחי בקשת הצטרפות',
+                    'מנהלת המערכת תאשר את בקשתך תוך 24 שעות',
+                    'תקבלי SMS — ותוכלי להיכנס עם Google',
+                  ].map((s, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="w-4 h-4 rounded-full text-[10px] font-black flex items-center justify-center shrink-0"
+                        style={{ background: 'var(--purple)', color: '#fff' }}>{i + 1}</span>
+                      <span className="text-[12px]" style={{ color: 'var(--ink-2)' }}>{s}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             {step === 0 && <StepPersonal form={form} set={set} />}
             {step === 1 && <StepEducation form={form} set={set}
               specs={specs} toggleSpec={toggleSpec}
@@ -655,8 +673,7 @@ export default function RegisterCandidatePage() {
         </div>
 
         <p className="text-center text-[12px] mb-8" style={{ color: 'var(--ink-4)' }}>
-          כבר קיבלת קוד?{' '}
-          <a href="/register/candidate/activate" style={{ color: 'var(--purple)', fontWeight: 700 }}>לחצי כאן</a>
+          <a href="/" style={{ color: 'var(--ink-4)', textDecoration: 'none' }}>← חזרה לדף הבית</a>
         </p>
       </div>
     </div>

@@ -1,5 +1,7 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { sendApplicationAccepted, sendApplicationRejected, sendApplicationViewedEmail } from '@/lib/email'
+import { sendSms } from '@/lib/sms'
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -10,7 +12,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data: profile } = await createServiceClient().from('profiles').select('role').eq('id', user.id).single()
-  const isAdmin = profile?.role && ['מנהל רשת', 'אדמין מערכת'].includes(profile.role)
+  const isAdmin = profile?.role && ['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)
 
   // verify caller is the institution owner or admin
   if (!isAdmin) {
@@ -53,6 +55,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         body: `${institutionName} עיינ${institutionName ? 'ה' : 'ו'} בהגשתך למשרת "${jobTitle}"`,
         related_id: id,
       })
+      void sendApplicationViewedEmail({ candidateProfileId, jobTitle, institutionName })
     }
   }
 
@@ -77,7 +80,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
           service.from('candidates').update({ availability_status: 'משובצת' }).eq('id', app.candidate_id),
         ])
 
-        // notify candidate
+        // notify candidate (in-app + email + SMS)
         if (candidateProfileId) {
           await service.from('notifications').insert({
             profile_id: candidateProfileId,
@@ -86,11 +89,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
             body: `אנו שמחים לבשר שהתקבלת למשרת "${jobTitle}" ב${institutionName}. נציג מהמוסד יצור איתך קשר בקרוב.`,
             related_id: id,
           })
+          void sendApplicationAccepted({ candidateProfileId, candidateName, jobTitle, institutionName })
+        }
+        const candidatePhone = (app.candidates as unknown as { profiles: { phone: string | null } } | null)?.profiles?.phone
+        if (candidatePhone) {
+          void sendSms(candidatePhone, `ברכות ${candidateName}! התקבלת למשרת "${jobTitle}" ב${institutionName}. נציג מהמוסד יצור איתך קשר בקרוב 🎉`)
         }
       } else if (status === 'נדחתה') {
-        // respectful rejection notification for candidate
+        // notify candidate (in-app + email + SMS)
         if (candidateProfileId) {
-          const candidatePhone = (app.candidates as unknown as { profiles: { phone: string | null } } | null)?.profiles?.phone ?? ''
           await service.from('notifications').insert({
             profile_id: candidateProfileId,
             type: 'application_rejected',
@@ -98,8 +105,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
             body: `תודה רבה על עניינך ב"${jobTitle}" ב${institutionName}. לאחר בחינת המועמדויות, לצערנו לא נמצאה התאמה הפעם. אנו מאחלים לך הצלחה רבה בהמשך הדרך!`,
             related_id: id,
           })
-          // Generate WhatsApp rejection link for admin to send manually
-          void candidatePhone // available if admin wants to send via WA
+          void sendApplicationRejected({ candidateProfileId, candidateName, jobTitle, institutionName })
+        }
+        const candidatePhone = (app.candidates as unknown as { profiles: { phone: string | null } } | null)?.profiles?.phone
+        if (candidatePhone) {
+          void sendSms(candidatePhone, `שלום ${candidateName}, תודה על עניינך במשרת "${jobTitle}" ב${institutionName}. לצערנו לא נמצאה התאמה הפעם. בהצלחה!`)
         }
       }
     }

@@ -10,7 +10,6 @@ import ActivityFeed from '@/components/dashboard/activity-feed'
 import Funnel from '@/components/dashboard/funnel'
 import ProcessTracker from '@/components/dashboard/process-tracker'
 import AdminAlerts from '@/components/dashboard/admin-alerts'
-import ChabadQuote from '@/components/dashboard/chabad-quote'
 import { Download, Plus, ChevronDown } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
@@ -23,7 +22,7 @@ const ACADEMIC_YEARS = [
 ]
 
 interface KpiData {
-  id: string; label: string; value: number; unit?: string
+  id: string; label: string; value: number; unit?: string; ring?: number
   delta: { value: number; dir: 'up' | 'down' | 'flat'; unit?: string; label: string }
   variant: 'purple' | 'soft' | 'teal' | 'amber'
   icon: 'users' | 'briefcase' | 'heart' | 'clock'
@@ -35,7 +34,11 @@ interface Props {
 
 export default function DashboardClient({ fullName }: Props) {
   const router = useRouter()
-  const [yearIdx, setYearIdx] = useState(ACADEMIC_YEARS.length - 1)
+  const [yearIdx, setYearIdx] = useState(() => {
+    const now = new Date()
+    const idx = ACADEMIC_YEARS.findIndex(y => now >= new Date(y.since) && now <= new Date(y.until))
+    return idx >= 0 ? idx : ACADEMIC_YEARS.length - 1
+  })
   const year = ACADEMIC_YEARS[yearIdx]
 
   const { data: kpis = [] } = useQuery<KpiData[]>({
@@ -46,19 +49,19 @@ export default function DashboardClient({ fullName }: Props) {
   const firstName = fullName?.split(' ')[0] ?? ''
 
   return (
-    <div className="p-4 md:p-8" style={{ minHeight: 'calc(100vh - 64px)' }}>
+    <div className="p-4 md:p-8">
       {/* Page header */}
       <div className="flex items-end justify-between gap-4 mb-6 flex-wrap">
         <div>
           <p className="text-[11.5px] font-bold uppercase tracking-[.1em] mb-1.5 hidden sm:block" style={{ color: 'var(--purple)' }}>
             לוח בקרה
           </p>
-          <h1 className="text-[28px] font-black leading-tight" style={{ color: 'var(--ink)', letterSpacing: '-.03em' }}>
+          <h1 className="text-[26px] font-extrabold leading-tight" style={{ color: 'var(--ink)', letterSpacing: '-.025em' }}>
             שלום, {firstName}
           </h1>
           <span className="brand-line hidden sm:block" />
           <div className="hidden sm:flex items-center gap-2 mt-2">
-            <p className="text-[13px] font-semibold" style={{ color: 'var(--ink-3)' }}>
+            <p className="text-[13px] font-normal" style={{ color: 'var(--ink-3)' }}>
               מחברים בין אנשי חינוך למקומות של שליחות
             </p>
             <span style={{ color: 'var(--line)' }}>·</span>
@@ -107,8 +110,24 @@ export default function DashboardClient({ fullName }: Props) {
       {/* Admin alerts */}
       <AdminAlerts />
 
-      {/* ציטוט יומי */}
-      <ChabadQuote />
+      {/* Summary strip */}
+      {kpis.length > 0 && (
+        <div className="flex flex-wrap items-center gap-0 mb-5 rounded-[12px] border overflow-hidden"
+          style={{ background: 'linear-gradient(90deg, #4B2E83 0%, #2A6B77 50%, #00A7B5 100%)', borderColor: 'transparent' }}>
+          {kpis.map((kpi, i) => (
+            <div key={kpi.id}
+              className="flex-1 min-w-[120px] flex flex-col items-center py-3 px-4"
+              style={{ borderInlineEnd: i < kpis.length - 1 ? '1px solid rgba(255,255,255,.15)' : 'none' }}>
+              <span className="text-[20px] font-bold leading-none text-white" style={{ letterSpacing: '-.02em' }}>
+                {kpi.value.toLocaleString('he-IL')}{kpi.unit ? <span className="text-[13px] font-semibold ms-1 opacity-80">{kpi.unit}</span> : null}
+              </span>
+              <span className="text-[10.5px] font-medium uppercase tracking-[.06em] mt-1" style={{ color: 'rgba(255,255,255,.65)' }}>
+                {kpi.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* KPI row */}
       <section

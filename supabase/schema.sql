@@ -1,11 +1,11 @@
--- ============================================================
+﻿-- ============================================================
 -- גיוס והשמה — Database Schema
 -- ============================================================
 
 -- profiles (extends auth.users)
 CREATE TABLE profiles (
   id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  role text NOT NULL CHECK (role IN ('מועמדת', 'מוסד', 'מנהל רשת', 'אדמין מערכת')),
+  role text NOT NULL CHECK (role IN ('מועמדת', 'מוסד', 'מנהלת מערכת', 'אדמין מערכת')),
   full_name text,
   phone text,
   created_at timestamptz DEFAULT now()
@@ -19,7 +19,11 @@ CREATE POLICY "users can read own profile"
 
 CREATE POLICY "users can update own profile"
   ON profiles FOR UPDATE
-  USING (auth.uid() = id);
+  USING (auth.uid() = id)
+  WITH CHECK (
+    auth.uid() = id
+    AND role = (SELECT p.role FROM profiles p WHERE p.id = auth.uid())
+  );
 
 CREATE POLICY "admins can read all profiles"
   ON profiles FOR SELECT
@@ -27,7 +31,7 @@ CREATE POLICY "admins can read all profiles"
     EXISTS (
       SELECT 1 FROM profiles p
       WHERE p.id = auth.uid()
-        AND p.role IN ('מנהל רשת', 'אדמין מערכת')
+        AND p.role IN ('מנהלת מערכת', 'אדמין מערכת')
     )
   );
 
@@ -71,7 +75,7 @@ CREATE POLICY "institutions can read candidates"
     EXISTS (
       SELECT 1 FROM profiles p
       WHERE p.id = auth.uid()
-        AND p.role IN ('מוסד', 'מנהל רשת', 'אדמין מערכת')
+        AND p.role IN ('מוסד', 'מנהלת מערכת', 'אדמין מערכת')
     )
   );
 
@@ -82,7 +86,7 @@ CREATE POLICY "admins can update candidates"
     EXISTS (
       SELECT 1 FROM profiles p
       WHERE p.id = auth.uid()
-        AND p.role IN ('מנהל רשת', 'אדמין מערכת')
+        AND p.role IN ('מנהלת מערכת', 'אדמין מערכת')
     )
   );
 
@@ -130,7 +134,7 @@ CREATE POLICY "admins can manage all institutions"
     EXISTS (
       SELECT 1 FROM profiles p
       WHERE p.id = auth.uid()
-        AND p.role IN ('מנהל רשת', 'אדמין מערכת')
+        AND p.role IN ('מנהלת מערכת', 'אדמין מערכת')
     )
   );
 
@@ -189,7 +193,7 @@ CREATE POLICY "admins can read all jobs"
     EXISTS (
       SELECT 1 FROM profiles p
       WHERE p.id = auth.uid()
-        AND p.role IN ('מנהל רשת', 'אדמין מערכת')
+        AND p.role IN ('מנהלת מערכת', 'אדמין מערכת')
     )
   );
 
@@ -242,7 +246,7 @@ CREATE POLICY "admins can read all applications"
     EXISTS (
       SELECT 1 FROM profiles p
       WHERE p.id = auth.uid()
-        AND p.role IN ('מנהל רשת', 'אדמין מערכת')
+        AND p.role IN ('מנהלת מערכת', 'אדמין מערכת')
     )
   );
 
@@ -278,8 +282,10 @@ ALTER TABLE candidates
 -- ============================================================
 ALTER TABLE jobs
   ADD COLUMN IF NOT EXISTS start_date date,
+  ADD COLUMN IF NOT EXISTS end_date date,
   ADD COLUMN IF NOT EXISTS placement_type text,
-  ADD COLUMN IF NOT EXISTS district text;
+  ADD COLUMN IF NOT EXISTS district text,
+  ADD COLUMN IF NOT EXISTS job_types text[] DEFAULT '{}';
 
 -- ============================================================
 -- applications — extended columns
@@ -332,7 +338,7 @@ CREATE POLICY IF NOT EXISTS "admins can manage candidate requests"
     EXISTS (
       SELECT 1 FROM profiles p
       WHERE p.id = auth.uid()
-        AND p.role IN ('מנהל רשת', 'אדמין מערכת')
+        AND p.role IN ('מנהלת מערכת', 'אדמין מערכת')
     )
   );
 
@@ -361,7 +367,7 @@ CREATE POLICY IF NOT EXISTS "admins can manage access codes"
     EXISTS (
       SELECT 1 FROM profiles p
       WHERE p.id = auth.uid()
-        AND p.role IN ('מנהל רשת', 'אדמין מערכת')
+        AND p.role IN ('מנהלת מערכת', 'אדמין מערכת')
     )
   );
 
@@ -435,7 +441,7 @@ CREATE POLICY IF NOT EXISTS "admins can manage all invitations"
     EXISTS (
       SELECT 1 FROM profiles p
       WHERE p.id = auth.uid()
-        AND p.role IN ('מנהל רשת', 'אדמין מערכת')
+        AND p.role IN ('מנהלת מערכת', 'אדמין מערכת')
     )
   );
 
@@ -546,7 +552,7 @@ CREATE POLICY IF NOT EXISTS "institution can read and reply to own inquiries"
 CREATE POLICY IF NOT EXISTS "admins can manage all inquiries"
   ON candidate_inquiries FOR ALL
   USING (
-    EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.role IN ('מנהל רשת', 'אדמין מערכת'))
+    EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.role IN ('מנהלת מערכת', 'אדמין מערכת'))
   );
 
 -- ============================================================

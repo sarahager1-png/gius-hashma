@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -9,7 +9,7 @@ export default function RegisterAdminPage() {
   const router = useRouter()
   const supabase = createClient()
 
-  const [form, setForm] = useState({ email: '', password: '', full_name: '', phone: '' })
+  const [form, setForm] = useState({ email: '', password: '', full_name: '', phone: '', admin_code: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -36,7 +36,7 @@ export default function RegisterAdminPage() {
     const res = await fetch('/api/profile', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role: 'מנהל רשת', full_name: form.full_name, phone: form.phone }),
+      body: JSON.stringify({ role: 'מנהלת מערכת', full_name: form.full_name, phone: form.phone, admin_code: form.admin_code }),
     })
 
     if (!res.ok) {
@@ -83,7 +83,8 @@ export default function RegisterAdminPage() {
                 { key: 'full_name', label: 'שם מלא', type: 'text', dir: 'rtl' as const },
                 { key: 'phone',    label: 'טלפון',  type: 'tel',  dir: 'ltr' as const },
                 { key: 'email',    label: 'אימייל', type: 'email', dir: 'ltr' as const },
-                { key: 'password', label: 'סיסמה', type: 'password', dir: 'ltr' as const, placeholder: 'לפחות 6 תווים' },
+                { key: 'password',   label: 'סיסמה',           type: 'password', dir: 'ltr' as const, placeholder: 'לפחות 6 תווים' },
+                { key: 'admin_code', label: 'קוד מנהל מערכת', type: 'password', dir: 'ltr' as const, placeholder: 'פנה למנהל המערכת לקבלת הקוד' },
               ].map(f => (
                 <div key={f.key}>
                   <label className="block text-[12.5px] font-bold mb-1.5" style={{ color: 'var(--ink-2)' }}>{f.label}</label>

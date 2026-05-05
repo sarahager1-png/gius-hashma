@@ -1,5 +1,5 @@
-const CACHE = 'giuus-v1'
-const STATIC = ['/manifest.json', '/icon-192.png', '/icon-512.png']
+const CACHE = 'giuus-v3'
+const STATIC = ['/manifest.json', '/icon-192.png', '/icon-512.png', '/icon-maskable-192.png', '/icon-maskable-512.png']
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)))

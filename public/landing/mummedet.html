@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GIUUS — למועמדות | מצאי את השליחות שלך ברשת חב"ד</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --purple:       #4B2E83;
+      --purple-600:   #3D2570;
+      --purple-700:   #2E1B5A;
+      --purple-800:   #1F1240;
+      --purple-050:   #EDE8F7;
+      --purple-100:   #D9D0F0;
+      --purple-200:   #B3A0E0;
+      --teal:         #00A7B5;
+      --teal-600:     #008F9C;
+      --teal-050:     #E0F7F9;
+      --teal-100:     #99E4EC;
+      --ink:          #0F0B23;
+      --ink-2:        #2D2848;
+      --ink-3:        #6B6688;
+      --ink-4:        #A09CB8;
+      --bg:           #F8F7FB;
+      --bg-2:         #F0EDF8;
+      --line:         #E2DCF0;
+      --brand-gradient: linear-gradient(90deg, #4B2E83 0%, #00A7B5 100%);
+      --shadow-card:  0 2px 12px rgba(75,46,131,.10), 0 1px 3px rgba(75,46,131,.07);
+      --shadow-xl:    0 24px 64px rgba(15,11,35,.18), 0 6px 20px rgba(15,11,35,.08);
+      --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+    body {
+      font-family: 'Heebo', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+      direction: rtl;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    button { font-family: inherit; cursor: pointer; border: none; }
+
+    /* ── Nav ── */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(226,220,240,.6);
+      height: 68px;
+      display: flex; align-items: center;
+    }
+    .nav-inner {
+      max-width: 1160px; margin: 0 auto; padding: 0 24px;
+      width: 100%;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .nav-logo img { height: 44px; width: auto; flex-shrink: 0; }
+    .nav-brand { display: flex; flex-direction: column; gap: 1px; border-right: 2px solid var(--line); padding-right: 14px; }
+    .nav-brand-name { font-size: 20px; font-weight: 900; letter-spacing: -0.02em; color: var(--purple); line-height: 1.15; }
+    .nav-brand-sub { font-size: 11px; font-weight: 600; color: var(--ink-4); letter-spacing: 0.01em; }
+    .nav-pages {
+      display: flex; align-items: center; gap: 4px;
+      background: var(--bg-2); border-radius: 12px; padding: 4px;
+      border: 1px solid var(--line);
+    }
+    .nav-page-btn {
+      padding: 7px 16px; border-radius: 9px;
+      font-size: 14px; font-weight: 600; color: var(--ink-3);
+      background: transparent; transition: all 0.2s var(--ease-out);
+      cursor: pointer; white-space: nowrap;
+    }
+    .nav-page-btn:hover { color: var(--purple); background: white; }
+    .nav-page-btn.active {
+      background: white; color: var(--purple);
+      box-shadow: 0 2px 8px rgba(75,46,131,.15); font-weight: 700;
+    }
+    .nav-cta {
+      padding: 10px 22px; border-radius: 10px;
+      font-size: 14px; font-weight: 800;
+      background: linear-gradient(135deg, var(--teal) 0%, var(--teal-600) 100%);
+      color: white;
+      box-shadow: 0 4px 16px rgba(0,167,181,.30);
+      transition: all 0.2s var(--ease-out); white-space: nowrap;
+    }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,167,181,.40); }
+    .nav-mobile-cta { display: none; }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(160deg, #0A2540 0%, #1A4060 35%, var(--teal-600) 75%, #007A60 100%);
+      padding: 96px 24px 80px;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(75,46,131,.25) 0%, transparent 60%);
+    }
+    .hero::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 80px;
+      background: linear-gradient(to bottom, transparent, var(--bg));
+    }
+    .hero-inner { max-width: 760px; margin: 0 auto; position: relative; z-index: 1; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+      border-radius: 100px; padding: 6px 16px; margin-bottom: 28px;
+      font-size: 13px; font-weight: 700; color: rgba(255,255,255,.9);
+      letter-spacing: 0.04em;
+    }
+    .hero-eyebrow-dot { width: 7px; height: 7px; border-radius: 50%; background: #99E4EC; flex-shrink: 0; }
+    .hero-title {
+      font-size: clamp(34px, 6vw, 60px);
+      font-weight: 900; letter-spacing: -0.04em; line-height: 1.08;
+      color: white; margin-bottom: 20px;
+    }
+    .hero-title-gradient {
+      background: linear-gradient(90deg, #F8E9FF, var(--purple-200));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      font-size: clamp(16px, 2.5vw, 20px);
+      color: rgba(255,255,255,.72); max-width: 560px;
+      margin: 0 auto 36px; font-weight: 400; line-height: 1.6;
+    }
+    .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-hero-primary {
+      padding: 14px 32px; border-radius: 12px;
+      font-size: 16px; font-weight: 800;
+      background: white; color: var(--purple);
+      box-shadow: 0 4px 20px rgba(0,0,0,.2);
+      transition: all 0.2s var(--ease-out);
+    }
+    .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.28); }
+    .btn-hero-ghost {
+      padding: 14px 32px; border-radius: 12px;
+      font-size: 16px; font-weight: 700;
+      background: rgba(255,255,255,.12); color: white;
+      border: 1.5px solid rgba(255,255,255,.25);
+      transition: all 0.2s var(--ease-out);
+    }
+    .btn-hero-ghost:hover { background: rgba(255,255,255,.2); }
+    .hero-trust {
+      display: flex; align-items: center; justify-content: center; gap: 24px;
+      margin-top: 48px; flex-wrap: wrap;
+    }
+    .hero-trust-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 14px; color: rgba(255,255,255,.65); font-weight: 500;
+    }
+    .hero-trust-icon { font-size: 18px; }
+
+    /* ── Sections ── */
+    .section { padding: 80px 24px; }
+    .container { max-width: 1160px; margin: 0 auto; }
+    .section-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--teal-050); border: 1px solid var(--teal-100);
+      border-radius: 100px; padding: 5px 14px; margin-bottom: 16px;
+      font-size: 12px; font-weight: 700; color: var(--teal-600);
+      letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    .section-eyebrow-purple {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--purple-050); border: 1px solid var(--purple-100);
+      border-radius: 100px; padding: 5px 14px; margin-bottom: 16px;
+      font-size: 12px; font-weight: 700; color: var(--purple);
+      letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    .section-title {
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 800; letter-spacing: -0.03em; line-height: 1.2;
+      color: var(--ink); margin-bottom: 12px;
+    }
+    .section-sub {
+      font-size: 17px; color: var(--ink-3); max-width: 560px;
+      line-height: 1.65; font-weight: 400;
+    }
+    .brand-bar {
+      display: block; height: 4px; width: 48px;
+      background: var(--brand-gradient); border-radius: 99px; margin: 12px 0 28px;
+    }
+
+    /* ── Pain ── */
+    .pain-section { background: white; }
+    .pain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 48px; }
+    .pain-card {
+      background: linear-gradient(145deg, #F8F8FF 0%, #FCFCFF 100%);
+      border: 1px solid #E8E0F5; border-radius: 18px; padding: 28px;
+      transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+    }
+    .pain-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(75,46,131,.1); }
+    .pain-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      background: var(--purple-050); display: flex; align-items: center;
+      justify-content: center; font-size: 22px; margin-bottom: 16px;
+    }
+    .pain-title { font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+    .pain-desc { font-size: 14px; color: var(--ink-3); line-height: 1.65; }
+
+    /* ── Features ── */
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 48px; }
+    .feature-card {
+      background: linear-gradient(145deg, #F0FDF9 0%, #F8FFFD 60%);
+      border: 1px solid #BBEDE9; border-radius: 18px; padding: 28px;
+      position: relative; overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,167,181,.08);
+      transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+    }
+    .feature-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--teal), var(--purple)); border-radius: 18px 18px 0 0;
+    }
+    .feature-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,167,181,.18); }
+    .feature-icon {
+      width: 52px; height: 52px; border-radius: 15px;
+      background: var(--teal-050); display: flex; align-items: center;
+      justify-content: center; font-size: 24px; margin-bottom: 18px;
+      box-shadow: 0 4px 12px rgba(0,167,181,.15);
+    }
+    .feature-title { font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+    .feature-desc { font-size: 14px; color: var(--ink-3); line-height: 1.65; }
+
+    /* ── Steps ── */
+    .steps-section {
+      background: linear-gradient(160deg, #0A2540 0%, #1A3A55 50%, var(--teal-600) 100%);
+    }
+    .steps-section .section-title { color: white; }
+    .steps-section .section-sub { color: rgba(255,255,255,.65); }
+    .steps-section .section-eyebrow { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.2); color: rgba(255,255,255,.85); }
+    .steps-section .brand-bar { background: linear-gradient(90deg, rgba(255,255,255,.4), #99E4EC); }
+    .steps-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2px; margin-top: 48px;
+      background: rgba(255,255,255,.08); border-radius: 20px;
+      overflow: hidden; border: 1px solid rgba(255,255,255,.1);
+    }
+    .step-card {
+      padding: 36px 28px; position: relative;
+      transition: background 0.2s;
+    }
+    .step-card:hover { background: rgba(255,255,255,.06); }
+    .step-number {
+      font-size: 48px; font-weight: 900; letter-spacing: -0.05em;
+      background: linear-gradient(135deg, rgba(255,255,255,.15), rgba(153,228,236,.4));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      line-height: 1; margin-bottom: 12px;
+    }
+    .step-title { font-size: 18px; font-weight: 700; color: white; margin-bottom: 8px; }
+    .step-desc { font-size: 14px; color: rgba(255,255,255,.6); line-height: 1.6; }
+
+    /* ── Profile mockup ── */
+    .preview-section { background: var(--bg-2); }
+    .mockup-wrap {
+      background: white; border-radius: 20px;
+      border: 1px solid var(--line); box-shadow: var(--shadow-xl);
+      overflow: hidden; margin-top: 48px;
+    }
+    .mockup-topbar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 14px 20px;
+      background: linear-gradient(90deg, #0A2540, var(--teal-600));
+    }
+    .mockup-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .mockup-topbar-title { margin-right: 12px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,.75); }
+    .mockup-body { padding: 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .mockup-profile-card {
+      background: linear-gradient(145deg, var(--purple-050) 0%, var(--bg) 100%);
+      border: 1px solid var(--purple-100); border-radius: 16px; padding: 24px;
+      position: relative; overflow: hidden;
+    }
+    .mockup-profile-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--brand-gradient);
+    }
+    .mockup-avatar-lg {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--teal));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; font-weight: 900; color: white; margin-bottom: 14px;
+    }
+    .mockup-profile-name { font-size: 18px; font-weight: 800; color: var(--ink); margin-bottom: 4px; }
+    .mockup-profile-role { font-size: 13px; color: var(--ink-3); margin-bottom: 16px; }
+    .mockup-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .mockup-tag {
+      padding: 4px 10px; border-radius: 100px;
+      font-size: 11px; font-weight: 700; border: 1.5px solid;
+    }
+    .tag-purple { background: var(--purple-050); color: var(--purple); border-color: var(--purple-100); }
+    .tag-teal { background: var(--teal-050); color: var(--teal-600); border-color: var(--teal-100); }
+    .tag-green { background: #DCFCE7; color: #15803D; border-color: #86EFAC; }
+    .mockup-profile-row {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; color: var(--ink-3); margin-bottom: 6px;
+    }
+    .mockup-profile-row-icon { font-size: 14px; }
+    .mockup-jobs-col { display: flex; flex-direction: column; gap: 12px; }
+    .mockup-section-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--ink-4); margin-bottom: 4px;
+    }
+    .mockup-job-card {
+      background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 16px;
+      transition: border-color 0.2s;
+    }
+    .mockup-job-card:hover { border-color: var(--teal-100); }
+    .mockup-job-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+    .mockup-job-title { font-size: 14px; font-weight: 700; color: var(--ink); }
+    .mockup-job-school { font-size: 12px; color: var(--ink-3); margin-bottom: 8px; }
+    .mockup-job-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+    .mockup-badge {
+      padding: 3px 10px; border-radius: 100px;
+      font-size: 11px; font-weight: 700;
+    }
+    .badge-match { background: #DCFCE7; color: #15803D; }
+    .badge-new { background: var(--teal-050); color: var(--teal-600); }
+    .badge-hours { background: var(--bg-2); color: var(--ink-3); border: 1px solid var(--line); }
+
+    /* ── Quote section ── */
+    .quote-section {
+      background: linear-gradient(135deg, var(--purple-050) 0%, var(--teal-050) 100%);
+      text-align: center;
+    }
+    .quote-mark { font-size: 72px; line-height: 1; color: var(--purple-200); font-family: Georgia, serif; }
+    .quote-text {
+      font-size: clamp(20px, 3.5vw, 32px); font-weight: 700;
+      letter-spacing: -0.025em; line-height: 1.4;
+      color: var(--ink); max-width: 700px; margin: 8px auto 24px;
+    }
+    .quote-source { font-size: 14px; color: var(--ink-4); font-weight: 600; letter-spacing: 0.02em; }
+
+    /* ── Testimonials ── */
+    .testimonial-section { background: white; }
+    .testimonial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 48px; }
+    .testimonial-card {
+      background: var(--bg); border: 1px solid var(--line);
+      border-radius: 18px; padding: 28px; box-shadow: var(--shadow-card);
+      transition: transform 0.2s var(--ease-out);
+    }
+    .testimonial-card:hover { transform: translateY(-3px); }
+    .testimonial-quote { font-size: 36px; color: var(--teal-100); margin-bottom: 8px; }
+    .testimonial-text { font-size: 15px; color: var(--ink-2); line-height: 1.7; margin-bottom: 20px; }
+    .testimonial-author { display: flex; align-items: center; gap: 12px; }
+    .testimonial-avatar {
+      width: 42px; height: 42px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700; color: white; flex-shrink: 0;
+    }
+    .testimonial-name { font-size: 14px; font-weight: 700; color: var(--ink); }
+    .testimonial-role { font-size: 12px; color: var(--ink-4); margin-top: 2px; }
+
+    /* ── CTA ── */
+    .cta-section {
+      background: linear-gradient(135deg, #0A2540 0%, var(--teal-600) 60%, var(--purple-600) 100%);
+      text-align: center; padding: 96px 24px;
+      position: relative; overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 70% 70% at 50% 50%, rgba(75,46,131,.3), transparent);
+    }
+    .cta-inner { max-width: 640px; margin: 0 auto; position: relative; z-index: 1; }
+    .cta-eyebrow {
+      display: inline-block; background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.25); border-radius: 100px;
+      padding: 5px 14px; font-size: 12px; font-weight: 700;
+      color: rgba(255,255,255,.85); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 20px;
+    }
+    .cta-title { font-size: clamp(28px, 5vw, 44px); font-weight: 900; letter-spacing: -0.04em; color: white; line-height: 1.1; margin-bottom: 16px; }
+    .cta-sub { font-size: 17px; color: rgba(255,255,255,.65); margin-bottom: 36px; font-weight: 400; line-height: 1.6; }
+    .cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    /* ── Footer ── */
+    .footer { background: var(--purple-800); padding: 48px 24px 32px; border-top: 1px solid rgba(255,255,255,.06); }
+    .footer-inner { max-width: 1160px; margin: 0 auto; }
+    .footer-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; margin-bottom: 32px; }
+    .footer-brand { display: flex; align-items: center; gap: 12px; }
+    .footer-brand img { height: 36px; width: auto; }
+    .footer-brand-name { font-size: 20px; font-weight: 900; color: white; letter-spacing: -0.03em; }
+    .footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
+    .footer-link { font-size: 14px; color: rgba(255,255,255,.5); transition: color 0.2s; font-weight: 500; }
+    .footer-link:hover { color: white; }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,.06); padding-top: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .footer-copy { font-size: 13px; color: rgba(255,255,255,.35); }
+    .footer-tagline { font-size: 13px; color: rgba(255,255,255,.35); }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .nav-pages { display: none; }
+      .nav-cta { display: none; }
+      .nav-mobile-cta {
+        display: flex; padding: 9px 18px; border-radius: 10px;
+        font-size: 14px; font-weight: 800;
+        background: linear-gradient(135deg, var(--teal) 0%, var(--teal-600) 100%);
+        color: white;
+      }
+      .hero { padding: 64px 20px 56px; }
+      .section { padding: 56px 20px; }
+      .btn-hero-primary, .btn-hero-ghost { width: 100%; text-align: center; justify-content: center; }
+      .hero-btns { flex-direction: column; align-items: center; }
+      .cta-btns { flex-direction: column; align-items: center; }
+      .cta-btns a, .cta-btns button { width: 100%; text-align: center; justify-content: center; }
+      .mockup-body { grid-template-columns: 1fr; }
+      .footer-top { flex-direction: column; }
+      .steps-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .hero-title { font-size: 30px; }
+      .section-title { font-size: 26px; }
+      .pain-grid, .features-grid { grid-template-columns: 1fr; }
+      .testimonial-grid { grid-template-columns: 1fr; }
+      .quote-text { font-size: 20px; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.55s cubic-bezier(0.16,1,0.3,1) both; }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <img src="/logo-chabad.png" alt="רשת אהלי יוסף יצחק" />
+      <div class="nav-brand">
+        <span class="nav-brand-name">עַדְכָּנִי</span>
+        <span class="nav-brand-sub">מערכת גיוס והשמה</span>
+      </div>
+    </a>
+    <div class="nav-pages">
+      <button class="nav-page-btn" onclick="location.href='mosad.html'">🏫 בית ספר</button>
+      <button class="nav-page-btn active" onclick="location.href='mummedet.html'">👩‍🏫 מועמדת</button>
+      <button class="nav-page-btn" onclick="location.href='nehal.html'">🔷 מנהל רשת</button>
+    </div>
+    <a href="/register/candidate" class="nav-cta">צרי פרופיל</a>
+    <a href="/register/candidate" class="nav-mobile-cta">הצטרפות</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow fade-up">
+      <span class="hero-eyebrow-dot"></span>
+      ממתינים לך תפקידים שמשנים חיים
+    </div>
+    <h1 class="hero-title fade-up delay-1">
+      את כאן! –<br/>
+      <span class="hero-title-gradient">עַדְכָּנִי</span> ומצאי<br/>את השליחות שלך
+    </h1>
+    <p class="hero-sub fade-up delay-2">
+      התחברי למוסדות חינוך ברשת חב"ד ומצאי את המקום שמתאים לך באמת —
+      לפי הניסיון, ההתמחות והערכים שלך.
+    </p>
+    <div class="hero-btns fade-up delay-3">
+      <a href="/register/candidate" class="btn-hero-primary">צרי פרופיל</a>
+      <a href="/login" class="btn-hero-ghost">כניסה לחשבון</a>
+    </div>
+    <div class="hero-trust fade-up">
+      <div class="hero-trust-item"><span class="hero-trust-icon">✓</span> גישה ייעודית לרשת חב"ד</div>
+      <div class="hero-trust-item"><span class="hero-trust-icon">✓</span> תהליך פשוט ומהיר</div>
+      <div class="hero-trust-item"><span class="hero-trust-icon">✓</span> התאמות אישיות בלבד</div>
+    </div>
+  </div>
+</section>
+
+<!-- PAIN -->
+<section class="section pain-section">
+  <div class="container">
+    <div>
+      <div class="section-eyebrow">את לא לבד</div>
+      <h2 class="section-title">מחפשת תפקיד? אנחנו מבינות</h2>
+      <span class="brand-bar"></span>
+      <p class="section-sub">מצאנו שלוש בעיות חוזרות אצל מורות שמחפשות תפקיד חינוכי — ופתרנו אותן.</p>
+    </div>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="pain-icon">🔍</div>
+        <h3 class="pain-title">קשה למצוא התאמה אמיתית</h3>
+        <p class="pain-desc">לוחות הדרושים מוצפים בהצעות שלא מתאימות. קשה למצוא תפקיד שמתחבר לניסיון ולאופי שלך.</p>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">❓</div>
+        <h3 class="pain-title">לא יודעים לאן לפנות</h3>
+        <p class="pain-desc">אין ריכוז של הזדמנויות ברשת חב"ד. פונות לכל מוסד בנפרד ומאבדות זמן יקר.</p>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">🌀</div>
+        <h3 class="pain-title">תהליך מסורבל ומתיש</h3>
+        <p class="pain-desc">שליחת קורות חיים בוואטסאפ, חיפוש מספרי טלפון, המתנה ללא מענה. זה לא צריך להיות ככה.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" style="background: var(--bg);">
+  <div class="container">
+    <div>
+      <div class="section-eyebrow-purple">הפתרון</div>
+      <h2 class="section-title">הפרופיל שלך — הכרטיס שמדבר בשמך</h2>
+      <span class="brand-bar"></span>
+      <p class="section-sub">במקום לשלוח קורות חיים לכל כיוון — בני פרופיל חכם שמגיע למוסדות הנכונים.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <h3 class="feature-title">התאמות אישיות</h3>
+        <p class="feature-desc">המערכת מציגה לך רק משרות שמתאימות לניסיון, להתמחות ולאזור הגיאוגרפי שלך.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌐</div>
+        <h3 class="feature-title">חיבור לכל הרשת</h3>
+        <p class="feature-desc">פרופיל אחד — גישה לכל 120+ מוסדות ברשת חב"ד. לא צריך לפנות לכל מוסד בנפרד.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3 class="feature-title">תהליך מהיר ופשוט</h3>
+        <p class="feature-desc">הגשת מועמדות בלחיצה אחת. קבלת עדכונים בזמן אמת. ידועה תמיד מה הסטטוס.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3 class="feature-title">פרטיות ושליטה</h3>
+        <p class="feature-desc">את שולטת במה מוצגים. מחליטה לאיזה מוסד הפרופיל נחשף. אין הפתעות.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section steps-section">
+  <div class="container">
+    <div>
+      <div class="section-eyebrow">שלב אחרי שלב</div>
+      <h2 class="section-title">מההרשמה עד התפקיד</h2>
+      <span class="brand-bar"></span>
+      <p class="section-sub">תהליך פשוט שמוביל לתוצאות אמיתיות.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-number">01</div>
+        <h3 class="step-title">נרשמות</h3>
+        <p class="step-desc">יצירת חשבון חינם בפחות מדקה. רק שם, מייל וסיסמה.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">02</div>
+        <h3 class="step-title">בונות פרופיל</h3>
+        <p class="step-desc">ניסיון, השכלה, התמחויות, אזור מגורים וזמינות. הכל בממשק פשוט ונעים.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">03</div>
+        <h3 class="step-title">מקבלות התאמות</h3>
+        <p class="step-desc">המערכת מציגה משרות שמתאימות בדיוק לפרופיל שלך — ללא חיפוש ידני.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">04</div>
+        <h3 class="step-title">יוצרות קשר</h3>
+        <p class="step-desc">מגישות מועמדות בלחיצה. המוסד מקבל את הפרופיל שלך ויוצר קשר.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROFILE PREVIEW MOCKUP -->
+<section class="section preview-section">
+  <div class="container">
+    <div>
+      <div class="section-eyebrow-purple">תצוגה מקדימה</div>
+      <h2 class="section-title">הפרופיל שלך נראה ככה</h2>
+      <span class="brand-bar"></span>
+      <p class="section-sub">ברור, מקצועי ומרשים — בדיוק כמו שמוסדות רוצים לראות.</p>
+    </div>
+    <div class="mockup-wrap">
+      <div class="mockup-topbar">
+        <div class="mockup-dot" style="background:#FF5F56"></div>
+        <div class="mockup-dot" style="background:#FEBC2E"></div>
+        <div class="mockup-dot" style="background:#28C840"></div>
+        <span class="mockup-topbar-title">GIUUS — הפרופיל שלי | שרה כהן</span>
+      </div>
+      <div class="mockup-body">
+        <div class="mockup-profile-card">
+          <div class="mockup-avatar-lg">ש</div>
+          <div class="mockup-profile-name">שרה כהן</div>
+          <div class="mockup-profile-role">מורה לתנ"ך ומחנכת כיתה | 7 שנות ניסיון</div>
+          <div class="mockup-tags">
+            <span class="mockup-tag tag-purple">תנ"ך</span>
+            <span class="mockup-tag tag-teal">חינוך</span>
+            <span class="mockup-tag tag-green">זמינה מיידית</span>
+            <span class="mockup-tag tag-purple">ירושלים</span>
+          </div>
+          <div class="mockup-profile-row">
+            <span class="mockup-profile-row-icon">🎓</span>
+            <span>תואר ראשון בחינוך — אוניברסיטת בר אילן</span>
+          </div>
+          <div class="mockup-profile-row">
+            <span class="mockup-profile-row-icon">📍</span>
+            <span>ירושלים | נכונה לנסיעה עד 30 דק'</span>
+          </div>
+          <div class="mockup-profile-row">
+            <span class="mockup-profile-row-icon">📅</span>
+            <span>זמינה לתחילת עבודה מיידית</span>
+          </div>
+          <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line);">
+            <div class="mockup-section-title">ניקוד התאמה</div>
+            <div style="height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; margin-top: 8px;">
+              <div style="height: 100%; width: 87%; background: var(--brand-gradient); border-radius: 99px;"></div>
+            </div>
+            <div style="font-size: 12px; color: var(--ink-3); margin-top: 6px; font-weight: 600;">87% התאמה ממוצעת למשרות ברשת</div>
+          </div>
+        </div>
+        <div class="mockup-jobs-col">
+          <div class="mockup-section-title">משרות שמתאימות לי</div>
+          <div class="mockup-job-card">
+            <div class="mockup-job-header">
+              <div>
+                <div class="mockup-job-title">מורה לתנ"ך — כיתות ז'-ט'</div>
+                <div class="mockup-job-school">בית ספר בית חיה מושקא — ירושלים</div>
+              </div>
+              <span class="mockup-badge badge-match">95% התאמה</span>
+            </div>
+            <div class="mockup-job-meta">
+              <span class="mockup-badge badge-hours">24 ש"ש</span>
+              <span class="mockup-badge badge-new">חדש</span>
+            </div>
+          </div>
+          <div class="mockup-job-card">
+            <div class="mockup-job-header">
+              <div>
+                <div class="mockup-job-title">מחנכת כיתה ה'</div>
+                <div class="mockup-job-school">בית ספר אורות — מעלה אדומים</div>
+              </div>
+              <span class="mockup-badge badge-match">88% התאמה</span>
+            </div>
+            <div class="mockup-job-meta">
+              <span class="mockup-badge badge-hours">30 ש"ש</span>
+            </div>
+          </div>
+          <div class="mockup-job-card">
+            <div class="mockup-job-header">
+              <div>
+                <div class="mockup-job-title">מורה לחינוך מיוחד</div>
+                <div class="mockup-job-school">מרכז חב"ד — גבעת שאול</div>
+              </div>
+              <span class="mockup-badge" style="background: var(--purple-050); color: var(--purple);">76% התאמה</span>
+            </div>
+            <div class="mockup-job-meta">
+              <span class="mockup-badge badge-hours">20 ש"ש</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE -->
+<section class="section quote-section">
+  <div class="container" style="text-align: center;">
+    <div class="quote-mark">"</div>
+    <p class="quote-text">שליחות בחינוך מתחילה במקום הנכון.</p>
+    <span class="quote-source">— ערך יסוד של רשת אהלי יוסף יצחק</span>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <span class="cta-eyebrow">מוכנה להתחיל?</span>
+    <h2 class="cta-title">עַדְכָּנִי — כי השליחות<br/>שלך מתחילה כאן</h2>
+    <p class="cta-sub">מורות ברחבי הרשת כבר יצרו פרופיל ומצאו את מקומן. הגיע התורך.</p>
+    <p style="font-size:13px;color:rgba(255,255,255,.45);margin-bottom:28px;margin-top:-20px;">המערכת זמינה למשתמשים רשומים בלבד</p>
+    <div class="cta-btns">
+      <a href="/register/candidate" class="btn-hero-primary">צרי פרופיל</a>
+      <a href="/login" class="btn-hero-ghost">כניסה לחשבון</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img src="/logo-chabad.png" alt="רשת חב"ד" />
+        <div>
+          <div class="footer-brand-name">עַדְכָּנִי</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:1px;font-weight:600;">מערכת גיוס והשמה</div>
+        </div>
+      </div>
+      <div class="footer-links">
+        <a href="mosad.html" class="footer-link">בתי ספר</a>
+        <a href="mummedet.html" class="footer-link">מועמדות</a>
+        <a href="nehal.html" class="footer-link">מנהלי רשת</a>
+        <a href="/login" class="footer-link">כניסה לחשבון</a>
+        <a href="/register/candidate" class="footer-link">הצטרפות למערכת</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2026 GIUUS — רשת אהלי יוסף יצחק</span>
+      <span class="footer-tagline">גיוס חינוכי חכם לרשת חב"ד</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

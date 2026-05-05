@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import { Clock } from 'lucide-react'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import DashboardClient from './dashboard-client'
@@ -16,7 +16,7 @@ export default async function DashboardPage() {
   if (!profile) redirect('/login')
 
   /* ── הנהלה ── */
-  if (['מנהל רשת', 'אדמין מערכת'].includes(profile.role)) {
+  if (['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)) {
     return <DashboardClient fullName={profile.full_name} />
   }
 
@@ -128,34 +128,57 @@ export default async function DashboardPage() {
 
     const oneWeekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString()
 
-    const [jobsRes, recentAppsRes] = await Promise.all([
-      service
-        .from('jobs')
-        .select('id, title, city, district, specialization, job_type, status, applications(count)')
-        .eq('institution_id', institution.id)
-        .order('created_at', { ascending: false })
-        .limit(8),
-      service
-        .from('applications')
-        .select('id, status, applied_at, job_id, jobs!inner(id, title, institution_id), candidates(profiles(full_name))')
-        .eq('jobs.institution_id', institution.id)
-        .order('applied_at', { ascending: false })
-        .limit(10),
+    // 1) Fetch jobs
+    const { data: jobsRaw } = await service
+      .from('jobs')
+      .select('id, title, city, district, specialization, job_type, status, applications(count)')
+      .eq('institution_id', institution.id)
+      .order('created_at', { ascending: false })
+      .limit(8)
+
+    const jobIds = (jobsRaw ?? []).map((j: { id: string }) => j.id)
+
+    // 2) Fetch recent apps by job IDs (no nested join on institution)
+    const [recentAppsRaw, newAppsRaw] = await Promise.all([
+      jobIds.length > 0
+        ? service
+            .from('applications')
+            .select('id, status, applied_at, job_id, candidate_id, jobs(id, title)')
+            .in('job_id', jobIds)
+            .order('applied_at', { ascending: false })
+            .limit(10)
+        : Promise.resolve({ data: [] as Record<string, unknown>[] }),
+      jobIds.length > 0
+        ? service
+            .from('applications')
+            .select('job_id')
+            .in('job_id', jobIds)
+            .gte('applied_at', oneWeekAgo)
+        : Promise.resolve({ data: [] as Record<string, unknown>[] }),
     ])
 
-    const newAppsRes = await service
-      .from('applications')
-      .select('job_id, applied_at, jobs!inner(institution_id)')
-      .eq('jobs.institution_id', institution.id)
-      .gte('applied_at', oneWeekAgo)
+    // 3) Fetch candidate profiles for recent apps separately
+    const candIds = [...new Set(
+      ((recentAppsRaw.data ?? []) as Record<string, unknown>[])
+        .map(a => a.candidate_id as string)
+        .filter(Boolean)
+    )]
+    const { data: candRows } = candIds.length > 0
+      ? await service.from('candidates').select('id, profiles(full_name)').in('id', candIds)
+      : { data: [] as { id: string; profiles: unknown }[] }
+
+    const candMap: Record<string, unknown> = Object.fromEntries(
+      ((candRows ?? []) as { id: string; profiles: unknown }[]).map(c => [c.id, c.profiles])
+    )
 
     const newAppsByJob: Record<string, number> = {}
-    for (const a of newAppsRes.data ?? []) {
-      newAppsByJob[a.job_id] = (newAppsByJob[a.job_id] ?? 0) + 1
+    for (const a of (newAppsRaw.data ?? []) as Record<string, unknown>[]) {
+      const jid = a.job_id as string
+      newAppsByJob[jid] = (newAppsByJob[jid] ?? 0) + 1
     }
 
     type RawJob = { id: string; title: string; city: string | null; district: string | null; specialization: string | null; job_type: string | null; status: string; applications: { count: number }[] }
-    const jobs = ((jobsRes.data ?? []) as RawJob[]).map(j => ({
+    const jobs = ((jobsRaw ?? []) as RawJob[]).map(j => ({
       id: j.id,
       title: j.title,
       city: j.city,
@@ -165,26 +188,35 @@ export default async function DashboardPage() {
       newAppCount: newAppsByJob[j.id] ?? 0,
     }))
 
+    // Combine recent apps with candidate names
+    const recentApps = ((recentAppsRaw.data ?? []) as Record<string, unknown>[]).map(a => ({
+      id: a.id as string,
+      status: a.status as string,
+      applied_at: a.applied_at as string,
+      job_id: a.job_id as string,
+      jobs: a.jobs as { id: string; title: string } | null,
+      candidates: { profiles: (candMap[a.candidate_id as string] ?? null) as { full_name: string | null } | null },
+    }))
+
     // Fetch matched candidates for active jobs
-    const activeJobs = ((jobsRes.data ?? []) as RawJob[]).filter(j => j.status === 'פעילה')
+    const activeJobs = ((jobsRaw ?? []) as RawJob[]).filter(j => j.status === 'פעילה')
     const specs    = [...new Set(activeJobs.map(j => j.specialization).filter(Boolean))] as string[]
-    const districts= [...new Set(activeJobs.map(j => j.district).filter(Boolean))]       as string[]
+    const districts = [...new Set(activeJobs.map(j => j.district).filter(Boolean))]      as string[]
     const cities   = [...new Set(activeJobs.map(j => j.city).filter(Boolean))]           as string[]
 
-    let candQ = service
+    const { data: allCands } = await service
       .from('candidates')
       .select('id, city, district, specialization, academic_level, availability_status, profiles(id, full_name)')
-      .not('availability_status', 'in', '("לא פעילה","משובצת")')
+      .neq('availability_status', 'לא פעילה')
+      .neq('availability_status', 'משובצת')
       .limit(40)
-
-    const { data: allCands } = await candQ
 
     type CandRow = { id: unknown; city: unknown; district: unknown; specialization: unknown; academic_level: unknown; availability_status: unknown; profiles: unknown }
     const scoreCand = (c: Record<string, unknown>) => {
       let s = 0
-      if (specs.includes(String(c.specialization ?? '')))   s += 3
-      if (districts.includes(String(c.district ?? '')))     s += 2
-      if (cities.includes(String(c.city ?? '')))            s += 2
+      if (specs.includes(String(c.specialization ?? '')))    s += 3
+      if (districts.includes(String(c.district ?? '')))      s += 2
+      if (cities.includes(String(c.city ?? '')))             s += 2
       return s
     }
     const matchedCandidates = [...(allCands ?? [])]
@@ -197,7 +229,7 @@ export default async function DashboardPage() {
         institutionName={institution.institution_name}
         jobs={jobs}
         matchedCandidates={matchedCandidates as unknown as Parameters<typeof InstitutionDashboard>[0]['matchedCandidates']}
-        recentApps={(recentAppsRes.data ?? []) as unknown as Parameters<typeof InstitutionDashboard>[0]['recentApps']}
+        recentApps={recentApps as unknown as Parameters<typeof InstitutionDashboard>[0]['recentApps']}
       />
     )
   }
@@ -208,7 +240,7 @@ export default async function DashboardPage() {
 function PendingApproval({ fullName }: { fullName: string | null }) {
   const firstName = fullName?.split(' ')[0] ?? ''
   return (
-    <div className="flex items-center justify-center" style={{ minHeight: 'calc(100vh - 64px)' }}>
+    <div className="flex items-center justify-center" style={{ minHeight: '100%' }}>
       <div className="text-center max-w-sm px-6">
         <div
           className="w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center"
@@ -223,7 +255,7 @@ function PendingApproval({ fullName }: { fullName: string | null }) {
           {firstName ? `שלום, ${firstName}` : 'שלום'}
         </h1>
         <p className="text-[15px] mb-1" style={{ color: 'var(--ink-2)' }}>
-          החשבון שלך ממתין לאישור מנהל הרשת.
+          החשבון שלך ממתין לאישור מנהלת המערכת.
         </p>
         <p className="text-[13px]" style={{ color: 'var(--ink-4)' }}>
           תקבלי הודעה בדוא&quot;ל ברגע שהחשבון יאושר.

@@ -1,5 +1,8 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { sendNewJobMatchEmail } from '@/lib/email'
+import { sendSms } from '@/lib/sms'
+import { sendWA } from '@/lib/whatsapp'
 
 export async function GET() {
   const service = createServiceClient()
@@ -22,7 +25,7 @@ export async function POST(request: Request) {
   const { institution_id, ...rest } = body
 
   const { data: profile } = await service.from('profiles').select('role').eq('id', user.id).single()
-  const isAdmin = profile?.role && ['מנהל רשת', 'אדמין מערכת'].includes(profile.role)
+  const isAdmin = profile?.role && ['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)
 
   if (!isAdmin) {
     // institution owner: verify they own this institution and it is approved
@@ -47,7 +50,7 @@ export async function POST(request: Request) {
   }
 
   const ALLOWED_JOB_FIELDS = [
-    'title', 'description', 'city', 'district', 'specialization', 'job_type',
+    'title', 'description', 'city', 'district', 'specialization', 'job_type', 'job_types',
     'placement_type', 'status', 'expires_at', 'start_date', 'end_date',
   ]
   const safeRest = Object.fromEntries(Object.entries(rest).filter(([k]) => ALLOWED_JOB_FIELDS.includes(k)))
@@ -59,5 +62,77 @@ export async function POST(request: Request) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // notify matching candidates asynchronously (don't await — don't block response)
+  notifyMatchingCandidates(service, data).catch(e =>
+    console.error('[JOBS] notifyMatchingCandidates error:', e)
+  )
+
   return NextResponse.json(data, { status: 201 })
+}
+
+async function notifyMatchingCandidates(
+  service: ReturnType<typeof createServiceClient>,
+  job: { id: string; title: string; city: string | null; specialization: string | null; institution_id: string }
+) {
+  // find active candidates matching specialization (or 'שניהם') and not already placed
+  let query = service
+    .from('candidates')
+    .select('profile_id, city, specialization, profiles(full_name, phone)')
+    .not('availability_status', 'in', '("משובצת","לא פעילה")')
+
+  if (job.specialization && job.specialization !== 'שניהם') {
+    query = query.in('specialization', [job.specialization, 'שניהם'])
+  }
+
+  const { data: candidates } = await query
+
+  if (!candidates?.length) return
+
+  // get institution name
+  const { data: institution } = await service
+    .from('institutions')
+    .select('institution_name')
+    .eq('id', job.institution_id)
+    .single()
+
+  const institutionName = institution?.institution_name ?? ''
+  const city = job.city ?? ''
+
+  // cap at 50 notifications to avoid spam on large candidate pools
+  const targets = candidates.slice(0, 50)
+
+  for (const c of targets) {
+    const candidate = c as unknown as {
+      profile_id: string
+      city: string | null
+      profiles: { full_name: string | null; phone: string | null }
+    }
+
+    const profileId = candidate.profile_id
+    const name = candidate.profiles?.full_name ?? 'מועמדת'
+    const phone = candidate.profiles?.phone
+
+    await sendNewJobMatchEmail({
+      candidateProfileId: profileId,
+      candidateName: name,
+      jobTitle: job.title,
+      institutionName,
+      city,
+      jobId: job.id,
+    })
+
+    void service.from('notifications').insert({
+      profile_id: profileId,
+      type: 'match_suggestion',
+      title: `משרה חדשה מתאימה — ${job.title}`,
+      body: `${institutionName}${city ? ' · ' + city : ''}`,
+      related_id: job.id,
+    })
+
+    if (phone) {
+      await sendSms(phone, `✨ משרה חדשה מתאימה לך! "${job.title}" ב-${institutionName}${city ? `, ${city}` : ''}. לצפייה: giuus.vercel.app/jobs`)
+      void sendWA(phone, `✨ משרה חדשה מתאימה לך!\n*${job.title}* — ${institutionName}${city ? ` · ${city}` : ''}\nלצפייה ולהגשה: giuus.vercel.app/jobs/${job.id}`)
+    }
+  }
 }

@@ -51,7 +51,7 @@ export default function TrendsChart({ since, until }: Props) {
       <div className="flex items-center gap-3 px-5 py-[18px]" style={{ paddingBottom: 14 }}>
         <div className="flex-1">
           <h3 className="text-[16.5px] font-bold" style={{ color: 'var(--ink)', letterSpacing: '-.005em' }}>
-            מגמות 6 חודשים
+            {range === '30d' ? 'מגמות 30 יום' : range === '90d' ? 'מגמות 90 יום' : range === 'year' ? 'מגמות שנה שלמה' : 'מגמות 6 חודשים'}
           </h3>
           <p className="text-[13px] font-medium mt-0.5" style={{ color: 'var(--ink-4)' }}>
             מועמדות · משרות · שיבוצים

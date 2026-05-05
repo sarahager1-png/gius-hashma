@@ -25,6 +25,13 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="he" dir="rtl" className="h-full">
+      <head>
+        {/* Capture beforeinstallprompt before React mounts */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__pwaPrompt=e;});
+          window.addEventListener('appinstalled',function(){window.__pwaInstalled=true;});
+        ` }} />
+      </head>
       <body className="min-h-full">
         <Providers>{children}</Providers>
         <InstallPwa />

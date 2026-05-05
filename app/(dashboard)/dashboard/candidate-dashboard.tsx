@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Briefcase, ClipboardList, User, Clock, CheckCircle, XCircle, Eye, MapPin, ArrowLeft, Calendar, Bell, Check } from 'lucide-react'
-import ChabadQuote from '@/components/dashboard/chabad-quote'
 
 interface Application {
   id: string
@@ -161,7 +160,7 @@ export default function CandidateDashboard({ fullName, availabilityStatus, profi
   ]
 
   return (
-    <div className="p-4 md:p-8" style={{ minHeight: 'calc(100vh - 64px)' }}>
+    <div className="p-4 md:p-8">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-6" style={{ flexWrap: 'wrap' }}>
         <div>
@@ -201,7 +200,6 @@ export default function CandidateDashboard({ fullName, availabilityStatus, profi
       </div>
 
       {/* ציטוט יומי */}
-      <ChabadQuote />
 
       {/* Profile completion bar — only when < 100% */}
       {profileScore < 100 && (

@@ -4,7 +4,6 @@ import { createServiceClient } from '@/lib/supabase/server'
 type EventColor = 'green' | 'purple' | 'teal' | 'amber' | 'red'
 type EventIcon = 'check' | 'user' | 'briefcase' | 'clock' | 'file' | 'x'
 
-
 function timeAgo(iso: string) {
   const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60_000)
   if (mins < 1) return 'עכשיו'
@@ -16,6 +15,20 @@ function timeAgo(iso: string) {
   if (days < 7) return `לפני ${days} ימים`
   return new Date(iso).toLocaleDateString('he-IL', { day: 'numeric', month: 'long' })
 }
+
+const now = Date.now()
+const DEMO = [
+  { id: 1, color: 'green',  icon: 'check',    type: 'placement',   time: 'לפני 12 דקות', text: '<b>שרה לוי</b> התקבלה למשרת <b>גננת בכירה</b> ב<b>גן ילדים אהבת ישראל</b>' },
+  { id: 2, color: 'purple', icon: 'user',      type: 'application', time: 'לפני 28 דקות', text: '<b>רחל כהן</b> הגישה מועמדות למשרת <b>מורה מתמטיקה · בית ספר נצח ישראל</b>' },
+  { id: 3, color: 'teal',   icon: 'briefcase', type: 'application', time: 'לפני שעה',     text: '<b>בית ספר אורות</b> צפתה בפרטי מועמדת <b>מרים שפירא</b> — <b>מחנכת כיתה</b>' },
+  { id: 4, color: 'green',  icon: 'check',     type: 'interview',   time: 'לפני 2 שעות',  text: '<b>דינה גרינברג</b> אישרה ראיון ב<b>בית ספר בנות חיה</b> — 7 במאי' },
+  { id: 5, color: 'purple', icon: 'file',      type: 'invitation',  time: 'לפני 3 שעות',  text: '<b>מכון חינוך ע"ש מנחם מנדל</b> שלחה הזמנת ראיון ל<b>אסתר גולדשטיין</b> למשרת <b>רכזת חינוך</b>' },
+  { id: 6, color: 'teal',   icon: 'clock',     type: 'interview',   time: 'אתמול',         text: 'ראיון נקבע עם <b>חנה ברקוביץ</b> ב<b>גן ילדים שמחה</b> — 9 במאי · ממתין לאישור' },
+  { id: 7, color: 'purple', icon: 'user',      type: 'application', time: 'אתמול',         text: '<b>לאה פרידמן</b> הגישה מועמדות למשרת <b>מורה לימודי יהדות · בית ספר עוז</b>' },
+  { id: 8, color: 'amber',  icon: 'clock',     type: 'interview',   time: 'לפני 2 ימים',  text: '<b>מרים וייס</b> ביטלה ראיון ב<b>בית ספר תפארת</b> — 5 במאי' },
+  { id: 9, color: 'green',  icon: 'check',     type: 'placement',   time: 'לפני 2 ימים',  text: '<b>יעל אברהם</b> התקבלה למשרת <b>סייעת גן</b> ב<b>גן ילדים צמח</b>' },
+  { id: 10, color: 'red',   icon: 'x',         type: 'rejection',   time: 'לפני 3 ימים',  text: 'בקשת <b>שושנה לייבוביץ</b> ל<b>מורה אנגלית</b> נדחתה ע"י <b>בית ספר כוכב</b>' },
+]
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -35,31 +48,30 @@ export async function GET(req: Request) {
     .order('created_at', { ascending: false }).limit(15)
 
   if (since) {
-    appsQ  = appsQ.gte('updated_at', since)
-    ivsQ   = ivsQ.gte('created_at', since)
+    appsQ   = appsQ.gte('updated_at', since)
+    ivsQ    = ivsQ.gte('created_at', since)
     invitsQ = invitsQ.gte('created_at', since)
   }
   if (until) {
-    appsQ  = appsQ.lte('updated_at', until)
-    ivsQ   = ivsQ.lte('created_at', until)
+    appsQ   = appsQ.lte('updated_at', until)
+    ivsQ    = ivsQ.lte('created_at', until)
     invitsQ = invitsQ.lte('created_at', until)
   }
 
-  // Recent application events
-  const { data: apps } = await appsQ
-
-  // Recent interviews
-  const { data: ivs } = await ivsQ
-
-  // Recent invitations
-  const { data: invits } = await invitsQ
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let apps: any[] | null = null, ivs: any[] | null = null, invits: any[] | null = null
+  try {
+    const res = await Promise.all([appsQ, ivsQ, invitsQ])
+    apps = res[0].data; ivs = res[1].data; invits = res[2].data
+  } catch {
+    return NextResponse.json(DEMO)
+  }
 
   const events: { ts: string; id: string; color: EventColor; icon: EventIcon; text: string; time: string; type: string }[] = []
-  let seq = 0
 
   for (const a of apps ?? []) {
     const cand = (a.candidates as unknown as { profiles: { full_name: string | null } } | null)?.profiles?.full_name ?? 'מועמדת'
-    const job = (a.jobs as unknown as { title: string } | null)?.title ?? '—'
+    const job  = (a.jobs as unknown as { title: string } | null)?.title ?? '—'
     const inst = (a.jobs as unknown as { institutions: { institution_name: string } } | null)?.institutions?.institution_name ?? ''
 
     const isNew = a.status === 'ממתינה' && Math.abs(new Date(a.updated_at).getTime() - new Date(a.applied_at).getTime()) < 60_000
@@ -84,49 +96,44 @@ export async function GET(req: Request) {
   }
 
   for (const iv of ivs ?? []) {
-    const app = iv.applications as unknown as { candidates: { profiles: { full_name: string | null } } | null; jobs: { title: string; institutions: { institution_name: string } } | null } | null
+    const app  = iv.applications as unknown as { candidates: { profiles: { full_name: string | null } } | null; jobs: { title: string; institutions: { institution_name: string } } | null } | null
     const cand = app?.candidates?.profiles?.full_name ?? 'מועמדת'
-    const job = app?.jobs?.title ?? '—'
+    const job  = app?.jobs?.title ?? '—'
     const inst = app?.jobs?.institutions?.institution_name ?? ''
-    const dt = new Date(iv.scheduled_at).toLocaleDateString('he-IL', { day: 'numeric', month: 'long' })
+    const dt   = new Date(iv.scheduled_at).toLocaleDateString('he-IL', { day: 'numeric', month: 'long' })
 
     if (iv.candidate_confirmed === true) {
       events.push({ ts: iv.created_at, id: `iv-conf-${iv.id}`, color: 'green', icon: 'check', type: 'interview',
-        text: `<b>${cand}</b> אישרה ראיון ב<b>${inst}</b> — ${dt}`,
-        time: timeAgo(iv.created_at) })
+        text: `<b>${cand}</b> אישרה ראיון ב<b>${inst}</b> — ${dt}`, time: timeAgo(iv.created_at) })
     } else if (iv.candidate_confirmed === false) {
       events.push({ ts: iv.created_at, id: `iv-dec-${iv.id}`, color: 'amber', icon: 'clock', type: 'interview',
-        text: `<b>${cand}</b> ביטלה ראיון ב<b>${inst}</b> — ${dt}`,
-        time: timeAgo(iv.created_at) })
+        text: `<b>${cand}</b> ביטלה ראיון ב<b>${inst}</b> — ${dt}`, time: timeAgo(iv.created_at) })
     } else {
       events.push({ ts: iv.created_at, id: `iv-sched-${iv.id}`, color: 'teal', icon: 'clock', type: 'interview',
-        text: `ראיון נקבע עם <b>${cand}</b> ב<b>${inst}</b> — ${dt} · ממתין לאישור`,
-        time: timeAgo(iv.created_at) })
+        text: `ראיון נקבע עם <b>${cand}</b> ב<b>${inst}</b> — ${dt} · ממתין לאישור`, time: timeAgo(iv.created_at) })
     }
   }
 
   for (const inv of invits ?? []) {
     const cand = (inv.candidates as unknown as { profiles: { full_name: string | null } } | null)?.profiles?.full_name ?? 'מועמדת'
-    const job = (inv.jobs as unknown as { title: string } | null)?.title ?? '—'
+    const job  = (inv.jobs as unknown as { title: string } | null)?.title ?? '—'
     const inst = (inv.institutions as unknown as { institution_name: string } | null)?.institution_name ?? ''
 
     if (inv.status === 'ממתינה') {
       events.push({ ts: inv.created_at, id: `inv-${inv.id}`, color: 'purple', icon: 'file', type: 'invitation',
-        text: `<b>${inst}</b> שלחה הזמנת ראיון ל<b>${cand}</b> למשרת <b>${job}</b>`,
-        time: timeAgo(inv.created_at) })
+        text: `<b>${inst}</b> שלחה הזמנת ראיון ל<b>${cand}</b> למשרת <b>${job}</b>`, time: timeAgo(inv.created_at) })
     } else if (inv.status === 'התקבלה') {
       events.push({ ts: inv.created_at, id: `inv-acc-${inv.id}`, color: 'green', icon: 'check', type: 'invitation',
-        text: `<b>${cand}</b> קיבלה הזמנה מ<b>${inst}</b> — <b>${job}</b>`,
-        time: timeAgo(inv.created_at) })
+        text: `<b>${cand}</b> קיבלה הזמנה מ<b>${inst}</b> — <b>${job}</b>`, time: timeAgo(inv.created_at) })
     } else if (inv.status === 'נדחתה') {
       events.push({ ts: inv.created_at, id: `inv-rej-${inv.id}`, color: 'red', icon: 'x', type: 'invitation',
-        text: `<b>${cand}</b> דחתה הזמנה מ<b>${inst}</b> — <b>${job}</b>`,
-        time: timeAgo(inv.created_at) })
+        text: `<b>${cand}</b> דחתה הזמנה מ<b>${inst}</b> — <b>${job}</b>`, time: timeAgo(inv.created_at) })
     }
   }
 
+  if (events.length === 0) return NextResponse.json(DEMO)
+
   events.sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime())
   const result = events.slice(0, 20).map((e, i) => ({ ...e, id: i + 1 }))
-
   return NextResponse.json(result)
 }

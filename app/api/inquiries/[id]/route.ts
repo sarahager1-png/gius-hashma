@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 // PATCH — institution marks seen / replies; candidate can view own inquiry
@@ -24,7 +24,7 @@ export async function PATCH(
     .single()
   if (!inquiry) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  const isAdmin = profile?.role && ['מנהל רשת', 'אדמין מערכת'].includes(profile.role)
+  const isAdmin = profile?.role && ['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)
   const isOwningInst = (inquiry.institutions as any)?.profile_id === user.id
   if (!isAdmin && !isOwningInst)
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

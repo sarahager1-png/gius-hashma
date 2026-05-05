@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { CheckCircle, XCircle, Copy, Check } from 'lucide-react'
@@ -35,6 +35,8 @@ ALTER TABLE institutions ADD CONSTRAINT institutions_institution_type_check
 ALTER TABLE jobs ADD COLUMN IF NOT EXISTS district text;
 ALTER TABLE jobs ADD COLUMN IF NOT EXISTS placement_type text;
 ALTER TABLE jobs ADD COLUMN IF NOT EXISTS start_date date;
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS end_date date;
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS job_types text[] DEFAULT '{}';
 ALTER TABLE institutions ADD COLUMN IF NOT EXISTS district text;
 ALTER TABLE candidates ADD COLUMN IF NOT EXISTS district text;
 ALTER TABLE candidates ADD COLUMN IF NOT EXISTS address text;
@@ -133,7 +135,7 @@ DO $$ BEGIN
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='invitations' AND policyname='admins can manage all invitations') THEN
     CREATE POLICY "admins can manage all invitations" ON invitations FOR ALL USING (
-      EXISTS (SELECT 1 FROM profiles p WHERE p.id=auth.uid() AND p.role IN ('מנהל רשת','אדמין מערכת'))
+      EXISTS (SELECT 1 FROM profiles p WHERE p.id=auth.uid() AND p.role IN ('מנהלת מערכת','אדמין מערכת'))
     );
   END IF;
 END $$;
@@ -160,7 +162,7 @@ ALTER TABLE candidate_requests ENABLE ROW LEVEL SECURITY;
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='candidate_requests' AND policyname='admins can manage candidate requests') THEN
     CREATE POLICY "admins can manage candidate requests" ON candidate_requests FOR ALL USING (
-      EXISTS (SELECT 1 FROM profiles p WHERE p.id=auth.uid() AND p.role IN ('מנהל רשת','אדמין מערכת'))
+      EXISTS (SELECT 1 FROM profiles p WHERE p.id=auth.uid() AND p.role IN ('מנהלת מערכת','אדמין מערכת'))
     );
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='candidate_requests' AND policyname='service role can insert candidate requests') THEN
@@ -179,10 +181,31 @@ ALTER TABLE access_codes ENABLE ROW LEVEL SECURITY;
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='access_codes' AND policyname='admins can manage access codes') THEN
     CREATE POLICY "admins can manage access codes" ON access_codes FOR ALL USING (
-      EXISTS (SELECT 1 FROM profiles p WHERE p.id=auth.uid() AND p.role IN ('מנהל רשת','אדמין מערכת'))
+      EXISTS (SELECT 1 FROM profiles p WHERE p.id=auth.uid() AND p.role IN ('מנהלת מערכת','אדמין מערכת'))
     );
   END IF;
 END $$;
+
+-- טבלת OTP לאימות SMS
+CREATE TABLE IF NOT EXISTS login_otps (
+  id         uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id    uuid        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  phone      text        NOT NULL,
+  code       text        NOT NULL,
+  attempts   int         NOT NULL DEFAULT 0,
+  expires_at timestamptz NOT NULL,
+  verified   boolean     NOT NULL DEFAULT false,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE login_otps ENABLE ROW LEVEL SECURITY;
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE tablename = 'login_otps' AND policyname = 'no direct access'
+  ) THEN
+    CREATE POLICY "no direct access" ON login_otps USING (false);
+  END IF;
+END $$;
+CREATE INDEX IF NOT EXISTS login_otps_user_id_idx ON login_otps (user_id, created_at DESC);
 
 SELECT 'Done!' AS result;`
 

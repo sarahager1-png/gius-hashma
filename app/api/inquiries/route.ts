@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 // POST — candidate sends inquiry to institution about a job
@@ -64,7 +64,7 @@ export async function GET() {
 
   const { data: profile } = await service
     .from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['מוסד', 'מנהל רשת', 'אדמין מערכת'].includes(profile.role))
+  if (!profile || !['מוסד', 'מנהלת מערכת', 'אדמין מערכת'].includes(profile.role))
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   let institutionId: string | null = null

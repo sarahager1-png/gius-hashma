@@ -1,0 +1,32 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/interview-reminders",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/invitation-reminders",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/stale-applications",
+      "schedule": "30 5 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-summary",
+      "schedule": "0 4 * * 1"
+    },
+    {
+      "path": "/api/cron/pending-applications",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/job-alerts",
+      "schedule": "0 5 * * 0"
+    },
+    {
+      "path": "/api/cron/job-expiry",
+      "schedule": "0 5 * * *"
+    }
+  ]
+}

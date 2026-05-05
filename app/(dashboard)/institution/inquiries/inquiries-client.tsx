@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   MessageCircle, Phone, MapPin, GraduationCap, BookOpen, Send,
-  CheckCircle, Loader2, Clock, X,
+  CheckCircle, Loader2, Clock, X, CalendarPlus,
 } from 'lucide-react'
 
 interface CandidateRow {
@@ -58,14 +58,19 @@ function fmt(d: string) {
   return new Date(d).toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-interface Props { inquiries: InquiryRow[] }
+interface Props { inquiries: InquiryRow[]; institutionId: string }
 
-export default function InquiriesClient({ inquiries: initial }: Props) {
+export default function InquiriesClient({ inquiries: initial, institutionId }: Props) {
   const [inquiries, setInquiries] = useState(initial)
   const [replyingId, setReplyingId]   = useState<string | null>(null)
   const [replyText, setReplyText]     = useState('')
   const [sending, setSending]         = useState(false)
   const [activeId, setActiveId]       = useState<string | null>(null)
+  const [invitingId, setInvitingId]   = useState<string | null>(null)
+  const [inviteDate, setInviteDate]   = useState('')
+  const [inviteMsg, setInviteMsg]     = useState('')
+  const [inviteSending, setInviteSending] = useState(false)
+  const [invitedIds, setInvitedIds]   = useState<Set<string>>(new Set())
   const router = useRouter()
 
   const pending = inquiries.filter(i => i.status === 'ממתינה').length
@@ -94,6 +99,29 @@ export default function InquiriesClient({ inquiries: initial }: Props) {
       ))
       setReplyingId(null)
       setReplyText('')
+    }
+  }
+
+  async function sendInvite(inquiry: InquiryRow) {
+    if (!inquiry.candidates || !inquiry.jobs) return
+    setInviteSending(true)
+    const res = await fetch('/api/invitations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        institution_id: institutionId,
+        candidate_id: inquiry.candidates.id,
+        job_id: inquiry.jobs.id,
+        scheduled_at: inviteDate || null,
+        message: inviteMsg.trim() || null,
+      }),
+    })
+    setInviteSending(false)
+    if (res.ok || (await res.json().then(d => d.error === 'Already invited').catch(() => false))) {
+      setInvitedIds(prev => new Set(prev).add(inquiry.id))
+      setInvitingId(null)
+      setInviteDate('')
+      setInviteMsg('')
     }
   }
 
@@ -283,6 +311,56 @@ export default function InquiriesClient({ inquiries: initial }: Props) {
                       </div>
                     )}
 
+                    {/* Invite to interview inline form */}
+                    {invitingId === inquiry.id && (
+                      <div className="px-5 pb-4 space-y-3" style={{ borderTop: '1px solid var(--line-soft)', paddingTop: '16px' }}>
+                        <p className="text-[12.5px] font-bold" style={{ color: 'var(--ink-2)' }}>הזמנה לראיון — {inquiry.jobs?.title}</p>
+                        <div className="flex flex-col gap-2.5">
+                          <div>
+                            <label className="block text-[11.5px] font-bold mb-1" style={{ color: 'var(--ink-4)' }}>תאריך ושעה (אופציונלי)</label>
+                            <input
+                              type="datetime-local"
+                              value={inviteDate}
+                              onChange={e => setInviteDate(e.target.value)}
+                              className="h-10 rounded-[9px] border px-3 text-[13px] outline-none w-full"
+                              style={{ borderColor: 'var(--line)', background: 'var(--bg-2)', fontFamily: 'inherit' }}
+                              onFocus={e => { e.currentTarget.style.borderColor = 'var(--purple)' }}
+                              onBlur={e => { e.currentTarget.style.borderColor = 'var(--line)' }}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11.5px] font-bold mb-1" style={{ color: 'var(--ink-4)' }}>הודעה אישית (אופציונלי)</label>
+                            <textarea
+                              value={inviteMsg}
+                              onChange={e => setInviteMsg(e.target.value)}
+                              rows={2}
+                              placeholder="למשל: נשמח לפגוש אותך לשיחת היכרות..."
+                              className="w-full px-3 py-2 rounded-[9px] border text-[13px] outline-none resize-none"
+                              style={{ borderColor: 'var(--line)', background: 'var(--bg-2)', fontFamily: 'inherit' }}
+                              onFocus={e => { e.currentTarget.style.borderColor = 'var(--purple)' }}
+                              onBlur={e => { e.currentTarget.style.borderColor = 'var(--line)' }}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => sendInvite(inquiry)}
+                            disabled={inviteSending}
+                            className="flex items-center gap-2 h-10 px-5 rounded-[10px] text-[13.5px] font-bold text-white"
+                            style={{ background: 'linear-gradient(135deg,var(--teal),var(--purple))', opacity: inviteSending ? 0.7 : 1 }}>
+                            {inviteSending ? <Loader2 size={14} className="animate-spin" /> : <CalendarPlus size={14} />}
+                            שלחי הזמנה
+                          </button>
+                          <button
+                            onClick={() => { setInvitingId(null); setInviteDate(''); setInviteMsg('') }}
+                            className="flex items-center gap-1.5 h-10 px-4 rounded-[10px] border text-[13px] font-semibold"
+                            style={{ borderColor: 'var(--line)', color: 'var(--ink-3)' }}>
+                            <X size={14} />ביטול
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Reply area */}
                     {replyingId === inquiry.id ? (
                       <div className="px-5 pb-5 space-y-3">
@@ -328,6 +406,22 @@ export default function InquiriesClient({ inquiries: initial }: Props) {
                           <MessageCircle size={14} />
                           {inquiry.institution_reply ? 'שלחי תגובה נוספת' : 'השיבי להודעה'}
                         </button>
+                        {inquiry.jobs && !invitedIds.has(inquiry.id) && invitingId !== inquiry.id && (
+                          <button
+                            onClick={() => { setInvitingId(inquiry.id); setReplyingId(null) }}
+                            className="flex items-center gap-2 h-9 px-4 rounded-[10px] text-[13px] font-bold transition-all"
+                            style={{ background: 'var(--teal-050)', color: 'var(--teal-600)' }}
+                            onMouseEnter={e => (e.currentTarget.style.background = 'var(--teal-100)')}
+                            onMouseLeave={e => (e.currentTarget.style.background = 'var(--teal-050)')}>
+                            <CalendarPlus size={14} />הזמינה לראיון
+                          </button>
+                        )}
+                        {invitedIds.has(inquiry.id) && (
+                          <span className="flex items-center gap-1.5 text-[12.5px] font-semibold"
+                            style={{ color: 'var(--teal-600)' }}>
+                            <CheckCircle size={14} />הזמנה נשלחה
+                          </span>
+                        )}
                         {waLink && (
                           <a href={waLink} target="_blank" rel="noreferrer"
                             className="flex items-center gap-2 h-9 px-4 rounded-[10px] text-[13px] font-bold transition-all"

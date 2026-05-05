@@ -37,12 +37,20 @@ function timeAgo(iso: string) {
 }
 
 const NOTIF_ICON: Record<string, string> = {
-  application_viewed:   '👁',
-  application_accepted: '🎉',
-  application_rejected: '📋',
-  interview_scheduled:  '📅',
-  invitation_accepted:  '✅',
-  interview_confirmed:  '✅',
+  application_viewed:    '👁',
+  application_accepted:  '🎉',
+  application_rejected:  '📋',
+  interview_scheduled:   '📅',
+  invitation_accepted:   '✅',
+  interview_confirmed:   '✅',
+  new_application:       '📋',
+  institution_approved:  '✅',
+  institution_rejected:  '❌',
+  match_suggestion:      '✨',
+  job_expiry_warning:    '⏳',
+  pending_apps_reminder: '📌',
+  stale_application:     '🔔',
+  weekly_summary:        '📊',
 }
 
 export default function AppHeader({ fullName, role }: Props) {
@@ -161,7 +169,7 @@ export default function AppHeader({ fullName, role }: Props) {
             width={20}
             height={20}
             className="object-contain"
-            style={{ filter: 'brightness(10) saturate(0)' }}
+            style={{ filter: 'brightness(0) invert(1)' }}
             onError={() => {}}
           />
         </div>

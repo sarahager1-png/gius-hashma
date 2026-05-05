@@ -63,7 +63,7 @@ export default function InstitutionProfileFormClient({ institution, profile }: P
 
       <section>
         <h2 className="text-[13px] font-bold uppercase tracking-[.08em] mb-4" style={{ color: 'var(--ink-3)' }}>פרטי המוסד</h2>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="col-span-2 space-y-1">
             <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>שם המוסד *</label>
             <input value={form.institution_name} onChange={e => set('institution_name', e.target.value)}
@@ -107,7 +107,7 @@ export default function InstitutionProfileFormClient({ institution, profile }: P
 
       <section>
         <h2 className="text-[13px] font-bold uppercase tracking-[.08em] mb-4" style={{ color: 'var(--ink-3)' }}>פרטי איש הקשר</h2>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1">
             <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>שם מנהל/ת</label>
             <input value={form.principal_name} onChange={e => set('principal_name', e.target.value)}

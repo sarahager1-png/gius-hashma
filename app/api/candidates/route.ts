@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export async function POST(request: Request) {
@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { data: profile } = await createServiceClient().from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['מנהל רשת', 'אדמין מערכת'].includes(profile.role))
+  if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role))
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { name, city, phone, level, status, placement_location, prev_employer, prev_role, exp } = await request.json()
@@ -54,6 +54,7 @@ export async function PATCH(request: Request) {
       'technical_skills', 'interpersonal_skills', 'experiences', 'practical_work',
       'shlichut_location', 'shlichut_years', 'past_projects', 'personal_note',
       'availability_from', 'availability_to', 'study_day',
+      'years_experience', 'whatsapp_preference',
     ]
     const safe = Object.fromEntries(Object.entries(candidate).filter(([k]) => ALLOWED.includes(k)))
     if (Object.keys(safe).length > 0) {

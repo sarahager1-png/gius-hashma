@@ -31,5 +31,5 @@ export default async function InstitutionInquiriesPage() {
     .eq('institution_id', institution.id)
     .order('created_at', { ascending: false })
 
-  return <InquiriesClient inquiries={inquiries ?? []} />
+  return <InquiriesClient inquiries={inquiries ?? []} institutionId={institution.id} />
 }

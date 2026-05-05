@@ -29,11 +29,21 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   // if accepted → auto-create application + interview + notify institution
   if (status === 'התקבלה') {
-    const { data: app, error: appErr } = await service
+    // reuse existing application if candidate already applied to this job
+    const { data: existing } = await service
       .from('applications')
-      .insert({ job_id: inv.job_id, candidate_id: cand.id })
-      .select()
+      .select('id')
+      .eq('job_id', inv.job_id)
+      .eq('candidate_id', cand.id)
       .single()
+
+    const { data: app, error: appErr } = existing
+      ? { data: existing, error: null }
+      : await service
+          .from('applications')
+          .insert({ job_id: inv.job_id, candidate_id: cand.id })
+          .select()
+          .single()
 
     if (!appErr && app && inv.scheduled_at) {
       await service.from('interviews').insert({

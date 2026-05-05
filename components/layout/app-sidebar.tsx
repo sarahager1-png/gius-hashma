@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
@@ -7,8 +7,9 @@ import { createClient } from '@/lib/supabase/client'
 import type { UserRole } from '@/lib/types'
 import {
   LayoutDashboard, Users, Briefcase, Building2, BarChart3,
-  Settings, LogOut, ClipboardList, KeyRound, UserPlus, Sparkles,
+  Settings, LogOut, ClipboardList, UserPlus, Sparkles,
   ShieldCheck, Mail, History, HelpCircle, MessageCircle, Send, UserCog, Inbox,
+  FileStack, CalendarDays, BellRing,
 } from 'lucide-react'
 
 interface NavItem {
@@ -29,16 +30,20 @@ const NAV_MAIN: Record<UserRole, NavItem[]> = {
     { href: '/help',            label: 'הנחיות',         icon: HelpCircle      },
   ],
   'מוסד': [
-    { href: '/dashboard',                  label: 'בית',              icon: LayoutDashboard },
-    { href: '/institution/jobs',           label: 'משרות',            icon: Briefcase       },
-    { href: '/institution/candidates',     label: 'מועמדות',          icon: Users           },
-    { href: '/institution/inquiries',      label: 'פניות',            icon: Inbox           },
-    { href: '/institution/invitations',    label: 'הזמנות שנשלחו',   icon: Send            },
-    { href: '/history',                    label: 'היסטוריה',         icon: History         },
-    { href: '/institution/profile',        label: 'פרופיל המוסד',    icon: UserCog         },
-    { href: '/help',                       label: 'הנחיות',           icon: HelpCircle      },
+    { href: '/dashboard',                   label: 'בית',              icon: LayoutDashboard },
+    { href: '/institution/jobs',            label: 'משרות',            icon: Briefcase       },
+    { href: '/institution/matches',         label: 'התאמות',           icon: Sparkles        },
+    { href: '/institution/applications',    label: 'הגשות',            icon: FileStack       },
+    { href: '/institution/candidates',      label: 'מועמדות',          icon: Users           },
+    { href: '/institution/inquiries',       label: 'פניות',            icon: Inbox           },
+    { href: '/institution/interviews',       label: 'לוח ראיונות',     icon: CalendarDays    },
+    { href: '/institution/invitations',     label: 'הזמנות שנשלחו',   icon: Send            },
+    { href: '/history',                     label: 'היסטוריה',         icon: History         },
+    { href: '/institution/profile',         label: 'פרופיל המוסד',    icon: UserCog         },
+    { href: '/settings',                    label: 'הגדרות',           icon: Settings        },
+    { href: '/help',                        label: 'הנחיות',           icon: HelpCircle      },
   ],
-  'מנהל רשת': [
+  'מנהלת מערכת': [
     { href: '/dashboard',                label: 'בית',           icon: LayoutDashboard },
     { href: '/admin/candidate-requests', label: 'בקשות הצטרפות', icon: UserPlus        },
     { href: '/admin/matches',            label: 'התאמות',        icon: Sparkles        },
@@ -46,8 +51,8 @@ const NAV_MAIN: Record<UserRole, NavItem[]> = {
     { href: '/jobs',                     label: 'משרות',         icon: Briefcase       },
     { href: '/admin/institutions',       label: 'מוסדות',        icon: Building2       },
     { href: '/messages',                 label: 'הודעות',        icon: MessageCircle   },
+    { href: '/admin/messages-log',       label: 'יומן הודעות',   icon: BellRing        },
     { href: '/admin/reports',            label: 'דוחות שיבוצים', icon: BarChart3       },
-    { href: '/admin/access-codes',       label: 'קודי גישה',     icon: KeyRound        },
     { href: '/admin/admins',             label: 'מנהלי מערכת',   icon: ShieldCheck     },
     { href: '/settings',                 label: 'הגדרות',        icon: Settings        },
     { href: '/help',                     label: 'הנחיות',        icon: HelpCircle      },
@@ -60,8 +65,8 @@ const NAV_MAIN: Record<UserRole, NavItem[]> = {
     { href: '/jobs',                     label: 'משרות',         icon: Briefcase       },
     { href: '/admin/institutions',       label: 'מוסדות',        icon: Building2       },
     { href: '/messages',                 label: 'הודעות',        icon: MessageCircle   },
+    { href: '/admin/messages-log',       label: 'יומן הודעות',   icon: BellRing        },
     { href: '/admin/reports',            label: 'דוחות שיבוצים', icon: BarChart3       },
-    { href: '/admin/access-codes',       label: 'קודי גישה',     icon: KeyRound        },
     { href: '/admin/admins',             label: 'מנהלי מערכת',   icon: ShieldCheck     },
     { href: '/settings',                 label: 'הגדרות',        icon: Settings        },
     { href: '/help',                     label: 'הנחיות',        icon: HelpCircle      },
@@ -72,18 +77,33 @@ interface Props {
   role: UserRole
   fullName: string | null
   pendingInstitutions?: number
+  pendingApplications?: number
+  pendingInquiries?: number
+  pendingCandidateReqs?: number
 }
 
-export default function AppSidebar({ role, fullName: _fullName, pendingInstitutions = 0 }: Props) {
+export default function AppSidebar({
+  role, fullName: _fullName,
+  pendingInstitutions  = 0,
+  pendingApplications  = 0,
+  pendingInquiries     = 0,
+  pendingCandidateReqs = 0,
+}: Props) {
   const pathname = usePathname()
   const router   = useRouter()
   const supabase = createClient()
 
-  const main = (NAV_MAIN[role] ?? []).map(item =>
-    item.href === '/admin/institutions' && pendingInstitutions > 0
-      ? { ...item, badge: pendingInstitutions }
-      : item
-  )
+  const main = (NAV_MAIN[role] ?? []).map(item => {
+    if (item.href === '/admin/candidate-requests' && pendingCandidateReqs > 0)
+      return { ...item, badge: pendingCandidateReqs }
+    if (item.href === '/admin/institutions' && pendingInstitutions > 0)
+      return { ...item, badge: pendingInstitutions }
+    if (item.href === '/institution/applications' && pendingApplications > 0)
+      return { ...item, badge: pendingApplications }
+    if (item.href === '/institution/inquiries' && pendingInquiries > 0)
+      return { ...item, badge: pendingInquiries }
+    return item
+  })
 
   async function signOut() {
     await supabase.auth.signOut()
@@ -98,50 +118,47 @@ export default function AppSidebar({ role, fullName: _fullName, pendingInstituti
 
   return (
     <aside className="dashboard-sidebar flex flex-col" dir="rtl">
-      {/* Brand top strip */}
+      {/* Brand */}
       <div
-        className="h-[3px] w-full shrink-0"
-        style={{ background: 'linear-gradient(90deg, #4B2E83 0%, #00A7B5 100%)' }}
-      />
-
-      {/* Logo — dominant identity anchor */}
-      <div
-        className="px-3 pt-4 pb-3 shrink-0"
+        className="px-4 pt-5 pb-4 shrink-0"
         style={{ borderBottom: '1px solid rgba(255,255,255,.08)' }}
       >
-        <div
-          className="flex items-center gap-3 px-3 py-3 rounded-[14px]"
-          style={{ background: 'rgba(255,255,255,.07)' }}
-        >
+        <Link href="/dashboard" className="flex items-center gap-3 no-underline">
+          {/* Logo container */}
           <div
-            className="w-11 h-11 rounded-[11px] flex items-center justify-center shrink-0"
-            style={{ background: 'rgba(255,255,255,.12)' }}
+            className="w-[46px] h-[46px] rounded-[13px] flex items-center justify-center shrink-0"
+            style={{
+              background: 'rgba(255,255,255,.1)',
+              border: '1px solid rgba(255,255,255,.18)',
+              backdropFilter: 'blur(8px)',
+            }}
           >
             <Image
               src="/logo-chabad.png"
-              alt="רשת חינוך חבד"
-              width={34}
-              height={34}
+              alt="רשת אהלי יוסף יצחק"
+              width={30}
+              height={30}
               className="object-contain"
-              style={{ filter: 'brightness(10) saturate(0)' }}
+              style={{ filter: 'brightness(0) invert(1)', opacity: 0.9 }}
               onError={() => {}}
             />
           </div>
+          {/* Text */}
           <div className="min-w-0">
             <div
-              className="text-[15px] font-black leading-tight truncate"
-              style={{ color: '#fff', letterSpacing: '-.02em' }}
+              className="font-black leading-tight truncate"
+              style={{ fontSize: '16px', color: '#fff', letterSpacing: '-.025em' }}
             >
               מערכת גיוס
             </div>
             <div
-              className="text-[11px] font-bold mt-0.5 truncate"
-              style={{ color: '#00A7B5', letterSpacing: '.04em' }}
+              className="font-semibold mt-0.5 truncate"
+              style={{ fontSize: '11px', color: 'rgba(255,255,255,.42)', letterSpacing: '.01em' }}
             >
-              גיוס והשמה
+              רשת אהלי יוסף יצחק
             </div>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Nav */}
@@ -168,7 +185,7 @@ export default function AppSidebar({ role, fullName: _fullName, pendingInstituti
           className="text-[10px] font-semibold mb-3 px-2"
           style={{ color: 'rgba(255,255,255,.2)' }}
         >
-          מערכת עלייה · תשפ״ה–תשפ״ו
+          מערכת עלייה · תשפ״ו–תשפ״ז
         </div>
         <button
           onClick={signOut}

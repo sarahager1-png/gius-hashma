@@ -1,5 +1,8 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { sendNewApplicationEmail } from '@/lib/email'
+import { smsNewApplication } from '@/lib/sms'
+import { sendWA } from '@/lib/whatsapp'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -34,7 +37,7 @@ export async function POST(request: Request) {
   // fetch job details for the notification
   const { data: job } = await service
     .from('jobs')
-    .select('title, city, institution_id, institutions(institution_name, profile_id)')
+    .select('title, city, institution_id, institutions(institution_name, profile_id, phone)')
     .eq('id', job_id)
     .single()
 
@@ -47,9 +50,10 @@ export async function POST(request: Request) {
   const { data: admins } = await service
     .from('profiles')
     .select('id')
-    .in('role', ['מנהל רשת', 'אדמין מערכת'])
+    .in('role', ['מנהלת מערכת', 'אדמין מערכת'])
 
   const instProfileId = (job as unknown as { institutions: { profile_id: string | null } } | null)?.institutions?.profile_id ?? null
+  const instPhone = (job as unknown as { institutions: { phone: string | null } } | null)?.institutions?.phone ?? null
 
   const notifyIds = new Set<string>([
     ...(admins ?? []).map(a => a.id),
@@ -66,6 +70,15 @@ export async function POST(request: Request) {
         related_id: data.id,
       }))
     )
+  }
+
+  // fire-and-forget: email + SMS + WA to institution
+  if (instProfileId) {
+    void Promise.allSettled([
+      sendNewApplicationEmail({ institutionProfileId: instProfileId, candidateName, jobTitle }),
+      instPhone ? smsNewApplication(instPhone, candidateName, jobTitle) : Promise.resolve(),
+      instPhone ? sendWA(instPhone, `📋 הגשה חדשה! ${candidateName} הגישה מועמדות למשרת "${jobTitle}". לצפייה: giuus.vercel.app/institution/applications`) : Promise.resolve(),
+    ])
   }
 
   return NextResponse.json(data, { status: 201 })

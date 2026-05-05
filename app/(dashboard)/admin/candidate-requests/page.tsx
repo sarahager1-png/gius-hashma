@@ -24,8 +24,9 @@ interface CandidateRequest {
 }
 
 interface ApprovalResult {
-  code: string
-  waLink: string
+  code?: string
+  waLink?: string
+  directApproval?: boolean
 }
 
 function fmtDate(iso: string) {
@@ -63,8 +64,8 @@ export default function CandidateRequestsPage() {
     })
     if (res.ok) {
       const data = await res.json()
-      setRequests(prev => prev.map(r => r.id === req.id ? { ...r, status: 'אושרה', access_code: data.code } : r))
-      setApprovalResults(prev => ({ ...prev, [req.id]: { code: data.code, waLink: data.waLink } }))
+      setRequests(prev => prev.map(r => r.id === req.id ? { ...r, status: 'אושרה', access_code: data.code ?? null } : r))
+      setApprovalResults(prev => ({ ...prev, [req.id]: { code: data.code, waLink: data.waLink, directApproval: data.directApproval } }))
     }
     setProcessing(null)
   }
@@ -107,7 +108,7 @@ export default function CandidateRequestsPage() {
             )}
           </h1>
           <p className="text-[13px] mt-0.5" style={{ color: 'var(--ink-3)' }}>
-            מועמדות שביקשו להצטרף למערכת — לאשר ולשלוח קוד גישה
+            מועמדות שביקשו להצטרף למערכת — לאשר כדי שיוכלו להיכנס
           </p>
         </div>
       </div>
@@ -209,8 +210,15 @@ export default function CandidateRequestsPage() {
                   </div>
                 </div>
 
-                {/* Approval result — code + WA + email buttons */}
-                {(result || req.access_code) && (() => {
+                {/* Approval result */}
+                {result?.directApproval && (
+                  <div className="mt-4 p-3 rounded-[12px]" style={{ background: 'var(--green-bg)', border: '1px solid var(--teal-100)' }}>
+                    <p className="text-[13px] font-bold" style={{ color: 'var(--green)' }}>
+                      ✓ אושרה ישירות — הפרופיל נוצר והמועמדת קיבלה הודעה. תוכל להיכנס עם Google.
+                    </p>
+                  </div>
+                )}
+                {!result?.directApproval && (result?.code || req.access_code) && (() => {
                   const code = result?.code ?? req.access_code ?? ''
                   const waLink = result?.waLink
                   const mailLink = req.email
@@ -259,7 +267,7 @@ export default function CandidateRequestsPage() {
                       className="btn btn-teal"
                       style={{ height: '36px', fontSize: '13px', opacity: isProcessing ? 0.6 : 1 }}>
                       <Check size={15} />
-                      {isProcessing ? 'מאשרת...' : 'אישור — שלח קוד'}
+                      {isProcessing ? 'מאשרת...' : 'אשרי מועמדת'}
                     </button>
                     <button
                       onClick={() => reject(req.id)}

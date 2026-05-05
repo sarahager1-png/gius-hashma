@@ -7,9 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ACADEMIC_LEVELS, DISTRICTS } from '@/lib/constants'
-
-const SPECIALIZATIONS = ['כיתות א-ב', 'כיתות ג-ד', 'כיתות ה-ו', 'כל הכיתות']
+import { ACADEMIC_LEVELS, DISTRICTS, SPECIALIZATIONS } from '@/lib/constants'
 import { KeyRound, CheckCircle } from 'lucide-react'
 
 export default function ActivateCandidatePage() {
@@ -142,7 +140,7 @@ export default function ActivateCandidatePage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label>שם מלא</Label>
               <Input value={form.full_name} onChange={e => set('full_name', e.target.value)} required />
@@ -165,7 +163,7 @@ export default function ActivateCandidatePage() {
 
           <hr className="my-2" />
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label>עיר</Label>
               <Input value={form.city} onChange={e => set('city', e.target.value)} />
@@ -186,7 +184,7 @@ export default function ActivateCandidatePage() {
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label>התמחות</Label>
               <Select onValueChange={v => set('specialization', v)}>

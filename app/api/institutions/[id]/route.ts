@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -11,7 +11,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   // verify caller owns this institution OR is admin
   const { data: profile } = await service.from('profiles').select('role').eq('id', user.id).single()
-  const isAdmin = profile?.role && ['מנהל רשת', 'אדמין מערכת'].includes(profile.role)
+  const isAdmin = profile?.role && ['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)
 
   if (!isAdmin) {
     const { data: inst } = await service.from('institutions').select('profile_id').eq('id', id).single()

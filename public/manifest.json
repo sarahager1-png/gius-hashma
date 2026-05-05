@@ -2,7 +2,8 @@
   "name": "מערכת גיוס והשמה",
   "short_name": "גיוס והשמה",
   "description": "פלטפורמה דיגיטלית לגיוס והשמה ברשת החינוך של חב\"ד",
-  "start_url": "/dashboard",
+  "start_url": "https://giuus.vercel.app/dashboard",
+  "scope": "https://giuus.vercel.app/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#F8F7FB",
@@ -10,7 +11,9 @@
   "lang": "he",
   "dir": "rtl",
   "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "https://giuus.vercel.app/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "https://giuus.vercel.app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "https://giuus.vercel.app/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "https://giuus.vercel.app/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

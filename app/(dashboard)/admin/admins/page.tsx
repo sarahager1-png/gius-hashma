@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import AdminsClient from './admins-client'
 
@@ -12,7 +12,7 @@ export default async function AdminsPage() {
   const { data: profile } = await service
     .from('profiles').select('role').eq('id', user.id).single()
 
-  if (!profile || !['מנהל רשת', 'אדמין מערכת'].includes(profile.role)) {
+  if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)) {
     redirect('/dashboard')
   }
 
@@ -20,7 +20,7 @@ export default async function AdminsPage() {
     service
       .from('profiles')
       .select('id, full_name, role, created_at')
-      .in('role', ['מנהל רשת', 'אדמין מערכת'])
+      .in('role', ['מנהלת מערכת', 'אדמין מערכת'])
       .order('created_at', { ascending: true }),
     service.auth.admin.listUsers({ perPage: 1000 }),
   ])

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 async function requireAdmin() {
@@ -7,7 +7,7 @@ async function requireAdmin() {
   if (!user) return null
   const { data: profile } = await createServiceClient()
     .from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['מנהל רשת', 'אדמין מערכת'].includes(profile.role)) return null
+  if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)) return null
   return user
 }
 
@@ -54,7 +54,7 @@ export async function DELETE(
   const { count } = await service
     .from('profiles')
     .select('*', { count: 'exact', head: true })
-    .in('role', ['מנהל רשת', 'אדמין מערכת'])
+    .in('role', ['מנהלת מערכת', 'אדמין מערכת'])
 
   if (!count || count <= 1) {
     return NextResponse.json({ error: 'לא ניתן להסיר את המנהל האחרון' }, { status: 400 })

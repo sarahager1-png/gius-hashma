@@ -1,4 +1,4 @@
-export type UserRole = 'מועמדת' | 'מוסד' | 'מנהל רשת' | 'אדמין מערכת'
+﻿export type UserRole = 'מועמדת' | 'מוסד' | 'מנהלת מערכת' | 'אדמין מערכת'
 
 export type AvailabilityStatus =
   | "מחפשת סטאג'"

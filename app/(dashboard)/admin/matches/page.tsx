@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
-import { Sparkles, Phone, FileText, MapPin, GraduationCap, Building2, MessageCircle, Send, X, CalendarDays, Check } from 'lucide-react'
+import { Sparkles, Phone, FileText, MapPin, GraduationCap, Building2, MessageCircle, Send, X, Check, Lightbulb } from 'lucide-react'
 
 interface Match {
   candidateId: string
@@ -34,34 +34,34 @@ function scoreStyle(s: number) {
 
 function waLink(phone: string | null, name: string, job: string, inst: string) {
   if (!phone) return '#'
-  const p = phone.replace(/\D/g, '').replace(/^0/, '')
+  const p = phone.replace(/\D/g, '').replace(/^972/, '').replace(/^0/, '')
   const text = encodeURIComponent(`שלום ${name},\nיש לנו הזדמנות שיכולה להתאים לך — משרת "${job}" ב${inst}.\nהאם תרצי לשמוע פרטים נוספים?`)
   return `https://wa.me/972${p}?text=${text}`
 }
 
-interface InviteModalProps {
+interface SuggestModalProps {
   match: Match
   onClose: () => void
   onSent: (key: string) => void
 }
 
-function InviteModal({ match, onClose, onSent }: InviteModalProps) {
-  const [message, setMessage] = useState('')
-  const [scheduledAt, setScheduledAt] = useState('')
+function SuggestModal({ match, onClose, onSent }: SuggestModalProps) {
+  const [note, setNote] = useState('')
   const [sending, setSending] = useState(false)
   const [err, setErr] = useState('')
 
   async function send() {
     setSending(true); setErr('')
-    const res = await fetch('/api/invitations', {
+    const res = await fetch('/api/admin/suggest', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         institution_id: match.institutionId,
         candidate_id: match.candidateId,
-        job_id: match.jobId,
-        message: message.trim() || null,
-        scheduled_at: scheduledAt || null,
+        candidate_name: match.candidateName,
+        job_title: match.jobTitle,
+        reasons: match.reasons,
+        note: note.trim() || null,
       }),
     })
     setSending(false)
@@ -70,7 +70,7 @@ function InviteModal({ match, onClose, onSent }: InviteModalProps) {
       onClose()
     } else {
       const d = await res.json()
-      setErr(d.error === 'Already invited' ? 'הזמנה כבר נשלחה למועמדת זו למשרה זו' : d.error)
+      setErr(d.error ?? 'שגיאה בשליחה')
     }
   }
 
@@ -82,9 +82,9 @@ function InviteModal({ match, onClose, onSent }: InviteModalProps) {
         style={{ borderRadius: '20px', background: '#fff', boxShadow: '0 24px 80px rgba(15,11,35,.25)' }} dir="rtl">
         <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #4B2E83 0%, #00A7B5 100%)' }} />
         <div className="px-6 py-5">
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-[18px] font-extrabold" style={{ color: 'var(--ink)' }}>שליחת הזמנה לראיון</h2>
+              <h2 className="text-[18px] font-extrabold" style={{ color: 'var(--ink)' }}>הצעת התאמה למוסד</h2>
               <p className="text-[13px] mt-0.5" style={{ color: 'var(--ink-3)' }}>
                 {match.candidateName} · {match.jobTitle} · {match.institutionName}
               </p>
@@ -96,32 +96,42 @@ function InviteModal({ match, onClose, onSent }: InviteModalProps) {
               <X size={16} style={{ color: 'var(--ink-3)' }} />
             </button>
           </div>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-[12px] font-bold mb-1.5" style={{ color: 'var(--ink-3)' }}>תאריך ושעת ראיון (אופציונלי)</label>
-              <input type="datetime-local" value={scheduledAt} onChange={e => setScheduledAt(e.target.value)}
-                className="w-full h-10 px-3 rounded-[10px] border text-[14px] outline-none"
-                style={{ borderColor: 'var(--line)', color: 'var(--ink)' }}
-                onFocus={e => { e.currentTarget.style.borderColor = 'var(--purple-200)'; e.currentTarget.style.boxShadow = '0 0 0 3px var(--purple-050)' }}
-                onBlur={e => { e.currentTarget.style.borderColor = 'var(--line)'; e.currentTarget.style.boxShadow = 'none' }}
-              />
+
+          {/* Match reasons */}
+          {match.reasons.length > 0 && (
+            <div className="rounded-[10px] px-3 py-2.5 mb-4 flex flex-wrap gap-1.5"
+              style={{ background: 'var(--teal-050)' }}>
+              {match.reasons.map(r => (
+                <span key={r} className="inline-flex items-center gap-1 text-[11.5px] font-semibold px-2 py-0.5 rounded-full"
+                  style={{ background: '#fff', color: 'var(--teal-600)' }}>
+                  <Check size={9} strokeWidth={3} />{r}
+                </span>
+              ))}
             </div>
+          )}
+
+          <div className="space-y-3">
             <div>
-              <label className="block text-[12px] font-bold mb-1.5" style={{ color: 'var(--ink-3)' }}>הודעה אישית (אופציונלי)</label>
-              <textarea value={message} onChange={e => setMessage(e.target.value)} rows={3}
-                placeholder={`שלום ${match.candidateName.split(' ')[0]}, ברצוננו להזמינך לראיון...`}
+              <label className="block text-[12px] font-bold mb-1.5" style={{ color: 'var(--ink-3)' }}>
+                הערה למוסד (אופציונלי)
+              </label>
+              <textarea value={note} onChange={e => setNote(e.target.value)} rows={3}
+                placeholder="למשל: מועמדת מצוינת עם ניסיון רלוונטי, ממליצה מאוד..."
                 className="w-full px-3 py-2.5 rounded-[10px] border text-[14px] outline-none resize-none"
                 style={{ borderColor: 'var(--line)', color: 'var(--ink)' }}
                 onFocus={e => { e.currentTarget.style.borderColor = 'var(--purple-200)'; e.currentTarget.style.boxShadow = '0 0 0 3px var(--purple-050)' }}
                 onBlur={e => { e.currentTarget.style.borderColor = 'var(--line)'; e.currentTarget.style.boxShadow = 'none' }}
               />
             </div>
+            <p className="text-[12px]" style={{ color: 'var(--ink-4)' }}>
+              ההצעה תישלח כהתראה למוסד. המוסד יחליט אם לפנות למועמדת.
+            </p>
             {err && <p className="text-[13px] px-3 py-2 rounded-[8px]" style={{ background: '#FEF2F2', color: '#DC2626' }}>{err}</p>}
             <div className="flex gap-2 pt-1">
               <button onClick={send} disabled={sending}
                 className="flex-1 h-11 rounded-[10px] text-[14px] font-bold text-white flex items-center justify-center gap-2"
                 style={{ background: 'linear-gradient(135deg, var(--purple) 0%, var(--purple-600) 100%)', opacity: sending ? 0.7 : 1 }}>
-                <Send size={14} />{sending ? 'שולח...' : 'שלח הזמנה'}
+                <Send size={14} />{sending ? 'שולח...' : 'שלח הצעה למוסד'}
               </button>
               <button onClick={onClose}
                 className="h-11 px-4 rounded-[10px] text-[14px] font-semibold border"
@@ -139,16 +149,16 @@ function InviteModal({ match, onClose, onSent }: InviteModalProps) {
 }
 
 export default function MatchesPage() {
-  const [inviteModal, setInviteModal] = useState<Match | null>(null)
-  const [sentKeys, setSentKeys] = useState<Set<string>>(new Set())
+  const [suggestModal, setSuggestModal] = useState<Match | null>(null)
+  const [suggestedKeys, setSuggestedKeys] = useState<Set<string>>(new Set())
 
   const { data: matches = [], isLoading } = useQuery<Match[]>({
     queryKey: ['admin-matches'],
     queryFn: () => fetch('/api/admin/matches').then(r => r.json()),
   })
 
-  function markSent(key: string) {
-    setSentKeys(prev => new Set(prev).add(key))
+  function markSuggested(key: string) {
+    setSuggestedKeys(prev => new Set(prev).add(key))
   }
 
   const byJob: Record<string, { job: string; inst: string; instId: string; jobId: string; items: Match[] }> = {}
@@ -159,12 +169,12 @@ export default function MatchesPage() {
 
   return (
     <div className="p-4 md:p-8 max-w-5xl">
-      {inviteModal && (
-        <InviteModal match={inviteModal} onClose={() => setInviteModal(null)} onSent={markSent} />
+      {suggestModal && (
+        <SuggestModal match={suggestModal} onClose={() => setSuggestModal(null)} onSent={markSuggested} />
       )}
 
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-4 mb-2">
         <div className="w-11 h-11 rounded-[13px] flex items-center justify-center shrink-0"
           style={{ background: 'var(--purple-050)', color: 'var(--purple)' }}>
           <Sparkles size={20} />
@@ -175,6 +185,10 @@ export default function MatchesPage() {
           <p className="page-subtitle">{matches.length} התאמות נמצאו — לפי מחוז, התמחות ועיר</p>
         </div>
       </div>
+      <p className="text-[13px] mb-6 px-1" style={{ color: 'var(--ink-4)' }}>
+        <Lightbulb size={13} className="inline me-1" style={{ color: 'var(--amber)' }} />
+        כאן ניתן להציע התאמות למוסדות. המוסד יקבל התראה ויחליט אם לשלוח הזמנה למועמדת.
+      </p>
 
       {isLoading ? (
         <div className="card">
@@ -230,7 +244,7 @@ export default function MatchesPage() {
                 {group.items.map(m => {
                   const sc = scoreStyle(m.score)
                   const key = `${m.jobId}:${m.candidateId}`
-                  const alreadySent = sentKeys.has(key)
+                  const alreadySuggested = suggestedKeys.has(key)
 
                   return (
                     <div key={key}
@@ -308,17 +322,17 @@ export default function MatchesPage() {
                           <MessageCircle size={12} />WA
                         </a>
                         <button
-                          onClick={() => !alreadySent && setInviteModal(m)}
-                          disabled={alreadySent}
+                          onClick={() => !alreadySuggested && setSuggestModal(m)}
+                          disabled={alreadySuggested}
                           className="flex items-center gap-1 h-8 px-3 rounded-[8px] border text-[12px] font-bold transition-all"
-                          style={alreadySent
+                          style={alreadySuggested
                             ? { borderColor: '#BBF7D0', color: 'var(--green)', background: 'var(--green-bg)' }
                             : { borderColor: 'var(--purple-200)', color: 'var(--purple)', background: 'var(--purple-050)' }}
-                          onMouseEnter={e => { if (!alreadySent) e.currentTarget.style.background = 'var(--purple-100)' }}
-                          onMouseLeave={e => { if (!alreadySent) e.currentTarget.style.background = 'var(--purple-050)' }}>
-                          {alreadySent
-                            ? <><Check size={12} />נשלחה</>
-                            : <><CalendarDays size={12} />הזמן</>}
+                          onMouseEnter={e => { if (!alreadySuggested) e.currentTarget.style.background = 'var(--purple-100)' }}
+                          onMouseLeave={e => { if (!alreadySuggested) e.currentTarget.style.background = 'var(--purple-050)' }}>
+                          {alreadySuggested
+                            ? <><Check size={12} />הוצע</>
+                            : <><Lightbulb size={12} />הצע למוסד</>}
                         </button>
                       </div>
                     </div>

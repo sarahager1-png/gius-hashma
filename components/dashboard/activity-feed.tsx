@@ -17,6 +17,18 @@ interface ActivityItem {
 
 const ICONS = { check: Check, user: User, briefcase: Briefcase, clock: Clock, file: FileText, x: X }
 
+function RichText({ html }: { html: string }) {
+  const parts = html.split(/(<b>[^<]*<\/b>)/)
+  return (
+    <>
+      {parts.map((part, i) => {
+        const match = part.match(/^<b>(.*)<\/b>$/)
+        return match ? <strong key={i} style={{ fontWeight: 700, color: 'var(--ink)' }}>{match[1]}</strong> : <span key={i}>{part}</span>
+      })}
+    </>
+  )
+}
+
 const RING: Record<string, React.CSSProperties> = {
   green:  { background: '#E4F6ED', color: 'var(--green)' },
   purple: { background: 'var(--purple-050)', color: 'var(--purple)' },
@@ -58,6 +70,12 @@ export default function ActivityFeed({ since, until }: Props) {
 
       {/* Items */}
       <div>
+        {data.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-12 gap-2">
+            <span className="text-[28px]">🌿</span>
+            <p className="text-[13.5px] font-semibold" style={{ color: 'var(--ink-3)' }}>אין פעילות להצגה</p>
+          </div>
+        )}
         {data.map((item, i) => {
           const Icon = ICONS[item.icon]
           return (
@@ -71,11 +89,9 @@ export default function ActivityFeed({ since, until }: Props) {
                 <Icon size={16} strokeWidth={item.icon === 'check' ? 2.3 : 2} />
               </span>
               <div className="flex-1 min-w-0">
-                <p
-                  className="text-[13.5px] leading-snug"
-                  style={{ color: 'var(--ink)', lineHeight: 1.45 }}
-                  dangerouslySetInnerHTML={{ __html: item.text }}
-                />
+                <p className="text-[13.5px] leading-snug" style={{ color: 'var(--ink-2)', lineHeight: 1.45 }}>
+                  <RichText html={item.text} />
+                </p>
                 <p className="text-[12px] font-medium mt-0.5" style={{ color: 'var(--ink-4)' }}>{item.time}</p>
               </div>
             </div>

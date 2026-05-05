@@ -71,7 +71,7 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
       {/* פרטים אישיים */}
       <section>
         <h2 className="font-semibold text-gray-700 mb-4">פרטים אישיים</h2>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1">
             <Label>שם מלא</Label>
             <Input value={profileForm.full_name} onChange={e => setP('full_name', e.target.value)} />
@@ -125,7 +125,7 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
       {/* השכלה */}
       <section>
         <h2 className="font-semibold text-gray-700 mb-4">השכלה</h2>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1">
             <Label>מכללה / אוניברסיטה</Label>
             <Input value={candForm.college} onChange={e => setC('college', e.target.value)} />

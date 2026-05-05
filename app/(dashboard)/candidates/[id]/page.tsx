@@ -1,10 +1,11 @@
-import { redirect, notFound } from 'next/navigation'
+﻿import { redirect, notFound } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import {
   ArrowRight, MapPin, Phone, GraduationCap, BookOpen,
   Briefcase, Calendar, MessageCircle, Building2, FileText,
 } from 'lucide-react'
+import InviteButton from './invite-button'
 
 const AVAIL_PILL: Record<string, { bg: string; color: string; dot: string }> = {
   "מחפשת סטאג'":       { bg: '#EDE9FE', color: '#5B21B6', dot: '#8B5CF6' },
@@ -14,8 +15,11 @@ const AVAIL_PILL: Record<string, { bg: string; color: string; dot: string }> = {
   'לא פעילה':           { bg: '#F3F4F6', color: '#6B7280', dot: '#9CA3AF' },
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export default async function CandidateDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  if (!UUID_RE.test(id)) notFound()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -24,7 +28,7 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
   const { data: viewerProfile } = await service
     .from('profiles').select('role').eq('id', user.id).single()
 
-  const allowed = ['מנהל רשת', 'אדמין מערכת', 'מוסד']
+  const allowed = ['מנהלת מערכת', 'אדמין מערכת', 'מוסד']
   if (!viewerProfile || !allowed.includes(viewerProfile.role)) redirect('/dashboard')
 
   const { data: candidate } = await service
@@ -38,6 +42,27 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
     .from('applications')
     .select('*', { count: 'exact', head: true })
     .eq('candidate_id', id)
+
+  // For institution viewers: load their active jobs for the invite button
+  let institutionForInvite: { id: string; institution_name: string } | null = null
+  let activeJobsForInvite: { id: string; title: string }[] = []
+  if (viewerProfile.role === 'מוסד') {
+    const { data: inst } = await service
+      .from('institutions')
+      .select('id, institution_name, is_approved')
+      .eq('profile_id', user.id)
+      .single()
+    if (inst?.is_approved) {
+      institutionForInvite = inst
+      const { data: jobsData } = await service
+        .from('jobs')
+        .select('id, title')
+        .eq('institution_id', inst.id)
+        .eq('status', 'פעילה')
+        .order('created_at', { ascending: false })
+      activeJobsForInvite = (jobsData ?? []) as { id: string; title: string }[]
+    }
+  }
 
   const name     = (candidate.profiles as any)?.full_name ?? '—'
   const phone    = (candidate.profiles as any)?.phone ?? null
@@ -90,24 +115,33 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
           </div>
 
           {/* Contact buttons */}
-          {(phone || waLink) && (
-            <div className="flex gap-3 mt-5 flex-wrap">
-              {phone && (
-                <a href={`tel:${phone}`}
-                  className="flex items-center gap-2 h-10 px-5 rounded-[10px] text-[13.5px] font-bold no-underline transition-all"
-                  style={{ background: 'var(--bg-2)', color: 'var(--ink-2)', border: '1px solid var(--line)' }}>
-                  <Phone size={15} />{phone}
-                </a>
-              )}
-              {waLink && (
-                <a href={waLink} target="_blank" rel="noreferrer"
-                  className="flex items-center gap-2 h-10 px-5 rounded-[10px] text-[13.5px] font-bold text-white no-underline transition-all"
-                  style={{ background: '#25D366', boxShadow: '0 3px 12px rgba(37,211,102,.3)' }}>
-                  <MessageCircle size={15} />וואצאפ
-                </a>
-              )}
-            </div>
-          )}
+          <div className="flex gap-3 mt-5 flex-wrap">
+            {phone && (
+              <a href={`tel:${phone}`}
+                className="flex items-center gap-2 h-10 px-5 rounded-[10px] text-[13.5px] font-bold no-underline transition-all"
+                style={{ background: 'var(--bg-2)', color: 'var(--ink-2)', border: '1px solid var(--line)' }}>
+                <Phone size={15} />{phone}
+              </a>
+            )}
+            {waLink && (
+              <a href={waLink} target="_blank" rel="noreferrer"
+                className="flex items-center gap-2 h-10 px-5 rounded-[10px] text-[13.5px] font-bold text-white no-underline transition-all"
+                style={{ background: '#25D366', boxShadow: '0 3px 12px rgba(37,211,102,.3)' }}>
+                <MessageCircle size={15} />וואצאפ
+              </a>
+            )}
+            {/* Invite button for institution viewers */}
+            {institutionForInvite && (
+              <InviteButton
+                candidateId={id}
+                candidateName={name}
+                candidatePhone={phone}
+                institutionId={institutionForInvite.id}
+                institutionName={institutionForInvite.institution_name}
+                activeJobs={activeJobsForInvite}
+              />
+            )}
+          </div>
         </div>
       </div>
 

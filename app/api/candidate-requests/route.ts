@@ -1,9 +1,13 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
-// POST — public, submit a request (no auth required)
+// POST — public, submit a request (auth optional — if authenticated via Google, profile_id is linked)
 export async function POST(request: Request) {
   const service = createServiceClient()
+
+  // Try to get the authenticated user (for Google OAuth flow)
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   const body = await request.json()
   const {
@@ -49,6 +53,7 @@ export async function POST(request: Request) {
       personal_note: personal_note?.trim() || null,
       availability_from: availability_from || null,
       availability_to: availability_to || null,
+      profile_id: user?.id ?? null,
     })
     .select()
     .single()
@@ -59,7 +64,7 @@ export async function POST(request: Request) {
   const { data: admins } = await service
     .from('profiles')
     .select('id')
-    .in('role', ['מנהל רשת', 'אדמין מערכת'])
+    .in('role', ['מנהלת מערכת', 'אדמין מערכת'])
 
   if (admins && admins.length > 0) {
     await service.from('notifications').insert(
@@ -83,7 +88,7 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data: profile } = await createServiceClient().from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['מנהל רשת', 'אדמין מערכת'].includes(profile.role))
+  if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role))
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const service = createServiceClient()

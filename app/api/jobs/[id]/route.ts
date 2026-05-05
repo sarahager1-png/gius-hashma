@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -10,7 +10,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data: profile } = await createServiceClient().from('profiles').select('role').eq('id', user.id).single()
-  const isAdmin = profile?.role && ['מנהל רשת', 'אדמין מערכת'].includes(profile.role)
+  const isAdmin = profile?.role && ['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)
 
   // non-admin must own the institution
   if (!isAdmin) {
@@ -27,7 +27,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 
   const body = await request.json()
-  const allowed = ['title', 'description', 'district', 'city', 'specialization', 'job_type', 'placement_type', 'status', 'expires_at', 'start_date', 'end_date']
+  const allowed = ['title', 'description', 'district', 'city', 'specialization', 'job_type', 'job_types', 'placement_type', 'status', 'expires_at', 'start_date', 'end_date']
   const update = Object.fromEntries(Object.entries(body).filter(([k]) => allowed.includes(k)))
 
   const { error } = await service.from('jobs').update(update).eq('id', id)

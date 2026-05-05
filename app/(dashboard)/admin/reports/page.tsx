@@ -11,7 +11,7 @@ export default async function AdminReportsPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
   const { data: profile } = await createServiceClient().from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['מנהל רשת', 'אדמין מערכת'].includes(profile.role)) redirect('/dashboard')
+  if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)) redirect('/dashboard')
 
   const { since, until } = await searchParams
   const service = createServiceClient()
@@ -234,7 +234,7 @@ export default async function AdminReportsPage({
                 {activityList.map(row => {
                   const isAccepted = row.status === 'התקבלה'
                   const phone = row.candidates?.profiles?.phone ?? ''
-                  const waBase = phone ? `https://wa.me/972${phone.replace(/\D/g, '').replace(/^0/, '')}` : null
+                  const waBase = phone ? `https://wa.me/972${phone.replace(/\D/g, '').replace(/^972/, '').replace(/^0/, '')}` : null
                   return (
                     <tr key={row.id}
                       className="hover:bg-[var(--bg-3)] transition-colors">

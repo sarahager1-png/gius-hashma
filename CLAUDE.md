@@ -28,7 +28,7 @@ NEXT_PUBLIC_APP_URL=
 
 **Stack:** Next.js 16 (App Router), Supabase (auth + postgres), Tailwind CSS v4, shadcn/ui, TypeScript.
 
-**Auth & routing:** `middleware.ts` guards all routes. Session via Supabase SSR cookies. Public paths: `/login`, `/register`, `/api/profile`.
+**Auth & routing:** `proxy.ts` guards all routes (Next.js 16 convention). Session via Supabase SSR cookies. Public paths: `/login`, `/register`, `/api/profile`, `/api/candidate-requests`, `/api/access-codes`.
 
 **Supabase clients — two patterns:**
 - `createClient()` — SSR client, respects RLS. Use for authenticated reads.

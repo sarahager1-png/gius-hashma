@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import InstitutionsClient from './institutions-client'
 import type { Institution } from '@/lib/types'
@@ -9,7 +9,7 @@ export default async function InstitutionsPage() {
   if (!user) redirect('/login')
   const service = createServiceClient()
   const { data: profile } = await service.from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['מנהל רשת', 'אדמין מערכת'].includes(profile.role)) redirect('/dashboard')
+  if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)) redirect('/dashboard')
 
   const { data: institutions } = await service
     .from('institutions')

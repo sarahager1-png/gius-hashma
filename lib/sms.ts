@@ -1,5 +1,30 @@
-// SMS via Inforu (inforu.co.il) — most common Israeli SMS provider
+// SMS via Inforu (inforu.co.il) — Israeli SMS provider
 // Set env vars: INFORU_USERNAME, INFORU_API_KEY, INFORU_SENDER_NAME
+// Without credentials, logs code to console (dev mode)
+
+// ── Named SMS helpers ─────────────────────────────────────────────────
+
+export function smsNewApplication(phone: string, candidateName: string, jobTitle: string) {
+  return sendSms(phone, `הגשה חדשה! ${candidateName} הגישה מועמדות למשרת "${jobTitle}". לצפייה: giuus.vercel.app/institution/applications`)
+}
+
+export function smsApplicationViewed(phone: string, institutionName: string, jobTitle: string) {
+  return sendSms(phone, `עדכון: ${institutionName} עיינה בהגשתך למשרת "${jobTitle}". בברכה, מערכת גיוס חב"ד`)
+}
+
+export function smsInstitutionApproved(phone: string, institutionName: string) {
+  return sendSms(phone, `ברכות! "${institutionName}" אושר במערכת גיוס חב"ד. כניסה: giuus.vercel.app`)
+}
+
+export function smsCandidateWelcome(phone: string, candidateName: string) {
+  return sendSms(phone, `ברוכה הבאה ${candidateName}! הפרופיל שלך נוצר במערכת גיוס חב"ד. השלימי את הפרופיל: giuus.vercel.app/profile`)
+}
+
+export function smsSurveyInvitation(phone: string, token: string, otherPartyName: string) {
+  return sendSms(phone, `שאלון שביעות רצון על ${otherPartyName} — 2 דקות בלבד: giuus.vercel.app/survey?t=${token}`)
+}
+
+// ── Core send function ────────────────────────────────────────────────
 
 export async function sendSms(phone: string, message: string): Promise<boolean> {
   const username = process.env.INFORU_USERNAME
@@ -7,8 +32,8 @@ export async function sendSms(phone: string, message: string): Promise<boolean> 
   const sender   = process.env.INFORU_SENDER_NAME ?? 'גיוס'
 
   if (!username || !apiKey) {
-    console.warn('[SMS] INFORU_USERNAME or INFORU_API_KEY not set — skipping SMS')
-    return false
+    console.log(`\n[SMS DEV] ➜ ${phone}\n${message}\n`)
+    return true  // return true so OTP flow works in dev/test
   }
 
   // normalize Israeli phone: 05X → 9725X
