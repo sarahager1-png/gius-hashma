@@ -12,13 +12,13 @@ function canAccess(role: string, pathname: string): boolean {
 
   // candidate: only her own pages
   if (role === 'מועמדת') {
-    const allowed = ['/dashboard', '/jobs', '/my-applications', '/my-invitations', '/history', '/profile', '/help', '/institutions']
+    const allowed = ['/dashboard', '/jobs', '/my-applications', '/my-invitations', '/notifications', '/history', '/profile', '/help', '/institutions']
     return allowed.some(p => pathname === p || pathname.startsWith(p + '/'))
   }
 
   // institution: only institution sub-pages + individual candidate profiles
   if (role === 'מוסד') {
-    const allowed = ['/dashboard', '/institution', '/history', '/help', '/settings', '/candidates']
+    const allowed = ['/dashboard', '/institution', '/notifications', '/history', '/help', '/settings', '/candidates']
     // allow /candidates/[id] (single profile) but not /candidates (admin list)
     if (/^\/candidates\/[^/]+$/.test(pathname)) return true
     return allowed.some(p => pathname === p || pathname.startsWith(p + '/'))

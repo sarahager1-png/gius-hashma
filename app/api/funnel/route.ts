@@ -1,18 +1,18 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 
-const DEMO = {
+const EMPTY = {
   stages: [
-    { label: 'מועמדות ברשת',   count: 127, pct: 100, color: '#5B3E9E' },
-    { label: 'הגישו מועמדות',  count: 89,  pct: 70,  color: '#7458B4' },
-    { label: 'הגיעו לראיון',   count: 52,  pct: 41,  color: '#9A80D1' },
-    { label: 'הצעה התקבלה',    count: 31,  pct: 24,  color: '#2DD4D4' },
-    { label: 'שוּבצו',         count: 18,  pct: 14,  color: '#1FB9B9' },
+    { label: 'מועמדות ברשת',  count: 0, pct: 100, color: '#5B3E9E' },
+    { label: 'הגישו מועמדות', count: 0, pct: 0,   color: '#7458B4' },
+    { label: 'הגיעו לראיון',  count: 0, pct: 0,   color: '#9A80D1' },
+    { label: 'הצעה התקבלה',   count: 0, pct: 0,   color: '#2DD4D4' },
+    { label: 'שוּבצו',        count: 0, pct: 0,   color: '#1FB9B9' },
   ],
-  conversionRate: 14.2,
-  conversionDelta: { value: 2.1, dir: 'up', label: 'מהחודש שעבר' },
-  avgOfferTime: 8,
-  avgOfferTimeDelta: { value: 1, dir: 'down', label: 'שיפור מהחודש שעבר' },
+  conversionRate: 0,
+  conversionDelta: { value: 0, dir: 'flat', label: '' },
+  avgOfferTime: 0,
+  avgOfferTimeDelta: { value: 0, dir: 'flat', label: '' },
 }
 
 export async function GET(req: Request) {
@@ -61,11 +61,11 @@ export async function GET(req: Request) {
     placedCandidates      = res[4].count
     respondedApps         = res[5].data as { applied_at: string; updated_at: string }[]
   } catch {
-    return NextResponse.json(DEMO)
+    return NextResponse.json(EMPTY)
   }
 
   const total = totalCandidates ?? 0
-  if (total === 0) return NextResponse.json(DEMO)
+  if (total === 0) return NextResponse.json(EMPTY)
 
   const applied      = appliedCandidates ?? 0
   const interviewed  = interviewedCandidates ?? 0
