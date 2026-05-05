@@ -52,8 +52,13 @@ export async function GET(request: Request) {
     .select('id, full_name')
     .in('role', ['מנהלת מערכת', 'אדמין מערכת'])
 
+  if (!adminProfiles?.length) {
+    console.warn('[CRON] stale-applications: no admins found, skipping email send')
+    return NextResponse.json({ ok: true, stale: stale.length, sent: 0 })
+  }
+
   let sent = 0
-  for (const profile of adminProfiles ?? []) {
+  for (const profile of adminProfiles) {
     const { data: authUser } = await service.auth.admin.getUserById(profile.id)
     const email = authUser?.user?.email
     if (!email) continue

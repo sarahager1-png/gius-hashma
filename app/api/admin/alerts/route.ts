@@ -1,21 +1,15 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
-const DEMO = [
-  { type: 'institution_unresponsive', id: 'd1', label: 'בית ספר נצח ישראל — 4 הגשות ממתינות', detail: 'הוותיקה ביותר: 18 ימים', severity: 'critical' },
-  { type: 'interview_no_response',    id: 'd2', label: 'שרה כהן לא אישרה ראיון — מורה מתמטיקה (בית ספר אורות)', detail: 'ממתין 54 שעות', severity: 'warning' },
-  { type: 'job_no_applicants',        id: 'd3', label: '"מחנך כיתה ה׳" — גן ילדים חדוה', detail: 'פעילה 21 ימים ללא הגשה', severity: 'warning' },
-]
-
 export async function GET() {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json(DEMO)
+    if (!user) return NextResponse.json([], { status: 401 })
 
     const { data: profile } = await createServiceClient().from('profiles').select('role').eq('id', user.id).single()
     if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role))
-      return NextResponse.json(DEMO)
+      return NextResponse.json([], { status: 403 })
 
     const service = createServiceClient()
     const now = Date.now()
@@ -74,10 +68,9 @@ export async function GET() {
       .sort((a, b) => (b.severity === 'critical' ? 1 : 0) - (a.severity === 'critical' ? 1 : 0))
 
     const alerts = [...unresponsiveInsts, ...stuckInterviews, ...jobsNoApplicants]
-    if (alerts.length === 0) return NextResponse.json(DEMO)
-
     return NextResponse.json(alerts)
-  } catch {
-    return NextResponse.json(DEMO)
+  } catch (err) {
+    console.error('[alerts] unexpected error:', err)
+    return NextResponse.json([], { status: 500 })
   }
 }

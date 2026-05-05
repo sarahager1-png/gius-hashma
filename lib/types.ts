@@ -142,6 +142,21 @@ export interface Invitation {
   jobs?: Job
 }
 
+export interface Inquiry {
+  id: string
+  candidate_id: string
+  institution_id: string
+  job_id: string | null
+  message: string
+  status: 'ממתינה' | 'נצפתה' | 'נענתה'
+  institution_reply: string | null
+  replied_at: string | null
+  created_at: string
+  candidates?: Candidate
+  institutions?: Institution
+  jobs?: Job
+}
+
 export interface Interview {
   id: string
   application_id: string
