@@ -50,16 +50,24 @@ export async function GET(request: Request) {
     const jobTitle = job.title
     const institutionName = job.institutions?.institution_name ?? ''
 
-    await sendInvitationReminderEmail({
-      candidateProfileId: profileId,
-      candidateName: name,
-      jobTitle,
-      institutionName,
-      scheduledAt: inv.scheduled_at,
-    })
+    try {
+      await sendInvitationReminderEmail({
+        candidateProfileId: profileId,
+        candidateName: name,
+        jobTitle,
+        institutionName,
+        scheduledAt: inv.scheduled_at,
+      })
+    } catch (err) {
+      console.error('[CRON] invitation-reminders email failed:', profileId, err)
+    }
 
     if (phone) {
-      await sendSms(phone, `תזכורת: הזמנה לראיון מ-${institutionName} למשרת "${jobTitle}" ממתינה לתגובה שלך. היכנסי לדשבורד: giuus.vercel.app`)
+      try {
+        await sendSms(phone, `תזכורת: הזמנה לראיון מ-${institutionName} למשרת "${jobTitle}" ממתינה לתגובה שלך. היכנסי לדשבורד: giuus.vercel.app`)
+      } catch (err) {
+        console.error('[CRON] invitation-reminders SMS failed:', phone, err)
+      }
     }
 
     reminded++

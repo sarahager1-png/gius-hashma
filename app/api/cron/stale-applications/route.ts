@@ -63,12 +63,16 @@ export async function GET(request: Request) {
     const email = authUser?.user?.email
     if (!email) continue
 
-    await sendStaleApplicationsEmail({
-      adminEmail: email,
-      adminName: profile.full_name ?? 'מנהל',
-      applications,
-    })
-    sent++
+    try {
+      await sendStaleApplicationsEmail({
+        adminEmail: email,
+        adminName: profile.full_name ?? 'מנהל',
+        applications,
+      })
+      sent++
+    } catch (err) {
+      console.error('[CRON] stale-applications email failed:', email, err)
+    }
   }
 
   return NextResponse.json({ ok: true, stale: stale.length, sent })

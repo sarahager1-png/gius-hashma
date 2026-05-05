@@ -1,18 +1,26 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 
-const DEMO = [
-  { id: 'candidates', label: 'מועמדות פעילות', value: 127, ring: 85,
-    delta: { value: 12, dir: 'up', unit: '', label: 'מהחודש שעבר' }, variant: 'purple', icon: 'users' },
-  { id: 'jobs', label: 'משרות פתוחות', value: 34, ring: 85,
-    delta: { value: 8, dir: 'flat', label: 'הגשות ממתינות' }, variant: 'soft', icon: 'briefcase' },
-  { id: 'placements', label: 'שיבוצים פעילים', value: 89, ring: 70,
-    delta: { value: 7, dir: 'up', unit: '', label: 'מהחודש שעבר' }, variant: 'teal', icon: 'heart' },
-  { id: 'avg_time', label: 'זמן טיפול ממוצע', value: 8, unit: 'ימים', ring: 73,
-    delta: { value: 2, dir: 'down', label: 'שיפור מהחודש שעבר' }, variant: 'amber', icon: 'clock' },
+const EMPTY = [
+  { id: 'candidates', label: 'מועמדות פעילות', value: 0, ring: 0,
+    delta: { value: 0, dir: 'flat', unit: '', label: 'במאגר' }, variant: 'purple', icon: 'users' },
+  { id: 'jobs', label: 'משרות פתוחות', value: 0, ring: 0,
+    delta: { value: 0, dir: 'flat', label: 'הגשות ממתינות' }, variant: 'soft', icon: 'briefcase' },
+  { id: 'placements', label: 'שיבוצים פעילים', value: 0, ring: 0,
+    delta: { value: 0, dir: 'flat', unit: '', label: 'מועמדות משובצות' }, variant: 'teal', icon: 'heart' },
+  { id: 'avg_time', label: 'זמן טיפול ממוצע', value: 0, unit: 'ימים', ring: 0,
+    delta: { value: 0, dir: 'flat', label: 'מהגשה לתגובה' }, variant: 'amber', icon: 'clock' },
 ]
 
 export async function GET(req: Request) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { data: profile } = await createServiceClient().from('profiles').select('role').eq('id', user.id).single()
+  if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role))
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   const { searchParams } = new URL(req.url)
   const since = searchParams.get('since')
   const until = searchParams.get('until')
@@ -44,7 +52,7 @@ export async function GET(req: Request) {
     ] = await Promise.all([candQ, jobsQ, placedQ, pendingQ])
 
     const isEmpty = !activeCandidates && !activeJobs && !placed && !pendingApps
-    if (isEmpty) return NextResponse.json(DEMO)
+    if (isEmpty) return NextResponse.json(EMPTY)
 
     const { data: respondedApps } = await service
       .from('applications').select('applied_at, updated_at')
@@ -74,7 +82,8 @@ export async function GET(req: Request) {
       { id: 'avg_time', label: 'זמן טיפול ממוצע', value: avgDays, unit: 'ימים', ring: timeRing,
         delta: { value: 0, dir: 'flat', label: 'מהגשה לתגובה' }, variant: 'amber', icon: 'clock' },
     ])
-  } catch {
-    return NextResponse.json(DEMO)
+  } catch (err) {
+    console.error('[kpis] unexpected error:', err)
+    return NextResponse.json(EMPTY)
   }
 }

@@ -1,5 +1,6 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { sendSms } from '@/lib/sms'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -11,19 +12,19 @@ export async function POST(request: Request) {
   if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role))
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { name, city, type, principal, phone, address } = await request.json()
+  const { name, city, type, principal, phone, address, email } = await request.json()
   if (!name?.trim()) return NextResponse.json({ error: 'שם מוסד חובה' }, { status: 400 })
+  if (!email?.trim()) return NextResponse.json({ error: 'אימייל חובה לשליחת הזמנה' }, { status: 400 })
 
-  // Create a placeholder auth user so the profile FK is satisfied
-  const dummyEmail = `inst-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@giuus-admin.internal`
-  const { data: authData, error: authError } = await service.auth.admin.createUser({
-    email: dummyEmail,
-    password: crypto.randomUUID(),
-    email_confirm: true,
-    user_metadata: { admin_created: true },
-  })
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app'
+
+  // Send invite via Supabase — generates a magic link + email automatically
+  const { data: authData, error: authError } = await service.auth.admin.inviteUserByEmail(
+    email.trim().toLowerCase(),
+    { redirectTo: `${APP_URL}/auth/callback?next=/dashboard` }
+  )
   if (authError || !authData.user)
-    return NextResponse.json({ error: authError?.message ?? 'Failed to create user' }, { status: 500 })
+    return NextResponse.json({ error: authError?.message ?? 'שגיאה ביצירת משתמש' }, { status: 500 })
 
   const { data: newProfile, error: pe } = await service
     .from('profiles')
@@ -47,6 +48,17 @@ export async function POST(request: Request) {
   if (ie) {
     await service.auth.admin.deleteUser(authData.user.id)
     return NextResponse.json({ error: ie.message }, { status: 500 })
+  }
+
+  if (phone) {
+    try {
+      await sendSms(
+        phone,
+        `שלום${principal ? ' ' + principal : ''}, הוזמנת למערכת הגיוס של רשת חב"ד כנציג/ת "${name.trim()}". קישור ההפעלה נשלח לאימייל: ${email.trim()}. לאחר ההפעלה תוכל/י להיכנס ולהשלים את פרטי המוסד.`
+      )
+    } catch (err) {
+      console.error('[institutions] SMS invite failed:', phone, err)
+    }
   }
 
   return NextResponse.json({ ok: true, id: newInst.id }, { status: 201 })

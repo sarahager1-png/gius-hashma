@@ -64,12 +64,16 @@ export async function GET(request: Request) {
     const email = authUser?.user?.email
     if (!email) continue
 
-    await sendWeeklySummaryEmail({
-      adminEmail: email,
-      adminName: profile.full_name ?? 'מנהל',
-      stats,
-    })
-    sent++
+    try {
+      await sendWeeklySummaryEmail({
+        adminEmail: email,
+        adminName: profile.full_name ?? 'מנהל',
+        stats,
+      })
+      sent++
+    } catch (err) {
+      console.error('[CRON] weekly-summary email failed:', email, err)
+    }
   }
 
   return NextResponse.json({ ok: true, sent })

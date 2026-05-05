@@ -55,21 +55,29 @@ export async function GET(request: Request) {
     const institutionName = app.jobs?.institutions?.institution_name ?? ''
 
     if (candidateProfileId) {
-      await sendInterviewReminderEmail({
-        candidateProfileId,
-        candidateName,
-        jobTitle,
-        institutionName,
-        scheduledAt: interview.scheduled_at,
-        location: interview.location,
-      })
+      try {
+        await sendInterviewReminderEmail({
+          candidateProfileId,
+          candidateName,
+          jobTitle,
+          institutionName,
+          scheduledAt: interview.scheduled_at,
+          location: interview.location,
+        })
+      } catch (err) {
+        console.error('[CRON] interview-reminders email failed:', candidateProfileId, err)
+      }
     }
 
     if (candidatePhone) {
-      const dt = new Date(interview.scheduled_at).toLocaleString('he-IL', {
-        day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
-      })
-      await sendSms(candidatePhone, `תזכורת: ראיון מחר! ${institutionName} · "${jobTitle}". תאריך: ${dt}${interview.location ? '. מיקום: ' + interview.location : ''}. בהצלחה! 🌟`)
+      try {
+        const dt = new Date(interview.scheduled_at).toLocaleString('he-IL', {
+          day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
+        })
+        await sendSms(candidatePhone, `תזכורת: ראיון מחר! ${institutionName} · "${jobTitle}". תאריך: ${dt}${interview.location ? '. מיקום: ' + interview.location : ''}. בהצלחה! 🌟`)
+      } catch (err) {
+        console.error('[CRON] interview-reminders SMS failed:', candidatePhone, err)
+      }
     }
 
     sent++

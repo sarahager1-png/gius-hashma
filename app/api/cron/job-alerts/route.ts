@@ -61,18 +61,30 @@ export async function GET(request: Request) {
       const name = candidate.profiles?.full_name ?? 'מועמדת'
       const phone = candidate.profiles?.phone
 
-      void sendNewJobMatchEmail({
-        candidateProfileId: candidate.profile_id,
-        candidateName: name,
-        jobTitle: job.title,
-        institutionName,
-        city,
-        jobId: job.id,
-      })
+      try {
+        await sendNewJobMatchEmail({
+          candidateProfileId: candidate.profile_id,
+          candidateName: name,
+          jobTitle: job.title,
+          institutionName,
+          city,
+          jobId: job.id,
+        })
+      } catch (err) {
+        console.error('[CRON] job-alerts email failed:', candidate.profile_id, err)
+      }
 
       if (phone) {
-        void sendSms(phone, `✨ משרה מתאימה לך! "${job.title}" ב-${institutionName}${city ? `, ${city}` : ''}. לצפייה: giuus.vercel.app/jobs`)
-        void sendWA(phone, `✨ משרה חדשה מתאימה לך!\n*${job.title}* — ${institutionName}${city ? ` · ${city}` : ''}\nלצפייה: giuus.vercel.app/jobs/${job.id}`)
+        try {
+          await sendSms(phone, `✨ משרה מתאימה לך! "${job.title}" ב-${institutionName}${city ? `, ${city}` : ''}. לצפייה: giuus.vercel.app/jobs`)
+        } catch (err) {
+          console.error('[CRON] job-alerts SMS failed:', phone, err)
+        }
+        try {
+          await sendWA(phone, `✨ משרה חדשה מתאימה לך!\n*${job.title}* — ${institutionName}${city ? ` · ${city}` : ''}\nלצפייה: giuus.vercel.app/jobs/${job.id}`)
+        } catch (err) {
+          console.error('[CRON] job-alerts WA failed:', phone, err)
+        }
       }
 
       totalSent++
