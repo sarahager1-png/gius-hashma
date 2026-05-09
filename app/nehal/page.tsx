@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   Building2, Users, BarChart2, ShieldCheck, Bell,
   FileDown, ClipboardList, CheckCircle, Settings, TrendingUp,
-  MessageSquare, Upload, Link2, MessageCircle,
+  MessageSquare, Upload, Link2, MessageCircle, ScrollText, MailOpen,
 } from 'lucide-react'
 import Link from 'next/link'
 import InstallFooter from '@/components/landing/install-footer'
@@ -79,6 +79,18 @@ const ADMIN_TOOLS = [
     color: '#D97706', bg: '#FEF3C7',
   },
   {
+    icon: ScrollText,
+    title: 'יומן פעולות',
+    desc: 'כל פעולת מנהל מתועדת — מי, מה, מתי — לבקרה ושקיפות מלאה',
+    color: '#DC2626', bg: '#FEE2E2',
+  },
+  {
+    icon: MailOpen,
+    title: 'הודעות ישירות',
+    desc: 'מוסדות שולחים הודעות ישירות למועמדות — מנוהל ומנוטר מכאן',
+    color: 'var(--teal)', bg: 'var(--teal-050)',
+  },
+  {
     icon: Settings,
     title: 'ניהול מערכת',
     desc: 'קודי גישה, ניהול אדמינים, הרצת מיגרציות ואפשרויות מתקדמות',
@@ -116,7 +128,9 @@ const DASHBOARDS = [
     items: [
       'סקרים — שליחה ומעקב תשובות',
       'יבוא CSV בצובר — מועמדות ומוסדות',
-      'קישורים וחיבורים — ניהול קישורי גישה',
+      'יומן פעולות — בקרת אדמינים ושקיפות',
+      'הודעות ישירות — מוסד ↔ מועמדת',
+      'התראות דפדפן (Web Push)',
       'העדפות תקשורת — וואטסאפ / SMS לפי משתמש',
     ],
   },

@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import {
   School, Briefcase, Search, MessageCircle,
-  CheckCircle, Clock, ClipboardList, Calendar, Star,
+  CheckCircle, Clock, ClipboardList, Calendar, Star, CalendarDays, FileStack, Bell,
 } from 'lucide-react'
 import Link from 'next/link'
 import InstallFooter from '@/components/landing/install-footer'
@@ -54,22 +54,34 @@ const FEATURES = [
     color: 'var(--teal)', bg: 'var(--teal-050)',
   },
   {
-    icon: Calendar,
-    title: 'תיאום ראיונות',
-    desc: 'שולחים הזמנה עם תאריך ומיקום — המועמדת מאשרת בוואטסאפ או SMS לפי בחירתה',
+    icon: CalendarDays,
+    title: 'לוח ראיונות + לוח שנה',
+    desc: 'כל הראיונות בתצוגת רשימה או לוח שנה חודשי — כולל דירוג אחרי הראיון',
     color: '#D97706', bg: '#FFFBEB',
   },
   {
     icon: MessageCircle,
-    title: 'עדכונים חכמים',
-    desc: 'מקבלים התראות בזמן אמת — וגם אתם בוחרים וואטסאפ או SMS לפי ההעדפה',
+    title: 'הודעות ישירות',
+    desc: 'שולחים הודעה ישירות למועמדת מתוך הפרופיל שלה — היא מקבלת התראה',
     color: '#15803D', bg: '#DCFCE7',
+  },
+  {
+    icon: FileStack,
+    title: 'תבניות משרה',
+    desc: 'שומרים תבניות לפרסום מהיר של משרות חוזרות — ללא הקלדה חוזרת',
+    color: 'var(--purple)', bg: 'var(--purple-050)',
   },
   {
     icon: Star,
     title: 'המלצות חכמות',
     desc: 'המערכת מציעה מועמדות שמתאימות למשרה שלכם אוטומטית',
-    color: 'var(--purple)', bg: 'var(--purple-050)',
+    color: 'var(--teal)', bg: 'var(--teal-050)',
+  },
+  {
+    icon: Bell,
+    title: 'עדכונים חכמים',
+    desc: 'בוחרים וואטסאפ, SMS או התראות דפדפן — מקבלים עדכונים בדיוק בדרך שנוחה',
+    color: '#D97706', bg: '#FFFBEB',
   },
 ]
 

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Users, MessageCircle, Download, Building2, Calendar, KeyRound, Eye, EyeOff, CheckCircle, Trash2 } from 'lucide-react'
 import type { UserRole } from '@/lib/types'
+import PushToggle from '@/components/push-toggle'
 
 interface SettingItem {
   icon: React.ComponentType<{ size?: number }>
@@ -172,6 +173,14 @@ export default function SettingsClient({ role }: Props) {
     <div className="p-4 md:p-8 max-w-2xl">
       <h1 className="page-title mb-1">הגדרות</h1>
       <span className="brand-line mb-6 block" />
+
+      {/* Push notifications */}
+      <div
+        className="rounded-[14px] border p-5 mb-6"
+        style={{ background: '#fff', borderColor: 'var(--line)', boxShadow: 'var(--shadow-sm)' }}
+      >
+        <PushToggle />
+      </div>
 
       {/* Password change — visible to all roles */}
       <div

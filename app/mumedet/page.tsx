@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import {
   GraduationCap, Search, FileText, Star, MessageCircle,
-  CheckCircle, Clock, ChevronLeft, Bell, MapPin,
+  CheckCircle, Clock, ChevronLeft, Bell, MapPin, MailOpen,
 } from 'lucide-react'
 import Link from 'next/link'
 import InstallFooter from '@/components/landing/install-footer'
@@ -55,8 +55,8 @@ const FEATURES = [
   },
   {
     icon: Bell,
-    title: 'מעקב הגשות',
-    desc: 'רואה את סטטוס כל בקשה — ממתינה, נצפתה, התקבלה',
+    title: 'התראות דפדפן',
+    desc: 'מפעילה התראות — מקבלת עדכון מיידי גם כשהאפליקציה לא פתוחה',
     color: 'var(--purple)', bg: 'var(--purple-050)',
   },
   {
@@ -66,10 +66,22 @@ const FEATURES = [
     color: '#15803D', bg: '#DCFCE7',
   },
   {
+    icon: MailOpen,
+    title: 'תיבת הודעות',
+    desc: 'מוסדות שולחים הודעות ישירות — קוראת ועונה במערכת',
+    color: 'var(--teal)', bg: 'var(--teal-050)',
+  },
+  {
     icon: MapPin,
     title: 'לפי מיקום',
     desc: 'רואה משרות קרובות אלייך לפי עיר ומחוז — בלי לחפש רחוק',
-    color: 'var(--teal)', bg: 'var(--teal-050)',
+    color: 'var(--purple)', bg: 'var(--purple-050)',
+  },
+  {
+    icon: CheckCircle,
+    title: 'מחיקת חשבון',
+    desc: 'GDPR מלא — מוחקת את כל הנתונים שלך בלחיצה אחת מעמוד ההגדרות',
+    color: '#DC2626', bg: '#FEE2E2',
   },
 ]
 

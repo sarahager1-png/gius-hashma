@@ -7,6 +7,7 @@ import {
   Briefcase, Calendar, MessageCircle, Building2, FileText,
 } from 'lucide-react'
 import InviteButton from './invite-button'
+import SendMessageButton from './send-message-button'
 
 const AVAIL_PILL: Record<string, { bg: string; color: string; dot: string }> = {
   "מחפשת סטאג'":       { bg: '#EDE9FE', color: '#5B21B6', dot: '#8B5CF6' },
@@ -141,6 +142,14 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
                 institutionId={institutionForInvite.id}
                 institutionName={institutionForInvite.institution_name}
                 activeJobs={activeJobsForInvite}
+              />
+            )}
+            {/* Send message — institution viewers with an approved institution */}
+            {viewerProfile.role === 'מוסד' && institutionForInvite && candidate.profile_id && (
+              <SendMessageButton
+                toCandidateName={name}
+                toProfileId={candidate.profile_id as string}
+                jobOptions={activeJobsForInvite}
               />
             )}
           </div>

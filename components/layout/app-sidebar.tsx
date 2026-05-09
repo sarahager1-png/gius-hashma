@@ -9,7 +9,7 @@ import {
   LayoutDashboard, Users, Briefcase, Building2, BarChart3,
   Settings, LogOut, ClipboardList, UserPlus, Sparkles,
   ShieldCheck, Mail, History, HelpCircle, MessageCircle, Send, UserCog, Inbox,
-  FileStack, CalendarDays, BellRing, Upload, ScrollText,
+  FileStack, CalendarDays, BellRing, Upload, ScrollText, MailOpen,
 } from 'lucide-react'
 
 interface NavItem {
@@ -25,6 +25,7 @@ const NAV_MAIN: Record<UserRole, NavItem[]> = {
     { href: '/jobs',            label: 'משרות',          icon: Briefcase       },
     { href: '/my-applications', label: 'הגשות שלי',      icon: ClipboardList   },
     { href: '/my-invitations',  label: 'הזמנות לראיון',  icon: Mail            },
+    { href: '/inbox',           label: 'הודעות',         icon: MailOpen        },
     { href: '/notifications',   label: 'התראות',         icon: BellRing        },
     { href: '/history',         label: 'היסטוריה',       icon: History         },
     { href: '/profile',         label: 'הפרופיל שלי',   icon: Users           },
