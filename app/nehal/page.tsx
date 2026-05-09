@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   Building2, Users, BarChart2, ShieldCheck, Bell,
   FileDown, ClipboardList, CheckCircle, Settings, TrendingUp,
+  MessageSquare, Upload, Link2, MessageCircle,
 } from 'lucide-react'
 import Link from 'next/link'
 import InstallFooter from '@/components/landing/install-footer'
@@ -20,7 +21,7 @@ const ADMIN_TOOLS = [
   {
     icon: Users,
     title: 'ניהול מועמדות',
-    desc: 'צפייה בכלל המועמדות הרשומות, עריכת פרטים, מעקב אחר תהליכים',
+    desc: 'צפייה בכלל המועמדות, עריכת פרטים, מעקב ומעבר לפרופיל מלא',
     color: 'var(--teal)', bg: 'var(--teal-050)',
   },
   {
@@ -30,50 +31,94 @@ const ADMIN_TOOLS = [
     color: 'var(--purple)', bg: 'var(--purple-050)',
   },
   {
-    icon: TrendingUp,
-    title: 'מגמות וניתוח',
-    desc: 'גרפים של מועמדות, שיבוצים ומשרות לאורך 30 יום / 6 חודשים / שנה',
+    icon: MessageSquare,
+    title: 'סקרים ומשוב',
+    desc: 'שליחת סקרים למועמדות ולמוסדות, מעקב אחר תשובות וניתוח',
     color: 'var(--teal)', bg: 'var(--teal-050)',
+  },
+  {
+    icon: Upload,
+    title: 'יבוא נתונים',
+    desc: 'העלאת קובץ CSV לייבוא מועמדות או מוסדות בצובר — מהיר ונוח',
+    color: 'var(--purple)', bg: 'var(--purple-050)',
+  },
+  {
+    icon: Link2,
+    title: 'קישורים וחיבורים',
+    desc: 'ניהול קישורי גישה, חיבורים בין מוסדות למועמדות ומשאבים נוספים',
+    color: 'var(--teal)', bg: 'var(--teal-050)',
+  },
+  {
+    icon: MessageCircle,
+    title: 'העדפות תקשורת',
+    desc: 'כל מועמדת ומוסד בוחרים וואטסאפ או SMS — נראה ומנוהל מכאן',
+    color: '#15803D', bg: '#DCFCE7',
   },
   {
     icon: Bell,
     title: 'ניטור התראות',
-    desc: 'מוסדות לא מגיבים, ראיונות ללא אישור, משרות ללא מגישות — בזמן אמת',
+    desc: 'מוסדות לא מגיבים, ראיונות ללא אישור, משרות פגות — בזמן אמת',
     color: '#D97706', bg: '#FEF3C7',
+  },
+  {
+    icon: TrendingUp,
+    title: 'מגמות וניתוח',
+    desc: 'גרפים של מועמדות, שיבוצים ומשרות לאורך 30 יום / 6 חודשים / שנה',
+    color: 'var(--purple)', bg: 'var(--purple-050)',
   },
   {
     icon: BarChart2,
     title: 'דוחות KPI',
     desc: 'מדד המרה, זמן ממוצע לשיבוץ, פעילות לפי מחוז ועוד',
-    color: 'var(--purple)', bg: 'var(--purple-050)',
+    color: 'var(--teal)', bg: 'var(--teal-050)',
   },
   {
     icon: FileDown,
     title: 'יצוא נתונים',
     desc: 'CSV מלא של שיבוצים ומועמדות — מוכן לפגישות ודיווחים',
-    color: 'var(--teal)', bg: 'var(--teal-050)',
+    color: '#D97706', bg: '#FEF3C7',
   },
   {
     icon: Settings,
     title: 'ניהול מערכת',
     desc: 'קודי גישה, ניהול אדמינים, הרצת מיגרציות ואפשרויות מתקדמות',
-    color: '#D97706', bg: '#FEF3C7',
+    color: 'var(--purple)', bg: 'var(--purple-050)',
   },
 ]
 
 const DASHBOARDS = [
   {
     title: 'לוח בקרה ראשי',
-    items: ['KPI cards — מועמדות, משרות, שיבוצים, ראיונות', 'תרשים מגמות לאורך זמן', 'פיד פעילות אחרונה בזמן אמת'],
+    items: [
+      'KPI cards — מועמדות, משרות, שיבוצים, ראיונות',
+      'תרשים מגמות לאורך זמן (30 יום / 6 חודשים / שנה)',
+      'פיד פעילות אחרונה בזמן אמת',
+    ],
   },
   {
     title: 'ניהול יישויות',
-    items: ['רשימת כל המוסדות + מצב אישור', 'כל המועמדות + פרופיל מלא', 'כל המשרות + מספר הגשות'],
+    items: [
+      'כל המוסדות + מצב אישור + העדפת תקשורת',
+      'כל המועמדות + פרופיל מלא + העדפת תקשורת',
+      'כל המשרות + מספר הגשות + סטטוס',
+    ],
   },
   {
     title: 'תהליכי גיוס',
-    desc: '',
-    items: ['הגשות ממתינות לבדיקה', 'ראיונות קרובים + אישורי נוכחות', 'שיבוצים שהושלמו + דוחות'],
+    items: [
+      'הגשות ממתינות לבדיקה',
+      'ראיונות קרובים + אישורי נוכחות',
+      'שיבוצים שהושלמו + דוחות',
+    ],
+  },
+  {
+    title: 'כלים חדשים',
+    items: [
+      'סקרים — שליחה ומעקב תשובות',
+      'יבוא CSV בצובר — מועמדות ומוסדות',
+      'קישורים וחיבורים — ניהול קישורי גישה',
+      'העדפות תקשורת — וואטסאפ / SMS לפי משתמש',
+    ],
   },
 ]
 
