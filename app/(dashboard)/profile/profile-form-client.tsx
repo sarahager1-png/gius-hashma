@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { AVAILABILITY_STATUSES, ACADEMIC_LEVELS, ACADEMIC_LEVELS_WITH_EXPERIENCE, DISTRICTS, SPECIALIZATIONS } from '@/lib/constants'
 import type { Profile, Candidate } from '@/lib/types'
+import { Upload, FileText, ExternalLink } from 'lucide-react'
 
 interface Props {
   profile: Profile
@@ -39,9 +40,30 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
   })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [cvUploading, setCvUploading] = useState(false)
+  const [cvError, setCvError] = useState('')
+  const cvInputRef = useRef<HTMLInputElement>(null)
 
   function setP(k: string, v: string) { setProfileForm(f => ({ ...f, [k]: v })) }
   function setC(k: string, v: string | boolean) { setCandForm(f => ({ ...f, [k]: v })) }
+
+  async function handleCvUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setCvUploading(true)
+    setCvError('')
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await fetch('/api/candidates/cv-upload', { method: 'POST', body: fd })
+    const json = await res.json()
+    if (res.ok) {
+      setC('cv_url', json.url)
+    } else {
+      setCvError(json.error ?? 'שגיאה בהעלאה')
+    }
+    setCvUploading(false)
+    if (cvInputRef.current) cvInputRef.current.value = ''
+  }
 
   const showExperience = ACADEMIC_LEVELS_WITH_EXPERIENCE.includes(candForm.academic_level as never)
 
@@ -186,8 +208,35 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
           <Textarea value={candForm.personal_note} onChange={e => setC('personal_note', e.target.value)} rows={2} placeholder="מידע נוסף שתרצי לשתף..." />
         </div>
         <div className="space-y-1 mt-4">
-          <Label>קישור קורות חיים (URL)</Label>
-          <Input value={candForm.cv_url} onChange={e => setC('cv_url', e.target.value)} dir="ltr" placeholder="https://" />
+          <Label>קורות חיים</Label>
+          <div className="flex flex-col gap-2">
+            {/* Upload button */}
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => cvInputRef.current?.click()}
+                disabled={cvUploading}
+                className="flex items-center gap-2 h-9 px-4 rounded-[10px] text-[13px] font-semibold border transition-all"
+                style={{ borderColor: 'var(--line)', color: 'var(--ink-2)', background: '#fff' }}>
+                <Upload size={14} />
+                {cvUploading ? 'מעלה...' : 'העלאת קובץ (PDF / Word)'}
+              </button>
+              {candForm.cv_url && (
+                <a href={candForm.cv_url} target="_blank" rel="noreferrer"
+                  className="flex items-center gap-1.5 h-9 px-3 rounded-[10px] text-[13px] font-semibold no-underline"
+                  style={{ background: 'var(--purple-050)', color: 'var(--purple)' }}>
+                  <FileText size={13} />צפייה <ExternalLink size={11} />
+                </a>
+              )}
+              <input ref={cvInputRef} type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={handleCvUpload} />
+            </div>
+            {cvError && <p className="text-[12px] font-semibold" style={{ color: 'var(--red)' }}>{cvError}</p>}
+            {/* Or paste URL */}
+            <div>
+              <p className="text-[11px] mb-1" style={{ color: 'var(--ink-4)' }}>או הדביקי קישור ישיר:</p>
+              <Input value={candForm.cv_url} onChange={e => setC('cv_url', e.target.value)} dir="ltr" placeholder="https://" />
+            </div>
+          </div>
         </div>
       </section>
 

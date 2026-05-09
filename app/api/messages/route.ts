@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { notify } from '@/lib/notify'
 
 // GET — inbox: messages sent to me, newest first
 export async function GET() {
@@ -52,14 +53,15 @@ export async function POST(request: Request) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // notify recipient
+  // notify recipient via in-app + web push
   const { data: sender } = await service.from('profiles').select('full_name').eq('id', user.id).single()
-  await service.from('notifications').insert({
+  void notify({
     profile_id: to_profile_id,
     type: 'message',
     title: `הודעה חדשה מ-${sender?.full_name ?? 'משתמש'}`,
     body: body.trim().substring(0, 100),
     related_id: data.id,
+    url: '/inbox',
   })
 
   return NextResponse.json({ ok: true, id: data.id }, { status: 201 })

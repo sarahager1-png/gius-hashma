@@ -5,6 +5,7 @@ import { sendInstitutionApprovedEmail } from '@/lib/email'
 import { smsInstitutionApproved } from '@/lib/sms'
 import { sendWA } from '@/lib/whatsapp'
 import { logAction } from '@/lib/audit'
+import { notify } from '@/lib/notify'
 
 export async function POST(_: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -42,12 +43,13 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
   const waPref = inst?.whatsapp_preference
 
   if (profileId) {
-    await service.from('notifications').insert({
+    void notify({
       profile_id: profileId,
       type: 'institution_approved',
       title: 'מוסדכם אושר! ✅',
       body: `"${name}" אושר במערכת. כעת ניתן לפרסם משרות.`,
       related_id: id,
+      url: '/dashboard',
     })
     void Promise.allSettled([
       sendInstitutionApprovedEmail({ institutionProfileId: profileId, institutionName: name }),
