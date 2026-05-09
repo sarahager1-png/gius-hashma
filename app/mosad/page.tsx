@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import {
-  School, Briefcase, Search, Users, MessageCircle,
+  School, Briefcase, Search, MessageCircle,
   CheckCircle, Clock, ClipboardList, Calendar, Star,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -28,7 +28,7 @@ const STEPS = [
   {
     n: '3',
     title: 'מגייסים ומשבצים',
-    desc: 'עוברים על בקשות, שולחים הזמנות לראיון ומסמנים שיבוץ בסיום',
+    desc: 'עוברים על בקשות, שולחים הזמנות לראיון — המועמדת מאשרת בוואטסאפ או SMS לפי בחירתה',
     color: '#15803D',
     bg: '#DCFCE7',
   },
@@ -56,13 +56,13 @@ const FEATURES = [
   {
     icon: Calendar,
     title: 'תיאום ראיונות',
-    desc: 'שולחים הזמנה עם תאריך ומיקום — המועמדת מאשרת ישירות מ-WhatsApp',
+    desc: 'שולחים הזמנה עם תאריך ומיקום — המועמדת מאשרת בוואטסאפ או SMS לפי בחירתה',
     color: '#D97706', bg: '#FFFBEB',
   },
   {
     icon: MessageCircle,
-    title: 'WhatsApp אינטגרציה',
-    desc: 'מקבלים עדכונים בזמן אמת על אישורי ראיון וביטולים ישר לנייד',
+    title: 'עדכונים חכמים',
+    desc: 'מקבלים התראות בזמן אמת — וגם אתם בוחרים וואטסאפ או SMS לפי ההעדפה',
     color: '#15803D', bg: '#DCFCE7',
   },
   {
@@ -147,7 +147,7 @@ export default function MosadLanding() {
           <p style={{ fontSize: '14px', color: 'var(--ink-2)', lineHeight: 1.7, margin: 0 }}>
             <strong style={{ color: 'var(--ink)' }}>מערכת גיוס.us</strong> היא הפלטפורמה הרשמית של רשת חינוך חב״ד לגיוס מורות, גננות וסטאג׳יריות.
             <br /><br />
-            מפרסמים משרה, עוברים על פרופילי מועמדות מסוננות, ושולחים הזמנה לראיון — הכל במקום אחד. המועמדת מאשרת ישירות מ-WhatsApp.
+            מפרסמים משרה, עוברים על פרופילי מועמדות מסוננות, ושולחים הזמנה לראיון — הכל במקום אחד. כל צד בוחר את ערוץ התקשורת שנוח לו — וואטסאפ או SMS.
           </p>
         </div>
 
@@ -178,7 +178,7 @@ export default function MosadLanding() {
               {[
                 { icon: CheckCircle, text: 'ניהול חינמי' },
                 { icon: Clock, text: 'אישור תוך יום' },
-                { icon: Users, text: 'מועמדות מאומתות' },
+                { icon: MessageCircle, text: 'וואטסאפ או SMS לבחירה' },
               ].map(({ icon: Icon, text }) => (
                 <span key={text} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11.5px', color: 'var(--ink-4)', fontWeight: 600 }}>
                   <Icon size={12} color="var(--green)" />
