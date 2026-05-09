@@ -126,7 +126,8 @@ export default async function DashboardPage() {
       return <PendingApproval fullName={profile.full_name} />
     }
 
-    const oneWeekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString()
+    const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7)
+    const oneWeekAgo = weekAgo.toISOString()
 
     // 1) Fetch jobs
     const { data: jobsRaw } = await service

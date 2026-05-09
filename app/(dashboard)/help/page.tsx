@@ -1,6 +1,6 @@
 ﻿import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { HelpCircle, CheckCircle2, ChevronLeft, ArrowLeft } from 'lucide-react'
+import { HelpCircle, CheckCircle2, ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 
 /* ─── Flow types ─── */

@@ -2,6 +2,12 @@ import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import HistoryClient from './history-client'
 
+type JobRow  = { title?: string; institution_id?: string; institutions?: { institution_name?: string } | null }
+type CandRow = { profiles?: { full_name?: string } | null }
+type AppRow  = { jobs?: JobRow | null; candidates?: CandRow | null }
+type InvRow  = { jobs?: { title?: string } | null; institutions?: { institution_name?: string } | null; candidates?: CandRow | null }
+type IvRow   = { applications?: AppRow | null }
+
 export default async function HistoryPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -35,7 +41,7 @@ export default async function HistoryPage() {
     ])
 
     for (const a of appsRes.data ?? []) {
-      const job = (a.jobs as any)
+      const job = a.jobs as JobRow | null
       const inst = job?.institutions?.institution_name ?? ''
       events.push({
         id: `app-${a.id}`, ts: a.updated_at,
@@ -47,8 +53,9 @@ export default async function HistoryPage() {
     }
 
     for (const inv of invRes.data ?? []) {
-      const job = (inv.jobs as any)
-      const inst = (inv.institutions as any)?.institution_name ?? ''
+      const inv2 = inv as unknown as InvRow
+      const job = inv2.jobs
+      const inst = (inv2.institutions as InvRow['institutions'])?.institution_name ?? ''
       events.push({
         id: `inv-${inv.id}`, ts: inv.created_at,
         type: 'invite',
@@ -60,7 +67,7 @@ export default async function HistoryPage() {
     }
 
     for (const iv of ivRes.data ?? []) {
-      const app = (iv.applications as any)
+      const app = iv.applications as IvRow['applications']
       const job = app?.jobs
       const inst = job?.institutions?.institution_name ?? ''
       const pending = iv.candidate_confirmed === null || iv.candidate_confirmed === undefined
@@ -96,8 +103,8 @@ export default async function HistoryPage() {
     ])
 
     for (const a of appsRes.data ?? []) {
-      const candName = (a.candidates as any)?.profiles?.full_name ?? 'מועמדת'
-      const jobTitle = (a.jobs as any)?.title ?? '—'
+      const candName = (a.candidates as CandRow | null)?.profiles?.full_name ?? 'מועמדת'
+      const jobTitle = (a.jobs as JobRow | null)?.title ?? '—'
       events.push({
         id: `app-${a.id}`, ts: a.updated_at,
         type: a.status === 'התקבלה' ? 'success' : a.status === 'נדחתה' ? 'rejection' : a.status === 'נצפתה' ? 'view' : 'application',
@@ -108,8 +115,8 @@ export default async function HistoryPage() {
     }
 
     for (const inv of invRes.data ?? []) {
-      const candName = (inv.candidates as any)?.profiles?.full_name ?? 'מועמדת'
-      const jobTitle = (inv.jobs as any)?.title ?? '—'
+      const candName = (inv.candidates as CandRow | null)?.profiles?.full_name ?? 'מועמדת'
+      const jobTitle = (inv.jobs as InvRow['jobs'])?.title ?? '—'
       events.push({
         id: `inv-${inv.id}`, ts: inv.created_at,
         type: 'invite',
@@ -120,7 +127,7 @@ export default async function HistoryPage() {
     }
 
     for (const iv of ivRes.data ?? []) {
-      const app = (iv.applications as any)
+      const app = iv.applications as IvRow['applications']
       const candName = app?.candidates?.profiles?.full_name ?? 'מועמדת'
       const jobTitle = app?.jobs?.title ?? '—'
       events.push({

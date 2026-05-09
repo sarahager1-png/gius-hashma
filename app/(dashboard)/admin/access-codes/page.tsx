@@ -29,6 +29,7 @@ export default function AccessCodesPage() {
     setLoading(false)
   }
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load() }, [])
 
   async function createCode() {

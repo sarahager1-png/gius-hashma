@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { ShieldCheck, RefreshCw, Phone } from 'lucide-react'
 
 export default function VerifyOtpPage() {
+  const router = useRouter()
   const [status, setStatus]       = useState<'loading' | 'no-phone' | 'form' | 'error'>('loading')
   const [maskedPhone, setMasked]  = useState('')
   const [devCode, setDevCode]     = useState('')
@@ -17,20 +19,12 @@ export default function VerifyOtpPage() {
   const [savingPhone, setSavingPhone] = useState(false)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
-  useEffect(() => { sendCode() }, [])  // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (cooldown <= 0) return
-    const t = setTimeout(() => setCooldown(c => c - 1), 1000)
-    return () => clearTimeout(t)
-  }, [cooldown])
-
-  async function sendCode() {
+  const sendCode = useCallback(async () => {
     setSendErr('')
     setStatus('loading')
     const res  = await fetch('/api/auth/send-otp', { method: 'POST' })
     const data = await res.json()
-    if (data.skip) { window.location.href = '/dashboard'; return }
+    if (data.skip) { router.push('/dashboard'); return }
     if (data.noPhone) { setStatus('no-phone'); return }
     if (data.error) { setSendErr(data.error); setStatus('error'); return }
     setMasked(data.maskedPhone ?? '')
@@ -38,7 +32,16 @@ export default function VerifyOtpPage() {
     setStatus('form')
     setCooldown(60)
     setTimeout(() => inputRefs.current[0]?.focus(), 100)
-  }
+  }, [router])
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { sendCode() }, [sendCode])
+
+  useEffect(() => {
+    if (cooldown <= 0) return
+    const t = setTimeout(() => setCooldown(c => c - 1), 1000)
+    return () => clearTimeout(t)
+  }, [cooldown])
 
   async function savePhone(e: React.FormEvent) {
     e.preventDefault()
@@ -88,7 +91,7 @@ export default function VerifyOtpPage() {
     const data = await res.json()
     setVerifying(false)
     if (data.ok) {
-      window.location.href = '/dashboard'
+      router.push('/dashboard')
     } else {
       setVerifyErr(data.error ?? 'קוד שגוי')
       setDigits(['', '', '', '', '', ''])
@@ -257,7 +260,7 @@ export default function VerifyOtpPage() {
         </div>
 
         <p className="mt-5 text-center text-[11.5px]" style={{ color: 'var(--ink-4)' }}>
-          © 2025 רשת חינוך חב״ד · אבטחה מוגברת
+          © 2026 רשת חינוך חב״ד · אבטחה מוגברת
         </p>
       </div>
     </div>

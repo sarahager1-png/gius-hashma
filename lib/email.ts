@@ -529,6 +529,31 @@ export async function sendSurveyEmail(opts: {
   }).catch(e => console.error('[EMAIL] survey:', e))
 }
 
+// ── Institution pending approval ─────────────────────────────────────
+export async function sendInstitutionPendingEmail(opts: {
+  institutionProfileId: string
+  institutionName: string
+}) {
+  const email = await getEmailByProfileId(opts.institutionProfileId)
+  if (!email) return
+
+  const body = `
+    <p>שלום,</p>
+    <p style="background:#e8eaf6;border-right:4px solid #5B3AAB;padding:12px 16px;border-radius:6px">
+      📬 קיבלנו את בקשת ההצטרפות של <strong>${opts.institutionName}</strong> למערכת גיוס חב&quot;ד.
+    </p>
+    <p>הבקשה נמצאת כעת בבדיקה. נציג יבחן את הפרטים ויאשר את המוסד בהקדם.</p>
+    <p>לאחר האישור תקבלו הודעה במייל ותוכלו להתחיל לפרסם משרות ולגלוש בין המועמדות.</p>
+    <p style="font-size:13px;color:#888">לשאלות ניתן לפנות לצוות המערכת. תודה על הסבלנות!</p>`
+
+  await getResend()?.emails.send({
+    from: FROM,
+    to: email,
+    subject: `📬 בקשת ההצטרפות שלכם התקבלה — ${opts.institutionName}`,
+    html: baseHtml('בקשת הצטרפות התקבלה', body),
+  }).catch(e => console.error('[EMAIL] institution-pending:', e))
+}
+
 // ── Interview reminder (24h before) ──────────────────────────────────
 export async function sendInterviewReminderEmail(opts: {
   candidateProfileId: string

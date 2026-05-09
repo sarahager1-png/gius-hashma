@@ -3,25 +3,32 @@
 import { useEffect, useState } from 'react'
 import { Smartphone } from 'lucide-react'
 
+declare global {
+  interface Window { __pwaInstalled?: boolean }
+}
+
 const PHONE = '0503339770'
 const WA_LINK = `https://wa.me/972${PHONE.replace(/^0/, '')}?text=${encodeURIComponent('שלום שרה, יש לי שאלה לגבי מערכת הגיוס')}`
 
 export default function InstallFooter() {
-  const [showIosHint, setShowIosHint] = useState(false)
+  const [showIosHint] = useState(() => {
+    if (typeof window === 'undefined') return false
+    const ua = navigator.userAgent
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    return !isStandalone && /iphone|ipad|ipod/i.test(ua)
+  })
   const [showAndroidHint, setShowAndroidHint] = useState(false)
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
     const ua = navigator.userAgent
-    const isIos = /iphone|ipad|ipod/i.test(ua)
     const isAndroid = /android/i.test(ua)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-    if (isStandalone) return
-    setShowIosHint(isIos)
-    if (isAndroid) {
-      setTimeout(() => {
-        if (!(window as any).__pwaInstalled) setShowAndroidHint(true)
-      }, 1500)
-    }
+    if (isStandalone || !isAndroid) return
+    const t = setTimeout(() => {
+      if (!window.__pwaInstalled) setShowAndroidHint(true)
+    }, 1500)
+    return () => clearTimeout(t)
   }, [])
 
   return (

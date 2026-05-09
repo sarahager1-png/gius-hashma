@@ -12,7 +12,6 @@ type Admin = {
 }
 
 const PURPLE = 'var(--purple)'
-const TEAL   = '#2DD4D4'
 
 function initials(name: string) {
   return name.trim().split(' ').slice(0, 2).map(w => w[0]).join('') || '?'

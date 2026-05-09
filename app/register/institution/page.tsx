@@ -1,7 +1,6 @@
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { DISTRICTS } from '@/lib/constants'
 import { CheckCircle, ChevronDown } from 'lucide-react'
@@ -54,7 +53,6 @@ function NativeSelect({ value, onChange, placeholder, options }: {
 }
 
 export default function RegisterInstitutionPage() {
-  const router = useRouter()
   const supabase = createClient()
 
   const [form, setForm] = useState({
@@ -66,6 +64,8 @@ export default function RegisterInstitutionPage() {
     contact_name: '', contact_phone: '',
     // institution
     institution_name: '', institution_type: '', district: '', city: '', address: '',
+    // messaging
+    whatsapp_preference: true,
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -81,9 +81,10 @@ export default function RegisterInstitutionPage() {
         setForm(f => ({ ...f, email: user.email ?? '' }))
       }
     })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function set(k: string, v: string) { setForm(f => ({ ...f, [k]: v })) }
+  function set(k: string, v: string | boolean) { setForm(f => ({ ...f, [k]: v })) }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -124,6 +125,7 @@ export default function RegisterInstitutionPage() {
           contact_name: form.contact_name.trim() || null,
           contact_phone: form.contact_phone.trim() || null,
           institution_type: form.institution_type || null,
+          whatsapp_preference: form.whatsapp_preference,
         },
       }),
     })
@@ -257,6 +259,30 @@ export default function RegisterInstitutionPage() {
               <input className={INPUT_CLS} style={{ ...INPUT_STYLE, maxWidth: '200px' }}
                 value={form.contact_phone} onChange={e => set('contact_phone', e.target.value)}
                 dir="ltr" placeholder="05X-XXXXXXX" />
+            </Row>
+          </Section>
+
+          {/* העדפת תקשורת */}
+          <Section title="העדפת תקשורת" icon="💬">
+            <Row label="ערוץ עדכונים">
+              <div className="flex items-center gap-3 py-1">
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={form.whatsapp_preference}
+                  onClick={() => set('whatsapp_preference', !form.whatsapp_preference)}
+                  className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none flex-shrink-0"
+                  style={{ background: form.whatsapp_preference ? '#00B1AE' : '#D1D5DB' }}
+                >
+                  <span
+                    className="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform"
+                    style={{ transform: form.whatsapp_preference ? 'translateX(-6px)' : 'translateX(-26px)' }}
+                  />
+                </button>
+                <span className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>
+                  {form.whatsapp_preference ? 'וואטסאפ + SMS' : 'SMS בלבד'}
+                </span>
+              </div>
             </Row>
           </Section>
 

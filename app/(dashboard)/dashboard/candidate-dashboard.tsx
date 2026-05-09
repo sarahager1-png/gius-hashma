@@ -108,11 +108,6 @@ function fmtDt(iso: string) {
   })
 }
 
-const INST_TYPE_COLORS: Record<string, { bg: string; color: string }> = {
-  'שלהבות חב"ד': { bg: 'var(--purple-050)', color: 'var(--purple)'   },
-  'בית חינוך':   { bg: 'var(--teal-050)',   color: 'var(--teal-600)' },
-  'קהילתי':      { bg: 'var(--amber-bg)',   color: 'var(--amber)'    },
-}
 
 export default function CandidateDashboard({ fullName, availabilityStatus, profileScore, matchedJobs, totalJobs, myApplications, suggestedJobs, upcomingInterviews, notifications: initialNotifs, pendingInvitations: initialInvitations }: Props) {
   const firstName = fullName?.split(' ')[0] ?? ''
@@ -438,7 +433,6 @@ export default function CandidateDashboard({ fullName, availabilityStatus, profi
             {matchedJobs.map((job, idx) => {
               const inst = job.institutions
               const instType = inst?.institution_type ?? ''
-              const itc = INST_TYPE_COLORS[instType] ?? { bg: 'var(--bg-2)', color: 'var(--ink-3)' }
               const gradients = [
                 'linear-gradient(135deg, #4B2E83 0%, #00A7B5 100%)',
                 'linear-gradient(135deg, #2D1B5C 0%, #4B2E83 100%)',

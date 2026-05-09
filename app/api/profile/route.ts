@@ -1,5 +1,6 @@
 ﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { sendCandidateWelcomeEmail, sendInstitutionPendingEmail } from '@/lib/email'
 
 // PATCH — update phone number only (used by OTP no-phone flow)
 export async function PATCH(request: Request) {
@@ -110,6 +111,7 @@ export async function POST(request: Request) {
         availability_from: reqData?.availability_from || null,
         availability_to: reqData?.availability_to || null,
         study_day: reqData?.study_day || null,
+        whatsapp_preference: typeof reqData?.whatsapp_preference === 'boolean' ? reqData.whatsapp_preference : true,
       })
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
@@ -125,10 +127,15 @@ export async function POST(request: Request) {
     if (reqData) {
       await service.from('candidate_requests').update({ profile_id: user.id }).eq('id', reqData.id)
     }
+
+    sendCandidateWelcomeEmail({
+      candidateProfileId: user.id,
+      candidateName: full_name || 'מועמדת',
+    }).catch(e => console.error('[PROFILE] candidate-welcome email failed:', e))
   }
 
   if (role === 'מוסד' && institution) {
-    const { institution_name, city, address, phone, institution_type, district } = institution
+    const { institution_name, city, address, phone, institution_type, district, whatsapp_preference } = institution
     const { error } = await service
       .from('institutions')
       .insert({
@@ -139,11 +146,17 @@ export async function POST(request: Request) {
         phone: phone || null,
         institution_type: institution_type || null,
         district: district || null,
+        whatsapp_preference: typeof whatsapp_preference === 'boolean' ? whatsapp_preference : true,
         // is_approved deliberately omitted — must go through admin approval flow
       })
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
+
+    sendInstitutionPendingEmail({
+      institutionProfileId: user.id,
+      institutionName: institution_name || 'המוסד שלכם',
+    }).catch(e => console.error('[PROFILE] institution-pending email failed:', e))
   }
 
   return NextResponse.json({ ok: true })

@@ -1,6 +1,7 @@
 ﻿'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Search, MapPin, Paperclip, Send, X, Calendar, CheckCircle, MessageCircle, ChevronDown, Star } from 'lucide-react'
 import type { Candidate } from '@/lib/types'
@@ -52,21 +53,20 @@ export default function CandidateSearchClient({ candidates, institutionId, insti
   const [invite, setInvite] = useState<InviteState | null>(null)
   const [saving, setSaving] = useState(false)
   const [invited, setInvited] = useState<Set<string>>(new Set())
-  const [favorites, setFavorites] = useState<Set<string>>(new Set())
-  const router = useRouter()
-
-  useEffect(() => {
+  const [favorites, setFavorites] = useState<Set<string>>(() => {
     try {
       const stored = localStorage.getItem(LS_KEY)
-      if (stored) setFavorites(new Set(JSON.parse(stored) as string[]))
+      if (stored) return new Set(JSON.parse(stored) as string[])
     } catch {}
-  }, [])
+    return new Set()
+  })
+  const router = useRouter()
 
   function toggleFavorite(e: React.MouseEvent, id: string) {
     e.stopPropagation()
     setFavorites(prev => {
       const s = new Set(prev)
-      s.has(id) ? s.delete(id) : s.add(id)
+      if (s.has(id)) { s.delete(id) } else { s.add(id) }
       try { localStorage.setItem(LS_KEY, JSON.stringify([...s])) } catch {}
       return s
     })
@@ -292,7 +292,7 @@ export default function CandidateSearchClient({ candidates, institutionId, insti
                       </button>
                     ) : (
                       <p className="flex-1 text-center text-[12px] py-2" style={{ color: 'var(--ink-4)' }}>
-                        אין משרות פעילות · <a href="/institution/jobs/new" style={{ color: 'var(--purple)' }}>פרסמי משרה</a>
+                        אין משרות פעילות · <Link href="/institution/jobs/new" style={{ color: 'var(--purple)' }}>פרסמי משרה</Link>
                       </p>
                     )}
                     {prof?.phone && (() => {

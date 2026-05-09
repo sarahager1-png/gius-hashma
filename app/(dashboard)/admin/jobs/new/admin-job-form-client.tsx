@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { SPECIALIZATIONS, JOB_TYPES, DISTRICTS, PLACEMENT_TYPES } from '@/lib/constants'
+import { SPECIALIZATIONS, DISTRICTS, PLACEMENT_TYPES } from '@/lib/constants'
 import { Building2 } from 'lucide-react'
 
 interface Institution {

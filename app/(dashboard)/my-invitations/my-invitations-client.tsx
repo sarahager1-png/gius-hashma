@@ -47,7 +47,7 @@ function buildInstWaLink(inv: Invitation) {
   return `https://wa.me/${normalized}?text=${text}`
 }
 
-export default function MyInvitationsClient({ invitations: initial, candidateId: _candidateId }: Props) {
+export default function MyInvitationsClient({ invitations: initial }: Props) {
   const [invitations, setInvitations] = useState(initial)
   const [responding, setResponding] = useState<string | null>(null)
   const [declinedIds, setDeclinedIds] = useState<Set<string>>(new Set())

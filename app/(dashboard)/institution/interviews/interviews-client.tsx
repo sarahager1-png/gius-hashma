@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import {
   Calendar, MapPin, Phone, Clock, CheckCircle2, XCircle,
-  MessageCircle, Briefcase, ChevronLeft, ChevronRight,
+  MessageCircle, Briefcase,
 } from 'lucide-react'
 
 export interface InterviewRow {
@@ -34,9 +34,6 @@ function fmtDay(dt: string) {
   return new Date(dt).toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' })
 }
 
-function fmtShortDay(dt: string) {
-  return new Date(dt).toLocaleDateString('he-IL', { day: 'numeric', month: 'long' })
-}
 
 function waLink(phone: string | null, name: string | null, jobTitle: string | null, dt: string) {
   if (!phone) return '#'
@@ -46,7 +43,7 @@ function waLink(phone: string | null, name: string | null, jobTitle: string | nu
   return `https://wa.me/${n}?text=${encodeURIComponent(msg)}`
 }
 
-export default function InterviewsClient({ interviews, institutionName }: Props) {
+export default function InterviewsClient({ interviews }: Props) {
   const now = new Date()
   const [tab, setTab] = useState<'upcoming' | 'past'>(
     interviews.some(iv => new Date(iv.scheduled_at) >= now) ? 'upcoming' : 'past'
@@ -214,7 +211,7 @@ export default function InterviewsClient({ interviews, institutionName }: Props)
                             {isConfirmed && (
                               <span className="flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full"
                                 style={{ background: '#E4F6ED', color: '#1A7A4A' }}>
-                                <CheckCircle2 size={10} />אושר ע"י מועמדת
+                                <CheckCircle2 size={10} />אושר ע&quot;י מועמדת
                               </span>
                             )}
                             {isDeclined && (

@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { AlertTriangle, Bell, Building2, CalendarX, Briefcase } from 'lucide-react'
+import { Bell, Building2, CalendarX, Briefcase } from 'lucide-react'
 
 interface Alert {
   type: 'institution_unresponsive' | 'interview_no_response' | 'job_no_applicants'

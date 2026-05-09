@@ -1,5 +1,6 @@
 ﻿import { redirect, notFound } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import type { Candidate } from '@/lib/types'
 import Link from 'next/link'
 import {
   ArrowRight, MapPin, Phone, GraduationCap, BookOpen,
@@ -64,8 +65,9 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
     }
   }
 
-  const name     = (candidate.profiles as any)?.full_name ?? '—'
-  const phone    = (candidate.profiles as any)?.phone ?? null
+  type ProfileRow = { full_name?: string | null; phone?: string | null }
+  const name     = (candidate.profiles as ProfileRow | null)?.full_name ?? '—'
+  const phone    = (candidate.profiles as ProfileRow | null)?.phone ?? null
   const initials = name !== '—' ? name.split(' ').slice(0, 2).map((w: string) => w[0]).join('') : '?'
   const sc       = AVAIL_PILL[candidate.availability_status] ?? AVAIL_PILL['לא פעילה']
   const isStage  = ["שנה ב' - סטאג'", "שנה ג' - סטאג'", "סטאג'"].includes(candidate.academic_level ?? '')
@@ -146,13 +148,13 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
       </div>
 
       {/* Study day — highlighted */}
-      {(candidate as any).study_day && (
+      {(candidate as Candidate).study_day && (
         <div className="flex items-center gap-3 px-5 py-3.5 rounded-[14px] mb-4"
           style={{ background: '#FFFBEB', border: '1px solid #FDE68A', boxShadow: 'var(--shadow-sm)' }}>
           <BookOpen size={18} style={{ color: '#D97706', flexShrink: 0 }} />
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[.07em]" style={{ color: '#92400E' }}>יום לימודים</p>
-            <p className="text-[14px] font-extrabold" style={{ color: '#78350F' }}>{(candidate as any).study_day}</p>
+            <p className="text-[14px] font-extrabold" style={{ color: '#78350F' }}>{(candidate as Candidate).study_day}</p>
           </div>
         </div>
       )}

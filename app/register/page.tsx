@@ -100,7 +100,7 @@ export default function RegisterPage() {
         </div>
 
         <p className="mt-5 text-center text-[11.5px]" style={{ color: 'var(--ink-4)' }}>
-          © 2025 רשת חינוך חב״ד
+          © 2026 רשת חינוך חב״ד
         </p>
       </div>
     </div>

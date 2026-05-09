@@ -194,7 +194,7 @@ function SurveyForm({ token }: { token: string }) {
         </form>
 
         <p className="text-center text-[12px] mt-4" style={{ color: '#9CA3AF' }}>
-          מערכת גיוס והשמה חב"ד · giuus.vercel.app
+          מערכת גיוס והשמה חב&quot;ד · giuus.vercel.app
         </p>
       </div>
     </div>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Check, User, Briefcase, Clock, FileText, X, ChevronLeft } from 'lucide-react'
+import { Check, User, Briefcase, Clock, FileText, X } from 'lucide-react'
 
 type FeedFilter = 'הכל' | 'שיבוץ' | 'הגשות'
 

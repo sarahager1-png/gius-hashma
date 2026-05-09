@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
-  ResponsiveContainer, LineChart, Line, XAxis, YAxis,
-  CartesianGrid, Tooltip, Legend, Area, AreaChart,
+  ResponsiveContainer, Line, XAxis, YAxis,
+  CartesianGrid, Tooltip, Area, AreaChart,
 } from 'recharts'
 import { MoreVertical } from 'lucide-react'
 
@@ -20,12 +20,13 @@ type Range = typeof RANGES[number]['value']
 interface TrendPoint { month: string; candidates: number; jobs: number; placements: number }
 interface TrendsData { range: string; data: TrendPoint[]; totals: { candidates: number; jobs: number; placements: number } }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+interface TooltipEntry { name: string; value: number; color: string }
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: TooltipEntry[]; label?: string }) => {
   if (!active || !payload?.length) return null
   return (
     <div className="rounded-[10px] border py-3 px-4 text-sm" style={{ background: '#fff', borderColor: 'var(--line)', boxShadow: 'var(--shadow-md)', fontFamily: 'Heebo, sans-serif' }}>
       <div className="font-bold mb-2" style={{ color: 'var(--ink)' }}>{label}</div>
-      {payload.map((p: any) => (
+      {payload.map((p: TooltipEntry) => (
         <div key={p.name} className="flex items-center gap-2 mb-1">
           <span className="w-3 h-3 rounded-sm" style={{ background: p.color }} />
           <span style={{ color: 'var(--ink-2)' }}>{p.name}: <b>{p.value}</b></span>

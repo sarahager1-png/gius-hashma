@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Send, CheckCircle, Loader2, ChevronDown, ChevronUp } from 'lucide-react'
+import { Send, CheckCircle, Loader2, ChevronDown } from 'lucide-react'
 
 interface Props {
   jobId: string

@@ -257,7 +257,7 @@ export default function MigrationRunner({ checks }: { checks: Check[] }) {
               נדרש מיגריישן — יש עמודות/טבלאות חסרות
             </p>
             <p className="text-[13px] mt-1" style={{ color: '#92400E' }}>
-              לחצי "העתקי SQL" → פתחי Supabase SQL Editor → הדביקי → לחצי Run
+              לחצי &quot;העתקי SQL&quot; → פתחי Supabase SQL Editor → הדביקי → לחצי Run
             </p>
           </div>
 

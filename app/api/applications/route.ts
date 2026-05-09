@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   // fetch job details for the notification
   const { data: job } = await service
     .from('jobs')
-    .select('title, city, institution_id, institutions(institution_name, profile_id, phone)')
+    .select('title, city, institution_id, institutions(institution_name, profile_id, phone, whatsapp_preference)')
     .eq('id', job_id)
     .single()
 
@@ -52,8 +52,11 @@ export async function POST(request: Request) {
     .select('id')
     .in('role', ['מנהלת מערכת', 'אדמין מערכת'])
 
-  const instProfileId = (job as unknown as { institutions: { profile_id: string | null } } | null)?.institutions?.profile_id ?? null
-  const instPhone = (job as unknown as { institutions: { phone: string | null } } | null)?.institutions?.phone ?? null
+  type InstFields = { profile_id: string | null; phone: string | null; whatsapp_preference: boolean | null }
+  const instFields = (job as unknown as { institutions: InstFields } | null)?.institutions ?? null
+  const instProfileId = instFields?.profile_id ?? null
+  const instPhone = instFields?.phone ?? null
+  const instWaPref = instFields?.whatsapp_preference
 
   const notifyIds = new Set<string>([
     ...(admins ?? []).map(a => a.id),
@@ -77,7 +80,7 @@ export async function POST(request: Request) {
     void Promise.allSettled([
       sendNewApplicationEmail({ institutionProfileId: instProfileId, candidateName, jobTitle }),
       instPhone ? smsNewApplication(instPhone, candidateName, jobTitle) : Promise.resolve(),
-      instPhone ? sendWA(instPhone, `📋 הגשה חדשה! ${candidateName} הגישה מועמדות למשרת "${jobTitle}". לצפייה: giuus.vercel.app/institution/applications`) : Promise.resolve(),
+      instPhone && instWaPref !== false ? sendWA(instPhone, `📋 הגשה חדשה! ${candidateName} הגישה מועמדות למשרת "${jobTitle}". לצפייה: giuus.vercel.app/institution/applications`) : Promise.resolve(),
     ])
   }
 

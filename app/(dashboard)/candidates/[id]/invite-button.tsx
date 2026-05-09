@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Send, X, Calendar, CheckCircle, MessageCircle } from 'lucide-react'
 
 interface ActiveJob { id: string; title: string }
@@ -60,11 +61,11 @@ export default function InviteButton({ candidateId, candidateName, candidatePhon
 
   if (activeJobs.length === 0) {
     return (
-      <a href="/institution/jobs/new"
+      <Link href="/institution/jobs/new"
         className="flex items-center gap-2 h-10 px-5 rounded-[10px] text-[13.5px] font-bold no-underline"
         style={{ background: 'var(--purple-050)', color: 'var(--purple)', border: '1px solid var(--purple-200)' }}>
         <Send size={15} />+ צרי משרה ושלחי הצעה
-      </a>
+      </Link>
     )
   }
 

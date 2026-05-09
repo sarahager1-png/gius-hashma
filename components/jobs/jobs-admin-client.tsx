@@ -195,7 +195,7 @@ export default function JobsAdminClient({ jobs, initialSearch = '' }: Props) {
                   </div>
 
                   {/* Date range */}
-                  {(job.start_date || (job as any).end_date) && (
+                  {(job.start_date || job.end_date) && (
                     <div className="mt-3 flex items-center gap-1.5"
                       style={{ color: 'var(--teal-600)' }}>
                       <CalendarDays size={12} />
@@ -204,8 +204,8 @@ export default function JobsAdminClient({ jobs, initialSearch = '' }: Props) {
                           ? new Date(job.start_date).toLocaleDateString('he-IL', { day: 'numeric', month: 'short' })
                           : '—'}
                         {' – '}
-                        {(job as any).end_date
-                          ? new Date((job as any).end_date).toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric' })
+                        {job.end_date
+                          ? new Date(job.end_date).toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric' })
                           : '—'}
                       </span>
                     </div>

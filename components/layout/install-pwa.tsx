@@ -16,32 +16,23 @@ declare global {
 }
 
 export default function InstallPwa() {
-  const [prompt, setPrompt] = useState<BeforeInstallPromptEvent | null>(null)
-  const [dismissed, setDismissed] = useState(false)
-  const [installed, setInstalled] = useState(false)
+  const [installed, setInstalled] = useState(() =>
+    typeof window !== 'undefined' && (window.matchMedia('(display-mode: standalone)').matches || !!window.__pwaInstalled)
+  )
+  const [dismissed, setDismissed] = useState(() =>
+    typeof window !== 'undefined' && localStorage.getItem('pwa-dismissed') === '1'
+  )
+  const [prompt, setPrompt] = useState<BeforeInstallPromptEvent | null>(() =>
+    typeof window !== 'undefined' ? (window.__pwaPrompt ?? null) : null
+  )
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').catch(() => {})
     }
 
-    if (window.matchMedia('(display-mode: standalone)').matches || window.__pwaInstalled) {
-      setInstalled(true)
-      return
-    }
+    if (installed || dismissed) return
 
-    if (localStorage.getItem('pwa-dismissed') === '1') {
-      setDismissed(true)
-      return
-    }
-
-    // Event captured before React mounted (early script in <head>)
-    if (window.__pwaPrompt) {
-      setPrompt(window.__pwaPrompt)
-      return
-    }
-
-    // Fallback: listen for future event
     const handler = (e: Event) => {
       e.preventDefault()
       setPrompt(e as BeforeInstallPromptEvent)
@@ -49,7 +40,7 @@ export default function InstallPwa() {
     window.addEventListener('beforeinstallprompt', handler)
     window.addEventListener('appinstalled', () => setInstalled(true))
     return () => window.removeEventListener('beforeinstallprompt', handler)
-  }, [])
+  }, [installed, dismissed])
 
   async function install() {
     if (!prompt) return

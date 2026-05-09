@@ -23,7 +23,7 @@ export async function updateSession(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const PUBLIC_PATHS = ['/login', '/register', '/reset-password', '/mosad', '/mumedet', '/nehal', '/demo', '/enter', '/auth/callback', '/api/profile', '/api/dashboard', '/api/activity', '/api/funnel', '/api/auto-login', '/api/check-cookie', '/api/candidate-requests', '/api/access-codes', '/survey', '/api/surveys', '/api/webhooks/whatsapp']
+  const PUBLIC_PATHS = ['/login', '/register', '/reset-password', '/mosad', '/mumedet', '/nehal', '/demo', '/enter', '/auth/callback', '/api/profile', '/api/dashboard', '/api/activity', '/api/funnel', '/api/auto-login', '/api/check-cookie', '/api/candidate-requests', '/api/access-codes', '/survey', '/api/surveys', '/api/webhooks/whatsapp', '/guide']
   const isPublic = request.nextUrl.pathname === '/' ||
     PUBLIC_PATHS.some(p => request.nextUrl.pathname.startsWith(p))
 

@@ -29,6 +29,7 @@ function ResetForm() {
     setExchanging(false)
   }, [searchParams, supabase])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { exchangeCode() }, [exchangeCode])
 
   async function handleSubmit(e: React.FormEvent) {

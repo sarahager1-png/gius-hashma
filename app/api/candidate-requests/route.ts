@@ -20,6 +20,7 @@ export async function POST(request: Request) {
     study_day,
     past_projects, personal_note,
     availability_from, availability_to,
+    whatsapp_preference,
   } = body
 
   if (!full_name?.trim() || !phone?.trim())
@@ -53,6 +54,7 @@ export async function POST(request: Request) {
       personal_note: personal_note?.trim() || null,
       availability_from: availability_from || null,
       availability_to: availability_to || null,
+      whatsapp_preference: typeof whatsapp_preference === 'boolean' ? whatsapp_preference : true,
       profile_id: user?.id ?? null,
     })
     .select()

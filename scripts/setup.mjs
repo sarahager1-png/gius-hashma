@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * setup.mjs — הקמת מסד הנתונים + יצירת חשבון מנהל
  * הרצה: node scripts/setup.mjs

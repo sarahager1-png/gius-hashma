@@ -426,7 +426,7 @@ export default function LoginPage() {
           className="text-center pb-5"
           style={{ fontSize: '11.5px', color: 'var(--ink-4)' }}
         >
-          © 2025 רשת חינוך חב״ד · גרסה 1.0
+          © 2026 רשת חינוך חב״ד · גרסה 1.0
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import Image from 'next/image'
 import { ACADEMIC_LEVELS, DISTRICTS } from '@/lib/constants'
 import {
@@ -314,7 +315,10 @@ function StepExperience({
 
 const STUDY_DAYS = ["יום א'", "יום ב'", "יום ג'", "יום ד'", "יום ה'", "אין יום לימודים"]
 
-function StepSkills({ form, set }: { form: Record<string, string>; set: (k: string, v: string) => void }) {
+function StepSkills({ form, set, whatsappPref, setWhatsappPref }: {
+  form: Record<string, string>; set: (k: string, v: string) => void
+  whatsappPref: boolean; setWhatsappPref: (v: boolean) => void
+}) {
   return (
     <div className="space-y-4">
       <Field label="כישורים טכניים" optional>
@@ -358,6 +362,27 @@ function StepSkills({ form, set }: { form: Record<string, string>; set: (k: stri
             {new Date(form.availability_to).toLocaleDateString('he-IL')}
           </p>
         )}
+      </div>
+
+      <div className="flex items-center justify-between rounded-[12px] p-4"
+        style={{ background: 'var(--purple-050)', border: '1px solid var(--purple-200)' }}>
+        <div>
+          <p className="text-[14px] font-semibold" style={{ color: 'var(--ink)' }}>קבלת עדכונים בוואטסאפ</p>
+          <p className="text-[12px] mt-0.5" style={{ color: 'var(--ink-4)' }}>עדכונים על משרות ישלחו גם לוואטסאפ (בנוסף ל-SMS)</p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={whatsappPref}
+          onClick={() => setWhatsappPref(!whatsappPref)}
+          className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none flex-shrink-0"
+          style={{ background: whatsappPref ? 'var(--teal)' : '#D1D5DB' }}
+        >
+          <span
+            className="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform"
+            style={{ transform: whatsappPref ? 'translateX(-6px)' : 'translateX(-26px)' }}
+          />
+        </button>
       </div>
     </div>
   )
@@ -404,6 +429,7 @@ export default function RegisterCandidatePage() {
     shlichut_location: '', shlichut_years: '',
     past_projects: '', personal_note: '', handwriting_font: '',
   })
+  const [whatsappPref, setWhatsappPref] = useState(true)
   const [specs, setSpecs]         = useState<string[]>([])
   const [customSpec, setCustomSpec] = useState('')
   const [experiences, setExperiences] = useState<Experience[]>([{ ...EMPTY_EXP }])
@@ -470,6 +496,7 @@ export default function RegisterCandidatePage() {
         shlichut_years:       form.shlichut_years.trim() || null,
         past_projects:        form.past_projects.trim() || null,
         personal_note:        form.personal_note.trim() || null,
+        whatsapp_preference:  whatsappPref,
       }),
     })
     setLoading(false)
@@ -497,11 +524,11 @@ export default function RegisterCandidatePage() {
           מנהלת הרשת תאשר את הצטרפותך בהקדם.<br />
           תישלח אליך הודעה עם אישור.
         </p>
-        <a href="/"
+        <Link href="/"
           className="block mt-7 py-3 rounded-[12px] text-[14px] font-extrabold text-white transition-all"
           style={{ background: 'linear-gradient(135deg,var(--purple),var(--teal))', boxShadow: '0 4px 14px rgba(91,58,171,.3)' }}>
           חזרה לדף הבית ←
-        </a>
+        </Link>
       </div>
     </div>
   )
@@ -620,7 +647,7 @@ export default function RegisterCandidatePage() {
               experiences={experiences} setExp={setExp}
               addExp={addExp} removeExp={removeExp}
               form={form} set={set} />}
-            {step === 3 && <StepSkills form={form} set={set} />}
+            {step === 3 && <StepSkills form={form} set={set} whatsappPref={whatsappPref} setWhatsappPref={setWhatsappPref} />}
             {step === 4 && <StepPersonalExpression form={form} set={set} />}
 
             {error && (
@@ -673,7 +700,7 @@ export default function RegisterCandidatePage() {
         </div>
 
         <p className="text-center text-[12px] mb-8" style={{ color: 'var(--ink-4)' }}>
-          <a href="/" style={{ color: 'var(--ink-4)', textDecoration: 'none' }}>← חזרה לדף הבית</a>
+          <Link href="/" style={{ color: 'var(--ink-4)', textDecoration: 'none' }}>← חזרה לדף הבית</Link>
         </p>
       </div>
     </div>

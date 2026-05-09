@@ -35,7 +35,7 @@ export async function GET(request: Request) {
 
     let query = service
       .from('candidates')
-      .select('profile_id, profiles(full_name, phone)')
+      .select('profile_id, whatsapp_preference, profiles(full_name, phone)')
       .not('availability_status', 'in', '("משובצת","לא פעילה")')
 
     if (job.specialization && job.specialization !== 'שניהם') {
@@ -55,7 +55,7 @@ export async function GET(request: Request) {
     const alreadyNotified = new Set((existingNotifs ?? []).map(n => n.profile_id))
 
     for (const c of candidates) {
-      const candidate = c as unknown as { profile_id: string; profiles: { full_name: string | null; phone: string | null } }
+      const candidate = c as unknown as { profile_id: string; whatsapp_preference: boolean | null; profiles: { full_name: string | null; phone: string | null } }
       if (alreadyNotified.has(candidate.profile_id)) continue
 
       const name = candidate.profiles?.full_name ?? 'מועמדת'
@@ -80,10 +80,12 @@ export async function GET(request: Request) {
         } catch (err) {
           console.error('[CRON] job-alerts SMS failed:', phone, err)
         }
-        try {
-          await sendWA(phone, `✨ משרה חדשה מתאימה לך!\n*${job.title}* — ${institutionName}${city ? ` · ${city}` : ''}\nלצפייה: giuus.vercel.app/jobs/${job.id}`)
-        } catch (err) {
-          console.error('[CRON] job-alerts WA failed:', phone, err)
+        if (candidate.whatsapp_preference !== false) {
+          try {
+            await sendWA(phone, `✨ משרה חדשה מתאימה לך!\n*${job.title}* — ${institutionName}${city ? ` · ${city}` : ''}\nלצפייה: giuus.vercel.app/jobs/${job.id}`)
+          } catch (err) {
+            console.error('[CRON] job-alerts WA failed:', phone, err)
+          }
         }
       }
 

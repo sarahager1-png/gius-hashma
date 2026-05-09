@@ -1,5 +1,6 @@
 ﻿import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import Link from 'next/link'
 import AdminJobFormClient from './admin-job-form-client'
 
 export default async function AdminNewJobPage() {
@@ -21,9 +22,9 @@ export default async function AdminNewJobPage() {
   return (
     <div className="p-4 md:p-8 max-w-2xl">
       <div className="mb-6">
-        <a href="/jobs" className="text-[13px] font-semibold" style={{ color: 'var(--purple)' }}>
+        <Link href="/jobs" className="text-[13px] font-semibold" style={{ color: 'var(--purple)' }}>
           ← חזרה למשרות
-        </a>
+        </Link>
         <h1 className="text-[26px] font-extrabold mt-2" style={{ color: 'var(--purple)', letterSpacing: '-.01em' }}>
           פרסום משרה חדשה
         </h1>

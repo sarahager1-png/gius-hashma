@@ -28,7 +28,7 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
 
   const { data: inst } = await service
     .from('institutions')
-    .select('institution_name, phone, profile_id, profiles(full_name, phone)')
+    .select('institution_name, phone, whatsapp_preference, profile_id, profiles(full_name, phone)')
     .eq('id', id)
     .single()
 
@@ -36,6 +36,7 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
   const profilePhone = (inst?.profiles as unknown as { phone: string | null } | null)?.phone ?? ''
   const phone = inst?.phone ?? profilePhone
   const profileId = inst?.profile_id ?? null
+  const waPref = inst?.whatsapp_preference
 
   if (profileId) {
     await service.from('notifications').insert({
@@ -48,7 +49,7 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
     void Promise.allSettled([
       sendInstitutionApprovedEmail({ institutionProfileId: profileId, institutionName: name }),
       phone ? smsInstitutionApproved(phone, name) : Promise.resolve(),
-      phone ? sendWA(phone, `✅ ברכות! המוסד "${name}" אושר במערכת גיוס חב"ד. כעת ניתן לפרסם משרות. כניסה: giuus.vercel.app`) : Promise.resolve(),
+      phone && waPref !== false ? sendWA(phone, `✅ ברכות! המוסד "${name}" אושר במערכת גיוס חב"ד. כעת ניתן לפרסם משרות. כניסה: giuus.vercel.app`) : Promise.resolve(),
     ])
   }
 

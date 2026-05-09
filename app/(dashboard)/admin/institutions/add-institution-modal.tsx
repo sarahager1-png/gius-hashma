@@ -14,7 +14,6 @@ const INST_TYPES = [
   'מוסד אחר',
 ]
 
-const DISTRICTS = ['ירושלים', 'תל אביב', 'חיפה', 'דרום', 'צפון', 'מרכז', 'שרון', 'שומרון', 'יהודה']
 
 interface FormState {
   name: string

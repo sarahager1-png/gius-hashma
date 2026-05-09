@@ -63,9 +63,13 @@ export async function GET(request: Request) {
       .order('created_at', { ascending: false })
 
     const headers = ['שם', 'טלפון', 'עיר', 'מחוז', 'התמחות', 'רמה', 'סטטוס', 'כישורים טכניים', 'כישורים בינאישיים']
-    const csvRows = (data ?? []).map((c: any) => [
-      c.profiles?.full_name ?? '',
-      c.profiles?.phone ?? '',
+    type ProfRow = { full_name?: string | null; phone?: string | null }
+    type CandRow = { district?: string | null; city?: string | null; specialization?: string | null; academic_level?: string | null; availability_status?: string | null; technical_skills?: string | null; interpersonal_skills?: string | null; profiles?: unknown }
+    const csvRows = (data ?? []).map((c: CandRow) => {
+      const prof = (Array.isArray(c.profiles) ? c.profiles[0] : c.profiles) as ProfRow | null
+      return [
+      prof?.full_name ?? '',
+      prof?.phone ?? '',
       c.city ?? '',
       c.district ?? '',
       c.specialization ?? '',
@@ -73,7 +77,8 @@ export async function GET(request: Request) {
       c.availability_status ?? '',
       c.technical_skills ?? '',
       c.interpersonal_skills ?? '',
-    ])
+      ]
+    })
 
     const csv = buildCsv(headers, csvRows)
     return new NextResponse(csv, {

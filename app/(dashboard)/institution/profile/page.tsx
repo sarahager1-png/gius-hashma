@@ -11,7 +11,7 @@ export default async function InstitutionProfilePage() {
 
   const { data: institution } = await service
     .from('institutions')
-    .select('id, institution_name, city, district, address, phone, institution_type, is_approved, profiles(full_name, phone)')
+    .select('id, institution_name, city, district, address, phone, institution_type, whatsapp_preference, is_approved, profiles(full_name, phone)')
     .eq('profile_id', user.id)
     .single()
 
@@ -31,7 +31,7 @@ export default async function InstitutionProfilePage() {
         </p>
       </div>
       <InstitutionProfileFormClient
-        institution={institution}
+        institution={{ ...institution, whatsapp_preference: (institution.whatsapp_preference as boolean | null) ?? true }}
         profile={{ full_name: prof?.full_name ?? null, phone: prof?.phone ?? null }}
       />
     </div>

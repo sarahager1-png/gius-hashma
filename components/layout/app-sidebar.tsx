@@ -85,7 +85,7 @@ interface Props {
 }
 
 export default function AppSidebar({
-  role, fullName: _fullName,
+  role,
   pendingInstitutions  = 0,
   pendingApplications  = 0,
   pendingInquiries     = 0,

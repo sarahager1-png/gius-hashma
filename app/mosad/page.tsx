@@ -3,18 +3,81 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
-import { School, Briefcase, Search, Users } from 'lucide-react'
+import {
+  School, Briefcase, Search, Users, MessageCircle,
+  CheckCircle, Clock, ClipboardList, Calendar, Star,
+} from 'lucide-react'
+import Link from 'next/link'
 import InstallFooter from '@/components/landing/install-footer'
 
-const STATS = [
-  { n: '80+',  label: 'בתי ספר ברשת' },
-  { n: '300+', label: 'מועמדות פעילות' },
-  { n: '200+', label: 'משרות אויישו' },
+const STEPS = [
+  {
+    n: '1',
+    title: 'נרשמים ומקבלים אישור',
+    desc: 'מוגישים בקשת הצטרפות — מנהלת הרשת מאשרת את המוסד תוך יום עסקים',
+    color: 'var(--teal)',
+    bg: 'var(--teal-050)',
+  },
+  {
+    n: '2',
+    title: 'מפרסמים משרות',
+    desc: 'יוצרים משרה עם כותרת, סוג, מיקום והתמחות — מיד נחשפת לכלל המועמדות',
+    color: 'var(--purple)',
+    bg: 'var(--purple-050)',
+  },
+  {
+    n: '3',
+    title: 'מגייסים ומשבצים',
+    desc: 'עוברים על בקשות, שולחים הזמנות לראיון ומסמנים שיבוץ בסיום',
+    color: '#15803D',
+    bg: '#DCFCE7',
+  },
 ]
+
 const FEATURES = [
-  { icon: Briefcase, title: 'פרסום משרות',    desc: 'הוסיפי משרות פתוחות ברגע — שליחות חינוך, סטאג׳ וחלקיות' },
-  { icon: Search,    title: 'חיפוש מועמדות', desc: 'סנני לפי התמחות, מחוז, שנות ניסיון ורמה אקדמית' },
-  { icon: Users,     title: 'ניהול הגשות',   desc: 'עיקבי אחר כל בקשה — מסינון ועד ראיון וסגירה' },
+  {
+    icon: Briefcase,
+    title: 'פרסום משרות',
+    desc: 'סטאג׳, חלקי ומלא — כולל תאריך כניסה, תוקף, התמחות ותיאור מפורט',
+    color: 'var(--teal)', bg: 'var(--teal-050)',
+  },
+  {
+    icon: Search,
+    title: 'עיון במועמדות',
+    desc: 'סנני לפי התמחות, מחוז, רמה אקדמית, שנות ניסיון ויום לימודים',
+    color: 'var(--purple)', bg: 'var(--purple-050)',
+  },
+  {
+    icon: ClipboardList,
+    title: 'ניהול בקשות',
+    desc: 'רואים כל הגשה, צופים בפרופיל, מסמנים "נצפתה" — ומחליטים',
+    color: 'var(--teal)', bg: 'var(--teal-050)',
+  },
+  {
+    icon: Calendar,
+    title: 'תיאום ראיונות',
+    desc: 'שולחים הזמנה עם תאריך ומיקום — המועמדת מאשרת ישירות מ-WhatsApp',
+    color: '#D97706', bg: '#FFFBEB',
+  },
+  {
+    icon: MessageCircle,
+    title: 'WhatsApp אינטגרציה',
+    desc: 'מקבלים עדכונים בזמן אמת על אישורי ראיון וביטולים ישר לנייד',
+    color: '#15803D', bg: '#DCFCE7',
+  },
+  {
+    icon: Star,
+    title: 'המלצות חכמות',
+    desc: 'המערכת מציעה מועמדות שמתאימות למשרה שלכם אוטומטית',
+    color: 'var(--purple)', bg: 'var(--purple-050)',
+  },
+]
+
+const PROCESS = [
+  { icon: ClipboardList, label: 'הגשה',       status: 'ממתינה',   color: '#5B21B6', bg: '#F5F3FF' },
+  { icon: Search,        label: 'נצפתה',      status: 'נצפתה',    color: '#0369A1', bg: '#E0F2FE' },
+  { icon: Calendar,      label: 'ראיון',      status: 'הוזמנה',   color: '#D97706', bg: '#FEF3C7' },
+  { icon: CheckCircle,   label: 'שיבוץ',     status: 'התקבלה',   color: '#166534', bg: '#DCFCE7' },
 ]
 
 const GOOGLE_SVG = (
@@ -44,18 +107,18 @@ export default function MosadLanding() {
   return (
     <div dir="rtl" style={{ minHeight: '100vh', background: 'var(--bg-2)', fontFamily: 'Heebo, system-ui, sans-serif' }}>
 
-      {/* Hero */}
-      <div style={{ background: 'linear-gradient(135deg, var(--purple) 0%, var(--teal) 100%)' }}>
+      {/* ── Hero ── */}
+      <div style={{ background: 'linear-gradient(135deg, #007680 0%, var(--teal) 50%, var(--purple) 100%)' }}>
         <div style={{ maxWidth: '560px', margin: '0 auto', padding: '0 20px' }}>
 
           {/* Nav */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 0' }}>
-            <a href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
               <div style={{ width: '32px', height: '32px', background: 'rgba(255,255,255,.15)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </div>
               <span style={{ color: 'rgba(255,255,255,.75)', fontSize: '13px', fontWeight: 600 }}>חזרה</span>
-            </a>
+            </Link>
             <div style={{ width: '52px', height: '52px', background: '#fff', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(0,0,0,.18)', padding: '4px' }}>
               <Image src="/logo-chabad.png" alt="לוגו" width={44} height={44} className="object-contain" />
             </div>
@@ -67,36 +130,39 @@ export default function MosadLanding() {
               <School size={13} color="white" />
               <span style={{ fontSize: '12px', fontWeight: 700, color: 'white', letterSpacing: '.05em' }}>פורטל המוסד</span>
             </div>
-            <h1 style={{ fontSize: '32px', fontWeight: 900, color: 'white', letterSpacing: '-.03em', lineHeight: 1.15, margin: '0 0 10px' }}>
-              גייסי את<br />שליחות החינוך המושלמות
+            <h1 style={{ fontSize: '34px', fontWeight: 900, color: 'white', letterSpacing: '-.03em', lineHeight: 1.12, margin: '0 0 12px' }}>
+              גייסי את<br />שליחות החינוך הנכונה
             </h1>
-            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,.75)', margin: '0 0 28px', lineHeight: 1.6 }}>
-              חיברנו עשרות בתי ספר ברשת חב״ד עם מאות מועמדות מצוינות
+            <p style={{ fontSize: '14.5px', color: 'rgba(255,255,255,.82)', margin: '0', lineHeight: 1.6 }}>
+              מאגר מועמדות מאומתות, מנוהל ברשת חינוך חב״ד —<br />פרסמי משרה ומצאי מועמדת תוך ימים
             </p>
-            <div style={{ display: 'flex', background: 'rgba(255,255,255,.12)', borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(255,255,255,.18)' }}>
-              {STATS.map((s, i) => (
-                <div key={s.label} style={{ flex: 1, padding: '13px 8px', textAlign: 'center', borderRight: i < 2 ? '1px solid rgba(255,255,255,.15)' : 'none' }}>
-                  <div style={{ fontSize: '20px', fontWeight: 900, color: 'white', letterSpacing: '-.02em' }}>{s.n}</div>
-                  <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.6)', marginTop: '2px', fontWeight: 600 }}>{s.label}</div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </div>
 
       <div style={{ maxWidth: '560px', margin: '0 auto', padding: '0 20px' }}>
 
-        {/* Login card */}
-        <div style={{ marginTop: '-20px', background: 'white', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 8px 32px rgba(91,58,171,.14)', border: '1px solid var(--line)', marginBottom: '14px' }}>
-          <div style={{ height: '4px', background: 'linear-gradient(90deg, var(--purple), var(--teal))' }} />
+        {/* ── About ── */}
+        <div style={{ marginTop: '8px', marginBottom: '16px', background: 'white', borderRadius: '16px', padding: '18px 20px', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>
+          <p style={{ fontSize: '14px', color: 'var(--ink-2)', lineHeight: 1.7, margin: 0 }}>
+            <strong style={{ color: 'var(--ink)' }}>מערכת גיוס.us</strong> היא הפלטפורמה הרשמית של רשת חינוך חב״ד לגיוס מורות, גננות וסטאג׳יריות.
+            <br /><br />
+            מפרסמים משרה, עוברים על פרופילי מועמדות מסוננות, ושולחים הזמנה לראיון — הכל במקום אחד. המועמדת מאשרת ישירות מ-WhatsApp.
+          </p>
+        </div>
+
+        {/* ── Login card ── */}
+        <div style={{ marginTop: '-20px', background: 'white', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,167,181,.14)', border: '1px solid var(--line)', marginBottom: '24px' }}>
+          <div style={{ height: '4px', background: 'linear-gradient(90deg, var(--teal), var(--purple))' }} />
           <div style={{ padding: '24px 24px 22px' }}>
             <h2 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--ink)', margin: '0 0 3px', letterSpacing: '-.01em' }}>כניסה למערכת</h2>
-            <p style={{ fontSize: '13px', color: 'var(--ink-3)', margin: '0 0 20px' }}>התחברי עם חשבון Google שלך</p>
+            <p style={{ fontSize: '13px', color: 'var(--ink-3)', margin: '0 0 20px' }}>
+              מוסד חדש? תועברו לטופס הרשמה — אישור תוך יום עסקים
+            </p>
 
             <button onClick={handleGoogle} disabled={pending}
               style={{ width: '100%', height: '52px', borderRadius: '13px', background: pending ? 'var(--bg-2)' : '#fff', border: '1.5px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', cursor: pending ? 'default' : 'pointer', fontFamily: 'inherit', fontSize: '15px', fontWeight: 800, color: 'var(--ink)', boxShadow: '0 2px 8px rgba(0,0,0,.06)', transition: 'all .15s' }}
-              onMouseEnter={e => { if (!pending) { e.currentTarget.style.borderColor = 'var(--purple-200)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(91,58,171,.12)' } }}
+              onMouseEnter={e => { if (!pending) { e.currentTarget.style.borderColor = 'var(--teal-100)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,167,181,.12)' } }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--line)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,.06)' }}
             >
               {!pending && GOOGLE_SVG}
@@ -107,22 +173,88 @@ export default function MosadLanding() {
               <div style={{ background: 'var(--red-bg)', borderRadius: '8px', padding: '9px 12px', fontSize: '13px', color: 'var(--red)', fontWeight: 600, marginTop: '12px' }}>{error}</div>
             )}
 
-            <p style={{ textAlign: 'center', fontSize: '12px', color: 'var(--ink-4)', marginTop: '14px', lineHeight: 1.5 }}>
-              מוסד חדש? לחצי "כניסה עם Google" — תועברו לטופס הרשמה
-            </p>
+            {/* Trust row */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginTop: '16px', flexWrap: 'wrap' }}>
+              {[
+                { icon: CheckCircle, text: 'ניהול חינמי' },
+                { icon: Clock, text: 'אישור תוך יום' },
+                { icon: Users, text: 'מועמדות מאומתות' },
+              ].map(({ icon: Icon, text }) => (
+                <span key={text} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11.5px', color: 'var(--ink-4)', fontWeight: 600 }}>
+                  <Icon size={12} color="var(--green)" />
+                  {text}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Feature chips — compact */}
-        <div style={{ display: 'flex', gap: '7px', paddingBottom: '28px', flexWrap: 'wrap' }}>
-          {FEATURES.map(({ icon: Icon, title }) => (
-            <div key={title} style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '6px', background: 'white', borderRadius: '10px', padding: '8px 10px', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>
-              <div style={{ width: '22px', height: '22px', background: 'var(--teal-050)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Icon size={12} color="var(--teal-600)" />
+        {/* ── How it works ── */}
+        <div style={{ marginBottom: '24px' }}>
+          <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--ink-4)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: '12px' }}>איך זה עובד</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {STEPS.map(s => (
+              <div key={s.n} style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', background: 'white', borderRadius: '14px', padding: '14px 16px', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '14px', fontWeight: 900, color: s.color }}>
+                  {s.n}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--ink)', marginBottom: '2px' }}>{s.title}</div>
+                  <div style={{ fontSize: '12.5px', color: 'var(--ink-3)', lineHeight: 1.45 }}>{s.desc}</div>
+                </div>
               </div>
-              <span style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--ink)', lineHeight: 1.2 }}>{title}</span>
-            </div>
-          ))}
+            ))}
+          </div>
+        </div>
+
+        {/* ── Status flow ── */}
+        <div style={{ marginBottom: '24px', background: 'white', borderRadius: '16px', padding: '16px 18px', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>
+          <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--ink-4)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: '14px', margin: '0 0 14px' }}>מחזור חיים של הגשה</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
+            {PROCESS.map((p, i) => (
+              <div key={p.label} style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: p.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <p.icon size={16} color={p.color} />
+                  </div>
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: p.color }}>{p.label}</span>
+                </div>
+                {i < PROCESS.length - 1 && (
+                  <div style={{ width: '20px', height: '1px', background: 'var(--line)', marginBottom: '16px', flexShrink: 0 }} />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Features ── */}
+        <div style={{ marginBottom: '32px' }}>
+          <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--ink-4)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: '12px' }}>כלים לניהול הגיוס</p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            {FEATURES.map(({ icon: Icon, title, desc, color, bg }) => (
+              <div key={title} style={{ background: 'white', borderRadius: '14px', padding: '14px 13px', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>
+                <div style={{ width: '34px', height: '34px', borderRadius: '9px', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '9px' }}>
+                  <Icon size={16} color={color} />
+                </div>
+                <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--ink)', marginBottom: '4px' }}>{title}</div>
+                <div style={{ fontSize: '11.5px', color: 'var(--ink-4)', lineHeight: 1.4 }}>{desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Bottom CTA ── */}
+        <div style={{ background: 'linear-gradient(135deg, #007680 0%, var(--teal) 60%, var(--purple) 100%)', borderRadius: '18px', padding: '22px 20px', textAlign: 'center', marginBottom: '32px' }}>
+          <div style={{ fontSize: '16px', fontWeight: 900, color: 'white', marginBottom: '6px' }}>מוכנים לגייס?</div>
+          <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.75)', marginBottom: '16px' }}>הצטרפו לרשת — אישור מהיר, ניהול פשוט</div>
+          <button onClick={handleGoogle} disabled={pending}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'white', borderRadius: '12px', padding: '11px 22px', border: 'none', cursor: pending ? 'default' : 'pointer', fontSize: '14px', fontWeight: 800, color: 'var(--teal-600)', fontFamily: 'inherit', boxShadow: '0 4px 14px rgba(0,0,0,.15)', transition: 'all .15s' }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,.2)' }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,.15)' }}
+          >
+            {!pending && GOOGLE_SVG}
+            {pending ? 'מחברת...' : 'כניסה עם Google'}
+          </button>
         </div>
       </div>
 

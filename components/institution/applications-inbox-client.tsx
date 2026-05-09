@@ -252,12 +252,12 @@ export default function ApplicationsInboxClient({
                           )}
                           {cand?.college && <span>{cand.college}</span>}
                         </div>
-                        {(cand as any)?.study_day && (
+                        {cand?.study_day && (
                           <div className="inline-flex items-center gap-1.5 mt-1.5 px-2 py-0.5 rounded-[6px]"
                             style={{ background: '#FFFBEB', border: '1px solid #FDE68A' }}>
                             <BookOpen size={11} style={{ color: '#D97706' }} />
                             <span className="text-[11.5px] font-bold" style={{ color: '#92400E' }}>
-                              {(cand as any).study_day}
+                              {cand.study_day}
                             </span>
                           </div>
                         )}
@@ -341,7 +341,7 @@ export default function ApplicationsInboxClient({
                       <div className="flex items-start gap-2 mb-3">
                         <AlertCircle size={16} style={{ color: '#15803D', marginTop: '2px', flexShrink: 0 }} />
                         <p className="text-[13.5px] font-semibold leading-snug" style={{ color: '#166534' }}>
-                          קבלת {name} למשרה זו תסגור אותה לפניות נוספות ותסמן את המועמדת כ"משובצת".
+                          קבלת {name} למשרה זו תסגור אותה לפניות נוספות ותסמן את המועמדת כ&quot;משובצת&quot;.
                         </p>
                       </div>
                       <div className="flex gap-2">

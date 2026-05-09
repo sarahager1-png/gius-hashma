@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Clock, CheckCircle, Phone } from 'lucide-react'
 
 const WA_LINK = `https://wa.me/972503339770?text=${encodeURIComponent('שלום, שלחתי בקשת הצטרפות למערכת הגיוס ואני ממתינה לאישור')}`
@@ -58,11 +59,11 @@ export default function PendingPage() {
           יש שאלה? שלחי הודעת WhatsApp
         </a>
 
-        <a href="/"
+        <Link href="/"
           className="block text-center text-[12.5px] font-semibold"
           style={{ color: 'var(--ink-4)', textDecoration: 'none' }}>
           ← חזרה לדף הבית
-        </a>
+        </Link>
       </div>
     </div>
   )

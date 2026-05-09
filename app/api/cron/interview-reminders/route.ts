@@ -38,9 +38,23 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
+  // Deduplication: skip interviews already reminded today
+  const interviewIds = (interviews ?? []).map(i => i.id)
+  const { data: alreadyReminded } = interviewIds.length
+    ? await service
+        .from('notifications')
+        .select('related_id')
+        .eq('type', 'interview_reminder')
+        .in('related_id', interviewIds)
+    : { data: [] }
+
+  const remindedSet = new Set((alreadyReminded ?? []).map(n => n.related_id))
+
   let sent = 0
 
   for (const interview of interviews ?? []) {
+    if (remindedSet.has(interview.id)) continue
+
     const app = interview.applications as unknown as {
       candidates: { profile_id: string; profiles: { full_name: string | null; phone: string | null } }
       jobs: { title: string; institutions: { institution_name: string } }
@@ -55,6 +69,15 @@ export async function GET(request: Request) {
     const institutionName = app.jobs?.institutions?.institution_name ?? ''
 
     if (candidateProfileId) {
+      // Record reminder so deduplication works on re-run
+      await service.from('notifications').insert({
+        profile_id: candidateProfileId,
+        type: 'interview_reminder',
+        title: 'תזכורת לראיון מחר',
+        body: `ראיון עם ${institutionName} למשרת "${jobTitle}"`,
+        related_id: interview.id,
+      })
+
       try {
         await sendInterviewReminderEmail({
           candidateProfileId,

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { X, Quote } from 'lucide-react'
 
 const QUOTES = [
@@ -30,16 +30,12 @@ function getDailyQuote(): string {
 const STORAGE_KEY = 'chabad_quote_dismissed'
 
 export default function ChabadQuote() {
-  const [visible, setVisible] = useState(false)
-  const quote = getDailyQuote()
-
-  useEffect(() => {
+  const [visible, setVisible] = useState(() => {
+    if (typeof window === 'undefined') return false
     const dismissed = localStorage.getItem(STORAGE_KEY)
-    const today = new Date().toDateString()
-    if (dismissed !== today) {
-      setVisible(true)
-    }
-  }, [])
+    return dismissed !== new Date().toDateString()
+  })
+  const quote = getDailyQuote()
 
   function dismiss() {
     localStorage.setItem(STORAGE_KEY, new Date().toDateString())

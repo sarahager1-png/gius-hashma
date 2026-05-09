@@ -53,6 +53,7 @@ export default function CandidateRequestsPage() {
     setLoading(false)
   }
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load() }, [])
 
   async function approve(req: CandidateRequest) {

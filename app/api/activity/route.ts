@@ -16,7 +16,6 @@ function timeAgo(iso: string) {
   return new Date(iso).toLocaleDateString('he-IL', { day: 'numeric', month: 'long' })
 }
 
-const now = Date.now()
 const DEMO = [
   { id: 1, color: 'green',  icon: 'check',    type: 'placement',   time: 'לפני 12 דקות', text: '<b>שרה לוי</b> התקבלה למשרת <b>גננת בכירה</b> ב<b>גן ילדים אהבת ישראל</b>' },
   { id: 2, color: 'purple', icon: 'user',      type: 'application', time: 'לפני 28 דקות', text: '<b>רחל כהן</b> הגישה מועמדות למשרת <b>מורה מתמטיקה · בית ספר נצח ישראל</b>' },
@@ -98,7 +97,6 @@ export async function GET(req: Request) {
   for (const iv of ivs ?? []) {
     const app  = iv.applications as unknown as { candidates: { profiles: { full_name: string | null } } | null; jobs: { title: string; institutions: { institution_name: string } } | null } | null
     const cand = app?.candidates?.profiles?.full_name ?? 'מועמדת'
-    const job  = app?.jobs?.title ?? '—'
     const inst = app?.jobs?.institutions?.institution_name ?? ''
     const dt   = new Date(iv.scheduled_at).toLocaleDateString('he-IL', { day: 'numeric', month: 'long' })
 

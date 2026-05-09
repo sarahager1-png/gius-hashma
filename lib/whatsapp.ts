@@ -56,10 +56,14 @@ export interface WaMessage {
   name: string      // display name
 }
 
+interface WaContact { wa_id: string; profile?: { name?: string } }
+interface WaMsg { type: string; from: string; text?: { body?: string }; id: string }
+interface WaValue { messages?: WaMsg[]; contacts?: WaContact[] }
+
 export function parseWebhookMessages(body: unknown): WaMessage[] {
   try {
-    const entry = (body as any)?.entry?.[0]
-    const changes = entry?.changes?.[0]?.value
+    const wb = body as { entry?: { changes?: { value?: WaValue }[] }[] }
+    const changes = wb?.entry?.[0]?.changes?.[0]?.value
     const msgs: WaMessage[] = []
 
     for (const msg of changes?.messages ?? []) {
@@ -68,7 +72,7 @@ export function parseWebhookMessages(body: unknown): WaMessage[] {
         from: msg.from,
         text: (msg.text?.body ?? '').trim(),
         msgId: msg.id,
-        name: changes?.contacts?.find((c: any) => c.wa_id === msg.from)?.profile?.name ?? '',
+        name: changes?.contacts?.find((c: WaContact) => c.wa_id === msg.from)?.profile?.name ?? '',
       })
     }
     return msgs
@@ -78,17 +82,31 @@ export function parseWebhookMessages(body: unknown): WaMessage[] {
 }
 
 // Detect intent from a freeform reply
-export type Intent = 'confirm' | 'decline' | 'new_job' | 'help' | 'unknown'
+export type Intent =
+  | 'confirm' | 'decline'
+  | 'new_job'
+  | 'jobs' | 'apply'
+  | 'my_applications'
+  | 'register'
+  | 'help' | 'unknown'
 
-const CONFIRM_WORDS = ['1', 'כן', 'מאשרת', 'מאשר', 'אשר', 'אישור', 'ok', 'yes', '✓', '👍', 'בסדר']
-const DECLINE_WORDS = ['2', 'לא', 'מסרבת', 'מסרב', 'סירוב', 'no', 'לא יכולה', 'לא יכול', '👎', 'ביטול']
-const NEW_JOB_WORDS  = ['משרה חדשה', '+משרה', 'פרסם משרה', 'הוסף משרה', 'new job']
+const CONFIRM_WORDS      = ['1', 'כן', 'מאשרת', 'מאשר', 'אשר', 'אישור', 'ok', 'yes', '✓', '👍', 'בסדר']
+const DECLINE_WORDS      = ['2', 'לא', 'מסרבת', 'מסרב', 'סירוב', 'no', 'לא יכולה', 'לא יכול', '👎', 'ביטול']
+const NEW_JOB_WORDS      = ['משרה חדשה', '+משרה', 'פרסם משרה', 'הוסף משרה', 'new job']
+const JOBS_WORDS         = ['משרות', 'משרה', 'עבודה', 'חפש', 'מה יש', 'jobs', 'הצג משרות']
+const APPLY_WORDS        = ['הגש', 'להגיש', 'אני רוצה', 'apply', 'הגשה']
+const MY_APPS_WORDS      = ['הגשות', 'הגשות שלי', 'סטטוס', 'status', 'מה קורה', 'עדכון']
+const REGISTER_WORDS     = ['הרשמה', 'להצטרף', 'רוצה להצטרף', 'רשמי אותי', 'register', 'new', 'חדשה']
 
 export function parseIntent(text: string): Intent {
   const t = text.trim().toLowerCase()
   if (CONFIRM_WORDS.some(w => t === w.toLowerCase() || t.startsWith(w.toLowerCase()))) return 'confirm'
   if (DECLINE_WORDS.some(w => t === w.toLowerCase() || t.startsWith(w.toLowerCase()))) return 'decline'
   if (NEW_JOB_WORDS.some(w => t.includes(w.toLowerCase()))) return 'new_job'
-  if (['עזרה', 'help', 'תפריט', 'menu'].includes(t)) return 'help'
+  if (APPLY_WORDS.some(w => t.includes(w.toLowerCase()))) return 'apply'
+  if (MY_APPS_WORDS.some(w => t.includes(w.toLowerCase()))) return 'my_applications'
+  if (JOBS_WORDS.some(w => t.includes(w.toLowerCase()))) return 'jobs'
+  if (REGISTER_WORDS.some(w => t.includes(w.toLowerCase()))) return 'register'
+  if (['עזרה', 'help', 'תפריט', 'menu', 'שלום', 'היי', 'הי', 'hello'].includes(t)) return 'help'
   return 'unknown'
 }

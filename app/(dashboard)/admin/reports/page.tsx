@@ -29,7 +29,7 @@ export default async function AdminReportsPage({
     { data: allApps },
     { data: candidates },
     { data: activeJobs },
-    { data: institutions },
+    {},
     { data: recentActivity },
   ] = await Promise.all([
     // Placements (accepted applications)

@@ -92,9 +92,9 @@ export default function SettingsClient({ role }: Props) {
     if (item.action === 'link' && item.href) {
       router.push(item.href)
     } else if (item.action === 'export-placements') {
-      window.location.href = '/api/admin/reports/export?type=placements'
+      window.open('/api/admin/reports/export?type=placements', '_blank')
     } else if (item.action === 'export-candidates') {
-      window.location.href = '/api/admin/reports/export?type=candidates'
+      window.open('/api/admin/reports/export?type=candidates', '_blank')
     }
   }
 

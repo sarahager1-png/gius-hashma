@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import {
   MessageCircle, Phone, MapPin, GraduationCap, BookOpen, Send,
   CheckCircle, Loader2, Clock, X, CalendarPlus,
@@ -71,8 +70,6 @@ export default function InquiriesClient({ inquiries: initial, institutionId }: P
   const [inviteMsg, setInviteMsg]     = useState('')
   const [inviteSending, setInviteSending] = useState(false)
   const [invitedIds, setInvitedIds]   = useState<Set<string>>(new Set())
-  const router = useRouter()
-
   const pending = inquiries.filter(i => i.status === 'ממתינה').length
 
   async function markSeen(id: string) {

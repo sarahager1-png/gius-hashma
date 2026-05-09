@@ -25,7 +25,7 @@ export async function PATCH(
   if (!inquiry) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const isAdmin = profile?.role && ['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)
-  const isOwningInst = (inquiry.institutions as any)?.profile_id === user.id
+  const isOwningInst = (inquiry.institutions as { profile_id?: string } | null)?.profile_id === user.id
   if (!isAdmin && !isOwningInst)
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
@@ -53,7 +53,7 @@ export async function PATCH(
 
   // notify candidate when institution replies
   if (institution_reply?.trim()) {
-    const candidateProfileId = (inquiry.candidates as any)?.profile_id
+    const candidateProfileId = (inquiry.candidates as { profile_id?: string } | null)?.profile_id
     if (candidateProfileId) {
       await service.from('notifications').insert({
         profile_id: candidateProfileId,

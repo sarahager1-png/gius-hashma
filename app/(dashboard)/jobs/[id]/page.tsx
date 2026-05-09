@@ -47,11 +47,9 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
 
   let alreadyApplied = false
   let alreadyInquired = false
-  let candidateId: string | null = null
   if (isCandidate) {
     const { data: cand } = await service.from('candidates').select('id').eq('profile_id', user.id).single()
     if (cand) {
-      candidateId = cand.id
       const { data: existing } = await service
         .from('applications').select('id').eq('job_id', id).eq('candidate_id', cand.id).maybeSingle()
       alreadyApplied = !!existing

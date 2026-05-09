@@ -78,7 +78,7 @@ async function notifyMatchingCandidates(
   // find active candidates matching specialization (or 'שניהם') and not already placed
   let query = service
     .from('candidates')
-    .select('profile_id, city, specialization, profiles(full_name, phone)')
+    .select('profile_id, city, specialization, whatsapp_preference, profiles(full_name, phone)')
     .not('availability_status', 'in', '("משובצת","לא פעילה")')
 
   if (job.specialization && job.specialization !== 'שניהם') {
@@ -106,6 +106,7 @@ async function notifyMatchingCandidates(
     const candidate = c as unknown as {
       profile_id: string
       city: string | null
+      whatsapp_preference: boolean | null
       profiles: { full_name: string | null; phone: string | null }
     }
 
@@ -132,7 +133,9 @@ async function notifyMatchingCandidates(
 
     if (phone) {
       await sendSms(phone, `✨ משרה חדשה מתאימה לך! "${job.title}" ב-${institutionName}${city ? `, ${city}` : ''}. לצפייה: giuus.vercel.app/jobs`)
-      void sendWA(phone, `✨ משרה חדשה מתאימה לך!\n*${job.title}* — ${institutionName}${city ? ` · ${city}` : ''}\nלצפייה ולהגשה: giuus.vercel.app/jobs/${job.id}`)
+      if (candidate.whatsapp_preference !== false) {
+        void sendWA(phone, `✨ משרה חדשה מתאימה לך!\n*${job.title}* — ${institutionName}${city ? ` · ${city}` : ''}\nלצפייה ולהגשה: giuus.vercel.app/jobs/${job.id}`)
+      }
     }
   }
 }

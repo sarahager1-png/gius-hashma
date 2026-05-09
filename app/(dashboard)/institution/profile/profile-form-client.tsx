@@ -12,6 +12,7 @@ interface Props {
     address: string | null
     phone: string | null
     institution_type: string | null
+    whatsapp_preference: boolean
   }
   profile: {
     full_name: string | null
@@ -29,12 +30,13 @@ export default function InstitutionProfileFormClient({ institution, profile }: P
     institution_type: institution.institution_type ?? '',
     principal_name: profile.full_name ?? '',
     principal_phone: profile.phone ?? '',
+    whatsapp_preference: institution.whatsapp_preference,
   })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
 
-  function set(k: string, v: string) { setForm(f => ({ ...f, [k]: v })) }
+  function set(k: string, v: string | boolean) { setForm(f => ({ ...f, [k]: v })) }
 
   async function handleSave() {
     if (!form.institution_name.trim()) { setError('שם המוסד חובה'); return }
@@ -118,6 +120,32 @@ export default function InstitutionProfileFormClient({ institution, profile }: P
             <input value={form.principal_phone} onChange={e => set('principal_phone', e.target.value)}
               className={inputCls} style={inputStyle} dir="ltr" />
           </div>
+        </div>
+      </section>
+
+      <hr style={{ borderColor: 'var(--line)' }} />
+
+      <section>
+        <h2 className="text-[13px] font-bold uppercase tracking-[.08em] mb-4" style={{ color: 'var(--ink-3)' }}>הגדרות תקשורת</h2>
+        <div className="flex items-center justify-between rounded-[12px] border p-4"
+          style={{ borderColor: '#E9E3FC', background: '#FDFCFF' }}>
+          <div>
+            <p className="text-[14px] font-semibold" style={{ color: 'var(--ink)' }}>קבלת עדכונים בוואטסאפ</p>
+            <p className="text-[12px] mt-0.5" style={{ color: 'var(--ink-4)' }}>הגשות חדשות ועדכונים ישלחו גם לוואטסאפ (בנוסף ל-SMS)</p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={form.whatsapp_preference}
+            onClick={() => set('whatsapp_preference', !form.whatsapp_preference)}
+            className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none flex-shrink-0"
+            style={{ background: form.whatsapp_preference ? 'var(--teal)' : '#D1D5DB' }}
+          >
+            <span
+              className="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform"
+              style={{ transform: form.whatsapp_preference ? 'translateX(-6px)' : 'translateX(-26px)' }}
+            />
+          </button>
         </div>
       </section>
 
