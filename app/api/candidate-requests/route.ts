@@ -27,6 +27,10 @@ export async function POST(request: Request) {
   if (!full_name?.trim() || !phone?.trim())
     return NextResponse.json({ error: 'שם וטלפון הם שדות חובה' }, { status: 400 })
 
+  // length guards
+  if (full_name.trim().length > 120 || phone.trim().length > 30)
+    return NextResponse.json({ error: 'שדה חורג מהאורך המקסימלי' }, { status: 400 })
+
   // Rate limit: 3 requests per phone per hour
   if (!rateLimit('candidate-req:' + phone.trim(), 3, 60 * 60 * 1000)) {
     return NextResponse.json({ error: 'יותר מדי ניסיונות. נסי שוב מאוחר יותר.' }, { status: 429 })
