@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 const EMPTY = {
   stages: [
@@ -16,6 +16,10 @@ const EMPTY = {
 }
 
 export async function GET(req: Request) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
   const { searchParams } = new URL(req.url)
   const since = searchParams.get('since')
   const until = searchParams.get('until')
