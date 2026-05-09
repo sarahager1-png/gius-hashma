@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Users, MessageCircle, Download, Building2, Calendar, KeyRound, Eye, EyeOff, CheckCircle } from 'lucide-react'
+import { Users, MessageCircle, Download, Building2, Calendar, KeyRound, Eye, EyeOff, CheckCircle, Trash2 } from 'lucide-react'
 import type { UserRole } from '@/lib/types'
 
 interface SettingItem {
@@ -86,6 +86,11 @@ export default function SettingsClient({ role }: Props) {
   const [pwError, setPwError]       = useState('')
   const [pwSuccess, setPwSuccess]   = useState(false)
 
+  // Account deletion state
+  const [deleteConfirm, setDeleteConfirm] = useState('')
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [deleteError, setDeleteError]     = useState('')
+
   const visibleItems = ITEMS.filter(i => i.roles.includes(role))
 
   function handleAction(item: SettingItem) {
@@ -132,6 +137,26 @@ export default function SettingsClient({ role }: Props) {
       setOldPw('')
       setNewPw('')
       setConfirmPw('')
+    }
+  }
+
+  async function handleDeleteAccount() {
+    if (deleteConfirm !== 'מחק') return
+    setDeleteLoading(true)
+    setDeleteError('')
+    try {
+      const res = await fetch('/api/account/delete', { method: 'POST' })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}))
+        setDeleteError(d.error ?? 'שגיאה במחיקת החשבון')
+        setDeleteLoading(false)
+        return
+      }
+      await supabase.auth.signOut()
+      router.push('/login')
+    } catch {
+      setDeleteError('שגיאה בלתי צפויה')
+      setDeleteLoading(false)
     }
   }
 
@@ -280,6 +305,58 @@ export default function SettingsClient({ role }: Props) {
           })}
         </div>
       )}
+
+      {/* Danger zone — account deletion */}
+      <div
+        className="rounded-[14px] border p-5 mt-6"
+        style={{ background: '#FFF5F5', borderColor: '#FCA5A5', boxShadow: 'var(--shadow-sm)' }}
+      >
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0"
+            style={{ background: '#FEE2E2', color: '#DC2626' }}>
+            <Trash2 size={18} />
+          </div>
+          <div>
+            <div className="font-bold text-[15px]" style={{ color: '#DC2626' }}>מחיקת חשבון</div>
+            <p className="text-[13px] mt-0.5" style={{ color: '#9F1239' }}>פעולה זו בלתי הפיכה — כל הנתונים ימחקו לצמיתות</p>
+          </div>
+        </div>
+
+        {deleteError && (
+          <div className="rounded-[10px] p-3 mb-3 text-[13px] font-semibold"
+            style={{ background: '#FEE2E2', color: '#DC2626' }}>
+            {deleteError}
+          </div>
+        )}
+
+        <label className="block text-[12px] font-bold mb-1.5" style={{ color: '#9F1239' }}>
+          לאישור מחיקה, הקלידי &quot;מחק&quot;
+        </label>
+        <input
+          type="text"
+          value={deleteConfirm}
+          onChange={e => setDeleteConfirm(e.target.value)}
+          placeholder='מחק'
+          className="w-full h-10 px-3 rounded-[10px] border text-[14px] outline-none mb-3"
+          style={{
+            borderColor: '#FCA5A5',
+            background: '#fff',
+            color: 'var(--ink)',
+            fontFamily: 'inherit',
+          }}
+        />
+        <button
+          onClick={handleDeleteAccount}
+          disabled={deleteConfirm !== 'מחק' || deleteLoading}
+          className="h-10 px-5 rounded-[10px] text-[13.5px] font-bold text-white transition-all"
+          style={{
+            background: deleteConfirm === 'מחק' && !deleteLoading ? '#DC2626' : '#FCA5A5',
+            cursor: deleteConfirm === 'מחק' && !deleteLoading ? 'pointer' : 'not-allowed',
+          }}
+        >
+          {deleteLoading ? 'מוחק...' : 'מחקי את החשבון שלי לצמיתות'}
+        </button>
+      </div>
 
       <p className="text-[12px] font-medium mt-8" style={{ color: 'var(--ink-4)' }}>
         גיוס והשמה · רשת אהלי יוסף יצחק · גרסה 1.0

@@ -1,6 +1,7 @@
 ﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendSms } from '@/lib/sms'
+import { logAction } from '@/lib/audit'
 
 const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 function genCode() {
@@ -37,6 +38,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   if (action === 'reject') {
     await service.from('candidate_requests').update({ status: 'נדחתה' }).eq('id', id)
+    void logAction(user.id, 'reject_candidate_request', 'candidate_request', id)
     // Notify candidate if they have a linked profile
     if (req.profile_id) {
       await service.from('notifications').insert({
@@ -90,6 +92,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     })
 
     await service.from('candidate_requests').update({ status: 'אושרה' }).eq('id', id)
+    void logAction(user.id, 'approve_candidate_request', 'candidate_request', id)
 
     // In-app notification + SMS
     await service.from('notifications').insert({

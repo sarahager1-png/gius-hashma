@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
-// PATCH — candidate confirms or declines an interview
+// PATCH — candidate confirms/declines OR institution rates a past interview
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
@@ -10,7 +10,29 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { confirmed } = await request.json()
+  const body = await request.json()
+
+  // Institution rating path
+  if ('institution_rating' in body || 'institution_notes' in body) {
+    const { data: profile } = await service.from('profiles').select('role').eq('id', user.id).single()
+    const isAdmin = profile?.role && ['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)
+
+    if (!isAdmin) {
+      // verify the institution owns the interview via application > job > institution
+      const { data: inst } = await service.from('institutions').select('id').eq('profile_id', user.id).single()
+      if (!inst) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const update: Record<string, unknown> = {}
+    if (typeof body.institution_rating === 'number') update.institution_rating = body.institution_rating
+    if (typeof body.institution_notes === 'string') update.institution_notes = body.institution_notes
+
+    const { error } = await service.from('interviews').update(update).eq('id', id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ ok: true })
+  }
+
+  const { confirmed } = body
 
   // verify caller is the candidate for this interview
   const { data: cand } = await service.from('candidates').select('id').eq('profile_id', user.id).single()

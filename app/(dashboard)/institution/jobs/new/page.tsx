@@ -3,6 +3,15 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import JobFormClient from '@/components/institution/job-form'
 
+interface JobTemplate {
+  id: string
+  title: string
+  description: string | null
+  specialization: string | null
+  job_type: string | null
+  placement_type: string | null
+}
+
 export default async function NewJobPage({
   searchParams,
 }: {
@@ -22,6 +31,13 @@ export default async function NewJobPage({
     .single()
 
   if (!institution?.is_approved) redirect('/dashboard')
+
+  // Fetch templates for this institution
+  const { data: templates } = await service
+    .from('job_templates')
+    .select('id, title, description, specialization, job_type, placement_type')
+    .eq('institution_id', institution.id)
+    .order('created_at', { ascending: false })
 
   const { duplicate } = await searchParams
   let sourceJob: Parameters<typeof JobFormClient>[0]['job'] | undefined
@@ -59,7 +75,7 @@ export default async function NewJobPage({
           </p>
         )}
       </div>
-      <JobFormClient institutionId={institution.id} job={sourceJob} />
+      <JobFormClient institutionId={institution.id} job={sourceJob} templates={(templates ?? []) as JobTemplate[]} />
     </div>
   )
 }

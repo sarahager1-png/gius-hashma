@@ -1,7 +1,7 @@
 import { redirect, notFound } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { ArrowRight, MapPin, Building2, Briefcase, CalendarDays, Clock, GraduationCap, ChevronLeft } from 'lucide-react'
+import { ArrowRight, MapPin, Building2, Briefcase, CalendarDays, Clock, GraduationCap, ChevronLeft, Eye } from 'lucide-react'
 import ApplyButton from './apply-button'
 import InquiryButton from './inquiry-button'
 
@@ -44,6 +44,9 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
     .eq('id', id)
     .single()
   if (!job) notFound()
+
+  // Increment view count (fire and forget)
+  void service.rpc('increment_job_views', { job_id: id })
 
   let alreadyApplied = false
   let alreadyInquired = false
@@ -119,6 +122,12 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
                   <span className="text-[12px] font-semibold px-2.5 py-1 rounded-full"
                     style={{ background: 'var(--bg-2)', color: 'var(--ink-3)' }}>
                     {job.specialization}
+                  </span>
+                )}
+                {(job as { view_count?: number }).view_count != null && (job as { view_count?: number }).view_count! > 0 && (
+                  <span className="inline-flex items-center gap-1 text-[12px] font-semibold px-2.5 py-1 rounded-full"
+                    style={{ background: 'var(--bg-2)', color: 'var(--ink-4)' }}>
+                    <Eye size={11} />{(job as { view_count?: number }).view_count} צפיות
                   </span>
                 )}
               </div>

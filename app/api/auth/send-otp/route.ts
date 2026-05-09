@@ -1,6 +1,7 @@
 ﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendSms } from '@/lib/sms'
+import { rateLimit } from '@/lib/rate-limit'
 
 function generateCode(): string {
   return String(Math.floor(100000 + Math.random() * 900000))
@@ -28,6 +29,11 @@ export async function POST() {
 
   if (!profile.phone) {
     return NextResponse.json({ noPhone: true })
+  }
+
+  // Rate limit: max 5 OTPs per phone per 10 minutes
+  if (!rateLimit('otp:' + profile.phone, 5, 10 * 60 * 1000)) {
+    return NextResponse.json({ error: 'יותר מדי ניסיונות. נסי שוב בעוד מספר דקות.' }, { status: 429 })
   }
 
   const code      = generateCode()

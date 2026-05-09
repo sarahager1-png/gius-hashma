@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import {
   Calendar, MapPin, Phone, Clock, CheckCircle2, XCircle,
-  MessageCircle, Briefcase,
+  MessageCircle, Briefcase, Star,
 } from 'lucide-react'
 
 export interface InterviewRow {
@@ -19,6 +19,8 @@ export interface InterviewRow {
   candidate_name: string | null
   candidate_phone: string | null
   candidate_city: string | null
+  institution_rating?: number | null
+  institution_notes?: string | null
 }
 
 interface Props {
@@ -48,6 +50,30 @@ export default function InterviewsClient({ interviews }: Props) {
   const [tab, setTab] = useState<'upcoming' | 'past'>(
     interviews.some(iv => new Date(iv.scheduled_at) >= now) ? 'upcoming' : 'past'
   )
+  // Track ratings locally: { [interviewId]: number }
+  const [ratings, setRatings] = useState<Record<string, number>>(() => {
+    const init: Record<string, number> = {}
+    for (const iv of interviews) {
+      if (iv.institution_rating) init[iv.id] = iv.institution_rating
+    }
+    return init
+  })
+  const [ratingNotes] = useState<Record<string, string>>(() => {
+    const init: Record<string, string> = {}
+    for (const iv of interviews) {
+      if (iv.institution_notes) init[iv.id] = iv.institution_notes
+    }
+    return init
+  })
+
+  async function saveRating(ivId: string, rating: number) {
+    setRatings(prev => ({ ...prev, [ivId]: rating }))
+    await fetch(`/api/interviews/${ivId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ institution_rating: rating, institution_notes: ratingNotes[ivId] ?? null }),
+    })
+  }
 
   const upcoming = interviews.filter(iv => new Date(iv.scheduled_at) >= now)
   const past     = interviews.filter(iv => new Date(iv.scheduled_at) <  now)
@@ -248,6 +274,41 @@ export default function InterviewsClient({ interviews }: Props) {
                               style={{ background: '#E7FBF0', color: '#25D366', border: '1px solid #BBF7D0' }}>
                               <MessageCircle size={12} />שלחי תזכורת
                             </a>
+                          </div>
+                        )}
+
+                        {/* Rating widget — past interviews only */}
+                        {isPast && (
+                          <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--line-soft)' }}>
+                            <p className="text-[11.5px] font-bold mb-1.5" style={{ color: 'var(--ink-3)' }}>
+                              דירוג הראיון:
+                            </p>
+                            <div className="flex items-center gap-1">
+                              {[1, 2, 3, 4, 5].map(star => (
+                                <button
+                                  key={star}
+                                  type="button"
+                                  onClick={() => saveRating(iv.id, star)}
+                                  className="transition-all"
+                                  title={`${star} כוכבים`}
+                                >
+                                  <Star
+                                    size={20}
+                                    fill={(ratings[iv.id] ?? 0) >= star ? '#F59E0B' : 'none'}
+                                    strokeWidth={1.5}
+                                    style={{
+                                      color: (ratings[iv.id] ?? 0) >= star ? '#F59E0B' : 'var(--ink-4)',
+                                      transition: 'color 100ms, fill 100ms',
+                                    }}
+                                  />
+                                </button>
+                              ))}
+                              {ratings[iv.id] && (
+                                <span className="text-[11px] font-semibold ms-1" style={{ color: 'var(--ink-4)' }}>
+                                  ({ratings[iv.id]}/5)
+                                </span>
+                              )}
+                            </div>
                           </div>
                         )}
                       </div>

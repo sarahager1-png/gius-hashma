@@ -4,6 +4,7 @@ import { assertAdmin } from '@/lib/server-utils'
 import { sendInstitutionApprovedEmail } from '@/lib/email'
 import { smsInstitutionApproved } from '@/lib/sms'
 import { sendWA } from '@/lib/whatsapp'
+import { logAction } from '@/lib/audit'
 
 export async function POST(_: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -25,6 +26,8 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
     .eq('id', id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  void logAction(user.id, 'approve_institution', 'institution', id)
 
   const { data: inst } = await service
     .from('institutions')

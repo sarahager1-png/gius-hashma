@@ -1,6 +1,25 @@
 ﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
+// GET — public job detail with view count increment
+export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const service = createServiceClient()
+
+  const { data: job, error } = await service
+    .from('jobs')
+    .select('*, institutions(institution_name, city, institution_type, address, phone)')
+    .eq('id', id)
+    .single()
+
+  if (error || !job) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  // Increment view count (fire and forget)
+  void service.rpc('increment_job_views', { job_id: id })
+
+  return NextResponse.json(job)
+}
+
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()

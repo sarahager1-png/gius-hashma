@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { assertAdmin } from '@/lib/server-utils'
 import { sendInstitutionRejectedEmail } from '@/lib/email'
+import { logAction } from '@/lib/audit'
 
 export async function POST(_: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -23,6 +24,8 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
     .eq('id', id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  void logAction(user.id, 'reject_institution', 'institution', id)
 
   const { data: inst } = await service
     .from('institutions')

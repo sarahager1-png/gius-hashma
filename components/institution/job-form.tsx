@@ -4,6 +4,15 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { SPECIALIZATIONS, DISTRICTS, PLACEMENT_TYPES } from '@/lib/constants'
 
+interface JobTemplate {
+  id: string
+  title: string
+  description: string | null
+  specialization: string | null
+  job_type: string | null
+  placement_type: string | null
+}
+
 interface Props {
   institutionId: string
   job?: {
@@ -20,6 +29,7 @@ interface Props {
     start_date: string | null
     end_date: string | null
   }
+  templates?: JobTemplate[]
 }
 
 const FIELD = 'w-full h-11 rounded-[10px] border text-[14px] font-medium outline-none transition-all px-3.5'
@@ -57,8 +67,10 @@ function NativeSelect({ value, onChange, placeholder, options }: {
   )
 }
 
-export default function JobFormClient({ institutionId, job }: Props) {
+export default function JobFormClient({ institutionId, job, templates = [] }: Props) {
   const router = useRouter()
+  const [templateSaving, setTemplateSaving] = useState(false)
+  const [templateMsg, setTemplateMsg]       = useState('')
   const [form, setForm] = useState({
     title:          job?.title ?? '',
     description:    job?.description ?? '',
@@ -76,6 +88,37 @@ export default function JobFormClient({ institutionId, job }: Props) {
   const [error, setError] = useState('')
 
   function set(k: string, v: string) { setForm(f => ({ ...f, [k]: v })) }
+
+  function loadTemplate(t: JobTemplate) {
+    setForm(f => ({
+      ...f,
+      title:          t.title,
+      description:    t.description ?? '',
+      specialization: t.specialization ?? '',
+      job_type:       t.job_type ?? '',
+      job_types:      t.job_type ? [t.job_type] : [],
+      placement_type: t.placement_type ?? '',
+    }))
+  }
+
+  async function saveAsTemplate() {
+    setTemplateSaving(true)
+    setTemplateMsg('')
+    const res = await fetch('/api/job-templates', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: form.title || 'תבנית חדשה',
+        description: form.description || null,
+        specialization: form.specialization || null,
+        job_type: form.job_type || null,
+        placement_type: form.placement_type || null,
+      }),
+    })
+    setTemplateSaving(false)
+    setTemplateMsg(res.ok ? 'התבנית נשמרה!' : 'שגיאה בשמירת תבנית')
+    setTimeout(() => setTemplateMsg(''), 3000)
+  }
 
   function toggleJobType(jt: string) {
     setForm(f => {
@@ -121,6 +164,26 @@ export default function JobFormClient({ institutionId, job }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+
+      {/* Templates panel */}
+      {templates.length > 0 && (
+        <div className="rounded-[14px] border p-4" style={{ background: 'var(--purple-050)', borderColor: 'var(--purple-100)' }}>
+          <p className="text-[12px] font-bold mb-2" style={{ color: 'var(--purple)' }}>טען מתבנית:</p>
+          <div className="flex flex-wrap gap-2">
+            {templates.map(t => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => loadTemplate(t)}
+                className="px-3 py-1.5 rounded-full text-[12.5px] font-semibold border transition-all"
+                style={{ background: '#fff', borderColor: 'var(--purple-200)', color: 'var(--purple)' }}
+              >
+                {t.title}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="rounded-[16px] border p-5 space-y-4" style={{ background: '#fff', borderColor: 'var(--line)', boxShadow: 'var(--shadow-sm)' }}>
         <p className="text-[11.5px] font-bold uppercase tracking-[.1em]" style={{ color: 'var(--ink-4)' }}>פרטי המשרה</p>
@@ -232,7 +295,7 @@ export default function JobFormClient({ institutionId, job }: Props) {
         </p>
       )}
 
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3 items-center">
         <button
           type="submit"
           disabled={saving}
@@ -254,6 +317,20 @@ export default function JobFormClient({ institutionId, job }: Props) {
           onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--line)'; e.currentTarget.style.color = 'var(--ink-3)' }}>
           ביטול
         </button>
+        <button
+          type="button"
+          onClick={saveAsTemplate}
+          disabled={templateSaving}
+          className="h-11 px-4 rounded-[11px] text-[13px] font-semibold border transition-all"
+          style={{ borderColor: 'var(--teal)', color: 'var(--teal-600)', background: 'var(--teal-050)' }}
+        >
+          {templateSaving ? 'שומר...' : 'שמור כתבנית'}
+        </button>
+        {templateMsg && (
+          <span className="text-[12.5px] font-semibold" style={{ color: 'var(--green)' }}>
+            {templateMsg}
+          </span>
+        )}
       </div>
     </form>
   )

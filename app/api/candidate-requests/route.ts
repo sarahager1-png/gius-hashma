@@ -1,5 +1,6 @@
 ﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { rateLimit } from '@/lib/rate-limit'
 
 // POST — public, submit a request (auth optional — if authenticated via Google, profile_id is linked)
 export async function POST(request: Request) {
@@ -25,6 +26,11 @@ export async function POST(request: Request) {
 
   if (!full_name?.trim() || !phone?.trim())
     return NextResponse.json({ error: 'שם וטלפון הם שדות חובה' }, { status: 400 })
+
+  // Rate limit: 3 requests per phone per hour
+  if (!rateLimit('candidate-req:' + phone.trim(), 3, 60 * 60 * 1000)) {
+    return NextResponse.json({ error: 'יותר מדי ניסיונות. נסי שוב מאוחר יותר.' }, { status: 429 })
+  }
 
   const { data, error } = await service
     .from('candidate_requests')
