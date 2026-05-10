@@ -1,8 +1,7 @@
 ﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendNewJobMatchEmail } from '@/lib/email'
-import { sendSms } from '@/lib/sms'
-import { sendWA } from '@/lib/whatsapp'
+import { sendExternal } from '@/lib/notify-external'
 
 export async function GET() {
   const service = createServiceClient()
@@ -114,15 +113,6 @@ async function notifyMatchingCandidates(
     const name = candidate.profiles?.full_name ?? 'מועמדת'
     const phone = candidate.profiles?.phone
 
-    await sendNewJobMatchEmail({
-      candidateProfileId: profileId,
-      candidateName: name,
-      jobTitle: job.title,
-      institutionName,
-      city,
-      jobId: job.id,
-    })
-
     void service.from('notifications').insert({
       profile_id: profileId,
       type: 'match_suggestion',
@@ -131,11 +121,20 @@ async function notifyMatchingCandidates(
       related_id: job.id,
     })
 
-    if (phone) {
-      await sendSms(phone, `✨ משרה חדשה מתאימה לך! "${job.title}" ב-${institutionName}${city ? `, ${city}` : ''}. לצפייה: giuus.vercel.app/jobs`)
-      if (candidate.whatsapp_preference !== false) {
-        void sendWA(phone, `✨ משרה חדשה מתאימה לך!\n*${job.title}* — ${institutionName}${city ? ` · ${city}` : ''}\nלצפייה ולהגשה: giuus.vercel.app/jobs/${job.id}`)
-      }
-    }
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'giuus.vercel.app'
+    await sendExternal({
+      phone,
+      whatsapp_preference: candidate.whatsapp_preference,
+      waMessage:  `✨ משרה חדשה מתאימה לך!\n*${job.title}* — ${institutionName}${city ? ` · ${city}` : ''}\nלצפייה ולהגשה: ${appUrl}/jobs/${job.id}`,
+      smsMessage: `✨ משרה חדשה מתאימה! "${job.title}" ב-${institutionName}${city ? `, ${city}` : ''}. לצפייה: ${appUrl}/jobs/${job.id}`,
+      emailFallback: () => sendNewJobMatchEmail({
+        candidateProfileId: profileId,
+        candidateName: name,
+        jobTitle: job.title,
+        institutionName,
+        city,
+        jobId: job.id,
+      }),
+    })
   }
 }

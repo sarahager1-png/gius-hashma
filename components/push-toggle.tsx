@@ -13,18 +13,18 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export default function PushToggle() {
-  const [supported, setSupported]   = useState(false)
+  const [supported] = useState(() =>
+    typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window && !!VAPID_PUBLIC
+  )
   const [subscribed, setSubscribed] = useState(false)
   const [loading, setLoading]       = useState(false)
 
   useEffect(() => {
-    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !VAPID_PUBLIC) return
-    setSupported(true)
-
+    if (!supported) return
     navigator.serviceWorker.ready.then(reg =>
       reg.pushManager.getSubscription().then(sub => setSubscribed(!!sub))
     )
-  }, [])
+  }, [supported])
 
   if (!supported) return null
 

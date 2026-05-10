@@ -127,25 +127,29 @@ export default function InstitutionProfileFormClient({ institution, profile }: P
 
       <section>
         <h2 className="text-[13px] font-bold uppercase tracking-[.08em] mb-4" style={{ color: 'var(--ink-3)' }}>הגדרות תקשורת</h2>
-        <div className="flex items-center justify-between rounded-[12px] border p-4"
-          style={{ borderColor: '#E9E3FC', background: '#FDFCFF' }}>
-          <div>
-            <p className="text-[14px] font-semibold" style={{ color: 'var(--ink)' }}>קבלת עדכונים בוואטסאפ</p>
-            <p className="text-[12px] mt-0.5" style={{ color: 'var(--ink-4)' }}>הגשות חדשות ועדכונים ישלחו גם לוואטסאפ (בנוסף ל-SMS)</p>
+        <div className="rounded-[12px] border p-4" style={{ borderColor: '#E9E3FC', background: '#FDFCFF' }}>
+          <p className="text-[14px] font-semibold mb-1" style={{ color: 'var(--ink)' }}>ערוץ קבלת עדכונים</p>
+          <p className="text-[12px] mb-3" style={{ color: 'var(--ink-4)' }}>בחרי את הערוץ שדרכו תקבלי עדכונים על הגשות ומועמדות</p>
+          <div className="flex gap-2">
+            {[
+              { label: 'WhatsApp', value: true },
+              { label: 'SMS', value: false },
+            ].map(opt => (
+              <button
+                key={String(opt.value)}
+                type="button"
+                onClick={() => set('whatsapp_preference', opt.value)}
+                className="flex-1 h-10 rounded-[10px] text-[13px] font-bold border-2 transition-all"
+                style={{
+                  borderColor: form.whatsapp_preference === opt.value ? 'var(--teal)' : 'var(--line)',
+                  background: form.whatsapp_preference === opt.value ? 'var(--teal-050)' : '#fff',
+                  color: form.whatsapp_preference === opt.value ? 'var(--teal-600)' : 'var(--ink-3)',
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={form.whatsapp_preference}
-            onClick={() => set('whatsapp_preference', !form.whatsapp_preference)}
-            className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none flex-shrink-0"
-            style={{ background: form.whatsapp_preference ? 'var(--teal)' : '#D1D5DB' }}
-          >
-            <span
-              className="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform"
-              style={{ transform: form.whatsapp_preference ? 'translateX(-6px)' : 'translateX(-26px)' }}
-            />
-          </button>
         </div>
       </section>
 

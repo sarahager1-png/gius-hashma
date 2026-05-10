@@ -67,29 +67,36 @@ const FEATURES = [
   },
   {
     icon: FileStack,
-    title: 'תבניות משרה',
-    desc: 'שומרים תבניות לפרסום מהיר של משרות חוזרות — ללא הקלדה חוזרת',
+    title: 'קורות חיים',
+    desc: 'צופים בקורות החיים של המועמדת ישירות מהפרופיל — PDF או Word',
     color: 'var(--purple)', bg: 'var(--purple-050)',
   },
   {
     icon: Star,
-    title: 'המלצות חכמות',
-    desc: 'המערכת מציעה מועמדות שמתאימות למשרה שלכם אוטומטית',
+    title: 'התאמות חכמות + התראה',
+    desc: 'כשמועמדת חדשה מתאימה למשרה שלכם — מקבלים התראה מיידית',
     color: 'var(--teal)', bg: 'var(--teal-050)',
   },
   {
-    icon: Bell,
-    title: 'עדכונים חכמים',
-    desc: 'בוחרים וואטסאפ, SMS או התראות דפדפן — מקבלים עדכונים בדיוק בדרך שנוחה',
+    icon: Star,
+    title: 'סקר לאחר שיבוץ',
+    desc: 'חודש לאחר השיבוץ מקבלים שאלון קצר להערכת המועמדת — לשיפור מתמיד',
     color: '#D97706', bg: '#FFFBEB',
+  },
+  {
+    icon: Bell,
+    title: 'בחירת ערוץ תקשורת',
+    desc: 'בוחרים בפרופיל: WhatsApp או SMS — כל עדכון יגיע רק לערוץ שנבחר',
+    color: '#15803D', bg: '#DCFCE7',
   },
 ]
 
 const PROCESS = [
-  { icon: ClipboardList, label: 'הגשה',       status: 'ממתינה',   color: '#5B21B6', bg: '#F5F3FF' },
-  { icon: Search,        label: 'נצפתה',      status: 'נצפתה',    color: '#0369A1', bg: '#E0F2FE' },
-  { icon: Calendar,      label: 'ראיון',      status: 'הוזמנה',   color: '#D97706', bg: '#FEF3C7' },
-  { icon: CheckCircle,   label: 'שיבוץ',     status: 'התקבלה',   color: '#166534', bg: '#DCFCE7' },
+  { icon: ClipboardList, label: 'הגשה',    color: '#5B21B6', bg: '#F5F3FF' },
+  { icon: Search,        label: 'נצפתה',   color: '#0369A1', bg: '#E0F2FE' },
+  { icon: Calendar,      label: 'ראיון',   color: '#D97706', bg: '#FEF3C7' },
+  { icon: CheckCircle,   label: 'התקבלה', color: '#166534', bg: '#DCFCE7' },
+  { icon: Star,          label: 'משוב',    color: '#B45309', bg: '#FFFBEB' },
 ]
 
 const GOOGLE_SVG = (

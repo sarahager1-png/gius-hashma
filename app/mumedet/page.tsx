@@ -14,7 +14,7 @@ const STEPS = [
   {
     n: '1',
     title: 'נרשמת עם Google',
-    desc: 'כניסה מהירה עם חשבון Google — ממלאת פרופיל מקצועי פעם אחת',
+    desc: 'כניסה מהירה — רוב הפרטים (התמחות, עיר, מחוז, זמינות) ממולאים כבר בהרשמה',
     color: 'var(--purple)',
     bg: 'var(--purple-050)',
   },
@@ -38,31 +38,43 @@ const FEATURES = [
   {
     icon: FileText,
     title: 'פרופיל מקצועי מלא',
-    desc: 'התמחות, רמה אקדמית, ניסיון, יום לימודים, כישורים — הכל במקום אחד',
+    desc: 'התמחות, רמה אקדמית, ניסיון, כישורים וביו — הכל במקום אחד',
     color: 'var(--purple)', bg: 'var(--purple-050)',
+  },
+  {
+    icon: GraduationCap,
+    title: 'העלאת קורות חיים',
+    desc: 'אופציונלי — מעלה PDF או Word, או מדביקה קישור ישיר',
+    color: 'var(--teal)', bg: 'var(--teal-050)',
   },
   {
     icon: Search,
     title: 'חיפוש משרות מתקדם',
     desc: 'סנני לפי מחוז, עיר, סוג (סטאג׳ / חלקי / מלא) והתמחות',
-    color: 'var(--teal)', bg: 'var(--teal-050)',
+    color: '#D97706', bg: '#FFFBEB',
   },
   {
     icon: Star,
-    title: 'התאמות חכמות',
-    desc: 'המערכת מציעה משרות שמתאימות לפרופיל שלך אוטומטית',
-    color: '#D97706', bg: '#FFFBEB',
+    title: 'התאמות + התראה',
+    desc: 'כשנפתחת משרה חדשה שמתאימה לפרופיל שלך — מקבלת התראה מיידית',
+    color: 'var(--purple)', bg: 'var(--purple-050)',
+  },
+  {
+    icon: CheckCircle,
+    title: 'מעקב סטטוס',
+    desc: 'רואה בזמן אמת: ממתינה → נצפתה → התקבלה / נדחתה — לכל הגשה',
+    color: '#15803D', bg: '#DCFCE7',
   },
   {
     icon: Bell,
     title: 'התראות דפדפן',
     desc: 'מפעילה התראות — מקבלת עדכון מיידי גם כשהאפליקציה לא פתוחה',
-    color: 'var(--purple)', bg: 'var(--purple-050)',
+    color: '#D97706', bg: '#FFFBEB',
   },
   {
     icon: MessageCircle,
-    title: 'עדכונים חכמים',
-    desc: 'בוחרת WhatsApp או SMS — מקבלת עדכונים, מאשרת ראיונות ומגישה מועמדות ישר מהנייד',
+    title: 'בחירת ערוץ תקשורת',
+    desc: 'בוחרת בפרופיל: WhatsApp או SMS — כל עדכון יגיע רק לערוץ שבחרת',
     color: '#15803D', bg: '#DCFCE7',
   },
   {
@@ -78,10 +90,10 @@ const FEATURES = [
     color: 'var(--purple)', bg: 'var(--purple-050)',
   },
   {
-    icon: CheckCircle,
-    title: 'מחיקת חשבון',
-    desc: 'GDPR מלא — מוחקת את כל הנתונים שלך בלחיצה אחת מעמוד ההגדרות',
-    color: '#DC2626', bg: '#FEE2E2',
+    icon: Star,
+    title: 'סקר שביעות רצון',
+    desc: 'לאחר שיבוץ מקבלת שאלון קצר — המשוב שלך משפר את המערכת',
+    color: '#D97706', bg: '#FFFBEB',
   },
 ]
 
@@ -147,8 +159,16 @@ export default function MumedetLanding() {
 
       <div style={{ maxWidth: '560px', margin: '0 auto', padding: '0 20px' }}>
 
+        {/* ── Tip banner ── */}
+        <div style={{ marginTop: '8px', marginBottom: '10px', background: 'var(--purple-050)', borderRadius: '12px', padding: '11px 16px', border: '1px solid var(--purple-200)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Star size={15} color="var(--purple)" style={{ flexShrink: 0 }} />
+          <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--purple)', margin: 0, lineHeight: 1.4 }}>
+            השלמת כל הפרטים תעזור להתאמה גבוהה יותר למשרות
+          </p>
+        </div>
+
         {/* ── About ── */}
-        <div style={{ marginTop: '8px', marginBottom: '16px', background: 'white', borderRadius: '16px', padding: '18px 20px', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>
+        <div style={{ marginBottom: '16px', background: 'white', borderRadius: '16px', padding: '18px 20px', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>
           <p style={{ fontSize: '14px', color: 'var(--ink-2)', lineHeight: 1.7, margin: 0 }}>
             <strong style={{ color: 'var(--ink)' }}>מערכת גיוס.us</strong> היא הפלטפורמה הרשמית של רשת חינוך חב״ד לאיתור ושיבוץ מורות, גננות וסטאג׳יריות.
             <br /><br />

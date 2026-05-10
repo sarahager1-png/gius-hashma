@@ -243,29 +243,29 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
       {/* הגדרות תקשורת */}
       <section>
         <h2 className="font-semibold text-gray-700 mb-4">הגדרות תקשורת</h2>
-        <div className="flex items-center justify-between rounded-xl border p-4"
-          style={{ borderColor: '#E9E3FC', background: '#FDFCFF' }}>
-          <div>
-            <p className="text-[14px] font-semibold" style={{ color: 'var(--ink)' }}>קבלת עדכונים בוואטסאפ</p>
-            <p className="text-[12px] mt-0.5" style={{ color: 'var(--ink-4)' }}>עדכונים על משרות חדשות והגשות ישלחו לנייד</p>
+        <div className="rounded-xl border p-4" style={{ borderColor: '#E9E3FC', background: '#FDFCFF' }}>
+          <p className="text-[14px] font-semibold mb-1" style={{ color: 'var(--ink)' }}>ערוץ קבלת עדכונים</p>
+          <p className="text-[12px] mb-3" style={{ color: 'var(--ink-4)' }}>בחרי את הערוץ שדרכו תקבלי עדכונים על משרות חדשות וסטטוס הגשות</p>
+          <div className="flex gap-2">
+            {[
+              { label: 'WhatsApp', value: true },
+              { label: 'SMS', value: false },
+            ].map(opt => (
+              <button
+                key={String(opt.value)}
+                type="button"
+                onClick={() => setC('whatsapp_preference', opt.value)}
+                className="flex-1 h-10 rounded-[10px] text-[13px] font-bold border-2 transition-all"
+                style={{
+                  borderColor: candForm.whatsapp_preference === opt.value ? 'var(--teal)' : 'var(--line)',
+                  background: candForm.whatsapp_preference === opt.value ? 'var(--teal-050)' : '#fff',
+                  color: candForm.whatsapp_preference === opt.value ? 'var(--teal-600)' : 'var(--ink-3)',
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={candForm.whatsapp_preference}
-            onClick={() => setC('whatsapp_preference', !candForm.whatsapp_preference)}
-            className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none"
-            style={{
-              background: candForm.whatsapp_preference ? 'var(--teal)' : '#D1D5DB',
-            }}
-          >
-            <span
-              className="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform"
-              style={{
-                transform: candForm.whatsapp_preference ? 'translateX(-6px)' : 'translateX(-26px)',
-              }}
-            />
-          </button>
         </div>
       </section>
 

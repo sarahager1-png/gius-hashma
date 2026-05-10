@@ -9,7 +9,7 @@ import {
   LayoutDashboard, Users, Briefcase, Building2, BarChart3,
   Settings, LogOut, ClipboardList, UserPlus, Sparkles,
   ShieldCheck, Mail, History, HelpCircle, MessageCircle, Send, UserCog, Inbox,
-  FileStack, CalendarDays, BellRing, Upload, ScrollText, MailOpen,
+  FileStack, CalendarDays, BellRing, Upload, ScrollText, MailOpen, Star,
 } from 'lucide-react'
 
 interface NavItem {
@@ -56,6 +56,7 @@ const NAV_MAIN: Record<UserRole, NavItem[]> = {
     { href: '/messages',                 label: 'הודעות',        icon: MessageCircle   },
     { href: '/admin/messages-log',       label: 'יומן הודעות',   icon: BellRing        },
     { href: '/admin/reports',            label: 'דוחות שיבוצים', icon: BarChart3       },
+    { href: '/admin/surveys',            label: 'סקרי משוב',     icon: Star            },
     { href: '/admin/import',             label: 'ייבוא CSV',     icon: Upload          },
     { href: '/admin/audit',              label: 'יומן פעולות',   icon: ScrollText      },
     { href: '/admin/admins',             label: 'מנהלי מערכת',   icon: ShieldCheck     },
@@ -72,6 +73,7 @@ const NAV_MAIN: Record<UserRole, NavItem[]> = {
     { href: '/messages',                 label: 'הודעות',        icon: MessageCircle   },
     { href: '/admin/messages-log',       label: 'יומן הודעות',   icon: BellRing        },
     { href: '/admin/reports',            label: 'דוחות שיבוצים', icon: BarChart3       },
+    { href: '/admin/surveys',            label: 'סקרי משוב',     icon: Star            },
     { href: '/admin/import',             label: 'ייבוא CSV',     icon: Upload          },
     { href: '/admin/audit',              label: 'יומן פעולות',   icon: ScrollText      },
     { href: '/admin/admins',             label: 'מנהלי מערכת',   icon: ShieldCheck     },
