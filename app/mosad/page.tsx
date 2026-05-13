@@ -5,102 +5,57 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import {
   School, Briefcase, Search, MessageCircle,
-  CheckCircle, Clock, ClipboardList, Calendar, Star, CalendarDays, FileStack, Bell,
+  CheckCircle, Calendar, ClipboardList, Star, Bell, FileStack, ArrowLeft,
 } from 'lucide-react'
-import Link from 'next/link'
-import InstallFooter from '@/components/landing/install-footer'
 
 const STEPS = [
   {
     n: '1',
-    title: 'נרשמים ומקבלים אישור',
-    desc: 'מוגישים בקשת הצטרפות — מנהלת הרשת מאשרת את המוסד תוך יום עסקים',
-    color: 'var(--teal)',
-    bg: 'var(--teal-050)',
+    icon: '✦',
+    title: 'נכנסת עם Google',
+    desc: 'נכנסת עם המייל של המוסד — הפרופיל נפתח אוטומטית, ללא הרשמה נפרדת',
+    color: '#0090A8',
+    bg: 'rgba(0,180,204,0.08)',
+    border: 'rgba(0,180,204,0.2)',
   },
   {
     n: '2',
-    title: 'מפרסמים משרות',
-    desc: 'יוצרים משרה עם כותרת, סוג, מיקום והתמחות — מיד נחשפת לכלל המועמדות',
-    color: 'var(--purple)',
-    bg: 'var(--purple-050)',
+    icon: '◈',
+    title: 'מפרסמת משרות',
+    desc: 'יוצרת משרה עם כותרת, סוג, מיקום והתמחות — מיד נחשפת לכל המועמדות',
+    color: '#7B5AC4',
+    bg: 'rgba(91,58,171,0.08)',
+    border: 'rgba(91,58,171,0.2)',
   },
   {
     n: '3',
-    title: 'מגייסים ומשבצים',
-    desc: 'עוברים על בקשות, שולחים הזמנות לראיון — המועמדת מאשרת בוואטסאפ או SMS לפי בחירתה',
+    icon: '❋',
+    title: 'מגייסת ומשבצת',
+    desc: 'עוברת על בקשות, שולחת הזמנה לראיון — המועמדת מאשרת בוואטסאפ',
     color: '#15803D',
-    bg: '#DCFCE7',
+    bg: 'rgba(21,128,61,0.08)',
+    border: 'rgba(21,128,61,0.2)',
   },
+]
+
+const AUTOMATIONS = [
+  { title: 'התראה על התאמה חדשה', desc: 'כשמועמדת חדשה מתאימה למשרה שלך — מקבלת התראה מיידית', icon: Star, color: '#0090A8', bg: 'rgba(0,180,204,0.08)' },
+  { title: 'אישור ראיון אוטומטי', desc: 'מועמדת מאשרת או מסרבת ישירות מ-WhatsApp — בלי טלפון', icon: CheckCircle, color: '#15803D', bg: 'rgba(21,128,61,0.08)' },
+  { title: 'תזכורת לראיין', desc: '24 שעות לפני הראיון — שתי הצדדים מקבלות תזכורת אוטומטית', icon: Bell, color: '#C9A84C', bg: 'rgba(201,168,76,0.08)' },
+  { title: 'סקר לאחר שיבוץ', desc: 'חודש אחרי — שאלון קצר על המועמדת לשיפור מתמיד', icon: MessageCircle, color: '#7B5AC4', bg: 'rgba(91,58,171,0.08)' },
 ]
 
 const FEATURES = [
-  {
-    icon: Briefcase,
-    title: 'פרסום משרות',
-    desc: 'סטאג׳, חלקי ומלא — כולל תאריך כניסה, תוקף, התמחות ותיאור מפורט',
-    color: 'var(--teal)', bg: 'var(--teal-050)',
-  },
-  {
-    icon: Search,
-    title: 'עיון במועמדות',
-    desc: 'סנני לפי התמחות, מחוז, רמה אקדמית, שנות ניסיון ויום לימודים',
-    color: 'var(--purple)', bg: 'var(--purple-050)',
-  },
-  {
-    icon: ClipboardList,
-    title: 'ניהול בקשות',
-    desc: 'רואים כל הגשה, צופים בפרופיל, מסמנים "נצפתה" — ומחליטים',
-    color: 'var(--teal)', bg: 'var(--teal-050)',
-  },
-  {
-    icon: CalendarDays,
-    title: 'לוח ראיונות + לוח שנה',
-    desc: 'כל הראיונות בתצוגת רשימה או לוח שנה חודשי — כולל דירוג אחרי הראיון',
-    color: '#D97706', bg: '#FFFBEB',
-  },
-  {
-    icon: MessageCircle,
-    title: 'הודעות ישירות',
-    desc: 'שולחים הודעה ישירות למועמדת מתוך הפרופיל שלה — היא מקבלת התראה',
-    color: '#15803D', bg: '#DCFCE7',
-  },
-  {
-    icon: FileStack,
-    title: 'קורות חיים',
-    desc: 'צופים בקורות החיים של המועמדת ישירות מהפרופיל — PDF או Word',
-    color: 'var(--purple)', bg: 'var(--purple-050)',
-  },
-  {
-    icon: Star,
-    title: 'התאמות חכמות + התראה',
-    desc: 'כשמועמדת חדשה מתאימה למשרה שלכם — מקבלים התראה מיידית',
-    color: 'var(--teal)', bg: 'var(--teal-050)',
-  },
-  {
-    icon: Star,
-    title: 'סקר לאחר שיבוץ',
-    desc: 'חודש לאחר השיבוץ מקבלים שאלון קצר להערכת המועמדת — לשיפור מתמיד',
-    color: '#D97706', bg: '#FFFBEB',
-  },
-  {
-    icon: Bell,
-    title: 'בחירת ערוץ תקשורת',
-    desc: 'בוחרים בפרופיל: WhatsApp או SMS — כל עדכון יגיע רק לערוץ שנבחר',
-    color: '#15803D', bg: '#DCFCE7',
-  },
-]
-
-const PROCESS = [
-  { icon: ClipboardList, label: 'הגשה',    color: '#5B21B6', bg: '#F5F3FF' },
-  { icon: Search,        label: 'נצפתה',   color: '#0369A1', bg: '#E0F2FE' },
-  { icon: Calendar,      label: 'ראיון',   color: '#D97706', bg: '#FEF3C7' },
-  { icon: CheckCircle,   label: 'התקבלה', color: '#166534', bg: '#DCFCE7' },
-  { icon: Star,          label: 'משוב',    color: '#B45309', bg: '#FFFBEB' },
+  { icon: Briefcase,     title: 'פרסום משרות',      desc: 'סטאג׳, חלקי, מלא — כולל תאריך ותיאור', color: '#0090A8', bg: 'rgba(0,180,204,0.08)' },
+  { icon: Search,        title: 'עיון במועמדות',     desc: 'סנני לפי התמחות, מחוז, רמה', color: '#7B5AC4', bg: 'rgba(91,58,171,0.08)' },
+  { icon: ClipboardList, title: 'ניהול בקשות',       desc: 'צפי, סמני "נצפתה", החלטי', color: '#0090A8', bg: 'rgba(0,180,204,0.08)' },
+  { icon: Calendar,      title: 'לוח ראיונות',       desc: 'רשימה וחודשי — כולל דירוג', color: '#C9A84C', bg: 'rgba(201,168,76,0.08)' },
+  { icon: FileStack,     title: 'קורות חיים',        desc: 'PDF/Word ישירות מהפרופיל', color: '#7B5AC4', bg: 'rgba(91,58,171,0.08)' },
+  { icon: MessageCircle, title: 'הודעות ישירות',     desc: 'פני ישירות למועמדת מהמערכת', color: '#15803D', bg: 'rgba(21,128,61,0.08)' },
 ]
 
 const GOOGLE_SVG = (
-  <svg width="20" height="20" viewBox="0 0 24 24">
+  <svg width="18" height="18" viewBox="0 0 24 24">
     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
@@ -113,171 +68,313 @@ export default function MosadLanding() {
   const [error, setError]     = useState('')
 
   async function handleGoogle() {
-    setPending(true)
-    setError('')
+    setPending(true); setError('')
     const supabase = createClient()
     const { error: err } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=/register/institution` },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     })
     if (err) { setError('שגיאה בכניסה עם Google. נסי שוב.'); setPending(false) }
   }
 
   return (
-    <div dir="rtl" style={{ minHeight: '100vh', background: 'var(--bg-2)', fontFamily: 'Heebo, system-ui, sans-serif' }}>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
+        .ms-root { min-height:100vh; background:#F2F8F9; font-family:'Heebo',system-ui,sans-serif; direction:rtl; }
+        .ms-hero {
+          background: linear-gradient(160deg, #071C1E 0%, #0A2A2C 35%, #0D3438 65%, #07201F 100%);
+          position: relative; overflow: hidden; padding-bottom: 32px;
+        }
+        .ms-hero-orb1 {
+          position:absolute; top:-60px; right:-80px;
+          width:320px; height:320px; border-radius:50%;
+          background: radial-gradient(circle, rgba(0,180,204,.3) 0%, transparent 70%);
+          pointer-events:none;
+        }
+        .ms-hero-orb2 {
+          position:absolute; bottom:-40px; left:-60px;
+          width:240px; height:240px; border-radius:50%;
+          background: radial-gradient(circle, rgba(91,58,171,.18) 0%, transparent 70%);
+          pointer-events:none;
+        }
+        .ms-hero-pattern {
+          position:absolute; inset:0; opacity:.04;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpolygon points='30,6 35,18 48,15 41,26 48,37 35,35 30,47 25,35 12,37 19,26 12,15 25,18' fill='none' stroke='white' stroke-width='.7'/%3E%3C/svg%3E");
+          background-size:60px 60px; pointer-events:none;
+        }
+        .ms-inner { max-width:520px; margin:0 auto; padding:0 20px; position:relative; z-index:1; }
+        .ms-nav { display:flex; align-items:center; justify-content:space-between; padding:18px 0 0; }
+        .ms-nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+        .ms-nav-logobox {
+          width:44px; height:44px; background:#fff; border-radius:12px;
+          display:flex; align-items:center; justify-content:center;
+          box-shadow:0 4px 14px rgba(0,0,0,.22); padding:4px;
+        }
+        .ms-nav-name { font-size:17px; font-weight:900; color:#fff; letter-spacing:-.02em; }
+        .ms-nav-sub  { font-size:10px; font-weight:600; color:rgba(255,255,255,.45); letter-spacing:.06em; }
+        .ms-badge {
+          display:inline-flex; align-items:center; gap:6px;
+          background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
+          border-radius:999px; padding:5px 14px; margin-bottom:14px;
+          font-size:11px; font-weight:700; color:#fff; letter-spacing:.05em;
+        }
+        .ms-hero-title {
+          font-size:32px; font-weight:900; color:#fff;
+          letter-spacing:-.03em; line-height:1.15; margin:0 0 10px;
+        }
+        .ms-hero-em {
+          background:linear-gradient(90deg,#5ECFDB,#9EEAF0,#5ECFDB);
+          background-size:200% auto;
+          -webkit-background-clip:text; background-clip:text;
+          -webkit-text-fill-color:transparent;
+          animation:shimmerT 4s linear infinite;
+        }
+        @keyframes shimmerT { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        .ms-hero-sub { font-size:14px; color:rgba(255,255,255,.65); line-height:1.6; margin:0; }
 
-      {/* ── Hero ── */}
-      <div style={{ background: 'linear-gradient(135deg, #007680 0%, var(--teal) 50%, var(--purple) 100%)' }}>
-        <div style={{ maxWidth: '560px', margin: '0 auto', padding: '0 20px' }}>
+        .ms-card { background:#fff; border-radius:16px; border:1px solid #C8E8EC; box-shadow:0 2px 8px rgba(0,167,181,.07); overflow:hidden; }
+        .ms-card-header { background:#E0F7FA; padding:11px 18px; font-size:12px; font-weight:700; color:#006B75; letter-spacing:.04em; text-transform:uppercase; border-bottom:1px solid #B2E0E6; }
+        .ms-card-body { padding:18px; }
 
-          {/* Nav */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 0' }}>
-            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-              <div style={{ width: '32px', height: '32px', background: 'rgba(255,255,255,.15)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        .ms-login-btn {
+          width:100%; height:52px; border-radius:14px;
+          display:flex; align-items:center; justify-content:center; gap:11px;
+          font-family:'Heebo',system-ui,sans-serif; font-size:15px; font-weight:800;
+          cursor:pointer; border:none; outline:none; position:relative; overflow:hidden;
+          background:linear-gradient(135deg,#006B75,#00B4CC); color:#fff;
+          box-shadow:0 6px 24px rgba(0,167,181,.35); transition:all .2s;
+        }
+        .ms-login-btn:hover { transform:translateY(-1px); box-shadow:0 8px 28px rgba(0,167,181,.45); }
+        .ms-login-btn:active { transform:scale(.98); }
+        .ms-login-btn:disabled { opacity:.65; cursor:not-allowed; transform:none; }
+        .ms-login-btn .g-wrap {
+          background:rgba(255,255,255,.18); border-radius:8px;
+          width:30px; height:30px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+        }
+
+        .ms-step { display:flex; align-items:flex-start; gap:14px; padding:14px 16px; background:#fff; border-radius:14px; border:1px solid #C8E8EC; box-shadow:0 1px 4px rgba(0,167,181,.06); }
+        .ms-step-num { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:900; flex-shrink:0; }
+        .ms-step-arrow { width:1px; background:linear-gradient(180deg,#B2E0E6,transparent); margin:0 auto; height:16px; }
+
+        .ms-feat { background:#fff; border-radius:14px; padding:14px 13px; border:1px solid #C8E8EC; box-shadow:0 1px 4px rgba(0,167,181,.05); }
+        .ms-feat-icon { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; margin-bottom:9px; }
+
+        .ms-auto { display:flex; align-items:flex-start; gap:12px; padding:13px 15px; background:#fff; border-radius:13px; border:1px solid #C8E8EC; box-shadow:0 1px 4px rgba(0,167,181,.05); }
+        .ms-auto-icon { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+        .ms-flow { display:flex; align-items:center; justify-content:center; gap:4px; flex-wrap:wrap; }
+        .ms-flow-item { display:flex; flex-direction:column; align-items:center; gap:5px; }
+        .ms-flow-bubble { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; }
+        .ms-flow-arrow { width:16px; height:1px; background:#B2E0E6; margin-bottom:18px; flex-shrink:0; }
+
+        .ms-cta-bottom {
+          background:linear-gradient(135deg,#071C1E 0%,#0D3438 50%,#006B75 100%);
+          border-radius:18px; padding:24px 20px; text-align:center;
+          border:1px solid rgba(0,180,204,.25);
+        }
+        .ms-cta-title { font-size:17px; font-weight:900; color:#fff; margin-bottom:5px; }
+        .ms-cta-sub { font-size:12.5px; color:rgba(255,255,255,.55); margin-bottom:18px; }
+        .ms-cta-btn {
+          display:inline-flex; align-items:center; gap:8px;
+          background:#fff; border-radius:12px; padding:11px 22px;
+          border:none; cursor:pointer; font-family:'Heebo',system-ui,sans-serif;
+          font-size:14px; font-weight:800; color:#006B75;
+          box-shadow:0 4px 14px rgba(0,0,0,.18); transition:all .2s;
+        }
+        .ms-cta-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,0,0,.25); }
+        .ms-error { background:#FEF2F2; border-radius:10px; padding:10px 14px; font-size:13px; font-weight:600; color:#DC2626; margin-top:10px; text-align:center; }
+        .ms-trust { display:flex; align-items:center; justify-content:center; gap:14px; margin-top:14px; flex-wrap:wrap; }
+        .ms-trust-item { display:flex; align-items:center; gap:4px; font-size:11px; font-weight:600; color:#4A6A6E; }
+        .ms-section-label { font-size:10.5px; font-weight:700; color:#4A6A6E; letter-spacing:.1em; text-transform:uppercase; margin-bottom:12px; }
+      `}</style>
+
+      <div className="ms-root">
+
+        {/* ── Hero ── */}
+        <div className="ms-hero">
+          <div className="ms-hero-orb1" />
+          <div className="ms-hero-orb2" />
+          <div className="ms-hero-pattern" />
+
+          <div className="ms-inner">
+            {/* Nav */}
+            <div className="ms-nav">
+              <div className="ms-nav-logo">
+                <div className="ms-nav-logobox">
+                  <Image src="/logo-chabad.png" alt="השביל" width={36} height={36} style={{ objectFit:'contain' }} />
+                </div>
+                <div>
+                  <div className="ms-nav-name">הַשְּׁבִיל</div>
+                  <div className="ms-nav-sub">רשת חינוך חב״ד</div>
+                </div>
               </div>
-              <span style={{ color: 'rgba(255,255,255,.75)', fontSize: '13px', fontWeight: 600 }}>חזרה</span>
-            </Link>
-            <div style={{ width: '52px', height: '52px', background: '#fff', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(0,0,0,.18)', padding: '4px' }}>
-              <Image src="/logo-chabad.png" alt="לוגו" width={44} height={44} className="object-contain" />
+              <div style={{ background:'rgba(0,180,204,.15)', border:'1px solid rgba(0,180,204,.35)', borderRadius:'8px', padding:'5px 12px', fontSize:'11px', fontWeight:700, color:'rgba(94,207,219,.9)' }}>
+                פורטל מוסד
+              </div>
+            </div>
+
+            {/* Hero content */}
+            <div style={{ padding:'28px 0 0', textAlign:'center' }}>
+              <div className="ms-badge">
+                <School size={12} />
+                גיוס והשמה · רשת חינוך חב״ד
+              </div>
+              <h1 className="ms-hero-title">
+                גייסי את<br />
+                <span className="ms-hero-em">שליחות החינוך</span><br />
+                הנכונה
+              </h1>
+              <p className="ms-hero-sub">
+                מאגר מועמדות מאומתות ברשת חינוך חב״ד —<br />
+                פרסמי משרה ומצאי מועמדת תוך ימים
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="ms-inner" style={{ paddingTop:'0' }}>
+
+          {/* ── Login card ── */}
+          <div style={{ marginTop:'-1px', marginBottom:'20px', position:'relative', zIndex:10 }}>
+            <div className="ms-card" style={{ boxShadow:'0 12px 40px rgba(0,167,181,.2)' }}>
+              <div style={{ height:'3px', background:'linear-gradient(90deg,#00B4CC,#5B3AAB)' }} />
+              <div className="ms-card-body">
+                <h2 style={{ fontSize:'17px', fontWeight:800, color:'#1A1A2E', margin:'0 0 3px', letterSpacing:'-.01em' }}>כניסה למערכת המוסד</h2>
+                <p style={{ fontSize:'13px', color:'#4A6A6E', margin:'0 0 18px' }}>
+                  נכנסי עם המייל של המוסד — הפרופיל נפתח אוטומטית
+                </p>
+
+                <button className="ms-login-btn" onClick={handleGoogle} disabled={pending}>
+                  <div className="g-wrap">{GOOGLE_SVG}</div>
+                  <span>{pending ? 'מחברת...' : 'כניסה עם Google'}</span>
+                </button>
+
+                {error && <div className="ms-error">{error}</div>}
+
+                <div className="ms-trust">
+                  {[
+                    { icon: CheckCircle, text: 'כניסה מיידית' },
+                    { icon: CheckCircle, text: 'ניהול חינמי' },
+                    { icon: MessageCircle, text: 'עדכונים ב-WhatsApp' },
+                  ].map(({ icon: Icon, text }) => (
+                    <span key={text} className="ms-trust-item">
+                      <Icon size={11} color="#00B4CC" />
+                      {text}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Content */}
-          <div style={{ padding: '20px 0 44px', textAlign: 'center' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: 'rgba(255,255,255,.15)', border: '1px solid rgba(255,255,255,.25)', borderRadius: '999px', padding: '5px 14px', marginBottom: '16px' }}>
-              <School size={13} color="white" />
-              <span style={{ fontSize: '12px', fontWeight: 700, color: 'white', letterSpacing: '.05em' }}>פורטל המוסד</span>
-            </div>
-            <h1 style={{ fontSize: '34px', fontWeight: 900, color: 'white', letterSpacing: '-.03em', lineHeight: 1.12, margin: '0 0 12px' }}>
-              גייסי את<br />שליחות החינוך הנכונה
-            </h1>
-            <p style={{ fontSize: '14.5px', color: 'rgba(255,255,255,.82)', margin: '0', lineHeight: 1.6 }}>
-              מאגר מועמדות מאומתות, מנוהל ברשת חינוך חב״ד —<br />פרסמי משרה ומצאי מועמדת תוך ימים
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ maxWidth: '560px', margin: '0 auto', padding: '0 20px' }}>
-
-        {/* ── About ── */}
-        <div style={{ marginTop: '8px', marginBottom: '16px', background: 'white', borderRadius: '16px', padding: '18px 20px', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>
-          <p style={{ fontSize: '14px', color: 'var(--ink-2)', lineHeight: 1.7, margin: 0 }}>
-            <strong style={{ color: 'var(--ink)' }}>מערכת גיוס.us</strong> היא הפלטפורמה הרשמית של רשת חינוך חב״ד לגיוס מורות, גננות וסטאג׳יריות.
-            <br /><br />
-            מפרסמים משרה, עוברים על פרופילי מועמדות מסוננות, ושולחים הזמנה לראיון — הכל במקום אחד. כל צד בוחר את ערוץ התקשורת שנוח לו — וואטסאפ או SMS.
-          </p>
-        </div>
-
-        {/* ── Login card ── */}
-        <div style={{ marginTop: '-20px', background: 'white', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,167,181,.14)', border: '1px solid var(--line)', marginBottom: '24px' }}>
-          <div style={{ height: '4px', background: 'linear-gradient(90deg, var(--teal), var(--purple))' }} />
-          <div style={{ padding: '24px 24px 22px' }}>
-            <h2 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--ink)', margin: '0 0 3px', letterSpacing: '-.01em' }}>כניסה למערכת</h2>
-            <p style={{ fontSize: '13px', color: 'var(--ink-3)', margin: '0 0 20px' }}>
-              מוסד חדש? תועברו לטופס הרשמה — אישור תוך יום עסקים
-            </p>
-
-            <button onClick={handleGoogle} disabled={pending}
-              style={{ width: '100%', height: '52px', borderRadius: '13px', background: pending ? 'var(--bg-2)' : '#fff', border: '1.5px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', cursor: pending ? 'default' : 'pointer', fontFamily: 'inherit', fontSize: '15px', fontWeight: 800, color: 'var(--ink)', boxShadow: '0 2px 8px rgba(0,0,0,.06)', transition: 'all .15s' }}
-              onMouseEnter={e => { if (!pending) { e.currentTarget.style.borderColor = 'var(--teal-100)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,167,181,.12)' } }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--line)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,.06)' }}
-            >
-              {!pending && GOOGLE_SVG}
-              <span>{pending ? 'מחברת...' : 'כניסה עם Google'}</span>
-            </button>
-
-            {error && (
-              <div style={{ background: 'var(--red-bg)', borderRadius: '8px', padding: '9px 12px', fontSize: '13px', color: 'var(--red)', fontWeight: 600, marginTop: '12px' }}>{error}</div>
-            )}
-
-            {/* Trust row */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginTop: '16px', flexWrap: 'wrap' }}>
-              {[
-                { icon: CheckCircle, text: 'ניהול חינמי' },
-                { icon: Clock, text: 'אישור תוך יום' },
-                { icon: MessageCircle, text: 'וואטסאפ או SMS לבחירה' },
-              ].map(({ icon: Icon, text }) => (
-                <span key={text} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11.5px', color: 'var(--ink-4)', fontWeight: 600 }}>
-                  <Icon size={12} color="var(--green)" />
-                  {text}
-                </span>
+          {/* ── How it works ── */}
+          <div style={{ marginBottom:'20px' }}>
+            <div className="ms-section-label">איך זה עובד</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
+              {STEPS.map((s, i) => (
+                <div key={s.n}>
+                  <div className="ms-step">
+                    <div className="ms-step-num" style={{ background:s.bg, border:`1px solid ${s.border}` }}>
+                      <span style={{ color:s.color, fontSize:'16px' }}>{s.icon}</span>
+                    </div>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontSize:'14px', fontWeight:800, color:'#1A1A2E', marginBottom:'2px' }}>{s.title}</div>
+                      <div style={{ fontSize:'12.5px', color:'#4A4A6A', lineHeight:1.45 }}>{s.desc}</div>
+                    </div>
+                  </div>
+                  {i < STEPS.length - 1 && <div className="ms-step-arrow" />}
+                </div>
               ))}
             </div>
           </div>
-        </div>
 
-        {/* ── How it works ── */}
-        <div style={{ marginBottom: '24px' }}>
-          <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--ink-4)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: '12px' }}>איך זה עובד</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {STEPS.map(s => (
-              <div key={s.n} style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', background: 'white', borderRadius: '14px', padding: '14px 16px', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '14px', fontWeight: 900, color: s.color }}>
-                  {s.n}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--ink)', marginBottom: '2px' }}>{s.title}</div>
-                  <div style={{ fontSize: '12.5px', color: 'var(--ink-3)', lineHeight: 1.45 }}>{s.desc}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Status flow ── */}
-        <div style={{ marginBottom: '24px', background: 'white', borderRadius: '16px', padding: '16px 18px', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>
-          <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--ink-4)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: '14px', margin: '0 0 14px' }}>מחזור חיים של הגשה</p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
-            {PROCESS.map((p, i) => (
-              <div key={p.label} style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: p.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <p.icon size={16} color={p.color} />
+          {/* ── Automations ── */}
+          <div style={{ marginBottom:'20px' }}>
+            <div className="ms-card">
+              <div className="ms-card-header">אוטומציות וזרימות</div>
+              <div className="ms-card-body" style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
+                {AUTOMATIONS.map(({ title, desc, icon: Icon, color, bg }) => (
+                  <div key={title} className="ms-auto">
+                    <div className="ms-auto-icon" style={{ background:bg }}>
+                      <Icon size={16} color={color} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize:'13px', fontWeight:800, color:'#1A1A2E', marginBottom:'2px' }}>{title}</div>
+                      <div style={{ fontSize:'12px', color:'#4A4A6A', lineHeight:1.4 }}>{desc}</div>
+                    </div>
                   </div>
-                  <span style={{ fontSize: '11px', fontWeight: 700, color: p.color }}>{p.label}</span>
-                </div>
-                {i < PROCESS.length - 1 && (
-                  <div style={{ width: '20px', height: '1px', background: 'var(--line)', marginBottom: '16px', flexShrink: 0 }} />
-                )}
+                ))}
               </div>
-            ))}
+            </div>
           </div>
+
+          {/* ── Application flow ── */}
+          <div style={{ marginBottom:'20px' }}>
+            <div className="ms-card">
+              <div className="ms-card-header">מחזור חיים של הגשה</div>
+              <div className="ms-card-body">
+                <div className="ms-flow">
+                  {[
+                    { label:'הגשה',     color:'#5B3AAB', bg:'rgba(91,58,171,.1)' },
+                    { label:'נצפתה',    color:'#0369A1', bg:'rgba(3,105,161,.1)' },
+                    { label:'ראיון',    color:'#D97706', bg:'rgba(217,119,6,.1)' },
+                    { label:'שיבוץ',   color:'#15803D', bg:'rgba(21,128,61,.1)' },
+                    { label:'משוב',     color:'#C9A84C', bg:'rgba(201,168,76,.1)' },
+                  ].map(({ label, color, bg }, i, arr) => (
+                    <div key={label} style={{ display:'flex', alignItems:'center', gap:'4px', flexShrink:0 }}>
+                      <div className="ms-flow-item">
+                        <div className="ms-flow-bubble" style={{ background:bg }}>
+                          <span style={{ fontSize:'11px', fontWeight:800, color }}>{label}</span>
+                        </div>
+                      </div>
+                      {i < arr.length - 1 && <div className="ms-flow-arrow" />}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Features ── */}
+          <div style={{ marginBottom:'20px' }}>
+            <div className="ms-section-label">כלים לניהול הגיוס</div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px' }}>
+              {FEATURES.map(({ icon: Icon, title, desc, color, bg }) => (
+                <div key={title} className="ms-feat">
+                  <div className="ms-feat-icon" style={{ background:bg }}>
+                    <Icon size={16} color={color} />
+                  </div>
+                  <div style={{ fontSize:'13px', fontWeight:800, color:'#1A1A2E', marginBottom:'3px' }}>{title}</div>
+                  <div style={{ fontSize:'11.5px', color:'#4A6A6E', lineHeight:1.4 }}>{desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Bottom CTA ── */}
+          <div className="ms-cta-bottom" style={{ marginBottom:'32px' }}>
+            <div style={{ fontSize:'13px', color:'rgba(94,207,219,.7)', fontStyle:'italic', marginBottom:'10px' }}>
+              ״גייסי את שליחות החינוך הנכונה״
+            </div>
+            <div className="ms-cta-title">מוכנות לגייס?</div>
+            <div className="ms-cta-sub">כניסה מיידית — ניהול פשוט ויעיל</div>
+            <button className="ms-cta-btn" onClick={handleGoogle} disabled={pending}>
+              {GOOGLE_SVG}
+              {pending ? 'מחברת...' : 'כניסה עם Google'}
+            </button>
+          </div>
+
         </div>
 
-        {/* ── Features ── */}
-        <div style={{ marginBottom: '32px' }}>
-          <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--ink-4)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: '12px' }}>כלים לניהול הגיוס</p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-            {FEATURES.map(({ icon: Icon, title, desc, color, bg }) => (
-              <div key={title} style={{ background: 'white', borderRadius: '14px', padding: '14px 13px', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>
-                <div style={{ width: '34px', height: '34px', borderRadius: '9px', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '9px' }}>
-                  <Icon size={16} color={color} />
-                </div>
-                <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--ink)', marginBottom: '4px' }}>{title}</div>
-                <div style={{ fontSize: '11.5px', color: 'var(--ink-4)', lineHeight: 1.4 }}>{desc}</div>
-              </div>
-            ))}
-          </div>
+        {/* Footer */}
+        <div style={{ textAlign:'center', padding:'0 0 28px', fontSize:'11px', color:'#4A6A6E', direction:'rtl' }}>
+          הַשְּׁבִיל · רשת חינוך חב״ד · 2026
+          <span style={{ margin:'0 8px' }}>·</span>
+          <a href="/mumedet" style={{ color:'#00B4CC', textDecoration:'none', fontWeight:600 }}>פורטל מועמדת <ArrowLeft size={10} style={{ display:'inline' }} /></a>
         </div>
 
-        {/* ── Bottom CTA ── */}
-        <div style={{ background: 'linear-gradient(135deg, #007680 0%, var(--teal) 60%, var(--purple) 100%)', borderRadius: '18px', padding: '22px 20px', textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{ fontSize: '16px', fontWeight: 900, color: 'white', marginBottom: '6px' }}>מוכנים לגייס?</div>
-          <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.75)', marginBottom: '16px' }}>הצטרפו לרשת — אישור מהיר, ניהול פשוט</div>
-          <button onClick={handleGoogle} disabled={pending}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'white', borderRadius: '12px', padding: '11px 22px', border: 'none', cursor: pending ? 'default' : 'pointer', fontSize: '14px', fontWeight: 800, color: 'var(--teal-600)', fontFamily: 'inherit', boxShadow: '0 4px 14px rgba(0,0,0,.15)', transition: 'all .15s' }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,.2)' }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,.15)' }}
-          >
-            {!pending && GOOGLE_SVG}
-            {pending ? 'מחברת...' : 'כניסה עם Google'}
-          </button>
-        </div>
       </div>
-
-      <InstallFooter />
-    </div>
+    </>
   )
 }

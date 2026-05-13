@@ -5,100 +5,57 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import {
   GraduationCap, Search, FileText, Star, MessageCircle,
-  CheckCircle, Clock, ChevronLeft, Bell, MapPin, MailOpen,
+  CheckCircle, Bell, MapPin, MailOpen, ArrowLeft,
 } from 'lucide-react'
-import Link from 'next/link'
-import InstallFooter from '@/components/landing/install-footer'
 
 const STEPS = [
   {
     n: '1',
-    title: 'נרשמת עם Google',
-    desc: 'כניסה מהירה — רוב הפרטים (התמחות, עיר, מחוז, זמינות) ממולאים כבר בהרשמה',
-    color: 'var(--purple)',
-    bg: 'var(--purple-050)',
+    icon: '✦',
+    title: 'נכנסת עם Google',
+    desc: 'הרשמה חד-פעמית — בונה פרופיל עם התמחות, עיר ורמה אקדמית',
+    color: '#7B5AC4',
+    bg: 'rgba(91,58,171,0.08)',
+    border: 'rgba(91,58,171,0.18)',
   },
   {
     n: '2',
+    icon: '◈',
     title: 'מגישה למשרות',
-    desc: 'מוצאת משרות מתאימות לפי עיר, התמחות וסוג משרה — ומגישה בקליק',
-    color: 'var(--teal)',
-    bg: 'var(--teal-050)',
+    desc: 'מחפשת לפי עיר, התמחות, סוג משרה — ומגישה בקליק אחד',
+    color: '#0090A8',
+    bg: 'rgba(0,180,204,0.08)',
+    border: 'rgba(0,180,204,0.18)',
   },
   {
     n: '3',
+    icon: '❋',
     title: 'מקבלת הצעה',
-    desc: 'המוסד שולח הזמנה לראיון — מאשרת ישירות מ-WhatsApp או SMS לפי בחירתך',
-    color: '#22C55E',
-    bg: '#DCFCE7',
+    desc: 'המוסד שולח הזמנה לראיון — מאשרת ישירות מ-WhatsApp',
+    color: '#15803D',
+    bg: 'rgba(21,128,61,0.08)',
+    border: 'rgba(21,128,61,0.18)',
   },
+]
+
+const AUTOMATIONS = [
+  { title: 'התאמה חכמה', desc: 'כשנפתחת משרה חדשה שמתאימה לפרופיל שלך — מקבלת התראה מיידית', icon: Star, color: '#7B5AC4', bg: 'rgba(91,58,171,0.08)' },
+  { title: 'עדכון סטטוס אוטומטי', desc: 'ממתינה → נצפתה → התקבלה — כל שינוי מגיע ב-WhatsApp', icon: Bell, color: '#0090A8', bg: 'rgba(0,180,204,0.08)' },
+  { title: 'תזכורת ראיון', desc: '24 שעות לפני הראיון — תזכורת אוטומטית עם פרטי המיקום', icon: CheckCircle, color: '#15803D', bg: 'rgba(21,128,61,0.08)' },
+  { title: 'סקר שביעות רצון', desc: 'חודש לאחר השיבוץ — שאלון קצר לשיפור מתמיד', icon: MessageCircle, color: '#C9A84C', bg: 'rgba(201,168,76,0.08)' },
 ]
 
 const FEATURES = [
-  {
-    icon: FileText,
-    title: 'פרופיל מקצועי מלא',
-    desc: 'התמחות, רמה אקדמית, ניסיון, כישורים וביו — הכל במקום אחד',
-    color: 'var(--purple)', bg: 'var(--purple-050)',
-  },
-  {
-    icon: GraduationCap,
-    title: 'העלאת קורות חיים',
-    desc: 'אופציונלי — מעלה PDF או Word, או מדביקה קישור ישיר',
-    color: 'var(--teal)', bg: 'var(--teal-050)',
-  },
-  {
-    icon: Search,
-    title: 'חיפוש משרות מתקדם',
-    desc: 'סנני לפי מחוז, עיר, סוג (סטאג׳ / חלקי / מלא) והתמחות',
-    color: '#D97706', bg: '#FFFBEB',
-  },
-  {
-    icon: Star,
-    title: 'התאמות + התראה',
-    desc: 'כשנפתחת משרה חדשה שמתאימה לפרופיל שלך — מקבלת התראה מיידית',
-    color: 'var(--purple)', bg: 'var(--purple-050)',
-  },
-  {
-    icon: CheckCircle,
-    title: 'מעקב סטטוס',
-    desc: 'רואה בזמן אמת: ממתינה → נצפתה → התקבלה / נדחתה — לכל הגשה',
-    color: '#15803D', bg: '#DCFCE7',
-  },
-  {
-    icon: Bell,
-    title: 'התראות דפדפן',
-    desc: 'מפעילה התראות — מקבלת עדכון מיידי גם כשהאפליקציה לא פתוחה',
-    color: '#D97706', bg: '#FFFBEB',
-  },
-  {
-    icon: MessageCircle,
-    title: 'בחירת ערוץ תקשורת',
-    desc: 'בוחרת בפרופיל: WhatsApp או SMS — כל עדכון יגיע רק לערוץ שבחרת',
-    color: '#15803D', bg: '#DCFCE7',
-  },
-  {
-    icon: MailOpen,
-    title: 'תיבת הודעות',
-    desc: 'מוסדות שולחים הודעות ישירות — קוראת ועונה במערכת',
-    color: 'var(--teal)', bg: 'var(--teal-050)',
-  },
-  {
-    icon: MapPin,
-    title: 'לפי מיקום',
-    desc: 'רואה משרות קרובות אלייך לפי עיר ומחוז — בלי לחפש רחוק',
-    color: 'var(--purple)', bg: 'var(--purple-050)',
-  },
-  {
-    icon: Star,
-    title: 'סקר שביעות רצון',
-    desc: 'לאחר שיבוץ מקבלת שאלון קצר — המשוב שלך משפר את המערכת',
-    color: '#D97706', bg: '#FFFBEB',
-  },
+  { icon: FileText,       title: 'פרופיל מקצועי',    desc: 'התמחות, ניסיון, כישורים וביו', color: '#7B5AC4', bg: 'rgba(91,58,171,0.08)' },
+  { icon: GraduationCap, title: 'קורות חיים',         desc: 'העלאת PDF/Word או קישור', color: '#0090A8', bg: 'rgba(0,180,204,0.08)' },
+  { icon: Search,         title: 'חיפוש מתקדם',       desc: 'מחוז, עיר, סוג, התמחות', color: '#C9A84C', bg: 'rgba(201,168,76,0.08)' },
+  { icon: CheckCircle,    title: 'מעקב הגשות',        desc: 'סטטוס בזמן אמת לכל הגשה', color: '#15803D', bg: 'rgba(21,128,61,0.08)' },
+  { icon: MapPin,         title: 'לפי מיקום',          desc: 'משרות קרובות לפי עיר ומחוז', color: '#7B5AC4', bg: 'rgba(91,58,171,0.08)' },
+  { icon: MailOpen,       title: 'תיבת הודעות',        desc: 'מוסדות פונים ישירות', color: '#0090A8', bg: 'rgba(0,180,204,0.08)' },
 ]
 
 const GOOGLE_SVG = (
-  <svg width="20" height="20" viewBox="0 0 24 24">
+  <svg width="18" height="18" viewBox="0 0 24 24">
     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
@@ -111,162 +68,318 @@ export default function MumedetLanding() {
   const [error, setError]     = useState('')
 
   async function handleGoogle() {
-    setPending(true)
-    setError('')
+    setPending(true); setError('')
     const supabase = createClient()
     const { error: err } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=/register/candidate` },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     })
     if (err) { setError('שגיאה בכניסה עם Google. נסי שוב.'); setPending(false) }
   }
 
   return (
-    <div dir="rtl" style={{ minHeight: '100vh', background: 'var(--bg-2)', fontFamily: 'Heebo, system-ui, sans-serif' }}>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
+        .ml-root { min-height:100vh; background:#F5F3F9; font-family:'Heebo',system-ui,sans-serif; direction:rtl; }
+        .ml-hero {
+          background: linear-gradient(160deg, #0D0820 0%, #1E1040 35%, #2A1558 65%, #1A0D38 100%);
+          position: relative; overflow: hidden; padding-bottom: 32px;
+        }
+        .ml-hero-orb1 {
+          position:absolute; top:-60px; right:-80px;
+          width:320px; height:320px; border-radius:50%;
+          background: radial-gradient(circle, rgba(91,58,171,.35) 0%, transparent 70%);
+          pointer-events:none;
+        }
+        .ml-hero-orb2 {
+          position:absolute; bottom:-40px; left:-60px;
+          width:240px; height:240px; border-radius:50%;
+          background: radial-gradient(circle, rgba(0,180,204,.18) 0%, transparent 70%);
+          pointer-events:none;
+        }
+        .ml-hero-pattern {
+          position:absolute; inset:0; opacity:.04;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpolygon points='30,6 35,18 48,15 41,26 48,37 35,35 30,47 25,35 12,37 19,26 12,15 25,18' fill='none' stroke='white' stroke-width='.7'/%3E%3C/svg%3E");
+          background-size:60px 60px; pointer-events:none;
+        }
+        .ml-inner { max-width:520px; margin:0 auto; padding:0 20px; position:relative; z-index:1; }
+        .ml-nav { display:flex; align-items:center; justify-content:space-between; padding:18px 0 0; }
+        .ml-nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+        .ml-nav-logobox {
+          width:44px; height:44px; background:#fff; border-radius:12px;
+          display:flex; align-items:center; justify-content:center;
+          box-shadow:0 4px 14px rgba(0,0,0,.22); padding:4px;
+        }
+        .ml-nav-name { font-size:17px; font-weight:900; color:#fff; letter-spacing:-.02em; }
+        .ml-nav-sub  { font-size:10px; font-weight:600; color:rgba(255,255,255,.45); letter-spacing:.06em; }
+        .ml-badge {
+          display:inline-flex; align-items:center; gap:6px;
+          background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
+          border-radius:999px; padding:5px 14px; margin-bottom:14px;
+          font-size:11px; font-weight:700; color:#fff; letter-spacing:.05em;
+        }
+        .ml-hero-title {
+          font-size:32px; font-weight:900; color:#fff;
+          letter-spacing:-.03em; line-height:1.15; margin:0 0 10px;
+        }
+        .ml-hero-em {
+          background:linear-gradient(90deg,#D4B06A,#F0D08A,#D4B06A);
+          background-size:200% auto;
+          -webkit-background-clip:text; background-clip:text;
+          -webkit-text-fill-color:transparent;
+          animation:shimmer 4s linear infinite;
+        }
+        @keyframes shimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        .ml-hero-sub { font-size:14px; color:rgba(255,255,255,.65); line-height:1.6; margin:0; }
 
-      {/* ── Hero ── */}
-      <div style={{ background: 'linear-gradient(135deg, var(--purple) 0%, var(--teal) 100%)' }}>
-        <div style={{ maxWidth: '560px', margin: '0 auto', padding: '0 20px' }}>
+        /* Cards */
+        .ml-card { background:#fff; border-radius:16px; border:1px solid #E0DCF0; box-shadow:0 2px 8px rgba(91,58,171,.06); overflow:hidden; }
+        .ml-card-header { background:#EBE5F8; padding:11px 18px; font-size:12px; font-weight:700; color:#3D2480; letter-spacing:.04em; text-transform:uppercase; border-bottom:1px solid #D8D0F0; }
+        .ml-card-body { padding:18px; }
 
-          {/* Nav */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 0' }}>
-            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-              <div style={{ width: '32px', height: '32px', background: 'rgba(255,255,255,.15)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        /* Login btn */
+        .ml-login-btn {
+          width:100%; height:52px; border-radius:14px;
+          display:flex; align-items:center; justify-content:center; gap:11px;
+          font-family:'Heebo',system-ui,sans-serif; font-size:15px; font-weight:800;
+          cursor:pointer; border:none; outline:none; position:relative; overflow:hidden;
+          background:linear-gradient(135deg,#3D2480,#5B3AAB); color:#fff;
+          box-shadow:0 6px 24px rgba(91,58,171,.35); transition:all .2s;
+        }
+        .ml-login-btn:hover { transform:translateY(-1px); box-shadow:0 8px 28px rgba(91,58,171,.45); }
+        .ml-login-btn:active { transform:scale(.98); }
+        .ml-login-btn:disabled { opacity:.65; cursor:not-allowed; transform:none; }
+        .ml-login-btn .g-wrap {
+          background:rgba(255,255,255,.15); border-radius:8px;
+          width:30px; height:30px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+        }
+
+        /* Step */
+        .ml-step { display:flex; align-items:flex-start; gap:14px; padding:14px 16px; background:#fff; border-radius:14px; border:1px solid #E0DCF0; box-shadow:0 1px 4px rgba(91,58,171,.05); }
+        .ml-step-num { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:900; flex-shrink:0; }
+        .ml-step-arrow { width:1px; background:linear-gradient(180deg,#D8D0F0,transparent); margin:0 auto; height:16px; }
+
+        /* Feature grid */
+        .ml-feat { background:#fff; border-radius:14px; padding:14px 13px; border:1px solid #E0DCF0; box-shadow:0 1px 4px rgba(91,58,171,.05); }
+        .ml-feat-icon { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; margin-bottom:9px; }
+
+        /* Automation */
+        .ml-auto { display:flex; align-items:flex-start; gap:12px; padding:13px 15px; background:#fff; border-radius:13px; border:1px solid #E0DCF0; box-shadow:0 1px 4px rgba(91,58,171,.05); }
+        .ml-auto-icon { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+        /* Flow bar */
+        .ml-flow { display:flex; align-items:center; justify-content:center; gap:4px; flex-wrap:wrap; }
+        .ml-flow-item { display:flex; flex-direction:column; align-items:center; gap:5px; }
+        .ml-flow-bubble { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; }
+        .ml-flow-label { font-size:10px; font-weight:700; }
+        .ml-flow-arrow { width:16px; height:1px; background:#D8D0F0; margin-bottom:18px; flex-shrink:0; }
+
+        /* CTA bottom */
+        .ml-cta-bottom {
+          background:linear-gradient(135deg,#1E1040 0%,#2A1558 50%,#3D2480 100%);
+          border-radius:18px; padding:24px 20px; text-align:center;
+          border:1px solid rgba(201,168,76,.2);
+        }
+        .ml-cta-quote { font-size:13px; color:rgba(212,176,106,.8); font-style:italic; margin-bottom:10px; }
+        .ml-cta-title { font-size:17px; font-weight:900; color:#fff; margin-bottom:5px; }
+        .ml-cta-sub { font-size:12.5px; color:rgba(255,255,255,.55); margin-bottom:18px; }
+        .ml-cta-btn {
+          display:inline-flex; align-items:center; gap:8px;
+          background:#fff; border-radius:12px; padding:11px 22px;
+          border:none; cursor:pointer; font-family:'Heebo',system-ui,sans-serif;
+          font-size:14px; font-weight:800; color:#3D2480;
+          box-shadow:0 4px 14px rgba(0,0,0,.18); transition:all .2s;
+        }
+        .ml-cta-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,0,0,.25); }
+        .ml-error { background:#FEF2F2; border-radius:10px; padding:10px 14px; font-size:13px; font-weight:600; color:#DC2626; margin-top:10px; text-align:center; }
+        .ml-trust { display:flex; align-items:center; justify-content:center; gap:14px; margin-top:14px; flex-wrap:wrap; }
+        .ml-trust-item { display:flex; align-items:center; gap:4px; font-size:11px; font-weight:600; color:#8888AA; }
+        .ml-section-label { font-size:10.5px; font-weight:700; color:#8888AA; letter-spacing:.1em; text-transform:uppercase; margin-bottom:12px; }
+      `}</style>
+
+      <div className="ml-root">
+
+        {/* ── Hero ── */}
+        <div className="ml-hero">
+          <div className="ml-hero-orb1" />
+          <div className="ml-hero-orb2" />
+          <div className="ml-hero-pattern" />
+
+          <div className="ml-inner">
+            {/* Nav */}
+            <div className="ml-nav">
+              <div className="ml-nav-logo">
+                <div className="ml-nav-logobox">
+                  <Image src="/logo-chabad.png" alt="השביל" width={36} height={36} style={{ objectFit:'contain' }} />
+                </div>
+                <div>
+                  <div className="ml-nav-name">הַשְּׁבִיל</div>
+                  <div className="ml-nav-sub">רשת חינוך חב״ד</div>
+                </div>
               </div>
-              <span style={{ color: 'rgba(255,255,255,.75)', fontSize: '13px', fontWeight: 600 }}>חזרה</span>
-            </Link>
-            <div style={{ width: '52px', height: '52px', background: '#fff', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(0,0,0,.18)', padding: '4px' }}>
-              <Image src="/logo-chabad.png" alt="לוגו" width={44} height={44} className="object-contain" />
+              <div style={{ background:'rgba(0,180,204,.15)', border:'1px solid rgba(0,180,204,.3)', borderRadius:'8px', padding:'5px 12px', fontSize:'11px', fontWeight:700, color:'rgba(0,180,204,.9)' }}>
+                פורטל מועמדת
+              </div>
+            </div>
+
+            {/* Hero content */}
+            <div style={{ padding:'28px 0 0', textAlign:'center' }}>
+              <div className="ml-badge">
+                <GraduationCap size={12} />
+                גיוס והשמה · רשת חינוך חב״ד
+              </div>
+              <h1 className="ml-hero-title">
+                מצאי את<br />
+                <span className="ml-hero-em">שביל השליחות</span><br />
+                שלך
+              </h1>
+              <p className="ml-hero-sub">
+                פלטפורמת הגיוס וההשמה הרשמית של הרשת —<br />
+                פרופיל אחד, כל המשרות, עדכון בוואטסאפ
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="ml-inner" style={{ paddingTop:'0' }}>
+
+          {/* ── Login card ── */}
+          <div style={{ marginTop:'-1px', marginBottom:'20px', position:'relative', zIndex:10 }}>
+            <div className="ml-card" style={{ boxShadow:'0 12px 40px rgba(91,58,171,.18)' }}>
+              <div style={{ height:'3px', background:'linear-gradient(90deg,#5B3AAB,#00B4CC)' }} />
+              <div className="ml-card-body">
+                <h2 style={{ fontSize:'17px', fontWeight:800, color:'#1A1A2E', margin:'0 0 3px', letterSpacing:'-.01em' }}>כניסה למערכת המועמדת</h2>
+                <p style={{ fontSize:'13px', color:'#8888AA', margin:'0 0 18px' }}>מועמדת חדשה? הפרופיל ייפתח אוטומטית</p>
+
+                <button className="ml-login-btn" onClick={handleGoogle} disabled={pending}>
+                  <div className="g-wrap">{GOOGLE_SVG}</div>
+                  <span>{pending ? 'מחברת...' : 'כניסה / הרשמה עם Google'}</span>
+                </button>
+
+                {error && <div className="ml-error">{error}</div>}
+
+                <div className="ml-trust">
+                  {[
+                    { icon: CheckCircle, text: 'הרשמה חינמית' },
+                    { icon: CheckCircle, text: 'פחות מ-5 דקות' },
+                    { icon: MessageCircle, text: 'עדכונים ב-WhatsApp' },
+                  ].map(({ icon: Icon, text }) => (
+                    <span key={text} className="ml-trust-item">
+                      <Icon size={11} color="#15803D" />
+                      {text}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Content */}
-          <div style={{ padding: '20px 0 44px', textAlign: 'center' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: 'rgba(255,255,255,.15)', border: '1px solid rgba(255,255,255,.25)', borderRadius: '999px', padding: '5px 14px', marginBottom: '16px' }}>
-              <GraduationCap size={13} color="white" />
-              <span style={{ fontSize: '12px', fontWeight: 700, color: 'white', letterSpacing: '.05em' }}>פורטל המועמדת</span>
-            </div>
-            <h1 style={{ fontSize: '34px', fontWeight: 900, color: 'white', letterSpacing: '-.03em', lineHeight: 1.12, margin: '0 0 12px' }}>
-              מצאי את<br />המשרה שחיכית לה
-            </h1>
-            <p style={{ fontSize: '14.5px', color: 'rgba(255,255,255,.82)', margin: '0', lineHeight: 1.6 }}>
-              הצטרפי לשליחות החינוך ברשת חינוך חב״ד
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ maxWidth: '560px', margin: '0 auto', padding: '0 20px' }}>
-
-        {/* ── Tip banner ── */}
-        <div style={{ marginTop: '8px', marginBottom: '10px', background: 'var(--purple-050)', borderRadius: '12px', padding: '11px 16px', border: '1px solid var(--purple-200)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Star size={15} color="var(--purple)" style={{ flexShrink: 0 }} />
-          <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--purple)', margin: 0, lineHeight: 1.4 }}>
-            השלמת כל הפרטים תעזור להתאמה גבוהה יותר למשרות
-          </p>
-        </div>
-
-        {/* ── About ── */}
-        <div style={{ marginBottom: '16px', background: 'white', borderRadius: '16px', padding: '18px 20px', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>
-          <p style={{ fontSize: '14px', color: 'var(--ink-2)', lineHeight: 1.7, margin: 0 }}>
-            <strong style={{ color: 'var(--ink)' }}>מערכת גיוס.us</strong> היא הפלטפורמה הרשמית של רשת חינוך חב״ד לאיתור ושיבוץ מורות, גננות וסטאג׳יריות.
-            <br /><br />
-            נרשמת פעם אחת, בונה פרופיל מקצועי — והמוסדות ברשת רואים אותך. כשמוסד מתעניין, תקבלי הזמנה ישירות — לוואטסאפ או SMS לפי בחירתך.
-          </p>
-        </div>
-
-        {/* ── Login card ── */}
-        <div style={{ marginTop: '-20px', background: 'white', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 8px 32px rgba(91,58,171,.14)', border: '1px solid var(--line)', marginBottom: '24px' }}>
-          <div style={{ height: '4px', background: 'linear-gradient(90deg, var(--purple), var(--teal))' }} />
-          <div style={{ padding: '24px 24px 22px' }}>
-            <h2 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--ink)', margin: '0 0 3px', letterSpacing: '-.01em' }}>כניסה למערכת</h2>
-            <p style={{ fontSize: '13px', color: 'var(--ink-3)', margin: '0 0 20px' }}>
-              מועמדת חדשה? תועברי להשלמת הפרופיל אוטומטית
-            </p>
-
-            <button onClick={handleGoogle} disabled={pending}
-              style={{ width: '100%', height: '52px', borderRadius: '13px', background: pending ? 'var(--bg-2)' : '#fff', border: '1.5px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', cursor: pending ? 'default' : 'pointer', fontFamily: 'inherit', fontSize: '15px', fontWeight: 800, color: 'var(--ink)', boxShadow: '0 2px 8px rgba(0,0,0,.06)', transition: 'all .15s' }}
-              onMouseEnter={e => { if (!pending) { e.currentTarget.style.borderColor = 'var(--purple-200)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(91,58,171,.12)' } }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--line)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,.06)' }}
-            >
-              {!pending && GOOGLE_SVG}
-              <span>{pending ? 'מחברת...' : 'כניסה עם Google'}</span>
-            </button>
-
-            {error && (
-              <div style={{ background: 'var(--red-bg)', borderRadius: '8px', padding: '9px 12px', fontSize: '13px', color: 'var(--red)', fontWeight: 600, marginTop: '12px' }}>{error}</div>
-            )}
-
-            {/* Trust row */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginTop: '16px', flexWrap: 'wrap' }}>
-              {[
-                { icon: CheckCircle, text: 'הרשמה חינמית' },
-                { icon: Clock, text: '5 דקות להשלמת פרופיל' },
-                { icon: CheckCircle, text: 'ללא מחויבות' },
-              ].map(({ icon: Icon, text }) => (
-                <span key={text} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11.5px', color: 'var(--ink-4)', fontWeight: 600 }}>
-                  <Icon size={12} color="var(--green)" />
-                  {text}
-                </span>
+          {/* ── How it works ── */}
+          <div style={{ marginBottom:'20px' }}>
+            <div className="ml-section-label">איך זה עובד</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
+              {STEPS.map((s, i) => (
+                <div key={s.n}>
+                  <div className="ml-step">
+                    <div className="ml-step-num" style={{ background:s.bg, border:`1px solid ${s.border}` }}>
+                      <span style={{ color:s.color, fontSize:'16px' }}>{s.icon}</span>
+                    </div>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontSize:'14px', fontWeight:800, color:'#1A1A2E', marginBottom:'2px' }}>{s.title}</div>
+                      <div style={{ fontSize:'12.5px', color:'#4A4A6A', lineHeight:1.45 }}>{s.desc}</div>
+                    </div>
+                  </div>
+                  {i < STEPS.length - 1 && <div className="ml-step-arrow" />}
+                </div>
               ))}
             </div>
           </div>
-        </div>
 
-        {/* ── How it works ── */}
-        <div style={{ marginBottom: '24px' }}>
-          <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--ink-4)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: '12px' }}>איך זה עובד</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {STEPS.map((s, i) => (
-              <div key={s.n} style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', background: 'white', borderRadius: '14px', padding: '14px 16px', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '14px', fontWeight: 900, color: s.color }}>
-                  {s.n}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--ink)', marginBottom: '2px' }}>{s.title}</div>
-                  <div style={{ fontSize: '12.5px', color: 'var(--ink-3)', lineHeight: 1.45 }}>{s.desc}</div>
-                </div>
-                {i < 2 && (
-                  <ChevronLeft size={14} style={{ color: 'var(--ink-4)', flexShrink: 0, marginTop: '9px', transform: 'rotate(270deg)' }} />
-                )}
+          {/* ── Automations ── */}
+          <div style={{ marginBottom:'20px' }}>
+            <div className="ml-card">
+              <div className="ml-card-header">אוטומציות וזרימות</div>
+              <div className="ml-card-body" style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
+                {AUTOMATIONS.map(({ title, desc, icon: Icon, color, bg }) => (
+                  <div key={title} className="ml-auto">
+                    <div className="ml-auto-icon" style={{ background:bg }}>
+                      <Icon size={16} color={color} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize:'13px', fontWeight:800, color:'#1A1A2E', marginBottom:'2px' }}>{title}</div>
+                      <div style={{ fontSize:'12px', color:'#4A4A6A', lineHeight:1.4 }}>{desc}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
-        </div>
 
-        {/* ── Features ── */}
-        <div style={{ marginBottom: '32px' }}>
-          <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--ink-4)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: '12px' }}>מה תקבלי במערכת</p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-            {FEATURES.map(({ icon: Icon, title, desc, color, bg }) => (
-              <div key={title} style={{ background: 'white', borderRadius: '14px', padding: '14px 13px', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>
-                <div style={{ width: '34px', height: '34px', borderRadius: '9px', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '9px' }}>
-                  <Icon size={16} color={color} />
+          {/* ── Application flow ── */}
+          <div style={{ marginBottom:'20px' }}>
+            <div className="ml-card">
+              <div className="ml-card-header">מחזור חיים של הגשה</div>
+              <div className="ml-card-body">
+                <div className="ml-flow">
+                  {[
+                    { label:'הגשה',     color:'#5B3AAB', bg:'rgba(91,58,171,.1)' },
+                    { label:'נצפתה',    color:'#0369A1', bg:'rgba(3,105,161,.1)' },
+                    { label:'ראיון',    color:'#D97706', bg:'rgba(217,119,6,.1)' },
+                    { label:'התקבלה',  color:'#15803D', bg:'rgba(21,128,61,.1)' },
+                    { label:'משוב',     color:'#C9A84C', bg:'rgba(201,168,76,.1)' },
+                  ].map(({ label, color, bg }, i, arr) => (
+                    <div key={label} style={{ display:'flex', alignItems:'center', gap:'4px', flexShrink:0 }}>
+                      <div className="ml-flow-item">
+                        <div className="ml-flow-bubble" style={{ background:bg }}>
+                          <span style={{ fontSize:'11px', fontWeight:800, color }}>{label}</span>
+                        </div>
+                      </div>
+                      {i < arr.length - 1 && <div className="ml-flow-arrow" />}
+                    </div>
+                  ))}
                 </div>
-                <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--ink)', marginBottom: '4px' }}>{title}</div>
-                <div style={{ fontSize: '11.5px', color: 'var(--ink-4)', lineHeight: 1.4 }}>{desc}</div>
               </div>
-            ))}
+            </div>
           </div>
+
+          {/* ── Features ── */}
+          <div style={{ marginBottom:'20px' }}>
+            <div className="ml-section-label">מה תקבלי במערכת</div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px' }}>
+              {FEATURES.map(({ icon: Icon, title, desc, color, bg }) => (
+                <div key={title} className="ml-feat">
+                  <div className="ml-feat-icon" style={{ background:bg }}>
+                    <Icon size={16} color={color} />
+                  </div>
+                  <div style={{ fontSize:'13px', fontWeight:800, color:'#1A1A2E', marginBottom:'3px' }}>{title}</div>
+                  <div style={{ fontSize:'11.5px', color:'#8888AA', lineHeight:1.4 }}>{desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Bottom CTA ── */}
+          <div className="ml-cta-bottom" style={{ marginBottom:'32px' }}>
+            <div className="ml-cta-quote">״וְכָל נְתִיבוֹתֶיהָ שָׁלוֹם״ — משלי ג׳</div>
+            <div className="ml-cta-title">מוכנה להתחיל את השביל שלך?</div>
+            <div className="ml-cta-sub">הרשמה חינמית — כניסה מיידית</div>
+            <button className="ml-cta-btn" onClick={handleGoogle} disabled={pending}>
+              {GOOGLE_SVG}
+              {pending ? 'מחברת...' : 'כניסה עם Google'}
+            </button>
+          </div>
+
         </div>
 
-        {/* ── Bottom CTA ── */}
-        <div style={{ background: 'linear-gradient(135deg, var(--purple) 0%, var(--teal) 100%)', borderRadius: '18px', padding: '22px 20px', textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{ fontSize: '16px', fontWeight: 900, color: 'white', marginBottom: '6px' }}>מוכנה להתחיל?</div>
-          <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.75)', marginBottom: '16px' }}>הרשמה חינמית — פחות מ-5 דקות</div>
-          <button onClick={handleGoogle} disabled={pending}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'white', borderRadius: '12px', padding: '11px 22px', border: 'none', cursor: pending ? 'default' : 'pointer', fontSize: '14px', fontWeight: 800, color: 'var(--purple)', fontFamily: 'inherit', boxShadow: '0 4px 14px rgba(0,0,0,.15)', transition: 'all .15s' }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,.2)' }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,.15)' }}
-          >
-            {!pending && GOOGLE_SVG}
-            {pending ? 'מחברת...' : 'כניסה עם Google'}
-          </button>
+        {/* Footer */}
+        <div style={{ textAlign:'center', padding:'0 0 28px', fontSize:'11px', color:'#8888AA', direction:'rtl' }}>
+          הַשְּׁבִיל · רשת חינוך חב״ד · 2026
+          <span style={{ margin:'0 8px' }}>·</span>
+          <a href="/mosad" style={{ color:'#5B3AAB', textDecoration:'none', fontWeight:600 }}>פורטל מוסד <ArrowLeft size={10} style={{ display:'inline' }} /></a>
         </div>
+
       </div>
-
-      <InstallFooter />
-    </div>
+    </>
   )
 }
