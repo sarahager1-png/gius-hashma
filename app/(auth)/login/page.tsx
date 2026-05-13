@@ -1,511 +1,619 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
-import {
-  Eye, EyeOff, ArrowLeft, Mail, Lock,
-  ClipboardList, Building2, KeyRound, CheckCircle2,
-} from 'lucide-react'
+import { KeyRound } from 'lucide-react'
 
 export default function LoginPage() {
   const supabase = createClient()
-  const [email, setEmail]           = useState('')
-  const [password, setPassword]     = useState('')
-  const [showPw, setShowPw]         = useState(false)
-  const [error, setError]           = useState('')
-  const [loading, setLoading]       = useState(false)
-  const [forgotMode, setForgotMode] = useState(false)
-  const [resetSent, setResetSent]   = useState(false)
-  const [activeRole, setActiveRole] = useState<'candidate' | 'institution'>('candidate')
+  const [loading, setLoading] = useState(false)
+  const [error, setError]     = useState('')
+  const [mounted, setMounted] = useState(false)
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true); setError('')
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
-      setError('אימייל או סיסמה שגויים')
-      setLoading(false)
-      return
-    }
-    window.location.href = '/dashboard'
-  }
+  useEffect(() => { setMounted(true) }, [])
 
-  async function handleForgot(e: React.FormEvent) {
-    e.preventDefault()
+  async function signInWithGoogle() {
     setLoading(true); setError('')
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: { prompt: 'select_account' },
+      },
     })
-    setLoading(false)
-    if (error) { setError(error.message); return }
-    setResetSent(true)
+    if (error) { setError('שגיאה בכניסה עם Google'); setLoading(false) }
   }
 
   return (
-    <div
-      className="min-h-screen flex"
-      dir="rtl"
-      style={{ fontFamily: 'Heebo, system-ui, sans-serif' }}
-    >
-      {/* ══ Brand panel — RTL: right / start side (desktop only) ══ */}
-      <div
-        className="hidden lg:flex flex-col justify-between w-[460px] flex-shrink-0 relative overflow-hidden"
-        style={{
-          background: 'linear-gradient(160deg, #2D1B5E 0%, #0E3050 55%, #0a2540 100%)',
-        }}
-      >
-        {/* Decorative blobs */}
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            top: '-110px', right: '-110px',
-            width: '520px', height: '520px', borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(0,167,181,.2) 0%, transparent 65%)',
-          }}
-        />
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            bottom: '-70px', left: '-70px',
-            width: '400px', height: '400px', borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(75,46,131,.35) 0%, transparent 65%)',
-          }}
-        />
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
 
-        <div />
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes shimmer {
+          0%   { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        @keyframes float1 {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50%       { transform: translateY(-18px) rotate(3deg); }
+        }
+        @keyframes float2 {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50%       { transform: translateY(-12px) rotate(-2deg); }
+        }
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 0.18; }
+          50%       { opacity: 0.32; }
+        }
 
-        {/* Center content */}
-        <div className="flex flex-col items-center text-center px-10 relative z-10">
-          {/* Logo */}
-          <div
-            className="w-[88px] h-[88px] rounded-[26px] mb-7 flex items-center justify-center"
-            style={{
-              background: 'rgba(255,255,255,.1)',
-              border: '1px solid rgba(255,255,255,.18)',
-              backdropFilter: 'blur(12px)',
-            }}
-          >
-            <Image
-              src="/logo-chabad.png"
-              alt="רשת אהלי יוסף יצחק"
-              width={54}
-              height={54}
-              className="object-contain"
-              style={{ filter: 'brightness(0) invert(1)', opacity: 0.9 }}
-            />
-          </div>
+        .login-root {
+          height: 100vh;
+          overflow: hidden;
+          display: flex;
+          direction: rtl;
+          font-family: 'Heebo', system-ui, sans-serif;
+          background: #F5F3F9;
+        }
 
-          <h2
-            className="text-white font-black mb-2"
-            style={{ fontSize: '28px', letterSpacing: '-.03em', lineHeight: 1.15 }}
-          >
-            מערכת גיוס והשמה
-          </h2>
-          <p style={{ fontSize: '14px', color: 'rgba(255,255,255,.5)', marginBottom: '6px' }}>
-            רשת אהלי יוסף יצחק לובאוויטש
-          </p>
+        /* ── Hero panel (right, 42%) ── */
+        .hero-panel {
+          width: 42%;
+          flex-shrink: 0;
+          position: relative;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          background: #1A0D38;
+        }
+        @media (max-width: 1023px) { .hero-panel { display: none; } }
 
-          <div
-            className="my-7 w-14 h-px"
-            style={{ background: 'rgba(255,255,255,.18)' }}
-          />
+        .hero-grad-base {
+          position: absolute; inset: 0;
+          background: linear-gradient(160deg,
+            #0D0820 0%, #1E1040 25%, #2A1558 50%, #1A0D38 75%, #120828 100%
+          );
+        }
+        .hero-grad-purple {
+          position: absolute; inset: 0;
+          background: radial-gradient(ellipse 120% 80% at 50% -10%,
+            rgba(91,63,163,.55) 0%, transparent 65%
+          );
+          animation: pulse-glow 5s ease-in-out infinite;
+        }
+        .hero-grad-gold {
+          position: absolute; inset: 0;
+          background: radial-gradient(ellipse 60% 40% at 80% 85%,
+            rgba(212,176,106,.18) 0%, transparent 60%
+          );
+        }
+        .hero-grad-left {
+          position: absolute; inset: 0;
+          background: radial-gradient(ellipse 55% 45% at -10% 40%,
+            rgba(67,40,116,.35) 0%, transparent 65%
+          );
+        }
+        .hero-pattern {
+          position: absolute; inset: 0;
+          opacity: 0.045;
+          background-image:
+            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpolygon points='40,8 46.9,24.6 65,21 54.5,35.8 65,50.6 46.9,47 40,63.6 33.1,47 15,50.6 25.5,35.8 15,21 33.1,24.6' fill='none' stroke='white' stroke-width='0.8'/%3E%3C/svg%3E");
+          background-size: 80px 80px;
+        }
+        .hero-grid {
+          position: absolute; inset: 0;
+          opacity: 0.035;
+          background-image:
+            linear-gradient(rgba(255,255,255,.8) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.8) 1px, transparent 1px);
+          background-size: 40px 40px;
+        }
+        .hero-orb-1 {
+          position: absolute; top: 10%; right: -8%;
+          width: 300px; height: 300px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(91,63,163,.28) 0%, transparent 70%);
+          animation: float1 9s ease-in-out infinite;
+        }
+        .hero-orb-2 {
+          position: absolute; bottom: 12%; left: -10%;
+          width: 260px; height: 260px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(212,176,106,.15) 0%, transparent 70%);
+          animation: float2 11s ease-in-out infinite;
+        }
+        .hero-gold-line {
+          position: absolute; top: 0; left: 50%;
+          transform: translateX(-50%);
+          width: 1px; height: 100%;
+          background: linear-gradient(180deg,
+            transparent 0%, rgba(212,176,106,.15) 30%,
+            rgba(212,176,106,.22) 50%, rgba(212,176,106,.08) 75%, transparent 100%
+          );
+        }
 
-          {/* Features */}
-          <div className="space-y-3 w-full max-w-[260px]">
-            {[
-              { icon: '🏫', text: 'ניהול משרות ומועמדות' },
-              { icon: '🤖', text: 'התאמה חכמה מבוססת AI' },
-              { icon: '📊', text: 'ניתוח נתונים ודוחות' },
-            ].map(({ icon, text }) => (
-              <div key={text} className="flex items-center gap-3">
-                <div
-                  className="w-9 h-9 rounded-[10px] flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'rgba(255,255,255,.1)', fontSize: '16px' }}
-                >
-                  {icon}
-                </div>
-                <span
-                  className="font-medium"
-                  style={{ fontSize: '14px', color: 'rgba(255,255,255,.72)' }}
-                >
-                  {text}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
+        .hero-content {
+          position: relative; z-index: 10;
+          flex: 1;
+          display: flex; flex-direction: column;
+          align-items: center; justify-content: center;
+          padding: 32px 40px;
+          text-align: center;
+          overflow: hidden;
+        }
 
-        <div
-          className="text-center pb-6"
-          style={{ fontSize: '11px', color: 'rgba(255,255,255,.2)' }}
-        >
-          פלטפורמת גיוס חינוכי
-        </div>
-      </div>
+        /* Logo */
+        .hero-logo-wrap { position: relative; margin-bottom: 32px; }
+        .hero-logo-halo {
+          position: absolute; top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
+          width: 130px; height: 130px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(212,176,106,.22) 0%, transparent 70%);
+        }
+        .hero-logo-img {
+          position: relative; z-index: 1;
+          width: 64px; height: 64px; object-fit: contain;
+          filter: brightness(0) invert(1); opacity: 0.9;
+        }
 
-      {/* ══ Form panel — RTL: left / end side ══ */}
-      <div className="flex-1 flex flex-col bg-white relative overflow-hidden">
+        .hero-gold-divider {
+          width: 40px; height: 2px;
+          background: linear-gradient(90deg, transparent, rgba(212,176,106,.7), transparent);
+          margin: 0 auto 10px;
+        }
+        .hero-name-badge {
+          font-size: 10.5px; font-weight: 600;
+          letter-spacing: 0.14em;
+          color: rgba(212,176,106,.6);
+          text-transform: uppercase;
+          margin-bottom: 36px;
+        }
 
-        {/* Subtle radial tint */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              'radial-gradient(ellipse 70% 45% at 50% 0%, rgba(94,61,174,.07) 0%, transparent 60%)',
-          }}
-        />
+        /* System name */
+        .hero-system-name {
+          font-size: 48px; font-weight: 900;
+          color: #ffffff;
+          letter-spacing: -0.04em;
+          line-height: 1;
+          margin-bottom: 6px;
+          text-shadow: 0 2px 24px rgba(0,0,0,.4);
+        }
+        .hero-system-sub {
+          font-size: 13px; font-weight: 400;
+          color: rgba(255,255,255,.38);
+          letter-spacing: 0.06em;
+          margin-bottom: 44px;
+        }
 
-        {/* Admin key */}
-        <div className="absolute top-4 left-5 z-10">
-          <a
-            href="/register/admin"
-            className="flex items-center gap-1.5 rounded-lg transition-all"
-            style={{
-              fontSize: '12px', fontWeight: 700,
-              padding: '6px 12px',
-              color: 'var(--ink-4)',
-              background: 'rgba(94,61,174,.07)',
-              border: '1px solid rgba(94,61,174,.1)',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = 'rgba(94,61,174,.14)'
-              e.currentTarget.style.color = 'var(--purple)'
-              e.currentTarget.style.borderColor = 'rgba(94,61,174,.25)'
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'rgba(94,61,174,.07)'
-              e.currentTarget.style.color = 'var(--ink-4)'
-              e.currentTarget.style.borderColor = 'rgba(94,61,174,.1)'
-            }}
-          >
-            <KeyRound size={12} />
-            הנהלה
-          </a>
-        </div>
+        /* Quote block */
+        .hero-quote-block {
+          width: 100%; max-width: 280px;
+          margin: 0 auto 40px;
+          padding: 22px 24px;
+          border-radius: 16px;
+          background: rgba(255,255,255,.04);
+          border: 1px solid rgba(212,176,106,.18);
+          backdrop-filter: blur(8px);
+          position: relative;
+        }
+        .hero-quote-mark {
+          position: absolute;
+          top: -14px; right: 20px;
+          font-size: 52px; line-height: 1;
+          color: rgba(212,176,106,.35);
+          font-family: Georgia, serif;
+        }
+        .hero-quote-text {
+          font-size: 17px; font-weight: 700;
+          color: rgba(255,255,255,.88);
+          line-height: 1.55;
+          letter-spacing: 0.01em;
+          margin-bottom: 12px;
+        }
+        .hero-quote-text em {
+          font-style: normal;
+          background: linear-gradient(90deg, #D4B06A 0%, #F0D08A 50%, #D4B06A 100%);
+          background-size: 200% auto;
+          -webkit-background-clip: text; background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: shimmer 5s linear infinite;
+        }
+        .hero-quote-source {
+          font-size: 11px; font-weight: 600;
+          color: rgba(212,176,106,.55);
+          letter-spacing: 0.08em;
+        }
 
-        {/* Mobile-only logo */}
-        <div className="lg:hidden flex flex-col items-center pt-14 pb-2">
-          <div
-            className="w-14 h-14 rounded-[16px] mb-3 flex items-center justify-center"
-            style={{
-              background: 'linear-gradient(135deg, #5E3DAE 0%, #00BCC8 100%)',
-              boxShadow: '0 6px 24px rgba(94,61,174,.28)',
-            }}
-          >
-            <Image
-              src="/logo-chabad.png"
-              alt="רשת"
-              width={34}
-              height={34}
-              className="object-contain"
-              style={{ filter: 'brightness(0) invert(1)' }}
-            />
-          </div>
-          <div
-            className="text-[17px] font-extrabold"
-            style={{ color: 'var(--ink)', letterSpacing: '-.02em' }}
-          >
-            מערכת גיוס והשמה
-          </div>
-        </div>
+        /* Feature rows */
+        .hero-features {
+          display: flex; flex-direction: column; gap: 10px;
+          width: 100%; max-width: 270px; margin: 0 auto;
+        }
+        .hero-feature-row {
+          display: flex; align-items: center; gap: 12px;
+          padding: 11px 14px; border-radius: 12px;
+          background: rgba(255,255,255,.035);
+          border: 1px solid rgba(255,255,255,.05);
+          transition: background 200ms;
+        }
+        .hero-feature-row:hover { background: rgba(255,255,255,.06); }
+        .hero-feature-icon {
+          width: 32px; height: 32px; border-radius: 9px;
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0; font-size: 15px;
+          background: rgba(212,176,106,.1);
+          border: 1px solid rgba(212,176,106,.15);
+        }
+        .hero-feature-text {
+          font-size: 12.5px; font-weight: 500;
+          color: rgba(255,255,255,.6);
+          text-align: right; flex: 1;
+        }
 
-        {/* Centered form */}
-        <div className="flex-1 flex items-center justify-center px-6 py-10">
-          <div className="w-full max-w-[380px] relative z-10">
+        .hero-footer {
+          position: relative; z-index: 10;
+          text-align: center; padding: 0 0 22px;
+          font-size: 10.5px; color: rgba(255,255,255,.15);
+          letter-spacing: 0.04em;
+        }
 
-            {/* Heading */}
-            <div className="mb-7">
-              <h1
-                className="font-black leading-tight mb-1.5"
-                style={{
-                  fontSize: '26px',
-                  color: 'var(--ink)',
-                  letterSpacing: '-.03em',
-                }}
-              >
-                {forgotMode ? 'שחזור סיסמה' : 'ברוכה הבאה,'}
-              </h1>
-              <p style={{ fontSize: '14px', color: 'var(--ink-3)' }}>
-                {forgotMode
-                  ? 'נשלח קישור לאיפוס הסיסמה לאימייל שלך'
-                  : 'היכנסי למערכת הגיוס של רשת חב"ד'}
-              </p>
+        /* ── Form panel (left, 58%) ── */
+        .form-panel {
+          flex: 1; display: flex; flex-direction: column;
+          position: relative; overflow: hidden;
+          background: #FAF9FC;
+          height: 100vh;
+        }
+        .form-panel-grad-1 {
+          position: absolute; top: -120px; right: -120px;
+          width: 480px; height: 480px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(91,63,163,.06) 0%, transparent 70%);
+          pointer-events: none;
+        }
+        .form-panel-grad-2 {
+          position: absolute; bottom: -80px; left: -80px;
+          width: 380px; height: 380px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(212,176,106,.06) 0%, transparent 70%);
+          pointer-events: none;
+        }
+        .form-panel-dots {
+          position: absolute; inset: 0; opacity: 0.022;
+          background-image: radial-gradient(circle, #432874 1px, transparent 1px);
+          background-size: 28px 28px; pointer-events: none;
+        }
+
+        .form-topbar {
+          position: absolute; top: 20px; left: 24px; z-index: 10;
+        }
+        .form-admin-btn {
+          display: flex; align-items: center; gap: 6px;
+          padding: 7px 14px; border-radius: 10px;
+          font-size: 12px; font-weight: 600;
+          color: rgba(67,40,116,.5);
+          background: rgba(67,40,116,.06);
+          border: 1px solid rgba(67,40,116,.1);
+          text-decoration: none; transition: all 200ms;
+        }
+        .form-admin-btn:hover {
+          background: rgba(67,40,116,.12); color: #432874;
+          border-color: rgba(67,40,116,.22);
+        }
+
+        /* Mobile brand */
+        .mobile-brand {
+          display: none; flex-direction: column;
+          align-items: center; padding: 52px 24px 20px;
+          text-align: center; position: relative; z-index: 1;
+        }
+        @media (max-width: 1023px) { .mobile-brand { display: flex; } }
+        .mobile-logo-ring {
+          width: 68px; height: 68px; border-radius: 20px;
+          background: linear-gradient(135deg, #432874 0%, #5B3FA3 100%);
+          box-shadow: 0 8px 28px rgba(67,40,116,.32);
+          display: flex; align-items: center; justify-content: center;
+          margin-bottom: 14px;
+        }
+
+        .form-main {
+          flex: 1; display: flex;
+          align-items: center; justify-content: center;
+          padding: 40px 24px; position: relative; z-index: 1;
+        }
+        .form-card { width: 100%; max-width: 400px; }
+
+        .form-welcome {
+          margin-bottom: 36px;
+          animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        .form-welcome-eyebrow {
+          display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+        }
+        .form-welcome-dot {
+          width: 6px; height: 6px; border-radius: 50%;
+          background: linear-gradient(135deg, #D4B06A, #F0D08A); flex-shrink: 0;
+        }
+        .form-welcome-eyebrow-text {
+          font-size: 11.5px; font-weight: 700;
+          letter-spacing: 0.1em; color: rgba(67,40,116,.5);
+          text-transform: uppercase;
+        }
+        .form-heading {
+          font-size: 30px; font-weight: 900;
+          color: #1A0D38; line-height: 1.18;
+          letter-spacing: -0.03em; margin-bottom: 8px;
+        }
+        .form-sub {
+          font-size: 14px; color: #6B6688;
+          line-height: 1.65; font-weight: 400;
+        }
+
+        /* Tabs */
+        .form-tabs {
+          display: flex; gap: 0;
+          border: 1.5px solid rgba(67,40,116,.15);
+          border-radius: 12px; overflow: hidden;
+          margin-bottom: 28px;
+          animation: fadeUp 0.5s 0.1s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        .form-tab {
+          flex: 1; padding: 10px;
+          font-size: 13px; font-weight: 600;
+          color: rgba(67,40,116,.45);
+          background: transparent; border: none;
+          cursor: pointer; transition: all 200ms;
+          font-family: 'Heebo', system-ui, sans-serif;
+        }
+        .form-tab.active {
+          background: linear-gradient(135deg, #432874, #5B3FA3);
+          color: #ffffff;
+        }
+        .form-tab:first-child { border-radius: 10px 0 0 10px; }
+        .form-tab:last-child  { border-radius: 0 10px 10px 0; }
+
+        .form-google-btn {
+          position: relative; width: 100%; height: 56px;
+          border-radius: 16px;
+          display: flex; align-items: center; justify-content: center; gap: 12px;
+          font-family: 'Heebo', system-ui, sans-serif;
+          font-size: 15px; font-weight: 700;
+          cursor: pointer; transition: all 260ms cubic-bezier(0.16,1,0.3,1);
+          border: none; outline: none;
+          animation: fadeUp 0.6s 0.2s cubic-bezier(0.16,1,0.3,1) both;
+          overflow: hidden;
+        }
+        .form-google-btn::before {
+          content: ''; position: absolute; inset: 0;
+          background: linear-gradient(135deg, #432874 0%, #5B3FA3 60%, #432874 100%);
+          background-size: 200% 100%;
+          transition: background-position 400ms ease;
+        }
+        .form-google-btn:hover::before { background-position: 100% 0; }
+        .form-google-btn::after {
+          content: ''; position: absolute; inset: 0;
+          box-shadow: 0 8px 32px rgba(67,40,116,.38), 0 2px 8px rgba(67,40,116,.22);
+          border-radius: 16px; transition: opacity 260ms;
+        }
+        .form-google-btn:hover::after {
+          box-shadow: 0 12px 40px rgba(67,40,116,.52), 0 4px 12px rgba(67,40,116,.3);
+        }
+        .form-google-btn:active { transform: scale(0.985); }
+        .form-google-btn:disabled { opacity: 0.68; cursor: not-allowed; transform: none; }
+        .form-google-btn span { position: relative; z-index: 1; color: #ffffff; }
+        .form-google-btn .btn-icon {
+          position: relative; z-index: 1;
+          background: rgba(255,255,255,.12); border-radius: 8px;
+          width: 32px; height: 32px;
+          display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+
+        .form-divider {
+          display: flex; align-items: center; gap: 14px;
+          margin: 22px 0;
+          animation: fadeIn 0.5s 0.3s both;
+        }
+        .form-divider-line {
+          flex: 1; height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(67,40,116,.12), transparent);
+        }
+        .form-divider-text {
+          font-size: 11.5px; font-weight: 600;
+          color: rgba(107,102,136,.5); letter-spacing: 0.06em;
+        }
+
+        .form-register-link {
+          display: block; text-align: center;
+          animation: fadeIn 0.5s 0.35s both;
+        }
+        .form-register-link a {
+          font-size: 13.5px; font-weight: 600;
+          color: #5B3AAB; text-decoration: none;
+          border-bottom: 1px solid rgba(91,58,171,.2);
+          transition: border-color 200ms;
+        }
+        .form-register-link a:hover { border-color: rgba(91,58,171,.6); }
+
+        .form-error {
+          margin-top: 12px; padding: 10px 14px;
+          border-radius: 12px; font-size: 13px; font-weight: 600;
+          color: #C83B3B; background: #FEE8E8;
+          border: 1px solid #FECACA; text-align: center;
+          animation: fadeUp 0.3s ease both;
+        }
+
+        .form-footer {
+          position: relative; z-index: 1;
+          text-align: center; padding: 0 0 20px;
+          font-size: 11px; color: rgba(107,102,136,.38);
+        }
+      `}</style>
+
+      <div className="login-root">
+
+        {/* ══ Hero Panel ══ */}
+        <div className="hero-panel">
+          <div className="hero-grad-base" />
+          <div className="hero-grad-purple" />
+          <div className="hero-grad-gold" />
+          <div className="hero-grad-left" />
+          <div className="hero-pattern" />
+          <div className="hero-grid" />
+          <div className="hero-orb-1" />
+          <div className="hero-orb-2" />
+          <div className="hero-gold-line" />
+
+          <div className="hero-content" style={{ opacity: mounted ? 1 : 0, transition: 'opacity 800ms ease' }}>
+
+            <div className="hero-logo-wrap">
+              <div className="hero-logo-halo" />
+              <Image
+                src="/logo-chabad.png"
+                alt="רשת אהלי יוסף יצחק"
+                width={64} height={64}
+                className="hero-logo-img"
+              />
             </div>
 
-            {/* Role selector */}
-            {!forgotMode && (
-              <div
-                className="flex gap-1 p-1 rounded-[14px] mb-6"
-                style={{ background: 'rgba(94,61,174,.07)' }}
-              >
-                {([
-                  { id: 'candidate' as const,    label: 'מועמדת', icon: ClipboardList },
-                  { id: 'institution' as const,  label: 'מוסד',   icon: Building2 },
-                ] as const).map(({ id, label, icon: Icon }) => (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => setActiveRole(id)}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-[10px] font-bold transition-all"
-                    style={{
-                      padding: '10px 8px',
-                      fontSize: '14px',
-                      background: activeRole === id ? '#fff' : 'transparent',
-                      color: activeRole === id ? 'var(--purple)' : 'var(--ink-3)',
-                      boxShadow: activeRole === id ? '0 2px 8px rgba(94,61,174,.12)' : 'none',
-                    }}
-                  >
-                    <Icon size={15} strokeWidth={2} />
-                    {label}
-                  </button>
-                ))}
+            <div className="hero-gold-divider" />
+            <div className="hero-name-badge">מערכת גיוס והשמה · רשת חינוך חב״ד</div>
+
+            <div className="hero-system-name">הַשְּׁבִיל</div>
+            <div className="hero-system-sub">מצאי את שביל השליחות שלך</div>
+
+            {/* Quote block */}
+            <div className="hero-quote-block">
+              <div className="hero-quote-mark">&ldquo;</div>
+              <div className="hero-quote-text">
+                דְּרָכֶיהָ דַרְכֵי נֹעַם<br/>
+                <em>וְכָל נְתִיבוֹתֶיהָ שָׁלוֹם</em>
               </div>
-            )}
+              <div className="hero-quote-source">משלי ג׳, יז</div>
+            </div>
 
-            {/* ── Forgot-password flow ── */}
-            {forgotMode ? (
-              resetSent ? (
-                <div className="text-center py-8 space-y-4">
-                  <div
-                    className="w-16 h-16 rounded-[20px] mx-auto flex items-center justify-center"
-                    style={{ background: '#DCFCE7' }}
-                  >
-                    <CheckCircle2 size={32} color="#16A34A" />
-                  </div>
-                  <div>
-                    <p className="font-bold mb-1" style={{ fontSize: '16px', color: '#15803D' }}>
-                      קישור נשלח!
-                    </p>
-                    <p style={{ fontSize: '13px', color: 'var(--ink-4)' }}>
-                      בדקי גם בתיקיית ספאם
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => { setForgotMode(false); setResetSent(false) }}
-                    className="flex items-center gap-1.5 font-bold mx-auto transition-colors"
-                    style={{ fontSize: '13px', color: 'var(--purple)' }}
-                  >
-                    <ArrowLeft size={14} />
-                    חזרה לכניסה
-                  </button>
+            <div className="hero-features">
+              {[
+                { icon: '✦', text: 'התאמה חכמה של משרות ומועמדות' },
+                { icon: '◈', text: 'ניהול הגשות ומעקב בזמן אמת' },
+                { icon: '❋', text: 'ליווי אישי לאורך כל התהליך' },
+              ].map(({ icon, text }) => (
+                <div key={text} className="hero-feature-row">
+                  <div className="hero-feature-icon">{icon}</div>
+                  <span className="hero-feature-text">{text}</span>
                 </div>
-              ) : (
-                <form onSubmit={handleForgot} className="space-y-4">
-                  <FieldInput
-                    id="reset-email" type="email" label="אימייל"
-                    icon={<Mail size={15} />}
-                    value={email} onChange={e => setEmail(e.target.value)}
-                    placeholder="your@email.com"
-                  />
-                  {error && <ErrMsg>{error}</ErrMsg>}
-                  <SubmitBtn loading={loading}>שלחי קישור איפוס</SubmitBtn>
-                  <button
-                    type="button"
-                    onClick={() => setForgotMode(false)}
-                    className="w-full flex items-center justify-center gap-1.5 font-medium transition-colors"
-                    style={{ fontSize: '13px', color: 'var(--ink-4)' }}
-                  >
-                    <ArrowLeft size={13} />
-                    חזרה
-                  </button>
-                </form>
-              )
-            ) : (
-              /* ── Login form ── */
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <FieldInput
-                  id="email" type="email" label="אימייל"
-                  icon={<Mail size={15} />}
-                  value={email} onChange={e => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                />
+              ))}
+            </div>
+          </div>
 
-                {/* Password field with forgot link */}
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label
-                      htmlFor="password"
-                      className="font-bold"
-                      style={{ fontSize: '12.5px', color: 'var(--ink-2)' }}
-                    >
-                      סיסמה
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => setForgotMode(true)}
-                      className="font-semibold transition-colors"
-                      style={{ fontSize: '12px', color: 'var(--ink-4)' }}
-                      onMouseEnter={e => e.currentTarget.style.color = 'var(--purple)'}
-                      onMouseLeave={e => e.currentTarget.style.color = 'var(--ink-4)'}
-                    >
-                      שכחתי סיסמה
-                    </button>
-                  </div>
-                  <div className="relative">
-                    <span
-                      className="absolute inset-y-0 end-3 flex items-center pointer-events-none"
-                      style={{ color: 'var(--ink-4)' }}
-                    >
-                      <Lock size={15} />
-                    </span>
-                    <input
-                      id="password"
-                      type={showPw ? 'text' : 'password'}
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      required
-                      className="w-full h-11 rounded-[10px] font-medium"
-                      style={{
-                        fontSize: '14px',
-                        paddingInlineStart: '40px',
-                        paddingInlineEnd: '14px',
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPw(p => !p)}
-                      className="absolute inset-y-0 start-3 flex items-center transition-colors"
-                      style={{ color: 'var(--ink-4)' }}
-                      onMouseEnter={e => e.currentTarget.style.color = 'var(--purple)'}
-                      onMouseLeave={e => e.currentTarget.style.color = 'var(--ink-4)'}
-                    >
-                      {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
-                    </button>
-                  </div>
-                </div>
-
-                {error && <ErrMsg>{error}</ErrMsg>}
-                <SubmitBtn loading={loading}>כניסה למערכת</SubmitBtn>
-
-                {/* Registration link */}
-                <div className="pt-2">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="flex-1 h-px" style={{ background: 'var(--line)' }} />
-                    <span
-                      className="font-semibold uppercase tracking-widest"
-                      style={{ fontSize: '11px', color: 'var(--ink-4)' }}
-                    >
-                      הצטרפות חדשה
-                    </span>
-                    <div className="flex-1 h-px" style={{ background: 'var(--line)' }} />
-                  </div>
-                  <a
-                    href={activeRole === 'candidate' ? '/register/candidate' : '/register/institution'}
-                    className="flex items-center justify-center gap-2 w-full h-11 rounded-[11px] font-bold transition-all"
-                    style={{
-                      fontSize: '14px',
-                      border: '1.5px solid var(--line)',
-                      color: 'var(--ink)',
-                      textDecoration: 'none',
-                    }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.borderColor = 'var(--purple)'
-                      e.currentTarget.style.color = 'var(--purple)'
-                      e.currentTarget.style.background = 'rgba(94,61,174,.04)'
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.borderColor = 'var(--line)'
-                      e.currentTarget.style.color = 'var(--ink)'
-                      e.currentTarget.style.background = 'transparent'
-                    }}
-                  >
-                    {activeRole === 'candidate'
-                      ? <><ClipboardList size={15} /> הרשמה כמועמדת</>
-                      : <><Building2 size={15} /> הרשמת מוסד</>}
-                  </a>
-                </div>
-              </form>
-            )}
+          <div className="hero-footer">
+            השביל · רשת חינוך חב״ד · 2026
           </div>
         </div>
 
-        {/* Footer */}
-        <div
-          className="text-center pb-5"
-          style={{ fontSize: '11.5px', color: 'var(--ink-4)' }}
-        >
-          © 2026 רשת חינוך חב״ד · גרסה 1.0
+        {/* ══ Form Panel ══ */}
+        <div className="form-panel">
+          <div className="form-panel-grad-1" />
+          <div className="form-panel-grad-2" />
+          <div className="form-panel-dots" />
+
+          <div className="form-topbar">
+            <a href="/register/admin" className="form-admin-btn">
+              <KeyRound size={12} />
+              הנהלה
+            </a>
+          </div>
+
+          {/* Mobile brand */}
+          <div className="mobile-brand">
+            <div className="mobile-logo-ring">
+              <Image
+                src="/logo-chabad.png"
+                alt="השביל"
+                width={36} height={36}
+                style={{ filter: 'brightness(0) invert(1)', objectFit: 'contain' }}
+              />
+            </div>
+            <div style={{ fontSize: '24px', fontWeight: 900, color: '#1A0D38', letterSpacing: '-0.03em', marginBottom: '4px' }}>
+              הַשְּׁבִיל
+            </div>
+            <div style={{ fontSize: '13px', color: '#6B6688' }}>
+              מערכת גיוס והשמה · רשת חינוך חב״ד
+            </div>
+          </div>
+
+          <div className="form-main">
+            <div
+              className="form-card"
+              style={{ opacity: mounted ? 1 : 0, transition: 'opacity 600ms 100ms ease' }}
+            >
+              <div className="form-welcome">
+                <div className="form-welcome-eyebrow">
+                  <div className="form-welcome-dot" />
+                  <span className="form-welcome-eyebrow-text">כניסה למערכת</span>
+                </div>
+                <h1 className="form-heading">ברוכה הבאה,</h1>
+                <p className="form-sub">
+                  היכנסי עם חשבון Google שלך כדי<br />
+                  לגשת למערכת הגיוס וההשמה
+                </p>
+              </div>
+
+              {/* Tabs */}
+              <div className="form-tabs">
+                <button className="form-tab active">מועמדת</button>
+                <button className="form-tab">מוסד</button>
+              </div>
+
+              <button
+                onClick={signInWithGoogle}
+                disabled={loading}
+                className="form-google-btn"
+              >
+                {loading ? (
+                  <span>מתחברת...</span>
+                ) : (
+                  <>
+                    <div className="btn-icon"><GoogleIcon /></div>
+                    <span>כניסה עם Google</span>
+                  </>
+                )}
+              </button>
+
+              {error && <div className="form-error">{error}</div>}
+
+              <div className="form-divider">
+                <div className="form-divider-line" />
+                <span className="form-divider-text">או</span>
+                <div className="form-divider-line" />
+              </div>
+
+              <div className="form-register-link">
+                <a href="/register">הגשת מועמדות חדשה ←</a>
+              </div>
+            </div>
+          </div>
+
+          <div className="form-footer">
+            © 2026 רשת חינוך חב״ד · כל הזכויות שמורות
+          </div>
         </div>
       </div>
-
-    </div>
+    </>
   )
 }
 
-/* ── Helpers ── */
-function FieldInput({
-  id, type, label, icon, value, onChange, placeholder,
-}: {
-  id: string; type: string; label: string
-  icon: React.ReactNode
-  value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  placeholder: string
-}) {
+function GoogleIcon() {
   return (
-    <div>
-      <label
-        htmlFor={id}
-        className="block font-bold mb-1.5"
-        style={{ fontSize: '12.5px', color: 'var(--ink-2)' }}
-      >
-        {label}
-      </label>
-      <div className="relative">
-        <span
-          className="absolute inset-y-0 end-3 flex items-center pointer-events-none"
-          style={{ color: 'var(--ink-4)' }}
-        >
-          {icon}
-        </span>
-        <input
-          id={id} type={type} value={value} onChange={onChange}
-          placeholder={placeholder} required dir="ltr"
-          className="w-full h-11 rounded-[10px] font-medium"
-          style={{
-            fontSize: '14px',
-            paddingInlineEnd: '38px',
-            paddingInlineStart: '14px',
-          }}
-        />
-      </div>
-    </div>
-  )
-}
-
-function SubmitBtn({ loading, children }: { loading: boolean; children: React.ReactNode }) {
-  return (
-    <button
-      type="submit"
-      disabled={loading}
-      className="w-full h-11 rounded-[11px] font-extrabold text-white transition-all mt-2"
-      style={{
-        fontSize: '14.5px',
-        background: 'linear-gradient(135deg, #5E3DAE 0%, #00BCC8 100%)',
-        boxShadow: '0 4px 16px rgba(94,61,174,.28)',
-        opacity: loading ? 0.7 : 1,
-      }}
-      onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = '0.88' }}
-      onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
-    >
-      {loading ? '...' : children}
-    </button>
-  )
-}
-
-function ErrMsg({ children }: { children: React.ReactNode }) {
-  return (
-    <p
-      className="font-semibold text-center py-2 px-3 rounded-[9px]"
-      style={{
-        fontSize: '13px',
-        color: 'var(--red)',
-        background: 'var(--red-bg)',
-        border: '1px solid #FECACA',
-      }}
-    >
-      {children}
-    </p>
+    <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+      <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+      <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+    </svg>
   )
 }

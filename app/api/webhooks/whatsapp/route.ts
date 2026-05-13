@@ -25,20 +25,7 @@ interface AppListing {
   jobs?: { title?: string; city?: string | null; institutions?: { institution_name?: string | null } | null } | null
 }
 
-// ── GET: Meta webhook verification ───────────────────────────────────
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url)
-  const mode      = searchParams.get('hub.mode')
-  const token     = searchParams.get('hub.verify_token')
-  const challenge = searchParams.get('hub.challenge')
-
-  if (mode === 'subscribe' && token === process.env.WHATSAPP_VERIFY_TOKEN) {
-    return new Response(challenge, { status: 200 })
-  }
-  return new Response('Forbidden', { status: 403 })
-}
-
-// ── POST: Receive incoming messages ──────────────────────────────────
+// ── POST: Receive incoming messages from Green API ───────────────────
 export async function POST(request: Request) {
   let body: unknown
   try { body = await request.json() } catch { return NextResponse.json({ ok: true }) }

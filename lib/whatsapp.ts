@@ -1,38 +1,43 @@
-// WhatsApp Business Cloud API (Meta)
-// Env vars: WHATSAPP_PHONE_ID, WHATSAPP_TOKEN, WHATSAPP_VERIFY_TOKEN, WHATSAPP_BUSINESS_PHONE
+// WhatsApp via Green API
+// Env vars: GREEN_API_URL, GREEN_API_INSTANCE_ID, GREEN_API_TOKEN, WHATSAPP_BUSINESS_PHONE
 
-const PHONE_ID = process.env.WHATSAPP_PHONE_ID
-const TOKEN    = process.env.WHATSAPP_TOKEN
-const BIZ_PHONE = process.env.WHATSAPP_BUSINESS_PHONE ?? ''
+const GREEN_URL      = process.env.GREEN_API_URL
+const INSTANCE_ID    = process.env.GREEN_API_INSTANCE_ID
+const GREEN_TOKEN    = process.env.GREEN_API_TOKEN
+const BIZ_PHONE      = process.env.WHATSAPP_BUSINESS_PHONE ?? ''
 
 export function normalizePhone(phone: string): string {
   return phone.replace(/\D/g, '').replace(/^0/, '972')
 }
 
-// Send a free-form text message (requires active 24h customer service window)
+// Format phone as Green API chatId: 972XXXXXXXXX@c.us
+function toChatId(phone: string): string {
+  return `${normalizePhone(phone)}@c.us`
+}
+
+// Extract plain phone number from chatId
+export function fromChatId(chatId: string): string {
+  return chatId.replace('@c.us', '').replace('@g.us', '')
+}
+
 export async function sendWA(to: string, text: string): Promise<boolean> {
-  if (!PHONE_ID || !TOKEN) {
+  if (!GREEN_URL || !INSTANCE_ID || !GREEN_TOKEN) {
     console.log(`\n[WA DEV] ➜ ${to}\n${text}\n`)
     return true
   }
 
-  const phone = normalizePhone(to)
+  const chatId = toChatId(to)
   try {
-    const res = await fetch(`https://graph.facebook.com/v18.0/${PHONE_ID}/messages`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${TOKEN}`,
+    const res = await fetch(
+      `${GREEN_URL}/waInstance${INSTANCE_ID}/sendMessage/${GREEN_TOKEN}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chatId, message: text }),
       },
-      body: JSON.stringify({
-        messaging_product: 'whatsapp',
-        to: phone,
-        type: 'text',
-        text: { body: text, preview_url: false },
-      }),
-    })
+    )
     const data = await res.json().catch(() => ({}))
-    if (data.messages?.[0]?.id) return true
+    if (data.idMessage) return true
     console.error('[WA] Send error:', JSON.stringify(data))
     return false
   } catch (e) {
@@ -42,40 +47,53 @@ export async function sendWA(to: string, text: string): Promise<boolean> {
 }
 
 // Generate a wa.me deep-link to the business number with pre-filled text
-// Include in SMS messages so users can initiate a WA session from there
 export function waDeepLink(text: string): string {
   if (!BIZ_PHONE) return ''
   return `https://wa.me/${BIZ_PHONE}?text=${encodeURIComponent(text)}`
 }
 
-// Parse incoming WhatsApp webhook entry and return an array of messages
+// Parse incoming Green API webhook and return an array of messages
 export interface WaMessage {
   from: string      // normalized phone (972...)
   text: string      // message body
-  msgId: string     // WhatsApp message id
+  msgId: string     // message id
   name: string      // display name
 }
 
-interface WaContact { wa_id: string; profile?: { name?: string } }
-interface WaMsg { type: string; from: string; text?: { body?: string }; id: string }
-interface WaValue { messages?: WaMsg[]; contacts?: WaContact[] }
+interface GreenWebhook {
+  typeWebhook?: string
+  idMessage?: string
+  senderData?: { chatId?: string; sender?: string; senderName?: string }
+  messageData?: {
+    typeMessage?: string
+    textMessageData?: { textMessage?: string }
+    extendedTextMessageData?: { text?: string }
+  }
+}
 
 export function parseWebhookMessages(body: unknown): WaMessage[] {
   try {
-    const wb = body as { entry?: { changes?: { value?: WaValue }[] }[] }
-    const changes = wb?.entry?.[0]?.changes?.[0]?.value
-    const msgs: WaMessage[] = []
+    const wb = body as GreenWebhook
+    if (wb?.typeWebhook !== 'incomingMessageReceived') return []
+    const msgType = wb.messageData?.typeMessage
+    if (msgType !== 'textMessage' && msgType !== 'extendedTextMessage') return []
 
-    for (const msg of changes?.messages ?? []) {
-      if (msg.type !== 'text') continue
-      msgs.push({
-        from: msg.from,
-        text: (msg.text?.body ?? '').trim(),
-        msgId: msg.id,
-        name: changes?.contacts?.find((c: WaContact) => c.wa_id === msg.from)?.profile?.name ?? '',
-      })
-    }
-    return msgs
+    const chatId = wb.senderData?.chatId ?? ''
+    const from   = fromChatId(chatId)
+    const text   = (
+      wb.messageData?.textMessageData?.textMessage ??
+      wb.messageData?.extendedTextMessageData?.text ??
+      ''
+    ).trim()
+
+    if (!from || !text) return []
+
+    return [{
+      from,
+      text,
+      msgId: wb.idMessage ?? '',
+      name:  wb.senderData?.senderName ?? '',
+    }]
   } catch {
     return []
   }

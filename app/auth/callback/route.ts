@@ -1,73 +1,85 @@
-import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { createServiceClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
 
 export async function GET(request: Request) {
-  const reqUrl = new URL(request.url)
-  const origin = process.env.NEXT_PUBLIC_APP_URL ?? reqUrl.origin
-  const { searchParams } = reqUrl
+  const { searchParams, origin } = new URL(request.url)
   const code  = searchParams.get('code')
-  const token = searchParams.get('token')
-  const type  = searchParams.get('type')
-  const next  = searchParams.get('next') ?? '/dashboard'
+  const error = searchParams.get('error')
 
-  const supabase = await createClient()
-
-  if (code) {
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
-    if (!error && data.user) {
-      const service = createServiceClient()
-
-      // Check if profile exists
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id, role')
-        .eq('id', data.user.id)
-        .maybeSingle()
-
-      if (profile) {
-        // מוסד — check approval status
-        if (profile.role === 'מוסד') {
-          const { data: institution } = await service
-            .from('institutions')
-            .select('is_approved')
-            .eq('profile_id', data.user.id)
-            .maybeSingle()
-
-          if (!institution?.is_approved) {
-            return NextResponse.redirect(new URL('/register/institution/pending', origin))
-          }
-        }
-        // Approved / other roles → dashboard
-        return NextResponse.redirect(new URL('/dashboard', origin))
-      }
-
-      // No profile — check for pending candidate request
-      const { data: candidateReq } = await service
-        .from('candidate_requests')
-        .select('status')
-        .eq('profile_id', data.user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-
-      if (candidateReq) {
-        if (candidateReq.status === 'נדחתה') {
-          return NextResponse.redirect(new URL('/register/candidate?rejected=1', origin))
-        }
-        return NextResponse.redirect(new URL('/register/candidate/pending', origin))
-      }
-
-      // No request at all → go to registration form
-      return NextResponse.redirect(new URL(next, origin))
-    }
+  if (error || !code) {
+    return NextResponse.redirect(`${origin}/login?error=oauth`)
   }
 
-  if (token && type) {
-    const { error } = await supabase.auth.verifyOtp({ token_hash: token, type: type as 'recovery' | 'magiclink' | 'email' })
-    if (!error) {
-      return NextResponse.redirect(new URL(next, origin))
+  const cookieStore = await cookies()
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => cookieStore.getAll(),
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          )
+        },
+      },
     }
+  )
+
+  const { data: { session }, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+  if (exchangeError || !session) {
+    return NextResponse.redirect(`${origin}/login?error=exchange`)
   }
 
-  return NextResponse.redirect(new URL('/login?err=callback', origin))
+  const userId = session.user.id
+  const email  = session.user.email?.toLowerCase() ?? ''
+
+  const service = createServiceClient()
+
+  const { data: profile } = await service.from('profiles').select('role').eq('id', userId).single()
+  if (profile) {
+    return NextResponse.redirect(`${origin}${roleHome(profile.role)}`)
+  }
+
+  const { data: preReg } = await service
+    .from('pre_registered_institutions')
+    .select('*')
+    .eq('email', email)
+    .single()
+
+  if (preReg) {
+    await service.from('profiles').insert({
+      id:        userId,
+      role:      'מוסד',
+      full_name: preReg.full_name ?? preReg.institution_name,
+    })
+    await service.from('institutions').insert({
+      profile_id:       userId,
+      institution_name: preReg.institution_name,
+      city:             preReg.city,
+      institution_type: preReg.institution_type,
+      is_approved:      true,
+      approved_at:      new Date().toISOString(),
+    })
+    await service.from('pre_registered_institutions').delete().eq('email', email)
+    return NextResponse.redirect(`${origin}/dashboard`)
+  }
+
+  // Unknown Google user — create a minimal 'מועמדת' profile + blank candidates row
+  // so they can access the dashboard immediately after completing the form
+  await service.from('profiles').insert({
+    id:        userId,
+    role:      'מועמדת',
+    full_name: session.user.user_metadata?.full_name ?? session.user.email ?? '',
+  })
+  await service.from('candidates').insert({ profile_id: userId })
+
+  return NextResponse.redirect(`${origin}/register/candidate?google=1`)
+}
+
+function roleHome(role: string): string {
+  return '/dashboard'
 }
