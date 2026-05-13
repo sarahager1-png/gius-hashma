@@ -76,7 +76,7 @@ export default function LandingPage() {
         *, *::before, *::after { box-sizing: border-box; }
 
         .lp-root {
-          background: #080616;
+          background: #110E24;
           color: #fff;
           font-family: 'Heebo', system-ui, sans-serif;
           direction: rtl;
@@ -97,15 +97,9 @@ export default function LandingPage() {
             radial-gradient(ellipse 110% 70% at 50% -10%, rgba(91,58,171,.55) 0%, transparent 60%),
             radial-gradient(ellipse 70% 50% at 80% 90%,  rgba(0,180,204,.2)  0%, transparent 55%),
             radial-gradient(ellipse 60% 40% at -5% 50%,  rgba(201,168,76,.12) 0%, transparent 55%),
-            linear-gradient(170deg, #0D0B1E 0%, #120E28 40%, #0A1520 75%, #080616 100%);
+            linear-gradient(170deg, #181530 0%, #1C1838 40%, #121E2E 75%, #110E24 100%);
         }
-        /* Star pattern */
-        .lp-stars {
-          position: absolute; inset: 0; opacity: .045;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cpolygon points='45,9 51.5,27 70,24 57,37 63,56 45,46 27,56 33,37 20,24 38.5,27' fill='none' stroke='%23ffffff' stroke-width='.9'/%3E%3Ccircle cx='45' cy='40' r='5.5' fill='none' stroke='%23ffffff' stroke-width='.5'/%3E%3C/svg%3E");
-          background-size: 90px 90px;
-          pointer-events: none;
-        }
+        .lp-stars { display: none; }
         /* Floating orbs */
         .lp-orb { position:absolute; border-radius:50%; pointer-events:none; }
         .lp-orb-1 { top:8%; right:-12%; width:480px; height:480px; background:radial-gradient(circle, rgba(91,58,171,.32) 0%, transparent 65%); animation:float 12s ease-in-out infinite; }
@@ -600,10 +594,10 @@ export default function LandingPage() {
 
             <div className="lp-trust-pills">
               {[
-                { label:'בתי ספר ברשת',        dot:'#C9A84C', icon: BookOpen },
-                { label:'שלהבות חב״ד',          dot:'#00B4CC', icon: Star },
-                { label:'בתי חינוך',             dot:'#7B5AC4', icon: Building2 },
-                { label:'מועמדות מורות וגננות', dot:'#15803D', icon: Users },
+                { label:'בתי חינוך',              dot:'#C9A84C', icon: BookOpen },
+                { label:'בתי ספר קהילתיים',       dot:'#7B5AC4', icon: Building2 },
+                { label:'בתי ספר שלהבות',         dot:'#00B4CC', icon: Star },
+                { label:'תיכונים וחט״ב',           dot:'#15803D', icon: Users },
               ].map(({ label, dot, icon: Icon }) => (
                 <div key={label} className="lp-trust-pill">
                   <span className="lp-trust-pill-dot" style={{ background: dot }} />
@@ -613,33 +607,9 @@ export default function LandingPage() {
               ))}
             </div>
 
-            <div className="lp-trust-counters">
-              {[
-                { val:'מאות', label:'מועמדות' },
-                { val:'עשרות', label:'מוסדות' },
-                { val:'אלפי', label:'התאמות' },
-              ].map(({ val, label }) => (
-                <div key={label} className="lp-counter-item">
-                  <span className="lp-counter-val">{val}</span>
-                  <div className="lp-counter-label">{label}</div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
 
-        {/* ══ SPIRITUAL QUOTE ══ */}
-        <div className="lp-quote-section">
-          <div className="lp-quote-wrap">
-            <div className="lp-quote-mark">&ldquo;</div>
-            <div className="lp-quote-text">
-              כל יהודי הוא שליח של הקב״ה
-            </div>
-            <div className="lp-quote-author">
-              — הרבי מליובאוויטש, מנחם מענדל שניאורסון
-            </div>
-          </div>
-        </div>
 
         {/* ══ FINAL CTA ══ */}
         <div className="lp-final-cta">

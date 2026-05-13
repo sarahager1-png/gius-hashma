@@ -82,7 +82,7 @@ export default function MumedetLanding() {
 
         /* ── Root ── */
         .mm-root {
-          background:#080616;
+          background:#110E24;
           color:#fff;
           font-family:'Heebo',system-ui,sans-serif;
           direction:rtl;
@@ -103,13 +103,9 @@ export default function MumedetLanding() {
             radial-gradient(ellipse 100% 65% at 50% -5%,  rgba(123,90,196,.6)  0%, transparent 58%),
             radial-gradient(ellipse 65%  50% at 85% 85%,  rgba(201,168,76,.18) 0%, transparent 55%),
             radial-gradient(ellipse 55%  40% at -8% 55%,  rgba(0,180,204,.12)  0%, transparent 52%),
-            linear-gradient(170deg, #0E0A20 0%, #150F2E 40%, #0A1420 75%, #080616 100%);
+            linear-gradient(170deg, #181430 0%, #1E1438 40%, #121E2E 75%, #110E24 100%);
         }
-        .mm-stars {
-          position:absolute; inset:0; opacity:.04;
-          background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpolygon points='40,8 46,22 61,20 51,31 56,46 40,38 24,46 29,31 19,20 34,22' fill='none' stroke='%23ffffff' stroke-width='.8'/%3E%3Ccircle cx='40' cy='34' r='4.5' fill='none' stroke='%23ffffff' stroke-width='.45'/%3E%3C/svg%3E");
-          background-size:80px 80px; pointer-events:none;
-        }
+        .mm-stars { display: none; }
         .mm-orb { position:absolute; border-radius:50%; pointer-events:none; }
         .mm-orb-1 { top:5%;   right:-10%; width:440px; height:440px; background:radial-gradient(circle, rgba(123,90,196,.38) 0%, transparent 65%); animation:floatA 12s ease-in-out infinite; }
         .mm-orb-2 { bottom:8%; left:-8%;  width:360px; height:360px; background:radial-gradient(circle, rgba(0,180,204,.16)  0%, transparent 65%); animation:floatB 15s ease-in-out infinite; }
@@ -637,10 +633,10 @@ export default function MumedetLanding() {
 
             <div className="mm-trust-pills">
               {[
-                { label:'שלהבות חב״ד',           dot:'#C9A84C' },
-                { label:'בתי ספר ברשת',            dot:'#9B72CF' },
-                { label:'בתי חינוך',               dot:'#00B4CC' },
-                { label:'גנים ופעוטונים',           dot:'#15803D' },
+                { label:'בתי חינוך',              dot:'#C9A84C' },
+                { label:'בתי ספר קהילתיים',       dot:'#9B72CF' },
+                { label:'בתי ספר שלהבות',         dot:'#00B4CC' },
+                { label:'תיכונים וחט״ב',           dot:'#15803D' },
               ].map(({ label, dot }) => (
                 <div key={label} className="mm-trust-pill">
                   <span className="mm-trust-dot" style={{ background:dot }} />
@@ -652,16 +648,6 @@ export default function MumedetLanding() {
           </div>
         </div>
 
-        {/* ══ QUOTE ══ */}
-        <div className="mm-quote-section">
-          <div className="mm-quote-wrap">
-            <div className="mm-quote-mark">&ldquo;</div>
-            <div className="mm-quote-text">
-              דְּרָכֶיהָ דַרְכֵי נֹעַם<br />וְכָל נְתִיבוֹתֶיהָ שָׁלוֹם
-            </div>
-            <div className="mm-quote-auth">משלי ג׳, יז׳</div>
-          </div>
-        </div>
 
         {/* ══ FINAL CTA ══ */}
         <div className="mm-final-cta">
