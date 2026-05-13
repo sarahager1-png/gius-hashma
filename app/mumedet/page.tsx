@@ -1,61 +1,45 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import {
-  GraduationCap, Search, FileText, Star, MessageCircle,
-  CheckCircle, Bell, MapPin, MailOpen, ArrowLeft,
+  FileText, Search, Star, MessageCircle, Bell,
+  CheckCircle, ClipboardList, MapPin, GraduationCap,
+  Building2, Sparkles, ArrowLeft,
 } from 'lucide-react'
 
-const STEPS = [
-  {
-    n: '1',
-    icon: '✦',
-    title: 'נכנסת עם Google',
-    desc: 'הרשמה חד-פעמית — בונה פרופיל עם התמחות, עיר ורמה אקדמית',
-    color: '#7B5AC4',
-    bg: 'rgba(91,58,171,0.08)',
-    border: 'rgba(91,58,171,0.18)',
-  },
-  {
-    n: '2',
-    icon: '◈',
-    title: 'מגישה למשרות',
-    desc: 'מחפשת לפי עיר, התמחות, סוג משרה — ומגישה בקליק אחד',
-    color: '#0090A8',
-    bg: 'rgba(0,180,204,0.08)',
-    border: 'rgba(0,180,204,0.18)',
-  },
-  {
-    n: '3',
-    icon: '❋',
-    title: 'מקבלת הצעה',
-    desc: 'המוסד שולח הזמנה לראיון — מאשרת ישירות מ-WhatsApp',
-    color: '#15803D',
-    bg: 'rgba(21,128,61,0.08)',
-    border: 'rgba(21,128,61,0.18)',
-  },
-]
+/* ─────────────────────────── data ─────────────────────────── */
 
-const AUTOMATIONS = [
-  { title: 'התאמה חכמה', desc: 'כשנפתחת משרה חדשה שמתאימה לפרופיל שלך — מקבלת התראה מיידית', icon: Star, color: '#7B5AC4', bg: 'rgba(91,58,171,0.08)' },
-  { title: 'עדכון סטטוס אוטומטי', desc: 'ממתינה → נצפתה → התקבלה — כל שינוי מגיע ב-WhatsApp', icon: Bell, color: '#0090A8', bg: 'rgba(0,180,204,0.08)' },
-  { title: 'תזכורת ראיון', desc: '24 שעות לפני הראיון — תזכורת אוטומטית עם פרטי המיקום', icon: CheckCircle, color: '#15803D', bg: 'rgba(21,128,61,0.08)' },
-  { title: 'סקר שביעות רצון', desc: 'חודש לאחר השיבוץ — שאלון קצר לשיפור מתמיד', icon: MessageCircle, color: '#C9A84C', bg: 'rgba(201,168,76,0.08)' },
+const JOURNEY = [
+  { n: '01', title: 'נרשמת',             sub: 'כניסה חד-פעמית עם Google — פרופיל נפתח אוטומטית', color: '#C9A84C', glow: 'rgba(201,168,76,.35)' },
+  { n: '02', title: 'בונה פרופיל',        sub: 'התמחות, ניסיון, עיר וסוג משרה מועדף', color: '#9B72CF', glow: 'rgba(155,114,207,.35)' },
+  { n: '03', title: 'מגישה מועמדות',     sub: 'חיפוש לפי עיר, התמחות וסוג מוסד — הגשה בקליק', color: '#7B5AC4', glow: 'rgba(123,90,196,.35)' },
+  { n: '04', title: 'מקבלת הצעות',       sub: 'מוסדות מגיעים אליך — ראיונות ישירות מ-WhatsApp', color: '#00B4CC', glow: 'rgba(0,180,204,.3)' },
+  { n: '05', title: 'מתחילה שליחות',     sub: 'כניסה לתפקיד שמתאים לך ולחזון שלך', color: '#C9A84C', glow: 'rgba(201,168,76,.35)' },
 ]
 
 const FEATURES = [
-  { icon: FileText,       title: 'פרופיל מקצועי',    desc: 'התמחות, ניסיון, כישורים וביו', color: '#7B5AC4', bg: 'rgba(91,58,171,0.08)' },
-  { icon: GraduationCap, title: 'קורות חיים',         desc: 'העלאת PDF/Word או קישור', color: '#0090A8', bg: 'rgba(0,180,204,0.08)' },
-  { icon: Search,         title: 'חיפוש מתקדם',       desc: 'מחוז, עיר, סוג, התמחות', color: '#C9A84C', bg: 'rgba(201,168,76,0.08)' },
-  { icon: CheckCircle,    title: 'מעקב הגשות',        desc: 'סטטוס בזמן אמת לכל הגשה', color: '#15803D', bg: 'rgba(21,128,61,0.08)' },
-  { icon: MapPin,         title: 'לפי מיקום',          desc: 'משרות קרובות לפי עיר ומחוז', color: '#7B5AC4', bg: 'rgba(91,58,171,0.08)' },
-  { icon: MailOpen,       title: 'תיבת הודעות',        desc: 'מוסדות פונים ישירות', color: '#0090A8', bg: 'rgba(0,180,204,0.08)' },
+  { icon: FileText,       title: 'פרופיל מקצועי',   desc: 'התמחות, ניסיון, כישורים וביו אישי',   c: '#9B72CF' },
+  { icon: ClipboardList,  title: 'קורות חיים',        desc: 'העלאת PDF/Word או קישור חיצוני',      c: '#C9A84C' },
+  { icon: Search,         title: 'חיפוש מתקדם',      desc: 'מחוז, עיר, סוג מוסד וסוג משרה',       c: '#00B4CC' },
+  { icon: CheckCircle,    title: 'מעקב הגשות',        desc: 'סטטוס בזמן אמת — מהגשה ועד שיבוץ',   c: '#15803D' },
+  { icon: Star,           title: 'התאמות חכמות',     desc: 'המערכת מציגה משרות שמתאימות לפרופיל', c: '#C9A84C' },
+  { icon: Bell,           title: 'עדכוני WhatsApp',   desc: 'כל התפתחות מגיעה ב-WhatsApp',         c: '#00B4CC' },
+  { icon: MessageCircle,  title: 'תקשורת ישירה',     desc: 'מוסדות פונים ישירות אלייך',            c: '#9B72CF' },
+  { icon: MapPin,         title: 'לפי מיקום',         desc: 'משרות קרובות לפי עיר ומחוז',          c: '#15803D' },
 ]
 
-const GOOGLE_SVG = (
-  <svg width="18" height="18" viewBox="0 0 24 24">
+const AUTOMATIONS = [
+  { icon: Star,          title: 'התאמה חכמה',          desc: 'כשנפתחת משרה שמתאימה לפרופיל שלך — מקבלת התראה מיידית',            c: '#C9A84C', bg: 'rgba(201,168,76,.12)' },
+  { icon: Bell,          title: 'עדכון סטטוס',          desc: 'ממתינה → נצפתה → הוזמנה לראיון — כל שלב מגיע ב-WhatsApp',         c: '#9B72CF', bg: 'rgba(155,114,207,.12)' },
+  { icon: CheckCircle,   title: 'תזכורת ראיון',         desc: '24 שעות לפני הראיון — תזכורת אוטומטית עם שם המוסד ומיקומו',        c: '#00B4CC', bg: 'rgba(0,180,204,.12)' },
+  { icon: MessageCircle, title: 'סקר שביעות רצון',      desc: 'חודש לאחר תחילת השליחות — שאלון קצר לשיפור ולמידה',                 c: '#15803D', bg: 'rgba(21,128,61,.12)' },
+]
+
+/* ─────────────────────────── icons ─────────────────────────── */
+const GoogleIcon = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24">
     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
@@ -63,320 +47,654 @@ const GOOGLE_SVG = (
   </svg>
 )
 
+/* ─────────────────────────── component ─────────────────────────── */
 export default function MumedetLanding() {
   const [pending, setPending] = useState(false)
-  const [error, setError]     = useState('')
+  const [err, setErr]         = useState('')
+  const [visible, setVisible] = useState(false)
 
-  async function handleGoogle() {
-    setPending(true); setError('')
-    const supabase = createClient()
-    const { error: err } = await supabase.auth.signInWithOAuth({
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), 80)
+    return () => clearTimeout(t)
+  }, [])
+
+  async function signIn() {
+    setPending(true); setErr('')
+    const { error } = await createClient().auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/auth/callback` },
     })
-    if (err) { setError('שגיאה בכניסה עם Google. נסי שוב.'); setPending(false) }
+    if (error) { setErr('שגיאה בכניסה עם Google. נסי שוב.'); setPending(false) }
   }
 
   return (
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
-        .ml-root { min-height:100vh; background:#F5F3F9; font-family:'Heebo',system-ui,sans-serif; direction:rtl; }
-        .ml-hero {
-          background: linear-gradient(160deg, #0D0820 0%, #1E1040 35%, #2A1558 65%, #1A0D38 100%);
-          position: relative; overflow: hidden; padding-bottom: 32px;
+
+        @keyframes floatA { 0%,100%{transform:translateY(0)}        50%{transform:translateY(-14px)} }
+        @keyframes floatB { 0%,100%{transform:translateY(-6px)}     50%{transform:translateY(8px)} }
+        @keyframes glow   { 0%,100%{opacity:.22} 50%{opacity:.44} }
+        @keyframes shimP  { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+
+        *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+        /* ── Root ── */
+        .mm-root {
+          background:#080616;
+          color:#fff;
+          font-family:'Heebo',system-ui,sans-serif;
+          direction:rtl;
+          overflow-x:hidden;
         }
-        .ml-hero-orb1 {
-          position:absolute; top:-60px; right:-80px;
-          width:320px; height:320px; border-radius:50%;
-          background: radial-gradient(circle, rgba(91,58,171,.35) 0%, transparent 70%);
-          pointer-events:none;
+
+        /* ── HERO ── */
+        .mm-hero {
+          min-height:100svh;
+          position:relative;
+          display:flex;
+          flex-direction:column;
+          overflow:hidden;
         }
-        .ml-hero-orb2 {
-          position:absolute; bottom:-40px; left:-60px;
-          width:240px; height:240px; border-radius:50%;
-          background: radial-gradient(circle, rgba(0,180,204,.18) 0%, transparent 70%);
-          pointer-events:none;
+        .mm-hero-bg {
+          position:absolute; inset:0;
+          background:
+            radial-gradient(ellipse 100% 65% at 50% -5%,  rgba(123,90,196,.6)  0%, transparent 58%),
+            radial-gradient(ellipse 65%  50% at 85% 85%,  rgba(201,168,76,.18) 0%, transparent 55%),
+            radial-gradient(ellipse 55%  40% at -8% 55%,  rgba(0,180,204,.12)  0%, transparent 52%),
+            linear-gradient(170deg, #0E0A20 0%, #150F2E 40%, #0A1420 75%, #080616 100%);
         }
-        .ml-hero-pattern {
+        .mm-stars {
           position:absolute; inset:0; opacity:.04;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpolygon points='30,6 35,18 48,15 41,26 48,37 35,35 30,47 25,35 12,37 19,26 12,15 25,18' fill='none' stroke='white' stroke-width='.7'/%3E%3C/svg%3E");
-          background-size:60px 60px; pointer-events:none;
+          background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpolygon points='40,8 46,22 61,20 51,31 56,46 40,38 24,46 29,31 19,20 34,22' fill='none' stroke='%23ffffff' stroke-width='.8'/%3E%3Ccircle cx='40' cy='34' r='4.5' fill='none' stroke='%23ffffff' stroke-width='.45'/%3E%3C/svg%3E");
+          background-size:80px 80px; pointer-events:none;
         }
-        .ml-inner { max-width:520px; margin:0 auto; padding:0 20px; position:relative; z-index:1; }
-        .ml-nav { display:flex; align-items:center; justify-content:space-between; padding:18px 0 0; }
-        .ml-nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
-        .ml-nav-logobox {
-          width:44px; height:44px; background:#fff; border-radius:12px;
+        .mm-orb { position:absolute; border-radius:50%; pointer-events:none; }
+        .mm-orb-1 { top:5%;   right:-10%; width:440px; height:440px; background:radial-gradient(circle, rgba(123,90,196,.38) 0%, transparent 65%); animation:floatA 12s ease-in-out infinite; }
+        .mm-orb-2 { bottom:8%; left:-8%;  width:360px; height:360px; background:radial-gradient(circle, rgba(0,180,204,.16)  0%, transparent 65%); animation:floatB 15s ease-in-out infinite; }
+        .mm-orb-3 { top:40%;  right:20%; width:200px; height:200px; background:radial-gradient(circle, rgba(201,168,76,.1)   0%, transparent 65%); animation:floatA 9s  ease-in-out infinite 2s; }
+        .mm-vline {
+          position:absolute; top:0; left:50%; transform:translateX(-50%);
+          width:1px; height:100%;
+          background:linear-gradient(180deg, transparent 0%, rgba(155,114,207,.2) 30%, rgba(155,114,207,.32) 55%, rgba(155,114,207,.1) 80%, transparent 100%);
+          pointer-events:none;
+        }
+
+        /* ── NAV ── */
+        .mm-nav {
+          position:relative; z-index:20;
+          display:flex; align-items:center; justify-content:space-between;
+          padding:22px 24px 0;
+          max-width:1100px; margin:0 auto; width:100%;
+        }
+        .mm-logo-wrap { display:flex; align-items:center; gap:12px; text-decoration:none; }
+        .mm-logo-box {
+          width:50px; height:50px; background:#fff; border-radius:14px;
           display:flex; align-items:center; justify-content:center;
-          box-shadow:0 4px 14px rgba(0,0,0,.22); padding:4px;
+          box-shadow:0 4px 18px rgba(0,0,0,.28); padding:4px; flex-shrink:0;
         }
-        .ml-nav-name { font-size:17px; font-weight:900; color:#fff; letter-spacing:-.02em; }
-        .ml-nav-sub  { font-size:10px; font-weight:600; color:rgba(255,255,255,.45); letter-spacing:.06em; }
-        .ml-badge {
-          display:inline-flex; align-items:center; gap:6px;
-          background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
-          border-radius:999px; padding:5px 14px; margin-bottom:14px;
-          font-size:11px; font-weight:700; color:#fff; letter-spacing:.05em;
+        .mm-logo-name { font-size:20px; font-weight:900; color:#fff; letter-spacing:-.025em; }
+        .mm-logo-sub  { font-size:10px; font-weight:500; color:rgba(255,255,255,.4); letter-spacing:.06em; }
+        .mm-nav-links { display:flex; align-items:center; gap:6px; }
+        .mm-nav-link {
+          padding:8px 14px; border-radius:10px; font-size:13px; font-weight:600;
+          color:rgba(255,255,255,.55); cursor:pointer; text-decoration:none;
+          border:1px solid transparent; transition:all .2s; background:transparent;
+          font-family:'Heebo',system-ui,sans-serif;
         }
-        .ml-hero-title {
-          font-size:32px; font-weight:900; color:#fff;
-          letter-spacing:-.03em; line-height:1.15; margin:0 0 10px;
+        .mm-nav-link:hover { color:#fff; background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.1); }
+        .mm-nav-cta {
+          padding:9px 18px; border-radius:12px; font-size:13px; font-weight:700;
+          color:#fff; cursor:pointer; text-decoration:none;
+          background:linear-gradient(135deg,rgba(0,180,204,.5),rgba(0,180,204,.3));
+          border:1px solid rgba(0,180,204,.3); transition:all .2s;
+          font-family:'Heebo',system-ui,sans-serif;
         }
-        .ml-hero-em {
-          background:linear-gradient(90deg,#D4B06A,#F0D08A,#D4B06A);
+        .mm-nav-cta:hover { background:linear-gradient(135deg,rgba(0,180,204,.7),rgba(0,180,204,.5)); border-color:rgba(0,180,204,.5); }
+
+        /* ── HERO BODY ── */
+        .mm-hero-body {
+          flex:1; position:relative; z-index:10;
+          display:flex; flex-direction:column;
+          align-items:center; justify-content:center;
+          padding:48px 24px 64px;
+          text-align:center;
+          max-width:760px; margin:0 auto; width:100%;
+        }
+        .mm-badge {
+          display:inline-flex; align-items:center; gap:7px;
+          background:rgba(155,114,207,.12); border:1px solid rgba(155,114,207,.25);
+          backdrop-filter:blur(12px);
+          border-radius:999px; padding:6px 16px; margin-bottom:26px;
+          font-size:11.5px; font-weight:700; color:rgba(200,170,255,.85); letter-spacing:.06em;
+        }
+        .mm-badge-dot { width:6px; height:6px; border-radius:50%; background:#C9A84C; flex-shrink:0; }
+
+        .mm-hero-title {
+          font-size:clamp(34px,7vw,60px);
+          font-weight:900; line-height:1.08; letter-spacing:-.04em;
+          margin:0 0 18px; color:#fff;
+          text-shadow:0 2px 30px rgba(0,0,0,.4);
+        }
+        .mm-hero-em {
+          background:linear-gradient(90deg, #C9A84C 0%, #F0D080 35%, #C9A84C 65%, #E8C870 100%);
           background-size:200% auto;
           -webkit-background-clip:text; background-clip:text;
           -webkit-text-fill-color:transparent;
-          animation:shimmer 4s linear infinite;
+          animation:shimP 5s linear infinite;
+          display:block;
         }
-        @keyframes shimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
-        .ml-hero-sub { font-size:14px; color:rgba(255,255,255,.65); line-height:1.6; margin:0; }
+        .mm-hero-sub {
+          font-size:clamp(15px,2.2vw,17px); font-weight:400;
+          color:rgba(255,255,255,.52); line-height:1.68; margin:0 0 10px;
+          max-width:480px;
+        }
+        .mm-hero-micro {
+          font-size:12px; font-weight:500; color:rgba(255,255,255,.28);
+          letter-spacing:.05em; margin-bottom:42px;
+        }
+        .mm-hero-micro span { margin:0 6px; color:rgba(155,114,207,.5); }
+        .mm-tagline {
+          font-size:13px; font-weight:600;
+          color:rgba(201,168,76,.6); letter-spacing:.04em;
+          margin-bottom:38px; font-style:italic;
+        }
 
-        /* Cards */
-        .ml-card { background:#fff; border-radius:16px; border:1px solid #E0DCF0; box-shadow:0 2px 8px rgba(91,58,171,.06); overflow:hidden; }
-        .ml-card-header { background:#EBE5F8; padding:11px 18px; font-size:12px; font-weight:700; color:#3D2480; letter-spacing:.04em; text-transform:uppercase; border-bottom:1px solid #D8D0F0; }
-        .ml-card-body { padding:18px; }
+        /* ── GLASS CTA CARD ── */
+        .mm-card {
+          width:100%; max-width:400px;
+          background:rgba(255,255,255,.045);
+          backdrop-filter:blur(28px) saturate(180%);
+          -webkit-backdrop-filter:blur(28px) saturate(180%);
+          border:1px solid rgba(255,255,255,.13);
+          border-radius:28px;
+          padding:28px 28px 24px;
+          box-shadow:
+            0 24px 64px rgba(0,0,0,.48),
+            0 0 0 1px rgba(155,114,207,.08),
+            inset 0 1px 0 rgba(255,255,255,.1);
+          position:relative; overflow:hidden;
+        }
+        .mm-card::before {
+          content:'';
+          position:absolute; top:-55px; left:50%; transform:translateX(-50%);
+          width:200px; height:110px; border-radius:50%;
+          background:radial-gradient(ellipse, rgba(123,90,196,.45) 0%, transparent 70%);
+          pointer-events:none;
+        }
+        .mm-card-bar {
+          height:2px; width:100%;
+          background:linear-gradient(90deg,rgba(201,168,76,.65),rgba(155,114,207,.65),rgba(0,180,204,.5));
+          border-radius:1px; margin-bottom:22px;
+        }
+        .mm-card-title { font-size:17px; font-weight:800; color:#fff; margin:0 0 3px; letter-spacing:-.01em; }
+        .mm-card-sub   { font-size:12.5px; color:rgba(255,255,255,.42); margin:0 0 20px; }
 
-        /* Login btn */
-        .ml-login-btn {
-          width:100%; height:52px; border-radius:14px;
-          display:flex; align-items:center; justify-content:center; gap:11px;
+        /* Google button */
+        .mm-goog-btn {
+          width:100%; height:54px; border-radius:16px;
+          display:flex; align-items:center; justify-content:center; gap:12px;
           font-family:'Heebo',system-ui,sans-serif; font-size:15px; font-weight:800;
           cursor:pointer; border:none; outline:none; position:relative; overflow:hidden;
-          background:linear-gradient(135deg,#3D2480,#5B3AAB); color:#fff;
-          box-shadow:0 6px 24px rgba(91,58,171,.35); transition:all .2s;
+          background:linear-gradient(135deg, #3D2480 0%, #5B3AAB 45%, #7B5AC4 100%);
+          background-size:200% 100%;
+          color:#fff;
+          box-shadow:0 8px 30px rgba(91,58,171,.52), 0 2px 8px rgba(0,0,0,.3);
+          transition:all .25s; letter-spacing:-.01em;
         }
-        .ml-login-btn:hover { transform:translateY(-1px); box-shadow:0 8px 28px rgba(91,58,171,.45); }
-        .ml-login-btn:active { transform:scale(.98); }
-        .ml-login-btn:disabled { opacity:.65; cursor:not-allowed; transform:none; }
-        .ml-login-btn .g-wrap {
-          background:rgba(255,255,255,.15); border-radius:8px;
-          width:30px; height:30px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+        .mm-goog-btn:hover { background-position:100% 0; box-shadow:0 12px 40px rgba(91,58,171,.68), 0 0 0 1px rgba(255,255,255,.15); transform:translateY(-1px); }
+        .mm-goog-btn:active { transform:scale(.98); }
+        .mm-goog-btn:disabled { opacity:.58; cursor:not-allowed; transform:none; }
+        .mm-goog-icon { background:rgba(255,255,255,.14); border-radius:9px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+        /* Trust bar */
+        .mm-trust { display:flex; align-items:center; justify-content:center; gap:14px; margin-top:16px; flex-wrap:wrap; }
+        .mm-trust-item { display:flex; align-items:center; gap:4px; font-size:11px; font-weight:600; color:rgba(255,255,255,.32); }
+        .mm-trust-check { width:14px; height:14px; border-radius:50%; background:rgba(21,128,61,.25); border:1px solid rgba(21,128,61,.45); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .mm-err { background:rgba(220,38,38,.14); border:1px solid rgba(220,38,38,.28); border-radius:10px; padding:10px 14px; font-size:13px; color:#FCA5A5; margin-top:10px; text-align:center; }
+
+        /* Mosad link */
+        .mm-mosad-link {
+          display:inline-flex; align-items:center; gap:5px; margin-top:13px;
+          font-size:12px; font-weight:600; color:rgba(0,180,204,.65);
+          text-decoration:none; letter-spacing:.03em;
+          border-bottom:1px solid rgba(0,180,204,.18); padding-bottom:1px;
+          transition:all .2s;
+        }
+        .mm-mosad-link:hover { color:rgba(0,180,204,.9); border-color:rgba(0,180,204,.45); }
+
+        /* ── SECTION BASE ── */
+        .mm-section { padding:88px 24px; max-width:1100px; margin:0 auto; }
+        .mm-section-label {
+          font-size:11px; font-weight:700; letter-spacing:.14em;
+          text-transform:uppercase; color:rgba(201,168,76,.7);
+          margin-bottom:12px; text-align:center;
+        }
+        .mm-section-title {
+          font-size:clamp(26px,4.5vw,40px); font-weight:900;
+          color:#fff; letter-spacing:-.03em; line-height:1.15;
+          text-align:center; margin-bottom:14px;
+        }
+        .mm-section-sub {
+          font-size:15px; color:rgba(255,255,255,.42); line-height:1.65;
+          text-align:center; max-width:500px; margin:0 auto 56px;
         }
 
-        /* Step */
-        .ml-step { display:flex; align-items:flex-start; gap:14px; padding:14px 16px; background:#fff; border-radius:14px; border:1px solid #E0DCF0; box-shadow:0 1px 4px rgba(91,58,171,.05); }
-        .ml-step-num { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:900; flex-shrink:0; }
-        .ml-step-arrow { width:1px; background:linear-gradient(180deg,#D8D0F0,transparent); margin:0 auto; height:16px; }
+        /* ── JOURNEY ── */
+        .mm-journey-steps { display:flex; flex-direction:column; gap:14px; }
+        @media(min-width:640px) { .mm-journey-steps { flex-direction:row; gap:10px; } }
 
-        /* Feature grid */
-        .ml-feat { background:#fff; border-radius:14px; padding:14px 13px; border:1px solid #E0DCF0; box-shadow:0 1px 4px rgba(91,58,171,.05); }
-        .ml-feat-icon { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; margin-bottom:9px; }
-
-        /* Automation */
-        .ml-auto { display:flex; align-items:flex-start; gap:12px; padding:13px 15px; background:#fff; border-radius:13px; border:1px solid #E0DCF0; box-shadow:0 1px 4px rgba(91,58,171,.05); }
-        .ml-auto-icon { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-
-        /* Flow bar */
-        .ml-flow { display:flex; align-items:center; justify-content:center; gap:4px; flex-wrap:wrap; }
-        .ml-flow-item { display:flex; flex-direction:column; align-items:center; gap:5px; }
-        .ml-flow-bubble { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; }
-        .ml-flow-label { font-size:10px; font-weight:700; }
-        .ml-flow-arrow { width:16px; height:1px; background:#D8D0F0; margin-bottom:18px; flex-shrink:0; }
-
-        /* CTA bottom */
-        .ml-cta-bottom {
-          background:linear-gradient(135deg,#1E1040 0%,#2A1558 50%,#3D2480 100%);
-          border-radius:18px; padding:24px 20px; text-align:center;
-          border:1px solid rgba(201,168,76,.2);
+        .mm-step {
+          flex:1; display:flex; flex-direction:column; align-items:center;
+          gap:12px; text-align:center; position:relative;
+          padding:22px 14px 20px;
+          background:rgba(255,255,255,.03);
+          border:1px solid rgba(255,255,255,.07);
+          border-radius:18px; backdrop-filter:blur(10px);
+          transition:all .3s;
         }
-        .ml-cta-quote { font-size:13px; color:rgba(212,176,106,.8); font-style:italic; margin-bottom:10px; }
-        .ml-cta-title { font-size:17px; font-weight:900; color:#fff; margin-bottom:5px; }
-        .ml-cta-sub { font-size:12.5px; color:rgba(255,255,255,.55); margin-bottom:18px; }
-        .ml-cta-btn {
-          display:inline-flex; align-items:center; gap:8px;
-          background:#fff; border-radius:12px; padding:11px 22px;
-          border:none; cursor:pointer; font-family:'Heebo',system-ui,sans-serif;
-          font-size:14px; font-weight:800; color:#3D2480;
-          box-shadow:0 4px 14px rgba(0,0,0,.18); transition:all .2s;
+        .mm-step:hover { background:rgba(155,114,207,.07); border-color:rgba(155,114,207,.2); transform:translateY(-3px); }
+        .mm-step-num {
+          width:46px; height:46px; border-radius:50%;
+          display:flex; align-items:center; justify-content:center;
+          font-size:13px; font-weight:800; letter-spacing:.04em;
+          flex-shrink:0; position:relative;
         }
-        .ml-cta-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,0,0,.25); }
-        .ml-error { background:#FEF2F2; border-radius:10px; padding:10px 14px; font-size:13px; font-weight:600; color:#DC2626; margin-top:10px; text-align:center; }
-        .ml-trust { display:flex; align-items:center; justify-content:center; gap:14px; margin-top:14px; flex-wrap:wrap; }
-        .ml-trust-item { display:flex; align-items:center; gap:4px; font-size:11px; font-weight:600; color:#8888AA; }
-        .ml-section-label { font-size:10.5px; font-weight:700; color:#8888AA; letter-spacing:.1em; text-transform:uppercase; margin-bottom:12px; }
+        .mm-step-num-glow { position:absolute; inset:0; border-radius:50%; animation:glow 4s ease-in-out infinite; }
+        .mm-step-title { font-size:14px; font-weight:800; color:#fff; line-height:1.2; }
+        .mm-step-sub { font-size:11.5px; color:rgba(255,255,255,.42); line-height:1.5; }
+
+        /* ── AUTOMATIONS ── */
+        .mm-auto-grid { display:grid; grid-template-columns:1fr; gap:10px; }
+        @media(min-width:560px) { .mm-auto-grid { grid-template-columns:1fr 1fr; } }
+
+        .mm-auto-item {
+          display:flex; align-items:flex-start; gap:14px;
+          background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07);
+          border-radius:16px; padding:18px 16px;
+          backdrop-filter:blur(10px); transition:all .25s;
+        }
+        .mm-auto-item:hover { background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.12); }
+        .mm-auto-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .mm-auto-title { font-size:13.5px; font-weight:800; color:#fff; margin-bottom:4px; }
+        .mm-auto-desc  { font-size:12px; color:rgba(255,255,255,.4); line-height:1.5; }
+
+        /* ── FEATURES ── */
+        .mm-feat-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+        @media(min-width:640px) { .mm-feat-grid { grid-template-columns:repeat(4,1fr); } }
+
+        .mm-feat {
+          background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07);
+          border-radius:15px; padding:18px 15px;
+          backdrop-filter:blur(10px); transition:all .25s;
+        }
+        .mm-feat:hover { background:rgba(155,114,207,.06); border-color:rgba(155,114,207,.18); transform:translateY(-2px); }
+        .mm-feat-icon { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
+        .mm-feat-title { font-size:13px; font-weight:800; color:#fff; margin-bottom:4px; }
+        .mm-feat-desc  { font-size:11px; color:rgba(255,255,255,.38); line-height:1.45; }
+
+        /* ── FLOW ── */
+        .mm-flow-wrap {
+          display:flex; align-items:center; justify-content:center;
+          gap:6px; flex-wrap:wrap; padding:8px 0;
+        }
+        .mm-flow-bubble {
+          padding:8px 16px; border-radius:12px;
+          font-size:12.5px; font-weight:800;
+        }
+        .mm-flow-arrow { color:rgba(255,255,255,.2); font-size:14px; flex-shrink:0; }
+
+        /* ── TRUST SECTION ── */
+        .mm-trust-section {
+          padding:72px 24px;
+          background:linear-gradient(135deg, rgba(123,90,196,.07) 0%, rgba(0,180,204,.04) 100%);
+          border-top:1px solid rgba(255,255,255,.05);
+          border-bottom:1px solid rgba(255,255,255,.05);
+        }
+        .mm-trust-inner { max-width:800px; margin:0 auto; text-align:center; }
+        .mm-trust-pills { display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:28px; }
+        .mm-trust-pill {
+          display:flex; align-items:center; gap:7px;
+          background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
+          border-radius:999px; padding:8px 16px;
+          font-size:12.5px; font-weight:600; color:rgba(255,255,255,.62);
+        }
+        .mm-trust-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+        /* ── QUOTE ── */
+        .mm-quote-section { padding:72px 24px; text-align:center; }
+        .mm-quote-wrap {
+          max-width:520px; margin:0 auto;
+          padding:38px 34px;
+          background:rgba(155,114,207,.05);
+          border:1px solid rgba(155,114,207,.15);
+          border-radius:24px;
+          position:relative; overflow:hidden;
+        }
+        .mm-quote-wrap::before {
+          content:''; position:absolute; inset:0;
+          background:radial-gradient(ellipse 75% 55% at 50% 50%, rgba(155,114,207,.07) 0%, transparent 70%);
+          pointer-events:none;
+        }
+        .mm-quote-mark  { font-size:64px; line-height:1; color:rgba(201,168,76,.22); font-family:Georgia,serif; margin-bottom:-8px; }
+        .mm-quote-text  { font-size:18px; font-weight:800; color:rgba(255,255,255,.86); line-height:1.55; margin-bottom:14px; letter-spacing:.01em; }
+        .mm-quote-auth  { font-size:11.5px; font-weight:600; color:rgba(201,168,76,.6); letter-spacing:.06em; }
+
+        /* ── FINAL CTA ── */
+        .mm-final-cta {
+          padding:96px 24px;
+          background:linear-gradient(160deg, #0D0A1E 0%, #190F30 40%, #0C1320 100%);
+          border-top:1px solid rgba(255,255,255,.05);
+          text-align:center; position:relative; overflow:hidden;
+        }
+        .mm-final-orb {
+          position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+          width:600px; height:280px; border-radius:50%;
+          background:radial-gradient(ellipse, rgba(123,90,196,.28) 0%, transparent 65%);
+          pointer-events:none; animation:glow 6s ease-in-out infinite;
+        }
+        .mm-final-inner { position:relative; z-index:1; max-width:560px; margin:0 auto; }
+        .mm-final-title { font-size:clamp(28px,5vw,48px); font-weight:900; color:#fff; letter-spacing:-.03em; line-height:1.12; margin-bottom:14px; }
+        .mm-final-sub   { font-size:15px; color:rgba(255,255,255,.42); line-height:1.65; margin-bottom:38px; }
+        .mm-final-btn {
+          display:inline-flex; align-items:center; gap:12px;
+          padding:16px 36px; border-radius:18px; border:none;
+          font-family:'Heebo',system-ui,sans-serif; font-size:16px; font-weight:800;
+          cursor:pointer; color:#fff; letter-spacing:-.01em;
+          background:linear-gradient(135deg, #3D2480, #5B3AAB 50%, #7B5AC4);
+          box-shadow:0 8px 36px rgba(91,58,171,.55), 0 0 60px rgba(91,58,171,.18);
+          transition:all .25s; position:relative; overflow:hidden;
+        }
+        .mm-final-btn::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,.12),transparent); border-radius:inherit; }
+        .mm-final-btn:hover { box-shadow:0 12px 44px rgba(91,58,171,.72), 0 0 80px rgba(155,114,207,.22); transform:translateY(-2px); }
+        .mm-final-btn:active { transform:scale(.97); }
+        .mm-final-btn:disabled { opacity:.58; cursor:not-allowed; transform:none; }
+        .mm-final-g-icon { background:rgba(255,255,255,.14); border-radius:10px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+        /* ── FOOTER ── */
+        .mm-footer {
+          padding:26px 24px; border-top:1px solid rgba(255,255,255,.05);
+          display:flex; align-items:center; justify-content:space-between;
+          flex-wrap:wrap; gap:10px; max-width:1100px; margin:0 auto;
+        }
+        .mm-footer-left { font-size:11px; color:rgba(255,255,255,.28); }
+        .mm-footer-links { display:flex; gap:14px; }
+        .mm-footer-link { font-size:11px; color:rgba(255,255,255,.28); text-decoration:none; transition:color .2s; }
+        .mm-footer-link:hover { color:rgba(255,255,255,.6); }
+
+        /* fade-in */
+        .mm-fadein { opacity:0; animation:fadeUp .72s cubic-bezier(.16,1,.3,1) forwards; }
+        .mm-d1 { animation-delay:.1s; }
+        .mm-d2 { animation-delay:.22s; }
+        .mm-d3 { animation-delay:.36s; }
+        .mm-d4 { animation-delay:.5s; }
       `}</style>
 
-      <div className="ml-root">
+      <div className="mm-root">
 
-        {/* ── Hero ── */}
-        <div className="ml-hero">
-          <div className="ml-hero-orb1" />
-          <div className="ml-hero-orb2" />
-          <div className="ml-hero-pattern" />
+        {/* ══ HERO ══ */}
+        <div className="mm-hero">
+          <div className="mm-hero-bg" />
+          <div className="mm-stars" />
+          <div className="mm-orb mm-orb-1" />
+          <div className="mm-orb mm-orb-2" />
+          <div className="mm-orb mm-orb-3" />
+          <div className="mm-vline" />
 
-          <div className="ml-inner">
-            {/* Nav */}
-            <div className="ml-nav">
-              <div className="ml-nav-logo">
-                <div className="ml-nav-logobox">
-                  <Image src="/logo-chabad.png" alt="השביל" width={36} height={36} style={{ objectFit:'contain' }} />
-                </div>
-                <div>
-                  <div className="ml-nav-name">הַשְּׁבִיל</div>
-                  <div className="ml-nav-sub">רשת חינוך חב״ד</div>
-                </div>
+          {/* NAV */}
+          <nav className="mm-nav">
+            <a href="/" className="mm-logo-wrap">
+              <div className="mm-logo-box">
+                <Image src="/logo-chabad.png" alt="השביל" width={42} height={42} style={{ objectFit:'contain' }} />
               </div>
-              <div style={{ background:'rgba(0,180,204,.15)', border:'1px solid rgba(0,180,204,.3)', borderRadius:'8px', padding:'5px 12px', fontSize:'11px', fontWeight:700, color:'rgba(0,180,204,.9)' }}>
-                פורטל מועמדת
+              <div>
+                <div className="mm-logo-name">הַשְּׁבִיל</div>
+                <div className="mm-logo-sub">רשת חינוך חב״ד</div>
               </div>
+            </a>
+            <div className="mm-nav-links">
+              <a href="#journey" className="mm-nav-link">המסלול</a>
+              <a href="#features" className="mm-nav-link">יכולות</a>
+              <a href="/mosad" className="mm-nav-cta">כניסת מוסד</a>
+            </div>
+          </nav>
+
+          {/* HERO BODY */}
+          <div className="mm-hero-body" style={{ opacity: visible ? 1 : 0, transition:'opacity .5s ease' }}>
+
+            <div className="mm-badge mm-fadein mm-d1">
+              <div className="mm-badge-dot" />
+              <GraduationCap size={12} />
+              פורטל מועמדת &nbsp;•&nbsp; גיוס והשמה
             </div>
 
-            {/* Hero content */}
-            <div style={{ padding:'28px 0 0', textAlign:'center' }}>
-              <div className="ml-badge">
-                <GraduationCap size={12} />
-                גיוס והשמה · רשת חינוך חב״ד
-              </div>
-              <h1 className="ml-hero-title">
-                מצאי את<br />
-                <span className="ml-hero-em">שביל השליחות</span><br />
-                שלך
-              </h1>
-              <p className="ml-hero-sub">
-                פלטפורמת הגיוס וההשמה הרשמית של הרשת —<br />
-                פרופיל אחד, כל המשרות, עדכון בוואטסאפ
-              </p>
+            <h1 className="mm-hero-title mm-fadein mm-d1">
+              מצאי את<br />
+              <span className="mm-hero-em">שביל השליחות</span>
+              שלך
+            </h1>
+
+            <p className="mm-hero-sub mm-fadein mm-d2">
+              פלטפורמת הגיוס הרשמית של רשת חינוך חב״ד —<br />
+              פרופיל אחד, כל המשרות, עדכון בוואטסאפ
+            </p>
+
+            <div className="mm-hero-micro mm-fadein mm-d2">
+              הרשמה חינמית<span>•</span>חיפוש מתקדם<span>•</span>התאמה אישית<span>•</span>עדכוני WhatsApp
             </div>
-          </div>
-        </div>
 
-        <div className="ml-inner" style={{ paddingTop:'0' }}>
+            <div className="mm-tagline mm-fadein mm-d3">
+              לא עוד חיפוש עבודה — מציאת השביל שלך
+            </div>
 
-          {/* ── Login card ── */}
-          <div style={{ marginTop:'-1px', marginBottom:'20px', position:'relative', zIndex:10 }}>
-            <div className="ml-card" style={{ boxShadow:'0 12px 40px rgba(91,58,171,.18)' }}>
-              <div style={{ height:'3px', background:'linear-gradient(90deg,#5B3AAB,#00B4CC)' }} />
-              <div className="ml-card-body">
-                <h2 style={{ fontSize:'17px', fontWeight:800, color:'#1A1A2E', margin:'0 0 3px', letterSpacing:'-.01em' }}>כניסה למערכת המועמדת</h2>
-                <p style={{ fontSize:'13px', color:'#8888AA', margin:'0 0 18px' }}>מועמדת חדשה? הפרופיל ייפתח אוטומטית</p>
+            {/* GLASS CTA CARD */}
+            <div className="mm-card mm-fadein mm-d3">
+              <div className="mm-card-bar" />
+              <div className="mm-card-title">כניסה למערכת המועמדת</div>
+              <div className="mm-card-sub">מועמדת חדשה? הפרופיל ייפתח אוטומטית</div>
 
-                <button className="ml-login-btn" onClick={handleGoogle} disabled={pending}>
-                  <div className="g-wrap">{GOOGLE_SVG}</div>
-                  <span>{pending ? 'מחברת...' : 'כניסה / הרשמה עם Google'}</span>
-                </button>
+              <button className="mm-goog-btn" onClick={signIn} disabled={pending}>
+                <div className="mm-goog-icon"><GoogleIcon /></div>
+                <span>{pending ? 'מחברת...' : 'כניסה / הרשמה עם Google'}</span>
+              </button>
 
-                {error && <div className="ml-error">{error}</div>}
+              {err && <div className="mm-err">{err}</div>}
 
-                <div className="ml-trust">
-                  {[
-                    { icon: CheckCircle, text: 'הרשמה חינמית' },
-                    { icon: CheckCircle, text: 'פחות מ-5 דקות' },
-                    { icon: MessageCircle, text: 'עדכונים ב-WhatsApp' },
-                  ].map(({ icon: Icon, text }) => (
-                    <span key={text} className="ml-trust-item">
-                      <Icon size={11} color="#15803D" />
-                      {text}
+              <div className="mm-trust">
+                {['הרשמה חינמית', 'פחות מ-5 דקות', 'עדכוני WhatsApp'].map(t => (
+                  <span key={t} className="mm-trust-item">
+                    <span className="mm-trust-check">
+                      <svg width="8" height="8" viewBox="0 0 8 8"><path d="M1.5 4L3 5.5L6.5 2" stroke="#4ade80" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ── How it works ── */}
-          <div style={{ marginBottom:'20px' }}>
-            <div className="ml-section-label">איך זה עובד</div>
-            <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
-              {STEPS.map((s, i) => (
-                <div key={s.n}>
-                  <div className="ml-step">
-                    <div className="ml-step-num" style={{ background:s.bg, border:`1px solid ${s.border}` }}>
-                      <span style={{ color:s.color, fontSize:'16px' }}>{s.icon}</span>
-                    </div>
-                    <div style={{ flex:1 }}>
-                      <div style={{ fontSize:'14px', fontWeight:800, color:'#1A1A2E', marginBottom:'2px' }}>{s.title}</div>
-                      <div style={{ fontSize:'12.5px', color:'#4A4A6A', lineHeight:1.45 }}>{s.desc}</div>
-                    </div>
-                  </div>
-                  {i < STEPS.length - 1 && <div className="ml-step-arrow" />}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* ── Automations ── */}
-          <div style={{ marginBottom:'20px' }}>
-            <div className="ml-card">
-              <div className="ml-card-header">אוטומציות וזרימות</div>
-              <div className="ml-card-body" style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
-                {AUTOMATIONS.map(({ title, desc, icon: Icon, color, bg }) => (
-                  <div key={title} className="ml-auto">
-                    <div className="ml-auto-icon" style={{ background:bg }}>
-                      <Icon size={16} color={color} />
-                    </div>
-                    <div>
-                      <div style={{ fontSize:'13px', fontWeight:800, color:'#1A1A2E', marginBottom:'2px' }}>{title}</div>
-                      <div style={{ fontSize:'12px', color:'#4A4A6A', lineHeight:1.4 }}>{desc}</div>
-                    </div>
-                  </div>
+                    {t}
+                  </span>
                 ))}
               </div>
-            </div>
-          </div>
 
-          {/* ── Application flow ── */}
-          <div style={{ marginBottom:'20px' }}>
-            <div className="ml-card">
-              <div className="ml-card-header">מחזור חיים של הגשה</div>
-              <div className="ml-card-body">
-                <div className="ml-flow">
-                  {[
-                    { label:'הגשה',     color:'#5B3AAB', bg:'rgba(91,58,171,.1)' },
-                    { label:'נצפתה',    color:'#0369A1', bg:'rgba(3,105,161,.1)' },
-                    { label:'ראיון',    color:'#D97706', bg:'rgba(217,119,6,.1)' },
-                    { label:'התקבלה',  color:'#15803D', bg:'rgba(21,128,61,.1)' },
-                    { label:'משוב',     color:'#C9A84C', bg:'rgba(201,168,76,.1)' },
-                  ].map(({ label, color, bg }, i, arr) => (
-                    <div key={label} style={{ display:'flex', alignItems:'center', gap:'4px', flexShrink:0 }}>
-                      <div className="ml-flow-item">
-                        <div className="ml-flow-bubble" style={{ background:bg }}>
-                          <span style={{ fontSize:'11px', fontWeight:800, color }}>{label}</span>
-                        </div>
-                      </div>
-                      {i < arr.length - 1 && <div className="ml-flow-arrow" />}
-                    </div>
-                  ))}
-                </div>
+              <div style={{ textAlign:'center' }}>
+                <a href="/mosad" className="mm-mosad-link">
+                  <Building2 size={12} />
+                  כניסה למערכת המוסד
+                  <ArrowLeft size={10} />
+                </a>
               </div>
             </div>
-          </div>
 
-          {/* ── Features ── */}
-          <div style={{ marginBottom:'20px' }}>
-            <div className="ml-section-label">מה תקבלי במערכת</div>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px' }}>
-              {FEATURES.map(({ icon: Icon, title, desc, color, bg }) => (
-                <div key={title} className="ml-feat">
-                  <div className="ml-feat-icon" style={{ background:bg }}>
-                    <Icon size={16} color={color} />
+          </div>
+        </div>
+
+        {/* ══ JOURNEY ══ */}
+        <div id="journey" style={{ background:'rgba(255,255,255,.012)', borderTop:'1px solid rgba(255,255,255,.055)', borderBottom:'1px solid rgba(255,255,255,.055)' }}>
+          <div className="mm-section">
+            <div className="mm-section-label">המסלול שלך</div>
+            <h2 className="mm-section-title">חמישה צעדים לשליחות</h2>
+            <p className="mm-section-sub">
+              מהרגע שנרשמת ועד שמצאת את המקום שלך — המערכת איתך בכל שלב
+            </p>
+
+            <div className="mm-journey-steps">
+              {JOURNEY.map(s => (
+                <div key={s.n} className="mm-step">
+                  <div className="mm-step-num" style={{
+                    background:`radial-gradient(circle, ${s.color}22 0%, ${s.color}0E 100%)`,
+                    border:`1.5px solid ${s.color}44`,
+                    boxShadow:`0 0 18px ${s.glow}`,
+                  }}>
+                    <div className="mm-step-num-glow" style={{ background:`radial-gradient(circle, ${s.glow} 0%, transparent 70%)` }} />
+                    <span style={{ color:s.color, fontSize:'13px', fontWeight:900, position:'relative', zIndex:1 }}>{s.n}</span>
                   </div>
-                  <div style={{ fontSize:'13px', fontWeight:800, color:'#1A1A2E', marginBottom:'3px' }}>{title}</div>
-                  <div style={{ fontSize:'11.5px', color:'#8888AA', lineHeight:1.4 }}>{desc}</div>
+                  <div className="mm-step-title">{s.title}</div>
+                  <div className="mm-step-sub">{s.sub}</div>
                 </div>
               ))}
             </div>
           </div>
-
-          {/* ── Bottom CTA ── */}
-          <div className="ml-cta-bottom" style={{ marginBottom:'32px' }}>
-            <div className="ml-cta-quote">״וְכָל נְתִיבוֹתֶיהָ שָׁלוֹם״ — משלי ג׳</div>
-            <div className="ml-cta-title">מוכנה להתחיל את השביל שלך?</div>
-            <div className="ml-cta-sub">הרשמה חינמית — כניסה מיידית</div>
-            <button className="ml-cta-btn" onClick={handleGoogle} disabled={pending}>
-              {GOOGLE_SVG}
-              {pending ? 'מחברת...' : 'כניסה עם Google'}
-            </button>
-          </div>
-
         </div>
 
-        {/* Footer */}
-        <div style={{ textAlign:'center', padding:'0 0 28px', fontSize:'11px', color:'#8888AA', direction:'rtl' }}>
-          הַשְּׁבִיל · רשת חינוך חב״ד · 2026
-          <span style={{ margin:'0 8px' }}>·</span>
-          <a href="/mosad" style={{ color:'#5B3AAB', textDecoration:'none', fontWeight:600 }}>פורטל מוסד <ArrowLeft size={10} style={{ display:'inline' }} /></a>
+        {/* ══ AUTOMATIONS ══ */}
+        <div>
+          <div className="mm-section" style={{ paddingTop:'72px' }}>
+            <div className="mm-section-label">אוטומציות חכמות</div>
+            <h2 className="mm-section-title">המערכת עובדת בשבילך</h2>
+            <p className="mm-section-sub">
+              עדכונים בזמן אמת, תזכורות ואוטומציות שמחסכות זמן ומונעות החמצה
+            </p>
+
+            <div className="mm-auto-grid">
+              {AUTOMATIONS.map(({ icon: Icon, title, desc, c, bg }) => (
+                <div key={title} className="mm-auto-item">
+                  <div className="mm-auto-icon" style={{ background:bg }}>
+                    <Icon size={17} color={c} />
+                  </div>
+                  <div>
+                    <div className="mm-auto-title">{title}</div>
+                    <div className="mm-auto-desc">{desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ══ APPLICATION FLOW ══ */}
+        <div style={{ background:'rgba(255,255,255,.01)', borderTop:'1px solid rgba(255,255,255,.05)' }}>
+          <div className="mm-section" style={{ paddingTop:'56px', paddingBottom:'56px' }}>
+            <div className="mm-section-label">מחזור חיים של הגשה</div>
+            <h2 className="mm-section-title" style={{ marginBottom:'8px', fontSize:'clamp(22px,3.5vw,32px)' }}>מה קורה אחרי שמגישים?</h2>
+            <p className="mm-section-sub" style={{ marginBottom:'32px' }}>כל שלב מתעדכן אוטומטית ב-WhatsApp</p>
+
+            <div className="mm-flow-wrap">
+              {[
+                { label:'הגשה',    c:'#9B72CF', bg:'rgba(155,114,207,.15)' },
+                { label:'נצפתה',   c:'#00B4CC', bg:'rgba(0,180,204,.12)' },
+                { label:'ראיון',   c:'#C9A84C', bg:'rgba(201,168,76,.12)' },
+                { label:'התקבלה', c:'#15803D', bg:'rgba(21,128,61,.12)' },
+                { label:'שיבוץ',  c:'#C9A84C', bg:'rgba(201,168,76,.1)' },
+              ].map(({ label, c, bg }, i, arr) => (
+                <div key={label} style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+                  <div className="mm-flow-bubble" style={{ background:bg, color:c }}>
+                    {label}
+                  </div>
+                  {i < arr.length - 1 && <span className="mm-flow-arrow">›</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ══ FEATURES ══ */}
+        <div id="features">
+          <div className="mm-section" style={{ paddingTop:'72px' }}>
+            <div className="mm-section-label">יכולות המערכת</div>
+            <h2 className="mm-section-title">מה מחכה לך?</h2>
+            <p className="mm-section-sub">
+              כלים שנבנו עבור שליחות חינוכית — לא תוכנת HR גנרית
+            </p>
+
+            <div className="mm-feat-grid">
+              {FEATURES.map(({ icon: Icon, title, desc, c }) => (
+                <div key={title} className="mm-feat">
+                  <div className="mm-feat-icon" style={{ background:`${c}18` }}>
+                    <Icon size={16} color={c} />
+                  </div>
+                  <div className="mm-feat-title">{title}</div>
+                  <div className="mm-feat-desc">{desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ══ TRUST ══ */}
+        <div className="mm-trust-section">
+          <div className="mm-trust-inner">
+            <div className="mm-section-label">הרשת שמאחורינו</div>
+            <h2 className="mm-section-title" style={{ marginBottom:'8px' }}>נבנה עבור עולם השליחות</h2>
+            <p style={{ fontSize:'14px', color:'rgba(255,255,255,.38)', lineHeight:1.65, maxWidth:'420px', margin:'0 auto' }}>
+              פלטפורמה רשמית לרשת חינוך חב״ד — מוסדות, שלוחים ומועמדות
+            </p>
+
+            <div className="mm-trust-pills">
+              {[
+                { label:'שלהבות חב״ד',           dot:'#C9A84C' },
+                { label:'בתי ספר ברשת',            dot:'#9B72CF' },
+                { label:'בתי חינוך',               dot:'#00B4CC' },
+                { label:'גנים ופעוטונים',           dot:'#15803D' },
+              ].map(({ label, dot }) => (
+                <div key={label} className="mm-trust-pill">
+                  <span className="mm-trust-dot" style={{ background:dot }} />
+                  <Sparkles size={12} color={dot} />
+                  {label}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ══ QUOTE ══ */}
+        <div className="mm-quote-section">
+          <div className="mm-quote-wrap">
+            <div className="mm-quote-mark">&ldquo;</div>
+            <div className="mm-quote-text">
+              דְּרָכֶיהָ דַרְכֵי נֹעַם<br />וְכָל נְתִיבוֹתֶיהָ שָׁלוֹם
+            </div>
+            <div className="mm-quote-auth">משלי ג׳, יז׳</div>
+          </div>
+        </div>
+
+        {/* ══ FINAL CTA ══ */}
+        <div className="mm-final-cta">
+          <div className="mm-final-orb" />
+          <div className="mm-final-inner">
+            <div style={{ fontSize:'11px', fontWeight:700, letterSpacing:'.12em', color:'rgba(201,168,76,.6)', textTransform:'uppercase', marginBottom:'16px' }}>
+              מוכנה להתחיל?
+            </div>
+            <h2 className="mm-final-title">
+              מוכנה להתחיל<br />את השביל שלך?
+            </h2>
+            <p className="mm-final-sub">
+              הרשמה קצרה. התאמה אישית. התחלה חדשה.
+            </p>
+            <button className="mm-final-btn" onClick={signIn} disabled={pending}>
+              <div className="mm-final-g-icon"><GoogleIcon /></div>
+              <span>{pending ? 'מחברת...' : 'כניסה עם Google'}</span>
+            </button>
+            <div style={{ marginTop:'16px', fontSize:'11.5px', color:'rgba(255,255,255,.28)' }}>
+              מועמדת חדשה? הפרופיל ייפתח אוטומטית
+            </div>
+          </div>
+        </div>
+
+        {/* ══ FOOTER ══ */}
+        <div className="mm-footer">
+          <div className="mm-footer-left">
+            © 2026 הַשְּׁבִיל · רשת חינוך חב״ד · כל הזכויות שמורות
+          </div>
+          <div className="mm-footer-links">
+            <a href="/"       className="mm-footer-link">עמוד הבית</a>
+            <a href="/mosad"  className="mm-footer-link">פורטל מוסד</a>
+          </div>
         </div>
 
       </div>
