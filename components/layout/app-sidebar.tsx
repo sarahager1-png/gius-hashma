@@ -173,6 +173,7 @@ interface Props {
 
 export default function AppSidebar({
   role,
+  fullName,
   pendingInstitutions  = 0,
   pendingApplications  = 0,
   pendingInquiries     = 0,
@@ -282,6 +283,20 @@ export default function AppSidebar({
               {roleLabel[role]}
             </span>
           </div>
+
+          {/* Personal greeting */}
+          {fullName && (
+            <div style={{ marginTop: '10px' }}>
+              <p style={{
+                fontSize: '13px', fontWeight: 700,
+                color: 'rgba(255,255,255,.85)',
+                letterSpacing: '-.01em',
+                margin: 0,
+              }}>
+                שלום, {fullName.split(' ')[0]}
+              </p>
+            </div>
+          )}
         </Link>
 
         {/* Brand gradient line */}
