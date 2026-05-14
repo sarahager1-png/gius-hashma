@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
-import { KeyRound } from 'lucide-react'
+import { KeyRound, Sparkles, ClipboardCheck, HeartHandshake } from 'lucide-react'
 
 function LoginPageInner() {
   const supabase = createClient()
@@ -202,20 +202,25 @@ function LoginPageInner() {
         }
 
         /* feature rows */
-        .lg-features { display:flex; flex-direction:column; gap:8px; width:100%; max-width:280px; margin:0 auto; }
+        .lg-features { display:flex; flex-direction:column; gap:10px; width:100%; max-width:290px; margin:0 auto; }
         .lg-feat-row {
-          display:flex; align-items:center; gap:12px;
-          padding:10px 14px; border-radius:13px;
-          background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
-          transition:background .2s;
+          display:flex; align-items:center; gap:14px;
+          padding:13px 16px; border-radius:15px;
+          background:rgba(255,255,255,.05);
+          border:1px solid rgba(255,255,255,.09);
+          transition:background .25s, border-color .25s, transform .25s;
+          position:relative; overflow:hidden;
         }
-        .lg-feat-row:hover { background:rgba(255,255,255,.07); }
+        .lg-feat-row::before {
+          content:''; position:absolute; right:0; top:0; bottom:0; width:2px;
+          border-radius:0 2px 2px 0;
+        }
+        .lg-feat-row:hover { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.14); transform:translateX(-2px); }
         .lg-feat-icon {
-          width:30px; height:30px; border-radius:8px; flex-shrink:0;
-          display:flex; align-items:center; justify-content:center; font-size:13px;
-          background:rgba(0,175,210,.09); border:1px solid rgba(0,175,210,.14);
+          width:36px; height:36px; border-radius:11px; flex-shrink:0;
+          display:flex; align-items:center; justify-content:center;
         }
-        .lg-feat-text { font-size:12px; font-weight:500; color:rgba(255,255,255,.5); flex:1; text-align:right; }
+        .lg-feat-text { font-size:12.5px; font-weight:500; color:rgba(255,255,255,.58); flex:1; text-align:right; line-height:1.4; }
 
         .lg-hero-footer {
           position:relative; z-index:10; text-align:center; padding:0 0 20px;
@@ -226,18 +231,18 @@ function LoginPageInner() {
         .lg-form {
           flex:1; display:flex; flex-direction:column;
           position:relative; overflow:hidden;
-          background:linear-gradient(160deg, #EEF3F9 0%, #E4EBF4 50%, #EBF0F7 100%);
+          background:linear-gradient(170deg, #EAF2FA 0%, #DDE8F3 55%, #E6EDF6 100%);
         }
         .lg-form::before {
-          content:''; position:absolute; top:-120px; right:-120px;
-          width:420px; height:420px; border-radius:50%;
-          background:radial-gradient(circle, rgba(0,150,185,.1) 0%, transparent 70%);
+          content:''; position:absolute; top:-80px; left:50%; transform:translateX(-50%);
+          width:90%; height:420px; border-radius:50%;
+          background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,175,210,.18) 0%, transparent 65%);
           pointer-events:none;
         }
         .lg-form::after {
-          content:''; position:absolute; bottom:-80px; left:-80px;
-          width:360px; height:360px; border-radius:50%;
-          background:radial-gradient(circle, rgba(201,168,76,.07) 0%, transparent 70%);
+          content:''; position:absolute; bottom:-60px; left:-60px;
+          width:340px; height:340px; border-radius:50%;
+          background:radial-gradient(circle, rgba(201,168,76,.09) 0%, transparent 70%);
           pointer-events:none;
         }
         .lg-form-grain {
@@ -284,15 +289,23 @@ function LoginPageInner() {
         }
         .lg-card {
           width:100%; max-width:400px;
-          background:rgba(7,18,32,.82);
+          background:rgba(6,16,28,.86);
           backdrop-filter:blur(28px) saturate(140%); -webkit-backdrop-filter:blur(28px) saturate(140%);
-          border:1px solid rgba(255,255,255,.14);
+          border:1px solid rgba(255,255,255,.13);
+          border-top:1px solid rgba(255,255,255,.2);
           border-radius:24px; padding:40px 36px;
           box-shadow:
-            0 2px 0 rgba(255,255,255,.07) inset,
-            0 24px 70px rgba(26,46,66,.25),
-            0 0 0 1px rgba(0,180,220,.05);
+            0 2px 0 rgba(255,255,255,.08) inset,
+            0 28px 80px rgba(10,24,50,.28),
+            0 0 60px rgba(0,175,210,.08),
+            0 0 0 1px rgba(0,180,220,.06);
           animation:floatCard 6s ease-in-out infinite;
+          position:relative;
+        }
+        .lg-card::before {
+          content:''; position:absolute; top:0; left:16px; right:16px; height:1px;
+          background:linear-gradient(90deg, transparent, rgba(0,195,225,.45), rgba(201,168,76,.25), transparent);
+          border-radius:1px;
         }
 
         .lg-welcome { margin-bottom:30px; animation:fadeUp .6s cubic-bezier(.16,1,.3,1) both; }
@@ -424,14 +437,17 @@ function LoginPageInner() {
             </div>
 
             <div className="lg-features">
-              {[
-                { icon: '✦', text: 'התאמה חכמה של משרות ומועמדות' },
-                { icon: '◈', text: 'ניהול הגשות ומעקב בזמן אמת' },
-                { icon: '❋', text: 'ליווי אישי לאורך כל התהליך' },
-              ].map(({ icon, text }) => (
-                <div key={text} className="lg-feat-row">
-                  <div className="lg-feat-icon">{icon}</div>
+              {([
+                { Icon: Sparkles,       color: '#00B4CC', text: 'התאמה חכמה של משרות ומועמדות' },
+                { Icon: ClipboardCheck, color: '#C9A84C', text: 'ניהול הגשות ומעקב בזמן אמת'   },
+                { Icon: HeartHandshake, color: '#7B5AC4', text: 'ליווי אישי לאורך כל התהליך'   },
+              ] as { Icon: React.ElementType; color: string; text: string }[]).map(({ Icon, color, text }) => (
+                <div key={text} className="lg-feat-row" style={{ '--accent': color } as React.CSSProperties}>
+                  <div className="lg-feat-icon" style={{ background:`${color}18`, border:`1px solid ${color}30`, boxShadow:`0 0 12px ${color}22` }}>
+                    <Icon size={17} color={color} style={{ filter:`drop-shadow(0 0 4px ${color}88)` }} />
+                  </div>
                   <span className="lg-feat-text">{text}</span>
+                  <div style={{ position:'absolute', right:0, top:0, bottom:0, width:'2.5px', background:`linear-gradient(180deg, transparent, ${color}55, transparent)`, borderRadius:'0 2px 2px 0' }} />
                 </div>
               ))}
             </div>
