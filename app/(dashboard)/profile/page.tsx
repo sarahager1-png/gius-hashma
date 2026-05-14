@@ -26,7 +26,9 @@ export default async function ProfilePage() {
 
   const { data: profile } = await service
     .from('profiles').select('*').eq('id', user.id).single()
-  if (!profile || profile.role !== 'מועמדת') redirect('/dashboard')
+  const ADMIN_ROLES = ['מנהל רשת', 'מנהלת מערכת', 'אדמין מערכת']
+  const isAdmin = profile && ADMIN_ROLES.includes(profile.role)
+  if (!profile || (profile.role !== 'מועמדת' && !isAdmin)) redirect('/dashboard')
 
   const { data: candidate } = await service
     .from('candidates').select('*').eq('profile_id', user.id).single()
@@ -48,8 +50,15 @@ export default async function ProfilePage() {
 
   return (
     <div className="p-4 md:p-8 max-w-2xl" dir="rtl">
-      {/* Placed status banner */}
-      {candidate?.availability_status && (
+      {isAdmin && (
+        <div className="mb-5 flex items-center gap-2 px-4 py-3 rounded-[12px] text-[13px] font-semibold"
+          style={{ background: '#FFF7E6', border: '1px solid #F8C94C', color: '#92600A' }}>
+          <Eye size={14} />
+          תצוגת אדמין — כך נראה הפרופיל למועמדת
+        </div>
+      )}
+
+      {!isAdmin && candidate?.availability_status && (
         <StatusWidget status={candidate.availability_status} />
       )}
 
