@@ -1,17 +1,25 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { KeyRound } from 'lucide-react'
 
-export default function LoginPage() {
+function LoginPageInner() {
   const supabase = createClient()
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState('')
   const [mounted, setMounted] = useState(false)
+  const searchParams = useSearchParams()
 
-  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => {
+    setMounted(true)
+    const err = searchParams.get('error')
+    if (err === 'oauth')    setError('שגיאה בהתחברות עם Google — בדקי שהחשבון מורשה')
+    if (err === 'exchange') setError('שגיאה בקבלת הסשן — נסי שוב')
+  }, [searchParams])
 
   async function signInWithGoogle() {
     setLoading(true); setError('')
@@ -593,6 +601,14 @@ export default function LoginPage() {
         </div>
       </div>
     </>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginPageInner />
+    </Suspense>
   )
 }
 
