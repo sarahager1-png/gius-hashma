@@ -616,6 +616,17 @@ export default function LandingPage() {
         </div>
 
 
+        {/* ══ QUOTE ══ */}
+        <div className="lp-quote-section">
+          <div className="lp-quote-wrap">
+            <div className="lp-quote-mark">&ldquo;</div>
+            <p className="lp-quote-text">
+              נהניתי ממה שכותב אודות בתו.. תחי&apos; שרוצה לקבל משרה בבתי-ספר הרשת. ובוודאי יחזקו אותה ברצון הטוב זה והכי נכון, כי עבודה במוסד של כ&quot;ק מו&quot;ח אדמו&quot;ר זצוקללה&quot;ה נבג&quot;מ זי&quot;ע ובפרט במקצוע החינוך על טהרת הקודש – הרי זה צינור וכלי לקבלת ברכות השי&quot;ת בכלל.
+            </p>
+            <div className="lp-quote-author">התקשרות · יט-לו · עמוד 115</div>
+          </div>
+        </div>
+
         {/* ══ FINAL CTA ══ */}
         <div className="lp-final-cta">
           <div className="lp-final-orb" />
@@ -642,7 +653,7 @@ export default function LandingPage() {
         {/* ══ FOOTER ══ */}
         <div className="lp-footer">
           <div className="lp-footer-left">
-            © 2026 הַשְּׁבִיל · עתודות לשליחות · כל הזכויות שמורות
+            © 2026 הַשְּׁבִיל · כל הזכויות שמורות
           </div>
           <div className="lp-footer-links">
             <a href="/mosad" className="lp-footer-link">פורטל מוסד</a>
