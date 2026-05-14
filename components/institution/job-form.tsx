@@ -32,6 +32,8 @@ interface Props {
 }
 
 const PLACEMENT_TYPES = ['שיבוץ לשנה', 'מילוי מקום - חופשת לידה', 'אחר']
+const GRADES = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י', 'י"א', 'י"ב']
+const HOURS_OPTIONS = Array.from({ length: 30 }, (_, i) => String(i + 1))
 
 const FIELD = 'w-full h-11 rounded-[10px] border text-[14px] font-medium outline-none transition-all px-3.5'
 const FS = { background: '#fff', borderColor: 'var(--line)', color: 'var(--ink)' }
@@ -189,22 +191,40 @@ export default function JobFormClient({ institutionId, school, job, templates = 
             onBlur={e => Object.assign(e.currentTarget.style, FB)} />
         </Field>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="כיתות">
-            <input value={form.classes} onChange={e => set('classes', e.target.value)}
-              placeholder="לדוגמה: א-ג, ז-ח"
-              className={FIELD} style={FS}
-              onFocus={e => Object.assign(e.currentTarget.style, FF)}
-              onBlur={e => Object.assign(e.currentTarget.style, FB)} />
-          </Field>
-          <Field label="מספר שעות">
-            <input value={form.hours} onChange={e => set('hours', e.target.value)}
-              placeholder="לדוגמה: 24"
-              className={FIELD} style={FS}
-              onFocus={e => Object.assign(e.currentTarget.style, FF)}
-              onBlur={e => Object.assign(e.currentTarget.style, FB)} />
-          </Field>
-        </div>
+        <Field label="כיתות (ניתן לבחור מספר)">
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {GRADES.map(g => {
+              const sel = form.classes.split(',').map(s => s.trim()).includes(g)
+              return (
+                <button key={g} type="button"
+                  onClick={() => {
+                    const cur = form.classes.split(',').map(s => s.trim()).filter(Boolean)
+                    const next = sel ? cur.filter(x => x !== g) : [...cur, g]
+                    set('classes', next.join(', '))
+                  }}
+                  className="w-10 h-9 rounded-[8px] text-[13px] font-bold border transition-all"
+                  style={{ background: sel ? 'var(--purple-050)' : '#fff', borderColor: sel ? 'var(--purple)' : 'var(--line)', color: sel ? 'var(--purple)' : 'var(--ink-3)' }}>
+                  {g}
+                </button>
+              )
+            })}
+          </div>
+        </Field>
+
+        <Field label="שעות פרונטליות">
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {HOURS_OPTIONS.map(h => {
+              const sel = form.hours === h
+              return (
+                <button key={h} type="button" onClick={() => set('hours', sel ? '' : h)}
+                  className="w-10 h-9 rounded-[8px] text-[13px] font-bold border transition-all"
+                  style={{ background: sel ? 'var(--purple-050)' : '#fff', borderColor: sel ? 'var(--purple)' : 'var(--line)', color: sel ? 'var(--purple)' : 'var(--ink-3)' }}>
+                  {h}
+                </button>
+              )
+            })}
+          </div>
+        </Field>
 
         <Field label="התמחות">
           <NativeSelect value={form.specialization} onChange={v => set('specialization', v)} placeholder="בחרי" options={SPECIALIZATIONS} />
