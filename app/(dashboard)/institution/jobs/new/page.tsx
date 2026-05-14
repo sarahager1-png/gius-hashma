@@ -45,7 +45,7 @@ export default async function NewJobPage({
   if (duplicate) {
     const { data: src } = await service
       .from('jobs')
-      .select('id, title, description, district, city, specialization, job_type, job_types, placement_type, expires_at, start_date, end_date')
+      .select('id, title, role, classes, hours, description, district, city, specialization, job_type, job_types, placement_type, expires_at, start_date, end_date')
       .eq('id', duplicate)
       .eq('institution_id', institution.id)
       .single()
@@ -55,6 +55,9 @@ export default async function NewJobPage({
         ...src,
         id: '',
         title: `${src.title} (עותק)`,
+        role: src.role ?? null,
+        classes: src.classes ?? null,
+        hours: src.hours ?? null,
         expires_at: null,
         start_date: null,
         end_date:   null,
