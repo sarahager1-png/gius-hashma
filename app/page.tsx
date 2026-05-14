@@ -76,14 +76,19 @@ export default function LandingPage() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
 
-        @keyframes shimG      { 0%{background-position:-200% center} 100%{background-position:200% center} }
-        @keyframes fadeUp     { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes slideUp    { from{transform:translateY(100%)} to{transform:translateY(0)} }
-        @keyframes fadeIn     { from{opacity:0} to{opacity:1} }
-        @keyframes floatCard  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
-        @keyframes pulseGlow  { 0%,100%{opacity:.3} 50%{opacity:.65} }
-        @keyframes pathFlow   { 0%{opacity:0;transform:scaleY(0) translateY(-10px)} 60%{opacity:1} 100%{opacity:.45;transform:scaleY(1) translateY(0)} }
-        @keyframes shimGold   { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes shimG        { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes fadeUp       { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes slideUp      { from{transform:translateY(100%)} to{transform:translateY(0)} }
+        @keyframes fadeIn       { from{opacity:0} to{opacity:1} }
+        @keyframes floatCard    { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+        @keyframes pulseGlow    { 0%,100%{opacity:.28} 50%{opacity:.6} }
+        @keyframes pulseWarm    { 0%,100%{opacity:.18} 50%{opacity:.42} }
+        @keyframes pathPulse    { 0%,100%{opacity:.3} 50%{opacity:.7} }
+        @keyframes pathReveal   { 0%{clip-path:inset(100% 0 0 0)} 100%{clip-path:inset(0% 0 0 0)} }
+        @keyframes particleDrop { 0%{opacity:0;transform:translateY(0) scale(1)} 20%{opacity:.8} 80%{opacity:.3} 100%{opacity:0;transform:translateY(130px) scale(.3)} }
+        @keyframes shimGold     { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes breathe      { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
+        @keyframes grainAnim    { 0%,100%{transform:translate(0,0)} 20%{transform:translate(-2px,1px)} 40%{transform:translate(1px,-1px)} 60%{transform:translate(-1px,2px)} 80%{transform:translate(2px,-2px)} }
 
         *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
 
@@ -99,57 +104,98 @@ export default function LandingPage() {
           position: relative;
         }
 
-        /* BG gradient + star pattern */
+        /* BG gradient + warm depth */
         .lp-bg {
           position: absolute; inset: 0; pointer-events: none; z-index: 0;
           background:
-            radial-gradient(ellipse 160% 65% at 50% 8%,  rgba(0,200,230,.5)  0%, rgba(0,140,180,.18) 38%, transparent 60%),
-            radial-gradient(ellipse 55%  40% at 88% 80%,  rgba(201,168,76,.1)  0%, transparent 55%),
-            radial-gradient(ellipse 40%  30% at 10% 70%,  rgba(91,58,171,.07)  0%, transparent 55%),
+            radial-gradient(ellipse 150% 60% at 50% 6%,  rgba(0,195,225,.42)  0%, rgba(0,130,170,.12) 40%, transparent 60%),
+            radial-gradient(ellipse 70%  50% at 50% 45%,  rgba(201,168,76,.06)  0%, transparent 60%),
+            radial-gradient(ellipse 50%  35% at 90% 80%,  rgba(201,168,76,.08)  0%, transparent 55%),
+            radial-gradient(ellipse 38%  28% at 8%  65%,  rgba(91,58,171,.06)   0%, transparent 55%),
             linear-gradient(180deg, #071820 0%, #060F1A 100%);
         }
-        /* very subtle star-like dots */
+        /* star field */
         .lp-bg::after {
           content:'';
           position:absolute; inset:0;
           background-image:
-            radial-gradient(1px 1px at 18% 22%, rgba(255,255,255,.18) 0%, transparent 100%),
-            radial-gradient(1px 1px at 72% 14%, rgba(255,255,255,.14) 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 44% 38%, rgba(255,255,255,.12) 0%, transparent 100%),
-            radial-gradient(1px 1px at 86% 55%, rgba(255,255,255,.1) 0%, transparent 100%),
-            radial-gradient(1px 1px at 31% 68%, rgba(255,255,255,.1) 0%, transparent 100%),
-            radial-gradient(1px 1px at 60% 75%, rgba(255,255,255,.08) 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 8%  45%, rgba(255,255,255,.1) 0%, transparent 100%),
-            radial-gradient(1px 1px at 93% 30%, rgba(255,255,255,.1) 0%, transparent 100%);
-          filter: blur(.4px);
-          opacity:.7;
+            radial-gradient(1px 1px at 15% 20%, rgba(255,255,255,.2) 0%, transparent 100%),
+            radial-gradient(1px 1px at 72% 12%, rgba(255,255,255,.16) 0%, transparent 100%),
+            radial-gradient(1.5px 1.5px at 42% 35%, rgba(255,255,255,.13) 0%, transparent 100%),
+            radial-gradient(1px 1px at 88% 52%, rgba(255,255,255,.11) 0%, transparent 100%),
+            radial-gradient(1px 1px at 28% 65%, rgba(255,255,255,.1) 0%, transparent 100%),
+            radial-gradient(1px 1px at 58% 78%, rgba(255,255,255,.09) 0%, transparent 100%),
+            radial-gradient(1.5px 1.5px at 6%  42%, rgba(255,255,255,.12) 0%, transparent 100%),
+            radial-gradient(1px 1px at 95% 28%, rgba(255,255,255,.1) 0%, transparent 100%),
+            radial-gradient(1px 1px at 50% 88%, rgba(255,255,255,.07) 0%, transparent 100%),
+            radial-gradient(1px 1px at 33% 8%,  rgba(255,255,255,.15) 0%, transparent 100%);
+          filter: blur(.3px); opacity:.65;
         }
 
-        /* human warmth — abstract soft blur */
+        /* cinematic grain */
+        .lp-grain {
+          position: absolute; inset: 0; pointer-events:none; z-index:3;
+          opacity: .028;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+          background-size: 180px 180px;
+          animation: grainAnim 0.4s steps(1) infinite;
+        }
+
+        /* human warmth — two-layer soft presence */
         .lp-human {
           position: absolute; pointer-events:none; z-index:1;
-          bottom: 0; left: 50%; transform: translateX(-50%);
-          width: 340px; height: 420px;
-          background: radial-gradient(ellipse 60% 80% at 50% 85%,
-            rgba(0,160,190,.07) 0%, rgba(201,168,76,.04) 40%, transparent 75%);
-          filter: blur(32px);
-          animation: pulseGlow 8s ease-in-out infinite;
+          bottom: -40px; left: 50%; transform: translateX(-50%);
+          width: 480px; height: 520px;
+        }
+        .lp-human::before {
+          content:''; position:absolute; inset:0;
+          background: radial-gradient(ellipse 55% 70% at 50% 80%,
+            rgba(0,150,180,.07) 0%, rgba(201,168,76,.04) 45%, transparent 72%);
+          filter: blur(40px);
+          animation: pulseWarm 9s ease-in-out infinite;
+        }
+        .lp-human::after {
+          content:''; position:absolute;
+          bottom:20px; left:50%; transform:translateX(-50%);
+          width:160px; height:280px;
+          background: radial-gradient(ellipse 50% 100% at 50% 90%,
+            rgba(201,168,76,.05) 0%, transparent 70%);
+          filter: blur(28px);
+          animation: pulseWarm 12s ease-in-out infinite reverse;
         }
 
-        /* subtle vertical path light */
+        /* living path with particles */
         .lp-path {
           position: absolute; pointer-events:none; z-index:2;
           left: 50%; transform: translateX(-50%);
-          top: 38%; width: 1.5px; height: 160px;
+          top: 36%; width: 1px; height: 180px;
           background: linear-gradient(180deg,
-            rgba(0,200,230,.0) 0%,
-            rgba(0,200,230,.35) 30%,
-            rgba(201,168,76,.25) 65%,
-            rgba(201,168,76,.0) 100%);
+            transparent 0%,
+            rgba(0,210,235,.5) 20%,
+            rgba(0,190,215,.4) 45%,
+            rgba(201,168,76,.3) 70%,
+            transparent 100%);
           border-radius: 1px;
-          animation: pathFlow 2s cubic-bezier(.16,1,.3,1) .5s forwards;
-          opacity: 0;
-          transform-origin: top center;
+          animation: pathReveal 1.6s cubic-bezier(.16,1,.3,1) .6s forwards, pathPulse 4s ease-in-out 2.2s infinite;
+          clip-path: inset(100% 0 0 0);
+        }
+        .lp-path::before {
+          content:''; position:absolute;
+          width:4px; height:4px; border-radius:50%;
+          background: rgba(0,210,235,.7);
+          left:50%; transform:translateX(-50%);
+          top:0;
+          animation: particleDrop 3s ease-in 2s infinite;
+          box-shadow: 0 0 6px rgba(0,210,235,.5);
+        }
+        .lp-path::after {
+          content:''; position:absolute;
+          width:3px; height:3px; border-radius:50%;
+          background: rgba(201,168,76,.65);
+          left:50%; transform:translateX(-50%);
+          top:30%;
+          animation: particleDrop 3s ease-in 3.4s infinite;
+          box-shadow: 0 0 5px rgba(201,168,76,.4);
         }
 
         /* ── NAV ── */
@@ -180,33 +226,37 @@ export default function LandingPage() {
         }
         .lp-nav-btn:hover { color:#fff; background:rgba(255,255,255,.13); border-color:rgba(255,255,255,.25); box-shadow:0 4px 16px rgba(0,0,0,.2); }
 
-        /* ── QUOTE ── */
+        /* ── QUOTE — glass whisper capsule ── */
         .lp-quote {
           position: relative; z-index: 10;
-          padding: 12px 20px 10px;
+          padding: 8px 20px 8px;
           flex-shrink: 0;
         }
         .lp-quote-box {
-          max-width: 580px; margin: 0 auto;
-          background: linear-gradient(135deg, rgba(201,168,76,.09) 0%, rgba(180,148,56,.05) 100%);
-          border: 1px solid rgba(201,168,76,.28);
-          border-radius: 18px;
-          padding: 14px 18px 13px;
-          position: relative;
-          box-shadow: 0 0 0 1px rgba(201,168,76,.06), 0 4px 24px rgba(201,168,76,.06), inset 0 1px 0 rgba(255,255,255,.06);
+          max-width: 560px; margin: 0 auto;
+          background: rgba(201,168,76,.045);
+          backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+          border: 1px solid rgba(201,168,76,.18);
+          border-radius: 999px;
+          padding: 10px 20px 10px 16px;
+          display: flex; align-items: center; gap: 10px;
+          box-shadow: 0 1px 0 rgba(255,255,255,.05) inset, 0 2px 16px rgba(201,168,76,.04);
         }
         .lp-quote-mark-sm {
-          font-size: 34px; line-height: 1;
-          background: linear-gradient(135deg, #D4A840, #F5D878, #C9941C);
+          font-size: 22px; line-height: 1; flex-shrink:0;
+          background: linear-gradient(135deg, #D4A840, #EDD870, #C9941C);
           -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-          font-family: Georgia, serif; float: right; margin-left: 8px; margin-top: -3px;
+          font-family: Georgia, serif;
         }
         .lp-quote-text-sm {
-          font-size: 12.5px; font-weight: 500; color: rgba(255,255,255,.8);
-          line-height: 1.75; margin-bottom: 9px;
+          font-size: 11.5px; font-weight: 400; color: rgba(255,255,255,.62);
+          line-height: 1.5; flex:1;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
+        @media(max-width:480px){ .lp-quote-text-sm { font-size:10.5px; } }
         .lp-quote-src {
-          font-size: 10.5px; font-weight: 700; letter-spacing: .09em;
+          font-size: 9.5px; font-weight: 700; letter-spacing: .1em;
+          flex-shrink:0;
           background: linear-gradient(90deg, #C9A84C, #E8C96A, #C9A84C);
           background-size: 200% auto;
           -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
@@ -255,8 +305,8 @@ export default function LandingPage() {
         }
         .lp-title {
           position: relative;
-          font-size: clamp(18px, 4.2vw, 27px); font-weight: 800; color: rgba(255,255,255,.92);
-          letter-spacing: -.022em; line-height: 1.35; margin-bottom: 0;
+          font-size: clamp(17px, 3.8vw, 25px); font-weight: 800; color: rgba(255,255,255,.9);
+          letter-spacing: -.02em; line-height: 1.4; margin-bottom: 0;
         }
         .lp-title-em {
           background: linear-gradient(90deg, #C8A040 0%, #EDD070 30%, #F8E898 55%, #EDD070 75%, #C8A040 100%);
@@ -294,12 +344,19 @@ export default function LandingPage() {
           width: 100%; height: 50px; border-radius: 14px;
           display: flex; align-items: center; justify-content: center; gap: 11px;
           font-family: 'Heebo',system-ui,sans-serif; font-size: 14.5px; font-weight: 700;
-          cursor: pointer; outline: none; position: relative;
-          background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.22);
-          color: #fff; transition: all .22s; letter-spacing: -.01em;
-          box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 4px 16px rgba(0,0,0,.2);
+          cursor: pointer; outline: none; position: relative; overflow:hidden;
+          background: linear-gradient(160deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.06) 100%);
+          border: 1px solid rgba(255,255,255,.2);
+          color: #fff; transition: all .28s cubic-bezier(.16,1,.3,1); letter-spacing: -.01em;
+          box-shadow: inset 0 1.5px 0 rgba(255,255,255,.15), 0 4px 20px rgba(0,0,0,.25), 0 0 0 1px rgba(0,180,220,.04);
         }
-        .lp-goog-btn:hover { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.36); transform:translateY(-2px); box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 8px 24px rgba(0,0,0,.3); }
+        .lp-goog-btn::before {
+          content:''; position:absolute; inset:0; border-radius:inherit;
+          background:linear-gradient(160deg,rgba(255,255,255,.08) 0%,transparent 60%);
+          opacity:0; transition:opacity .28s;
+        }
+        .lp-goog-btn:hover { transform:translateY(-2px); box-shadow: inset 0 1.5px 0 rgba(255,255,255,.18), 0 10px 30px rgba(0,0,0,.35), 0 0 24px rgba(0,190,220,.1); border-color:rgba(255,255,255,.32); }
+        .lp-goog-btn:hover::before { opacity:1; }
         .lp-goog-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
         .lp-goog-icon { background:rgba(255,255,255,.92); border-radius:8px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
         .lp-mosad-link {
@@ -407,6 +464,7 @@ export default function LandingPage() {
 
       <div className="lp-root">
         <div className="lp-bg" />
+        <div className="lp-grain" />
         <div className="lp-human" />
         <div className="lp-path" />
 
