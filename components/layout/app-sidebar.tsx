@@ -293,7 +293,7 @@ export default function AppSidebar({
                 letterSpacing: '-.01em',
                 margin: 0,
               }}>
-                שלום, {fullName.split(' ')[0]}
+                שלום, {fullName.split(' ')[0]} 👋
               </p>
             </div>
           )}
