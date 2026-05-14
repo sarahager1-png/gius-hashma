@@ -276,8 +276,6 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
     academic_level:       candidate?.academic_level ?? '',
     years_experience:     candidate?.years_experience?.toString() ?? '',
     seniority_years:      candidate?.seniority_years ?? '',
-    prev_employer:        candidate?.prev_employer ?? '',
-    prev_role:            candidate?.prev_role ?? '',
     past_projects:        candidate?.past_projects ?? '',
     technical_skills:     candidate?.technical_skills ?? '',
     interpersonal_skills: candidate?.interpersonal_skills ?? '',
@@ -286,6 +284,20 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
     personal_note:        candidate?.personal_note ?? '',
     whatsapp_preference:  candidate?.whatsapp_preference ?? true,
   })
+  type WorkEntry = { workplace: string; manager: string }
+  const initWork = (): WorkEntry[] => {
+    const raw = candidate?.experiences
+    if (Array.isArray(raw) && raw.length > 0) return raw as WorkEntry[]
+    return [{ workplace: '', manager: '' }]
+  }
+  const [workHistory, setWorkHistory] = useState<WorkEntry[]>(initWork)
+
+  function setWork(i: number, key: 'workplace' | 'manager', val: string) {
+    setWorkHistory(prev => prev.map((e, idx) => idx === i ? { ...e, [key]: val } : e))
+  }
+  function addWork() { if (workHistory.length < 4) setWorkHistory(p => [...p, { workplace: '', manager: '' }]) }
+  function removeWork(i: number) { setWorkHistory(p => p.filter((_, idx) => idx !== i)) }
+
   const [saving, setSaving] = useState(false)
   const [saved, setSaved]   = useState(false)
 
@@ -306,6 +318,7 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
           birth_year:       candForm.birth_year ? parseInt(candForm.birth_year) : null,
           graduation_year:  candForm.graduation_year ? parseInt(candForm.graduation_year) : null,
           years_experience: candForm.years_experience ? parseInt(candForm.years_experience) : null,
+          experiences:      workHistory.filter(e => e.workplace.trim()),
         },
       }),
     })
@@ -395,9 +408,34 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
       </AccSection>
 
       <AccSection id="experience" title="ניסיון" open={open.has('experience')} onToggle={() => toggle('experience')}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="מעסיק קודם">{inp(candForm.prev_employer, v => setC('prev_employer', v), { placeholder: 'שם בית הספר / מוסד' })}</Field>
-          <Field label="תפקיד קודם">{inp(candForm.prev_role, v => setC('prev_role', v), { placeholder: 'גננת, מורה א–ג' })}</Field>
+        <div className="space-y-3">
+          {workHistory.map((entry, i) => (
+            <div key={i} className="rounded-[12px] p-4 space-y-3" style={{ background: '#F8F7FF', border: '1px solid #EDE9FE' }}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[12px] font-bold" style={{ color: 'var(--purple)' }}>מקום עבודה {i + 1}</span>
+                {workHistory.length > 1 && (
+                  <button type="button" onClick={() => removeWork(i)}
+                    className="text-[12px] px-2 py-0.5 rounded-[6px]"
+                    style={{ color: '#B91C1C', background: '#FEE2E2' }}>הסרה</button>
+                )}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Field label="מקום עבודה">
+                  {inp(entry.workplace, v => setWork(i, 'workplace', v), { placeholder: 'שם בית הספר / מוסד' })}
+                </Field>
+                <Field label="שם מנהלת">
+                  {inp(entry.manager, v => setWork(i, 'manager', v), { placeholder: 'שם המנהלת / הממונה' })}
+                </Field>
+              </div>
+            </div>
+          ))}
+          {workHistory.length < 4 && (
+            <button type="button" onClick={addWork}
+              className="w-full h-10 rounded-[10px] text-[13px] font-semibold border border-dashed transition-all"
+              style={{ borderColor: 'var(--purple)', color: 'var(--purple)', background: '#fff' }}>
+              + הוספת מקום עבודה קודם
+            </button>
+          )}
         </div>
         <Field label="פרויקטים ותפקידים נוספים">
           <textarea value={candForm.past_projects} onChange={e => setC('past_projects', e.target.value)}
