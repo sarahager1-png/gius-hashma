@@ -216,12 +216,17 @@ export default function AppSidebar({
     'אדמין מערכת': 'ניהול מערכת',
   }
 
+  const homeHref =
+    role === 'מועמדת' ? '/profile' :
+    role === 'מוסד'   ? '/institution/jobs' :
+    '/dashboard'
+
   return (
     <aside className="dashboard-sidebar flex flex-col" dir="rtl">
 
       {/* ── Brand ── */}
       <div className="shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,.07)' }}>
-        <Link href="/dashboard" className="no-underline block" style={{ padding: '18px 16px 14px' }}>
+        <Link href={homeHref} className="no-underline block" style={{ padding: '18px 16px 14px' }}>
           {/* Logo */}
           <div className="flex items-center gap-3 mb-3">
             <div
