@@ -501,11 +501,9 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
       </AccSection>
 
       <AccSection id="expression" title="ביטוי אישי" open={open.has('expression')} onToggle={() => toggle('expression')}>
-        <Field label="ספרי לנו עליך">
-          <textarea value={candForm.bio} onChange={e => setC('bio', e.target.value)}
-            rows={4} className="w-full rounded-[10px] border px-3 py-2.5 text-[14px] outline-none resize-none"
-            style={inputStyle} placeholder="מה מניע אותך, מה את מביאה איתך, מה חשוב לך בעבודה..." />
-        </Field>
+        <textarea value={candForm.bio} onChange={e => setC('bio', e.target.value)}
+          rows={4} className="w-full rounded-[10px] border px-3 py-2.5 text-[14px] outline-none resize-none"
+          style={inputStyle} placeholder="הוסיפי ביטוי אישי — מה מניע אותך, מה את מביאה איתך, מה חשוב לך בעבודה..." />
         <Field label="הערה אישית">
           <textarea value={candForm.personal_note} onChange={e => setC('personal_note', e.target.value)}
             rows={2} className="w-full rounded-[10px] border px-3 py-2.5 text-[14px] outline-none resize-none"
