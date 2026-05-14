@@ -470,62 +470,119 @@ export default function LandingPage() {
         /* ── BOTTOM SHEET ── */
         .lp-overlay {
           position: fixed; inset: 0; z-index: 40;
-          background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
+          background: rgba(0,0,0,.62); backdrop-filter: blur(6px);
           animation: fadeIn .2s ease;
           display: flex; align-items: flex-end;
         }
         .lp-sheet {
-          width: 100%; max-height: 72svh;
-          background: #0D1A28;
-          border-top: 1px solid rgba(255,255,255,.12);
-          border-radius: 24px 24px 0 0;
-          padding: 20px 20px 32px;
+          width: 100%; max-height: 74svh;
+          background:
+            radial-gradient(ellipse 100% 28% at 50% 0%, rgba(0,175,215,.07) 0%, transparent 55%),
+            linear-gradient(180deg, #091420 0%, #060F1A 100%);
+          border-top: 1px solid rgba(0,180,220,.1);
+          border-radius: 28px 28px 0 0;
+          padding: 18px 20px 36px;
           overflow-y: auto;
-          animation: slideUp .28s cubic-bezier(.16,1,.3,1);
+          animation: slideUp .32s cubic-bezier(.16,1,.3,1);
+          box-shadow: 0 -1px 0 rgba(0,210,240,.06) inset, 0 -50px 100px rgba(0,0,0,.5);
         }
         .lp-sheet-handle {
-          width: 36px; height: 4px; border-radius: 2px;
-          background: rgba(255,255,255,.18); margin: 0 auto 18px;
+          width: 32px; height: 3px; border-radius: 2px;
+          background: rgba(255,255,255,.1); margin: 0 auto 20px;
         }
         .lp-sheet-title {
-          font-size: 18px; font-weight: 900; color: #fff; margin-bottom: 4px;
+          font-size: 20px; font-weight: 900; color: #fff; margin-bottom: 4px;
+          letter-spacing: -.025em;
           display: flex; align-items: center; justify-content: space-between;
         }
-        .lp-sheet-sub { font-size: 13px; color: rgba(255,255,255,.4); margin-bottom: 24px; line-height: 1.5; }
+        .lp-sheet-sub {
+          font-size: 12.5px; color: rgba(255,255,255,.32);
+          margin-bottom: 22px; line-height: 1.5; letter-spacing: .01em;
+        }
+        .lp-sheet-close {
+          background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
+          border-radius: 10px; color: rgba(255,255,255,.45); cursor: pointer;
+          width: 32px; height: 32px;
+          display: flex; align-items: center; justify-content: center;
+          transition: all .2s; flex-shrink: 0;
+        }
+        .lp-sheet-close:hover { background: rgba(255,255,255,.13); color: rgba(255,255,255,.85); border-color: rgba(255,255,255,.2); }
 
-        /* Journey in sheet */
-        .lp-steps { display: flex; flex-direction: column; gap: 12px; }
+        /* Journey — connected progression path */
+        .lp-steps {
+          display: flex; flex-direction: column; gap: 8px;
+          position: relative;
+        }
+        .lp-steps::before {
+          content: '';
+          position: absolute;
+          top: 34px; bottom: 34px;
+          right: 34px;
+          width: 1px;
+          background: linear-gradient(180deg,
+            transparent 0%,
+            rgba(0,180,220,.2) 15%,
+            rgba(201,168,76,.14) 65%,
+            transparent 100%);
+          pointer-events: none; z-index: 0;
+        }
         .lp-step-row {
           display: flex; align-items: flex-start; gap: 14px;
-          padding: 14px 16px; border-radius: 14px;
-          background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07);
+          padding: 14px 16px; border-radius: 16px;
+          background: rgba(255,255,255,.035);
+          border: 1px solid rgba(255,255,255,.065);
+          position: relative; z-index: 1;
+          transition: background .25s, border-color .25s, box-shadow .25s;
+        }
+        .lp-step-row:hover {
+          background: rgba(255,255,255,.055);
+          border-color: rgba(255,255,255,.1);
+          box-shadow: 0 6px 24px rgba(0,0,0,.3), 0 0 0 1px rgba(0,180,220,.04);
         }
         .lp-step-num-sm {
           width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
           display: flex; align-items: center; justify-content: center;
           font-size: 12px; font-weight: 800;
         }
-        .lp-step-info-title { font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 2px; }
-        .lp-step-info-sub { font-size: 12px; color: rgba(255,255,255,.4); line-height: 1.4; }
+        .lp-step-info-title { font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 2px; letter-spacing: -.01em; }
+        .lp-step-info-sub { font-size: 12px; color: rgba(255,255,255,.38); line-height: 1.45; }
 
         /* Features in sheet */
         .lp-feat-grid-sm { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
         @media(min-width:480px){ .lp-feat-grid-sm { grid-template-columns: repeat(4,1fr); } }
         .lp-feat-sm {
-          background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07);
-          border-radius: 14px; padding: 14px 12px;
+          background: rgba(255,255,255,.035);
+          border: 1px solid rgba(255,255,255,.065);
+          border-radius: 16px; padding: 16px 14px;
+          transition: background .25s, border-color .25s, transform .25s, box-shadow .25s;
+          cursor: default;
         }
-        .lp-feat-sm-icon { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; }
-        .lp-feat-sm-title { font-size: 13px; font-weight: 800; color: #fff; margin-bottom: 3px; }
-        .lp-feat-sm-desc  { font-size: 11px; color: rgba(255,255,255,.4); line-height: 1.4; }
+        .lp-feat-sm:hover {
+          background: rgba(255,255,255,.06);
+          border-color: rgba(255,255,255,.1);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 28px rgba(0,0,0,.32), 0 0 0 1px rgba(0,180,220,.04);
+        }
+        .lp-feat-sm-icon { width:36px; height:36px; border-radius:11px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
+        .lp-feat-sm-title { font-size: 13px; font-weight: 800; color: #fff; margin-bottom: 3px; letter-spacing: -.01em; }
+        .lp-feat-sm-desc  { font-size: 11px; color: rgba(255,255,255,.38); line-height: 1.45; }
 
-        /* Network pills in sheet */
-        .lp-net-pills { display: flex; flex-wrap: wrap; gap: 10px; }
+        /* Network grid in sheet */
+        .lp-net-pills { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .lp-net-pill {
-          display: flex; align-items: center; gap: 7px;
-          background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
-          border-radius: 999px; padding: 8px 16px;
-          font-size: 13px; font-weight: 600; color: rgba(255,255,255,.7);
+          display: flex; align-items: center; gap: 9px;
+          background: rgba(255,255,255,.04);
+          border: 1px solid rgba(255,255,255,.08);
+          border-radius: 14px; padding: 14px 16px;
+          font-size: 13px; font-weight: 600; color: rgba(255,255,255,.6);
+          transition: background .22s, color .22s, transform .22s, box-shadow .22s;
+          cursor: default;
+        }
+        .lp-net-pill:hover {
+          background: rgba(255,255,255,.07);
+          color: rgba(255,255,255,.85);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(0,0,0,.28);
         }
         .lp-net-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink:0; }
 
@@ -630,13 +687,13 @@ export default function LandingPage() {
                 <>
                   <div className="lp-sheet-title">
                     <span>המסלול</span>
-                    <button onClick={() => setPanel(null)} style={{ background:'none', border:'none', color:'rgba(255,255,255,.4)', cursor:'pointer' }}><X size={18}/></button>
+                    <button onClick={() => setPanel(null)} className="lp-sheet-close"><X size={16}/></button>
                   </div>
                   <div className="lp-sheet-sub">חמישה צעדים — מהרשמה ועד השמה</div>
                   <div className="lp-steps">
                     {JOURNEY.map(s => (
                       <div key={s.n} className="lp-step-row">
-                        <div className="lp-step-num-sm" style={{ background:`${s.color}18`, border:`1.5px solid ${s.color}44`, color: s.color }}>{s.n}</div>
+                        <div className="lp-step-num-sm" style={{ background:`${s.color}18`, border:`1.5px solid ${s.color}44`, color: s.color, boxShadow:`0 0 16px ${s.color}28, inset 0 0 0 1px ${s.color}12` }}>{s.n}</div>
                         <div>
                           <div className="lp-step-info-title">{s.title}</div>
                           <div className="lp-step-info-sub">{s.sub}</div>
@@ -651,14 +708,14 @@ export default function LandingPage() {
                 <>
                   <div className="lp-sheet-title">
                     <span>יכולות המערכת</span>
-                    <button onClick={() => setPanel(null)} style={{ background:'none', border:'none', color:'rgba(255,255,255,.4)', cursor:'pointer' }}><X size={18}/></button>
+                    <button onClick={() => setPanel(null)} className="lp-sheet-close"><X size={16}/></button>
                   </div>
                   <div className="lp-sheet-sub">כלים שנבנו עבור שליחות חינוכית</div>
                   <div className="lp-feat-grid-sm">
                     {FEATURES.map(({ icon: Icon, title, desc, c }) => (
                       <div key={title} className="lp-feat-sm">
-                        <div className="lp-feat-sm-icon" style={{ background:`${c}18` }}>
-                          <Icon size={16} color={c} />
+                        <div className="lp-feat-sm-icon" style={{ background:`${c}18`, boxShadow:`0 0 14px ${c}22, inset 0 0 0 1px ${c}18` }}>
+                          <Icon size={17} color={c} style={{ filter:`drop-shadow(0 0 4px ${c}99)` }} />
                         </div>
                         <div className="lp-feat-sm-title">{title}</div>
                         <div className="lp-feat-sm-desc">{desc}</div>
@@ -672,14 +729,14 @@ export default function LandingPage() {
                 <>
                   <div className="lp-sheet-title">
                     <span>הרשת שמאחורינו</span>
-                    <button onClick={() => setPanel(null)} style={{ background:'none', border:'none', color:'rgba(255,255,255,.4)', cursor:'pointer' }}><X size={18}/></button>
+                    <button onClick={() => setPanel(null)} className="lp-sheet-close"><X size={16}/></button>
                   </div>
                   <div className="lp-sheet-sub">פלטפורמה לרשת חינוך חב״ד — מוסדות, שלוחים ומועמדות</div>
                   <div className="lp-net-pills">
                     {NETWORK.map(({ label, dot, icon: Icon }) => (
                       <div key={label} className="lp-net-pill">
-                        <span className="lp-net-dot" style={{ background: dot }} />
-                        <Icon size={13} color={dot} />
+                        <span className="lp-net-dot" style={{ background: dot, boxShadow:`0 0 8px ${dot}88` }} />
+                        <Icon size={13} color={dot} style={{ filter:`drop-shadow(0 0 3px ${dot}88)`, flexShrink:0 }} />
                         {label}
                       </div>
                     ))}
