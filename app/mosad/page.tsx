@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   Briefcase, Search, MessageCircle, CheckCircle,
   Calendar, ClipboardList, Bell, FileStack,
-  Building2, LogIn, Settings, GraduationCap,
+  Building2, LogIn, Settings, GraduationCap, ChevronDown,
 } from 'lucide-react'
 
 /* ─────────────────────────── data ─────────────────────────── */
@@ -58,9 +58,11 @@ const GoogleIcon = () => (
 
 /* ─────────────────────────── component ─────────────────────────── */
 export default function MosadLanding() {
-  const [pending, setPending] = useState(false)
-  const [err, setErr]         = useState('')
-  const [visible, setVisible] = useState(false)
+  const [pending, setPending]   = useState(false)
+  const [err, setErr]           = useState('')
+  const [visible, setVisible]   = useState(false)
+  const [openStep, setOpenStep] = useState<string | null>('01')
+  const [openAct,  setOpenAct]  = useState<string | null>(null)
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80)
@@ -286,43 +288,53 @@ export default function MosadLanding() {
           text-align:center; max-width:500px; margin:0 auto 52px;
         }
 
-        /* ── STEPS ── */
-        .mo-steps { display:flex; flex-direction:column; gap:14px; }
-        @media(min-width:640px) { .mo-steps { flex-direction:row; gap:12px; } }
-
-        .mo-step {
-          flex:1; display:flex; flex-direction:column; align-items:center;
-          gap:12px; text-align:center;
-          padding:24px 16px 20px;
-          background:rgba(255,255,255,.03);
-          border:1px solid rgba(255,255,255,.07);
-          border-radius:18px; backdrop-filter:blur(10px);
-          transition:all .3s;
+        /* ── ACCORDION ── */
+        .mo-acc { display:flex; flex-direction:column; gap:8px; max-width:600px; margin:0 auto; }
+        .mo-acc-item {
+          background:rgba(255,255,255,.04);
+          border:1px solid rgba(255,255,255,.08);
+          border-radius:16px; overflow:hidden;
+          backdrop-filter:blur(12px);
+          transition:border-color .25s, background .25s;
         }
-        .mo-step:hover { background:rgba(0,180,204,.06); border-color:rgba(0,180,204,.18); transform:translateY(-3px); }
-        .mo-step-num {
-          width:46px; height:46px; border-radius:50%;
+        .mo-acc-item.open {
+          border-color:rgba(0,180,204,.28);
+          background:rgba(0,180,204,.04);
+          box-shadow:0 4px 24px rgba(0,0,0,.2), 0 0 0 1px rgba(0,180,204,.06);
+        }
+        .mo-acc-trigger {
+          width:100%; display:flex; align-items:center; gap:14px;
+          padding:16px 18px; cursor:pointer; background:transparent;
+          border:none; font-family:'Heebo',system-ui,sans-serif;
+          text-align:right; transition:background .2s;
+        }
+        .mo-acc-trigger:hover { background:rgba(255,255,255,.03); }
+        .mo-acc-num {
+          width:38px; height:38px; border-radius:50%; flex-shrink:0;
           display:flex; align-items:center; justify-content:center;
-          font-size:13px; font-weight:800; letter-spacing:.04em;
-          flex-shrink:0; position:relative;
+          font-size:12px; font-weight:800; position:relative;
         }
-        .mo-step-glow { position:absolute; inset:0; border-radius:50%; animation:glow 4s ease-in-out infinite; }
-        .mo-step-title { font-size:14px; font-weight:800; color:#fff; line-height:1.2; }
-        .mo-step-sub   { font-size:11.5px; color:rgba(255,255,255,.42); line-height:1.5; }
-
-        /* ── ACTIONS GRID ── */
-        .mo-actions-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
-        @media(min-width:640px) { .mo-actions-grid { grid-template-columns:repeat(4,1fr); } }
-
-        .mo-action {
-          background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07);
-          border-radius:15px; padding:18px 15px;
-          backdrop-filter:blur(10px); transition:all .25s;
+        .mo-acc-icon-wrap {
+          width:38px; height:38px; border-radius:11px; flex-shrink:0;
+          display:flex; align-items:center; justify-content:center;
         }
-        .mo-action:hover { background:rgba(0,180,204,.06); border-color:rgba(0,180,204,.18); transform:translateY(-2px); }
-        .mo-action-icon { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
-        .mo-action-title { font-size:13px; font-weight:800; color:#fff; margin-bottom:4px; }
-        .mo-action-desc  { font-size:11px; color:rgba(255,255,255,.38); line-height:1.45; }
+        .mo-acc-label { flex:1; font-size:14px; font-weight:800; color:#fff; letter-spacing:-.01em; }
+        .mo-acc-sub-inline { font-size:11.5px; color:rgba(255,255,255,.38); font-weight:400; margin-top:2px; }
+        .mo-acc-chevron {
+          flex-shrink:0; color:rgba(255,255,255,.3); transition:transform .3s cubic-bezier(.16,1,.3,1), color .2s;
+        }
+        .mo-acc-item.open .mo-acc-chevron { transform:rotate(180deg); color:rgba(0,180,204,.8); }
+        .mo-acc-body {
+          overflow:hidden; max-height:0;
+          transition:max-height .35s cubic-bezier(.16,1,.3,1), padding .3s;
+          padding:0 18px;
+        }
+        .mo-acc-item.open .mo-acc-body { max-height:200px; padding:0 18px 16px; }
+        .mo-acc-body-inner {
+          border-top:1px solid rgba(255,255,255,.06);
+          padding-top:14px;
+          font-size:13px; color:rgba(255,255,255,.5); line-height:1.6;
+        }
 
         /* ── FLOW ── */
         .mo-flow-wrap {
@@ -486,19 +498,19 @@ export default function MosadLanding() {
               הנתונים שלכם כבר קיימים — תוך דקות תהיו בפנים ומוכנים לגייס
             </p>
 
-            <div className="mo-steps">
+            <div className="mo-acc">
               {STEPS.map(s => (
-                <div key={s.n} className="mo-step">
-                  <div className="mo-step-num" style={{
-                    background:`radial-gradient(circle, ${s.color}22 0%, ${s.color}0E 100%)`,
-                    border:`1.5px solid ${s.color}44`,
-                    boxShadow:`0 0 18px ${s.glow}`,
-                  }}>
-                    <div className="mo-step-glow" style={{ background:`radial-gradient(circle, ${s.glow} 0%, transparent 70%)` }} />
-                    <span style={{ color:s.color, fontSize:'13px', fontWeight:900, position:'relative', zIndex:1 }}>{s.n}</span>
+                <div key={s.n} className={`mo-acc-item${openStep === s.n ? ' open' : ''}`}>
+                  <button className="mo-acc-trigger" onClick={() => setOpenStep(openStep === s.n ? null : s.n)}>
+                    <div className="mo-acc-num" style={{ background:`${s.color}18`, border:`1.5px solid ${s.color}44`, color:s.color, boxShadow:`0 0 14px ${s.glow}` }}>{s.n}</div>
+                    <div style={{ flex:1, textAlign:'right' }}>
+                      <div className="mo-acc-label">{s.title}</div>
+                    </div>
+                    <ChevronDown size={16} className="mo-acc-chevron" />
+                  </button>
+                  <div className="mo-acc-body">
+                    <div className="mo-acc-body-inner">{s.sub}</div>
                   </div>
-                  <div className="mo-step-title">{s.title}</div>
-                  <div className="mo-step-sub">{s.sub}</div>
                 </div>
               ))}
             </div>
@@ -514,14 +526,21 @@ export default function MosadLanding() {
               עדכנו את פרטי המוסד, פרסמו משרות ונהלו מועמדויות — הכל ממסך אחד
             </p>
 
-            <div className="mo-actions-grid">
+            <div className="mo-acc">
               {ACTIONS.map(({ icon: Icon, title, desc, c, bg }) => (
-                <div key={title} className="mo-action">
-                  <div className="mo-action-icon" style={{ background:bg }}>
-                    <Icon size={16} color={c} />
+                <div key={title} className={`mo-acc-item${openAct === title ? ' open' : ''}`}>
+                  <button className="mo-acc-trigger" onClick={() => setOpenAct(openAct === title ? null : title)}>
+                    <div className="mo-acc-icon-wrap" style={{ background:bg }}>
+                      <Icon size={16} color={c} />
+                    </div>
+                    <div style={{ flex:1, textAlign:'right' }}>
+                      <div className="mo-acc-label">{title}</div>
+                    </div>
+                    <ChevronDown size={16} className="mo-acc-chevron" />
+                  </button>
+                  <div className="mo-acc-body">
+                    <div className="mo-acc-body-inner">{desc}</div>
                   </div>
-                  <div className="mo-action-title">{title}</div>
-                  <div className="mo-action-desc">{desc}</div>
                 </div>
               ))}
             </div>
