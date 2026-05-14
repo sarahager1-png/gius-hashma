@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   Briefcase, Search, MessageCircle, CheckCircle,
   Calendar, ClipboardList, Bell, FileStack,
-  Building2, LogIn, Settings, GraduationCap,
+  Building2, LogIn, Settings, GraduationCap, ChevronDown,
 } from 'lucide-react'
 
 /* ─────────────────────────── data ─────────────────────────── */
@@ -61,6 +61,8 @@ export default function MosadLanding() {
   const [pending, setPending]   = useState(false)
   const [err, setErr]           = useState('')
   const [visible, setVisible]   = useState(false)
+  const [openStep, setOpenStep] = useState<string | null>('01')
+  const [openAct,  setOpenAct]  = useState<string | null>(null)
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80)
@@ -99,7 +101,6 @@ export default function MosadLanding() {
 
         /* ── HERO ── */
         .mo-hero {
-          min-height:100svh;
           position:relative;
           display:flex;
           flex-direction:column;
@@ -153,10 +154,10 @@ export default function MosadLanding() {
 
         /* ── HERO BODY ── */
         .mo-hero-body {
-          flex:1; position:relative; z-index:10;
+          position:relative; z-index:10;
           display:flex; flex-direction:column;
           align-items:center; justify-content:center;
-          padding:48px 24px 64px;
+          padding:32px 24px 48px;
           text-align:center;
           max-width:740px; margin:0 auto; width:100%;
         }
@@ -286,46 +287,56 @@ export default function MosadLanding() {
           text-align:center; max-width:500px; margin:0 auto 52px;
         }
 
-        /* ── STEPS LIST ── */
-        .mo-steps-list { display:flex; flex-direction:column; gap:10px; max-width:560px; margin:0 auto; }
-        .mo-step-row {
-          display:flex; align-items:flex-start; gap:18px;
-          padding:20px 24px;
+        /* ── ACCORDION ── */
+        .mo-acc { display:flex; flex-direction:column; gap:8px; max-width:580px; margin:0 auto; }
+        .mo-acc-item {
           background:rgba(255,255,255,.04);
-          border:1px solid rgba(255,255,255,.07);
-          border-radius:18px;
-          transition:background .25s, border-color .25s, transform .2s;
+          border:1px solid rgba(255,255,255,.08);
+          border-radius:18px; overflow:hidden;
+          transition:background .3s, border-color .3s, box-shadow .3s;
         }
-        .mo-step-row:hover { background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.12); transform:translateX(-2px); }
-        .mo-step-num-badge {
-          width:42px; height:42px; border-radius:50%; flex-shrink:0;
+        .mo-acc-item.open {
+          background:rgba(255,255,255,.11);
+          border-color:rgba(0,190,215,.38);
+          box-shadow:
+            0 8px 36px rgba(0,0,0,.18),
+            0 0 0 1px rgba(0,190,215,.1),
+            inset 0 1px 0 rgba(255,255,255,.18);
+          backdrop-filter:blur(20px);
+        }
+        .mo-acc-trigger {
+          width:100%; display:flex; align-items:center; gap:14px;
+          padding:16px 20px; cursor:pointer; background:transparent;
+          border:none; font-family:'Heebo',system-ui,sans-serif;
+          text-align:right; transition:background .2s;
+        }
+        .mo-acc-trigger:hover { background:rgba(255,255,255,.04); }
+        .mo-acc-num {
+          width:40px; height:40px; border-radius:50%; flex-shrink:0;
           display:flex; align-items:center; justify-content:center;
           font-size:13px; font-weight:800;
         }
-        .mo-step-title { font-size:15px; font-weight:800; color:#fff; margin-bottom:5px; letter-spacing:-.01em; }
-        .mo-step-desc  { font-size:13px; color:rgba(255,255,255,.46); line-height:1.6; }
-
-        /* ── ACTIONS GRID ── */
-        .mo-actions-grid2 {
-          display:grid; grid-template-columns:repeat(2,1fr); gap:10px;
-          max-width:640px; margin:0 auto;
-        }
-        @media(max-width:600px){ .mo-actions-grid2 { grid-template-columns:1fr; } }
-        .mo-action-card {
-          display:flex; align-items:flex-start; gap:14px;
-          padding:16px 18px;
-          background:rgba(255,255,255,.04);
-          border:1px solid rgba(255,255,255,.07);
-          border-radius:16px;
-          transition:background .25s, border-color .25s, transform .2s;
-        }
-        .mo-action-card:hover { background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.13); transform:translateY(-2px); }
-        .mo-action-icon-wrap {
-          width:36px; height:36px; border-radius:10px; flex-shrink:0;
+        .mo-acc-icon-wrap {
+          width:40px; height:40px; border-radius:12px; flex-shrink:0;
           display:flex; align-items:center; justify-content:center;
         }
-        .mo-action-title { font-size:13px; font-weight:800; color:#fff; margin-bottom:3px; letter-spacing:-.01em; }
-        .mo-action-desc  { font-size:11.5px; color:rgba(255,255,255,.42); line-height:1.5; }
+        .mo-acc-label { flex:1; font-size:14.5px; font-weight:800; color:#fff; letter-spacing:-.01em; }
+        .mo-acc-chevron {
+          flex-shrink:0; color:rgba(255,255,255,.28);
+          transition:transform .32s cubic-bezier(.16,1,.3,1), color .2s;
+        }
+        .mo-acc-item.open .mo-acc-chevron { transform:rotate(180deg); color:rgba(0,200,225,.8); }
+        .mo-acc-body {
+          overflow:hidden; max-height:0;
+          transition:max-height .38s cubic-bezier(.16,1,.3,1), padding .32s;
+          padding:0 20px;
+        }
+        .mo-acc-item.open .mo-acc-body { max-height:200px; padding:0 20px 18px; }
+        .mo-acc-body-inner {
+          border-top:1px solid rgba(255,255,255,.1);
+          padding-top:14px;
+          font-size:13.5px; color:rgba(255,255,255,.6); line-height:1.65;
+        }
 
         /* ── FLOW ── */
         .mo-flow-wrap {
@@ -489,13 +500,16 @@ export default function MosadLanding() {
               הנתונים שלכם כבר קיימים — תוך דקות תהיו בפנים ומוכנים לגייס
             </p>
 
-            <div className="mo-steps-list">
+            <div className="mo-acc">
               {STEPS.map(s => (
-                <div key={s.n} className="mo-step-row">
-                  <div className="mo-step-num-badge" style={{ background:`${s.color}18`, border:`1.5px solid ${s.color}44`, color:s.color, boxShadow:`0 0 14px ${s.glow}` }}>{s.n}</div>
-                  <div>
-                    <div className="mo-step-title">{s.title}</div>
-                    <div className="mo-step-desc">{s.sub}</div>
+                <div key={s.n} className={`mo-acc-item${openStep === s.n ? ' open' : ''}`}>
+                  <button className="mo-acc-trigger" onClick={() => setOpenStep(openStep === s.n ? null : s.n)}>
+                    <div className="mo-acc-num" style={{ background:`${s.color}1A`, border:`1.5px solid ${s.color}50`, color:s.color, boxShadow:`0 0 16px ${s.glow}` }}>{s.n}</div>
+                    <div className="mo-acc-label">{s.title}</div>
+                    <ChevronDown size={16} className="mo-acc-chevron" />
+                  </button>
+                  <div className="mo-acc-body">
+                    <div className="mo-acc-body-inner">{s.sub}</div>
                   </div>
                 </div>
               ))}
@@ -512,15 +526,18 @@ export default function MosadLanding() {
               עדכנו את פרטי המוסד, פרסמו משרות ונהלו מועמדויות — הכל ממסך אחד
             </p>
 
-            <div className="mo-actions-grid2">
+            <div className="mo-acc">
               {ACTIONS.map(({ icon: Icon, title, desc, c, bg }) => (
-                <div key={title} className="mo-action-card">
-                  <div className="mo-action-icon-wrap" style={{ background:bg }}>
-                    <Icon size={16} color={c} />
-                  </div>
-                  <div>
-                    <div className="mo-action-title">{title}</div>
-                    <div className="mo-action-desc">{desc}</div>
+                <div key={title} className={`mo-acc-item${openAct === title ? ' open' : ''}`}>
+                  <button className="mo-acc-trigger" onClick={() => setOpenAct(openAct === title ? null : title)}>
+                    <div className="mo-acc-icon-wrap" style={{ background:bg }}>
+                      <Icon size={16} color={c} />
+                    </div>
+                    <div className="mo-acc-label">{title}</div>
+                    <ChevronDown size={16} className="mo-acc-chevron" />
+                  </button>
+                  <div className="mo-acc-body">
+                    <div className="mo-acc-body-inner">{desc}</div>
                   </div>
                 </div>
               ))}
