@@ -330,7 +330,7 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
 
       <AccSection id="shlichut" title="שליחות" open={open.has('shlichut')} onToggle={() => toggle('shlichut')}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="מיקום שליחות">{inp(candForm.shlichut_location, v => setC('shlichut_location', v), { placeholder: 'עיר / מוסד' })}</Field>
+          <Field label="מיקום שליחות">{sel(candForm.shlichut_location, v => setC('shlichut_location', v), CITIES, 'בחרי עיר')}</Field>
           <Field label="שנות שליחות">{inp(candForm.shlichut_years, v => setC('shlichut_years', v), { placeholder: '2020–2022' })}</Field>
         </div>
         <Field label="יום לימוד שבועי">
