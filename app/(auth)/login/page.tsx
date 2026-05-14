@@ -25,7 +25,7 @@ function LoginPageInner() {
       if (!user) return
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
       if (!profile) return
-      const home = profile.role === 'מועמדת' ? '/jobs'
+      const home = profile.role === 'מועמדת' ? '/profile'
         : profile.role === 'מוסד' ? '/institution/jobs'
         : '/dashboard'
       router.replace(home)
