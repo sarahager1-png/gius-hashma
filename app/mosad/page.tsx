@@ -296,13 +296,15 @@ export default function MosadLanding() {
           transition:background .3s, border-color .3s, box-shadow .3s;
         }
         .mo-acc-item.open {
-          background:rgba(255,255,255,.11);
-          border-color:rgba(0,190,215,.38);
+          background:linear-gradient(160deg, rgba(255,255,255,.32) 0%, rgba(200,240,248,.22) 100%);
+          border-color:rgba(0,200,225,.55);
           box-shadow:
-            0 8px 36px rgba(0,0,0,.18),
-            0 0 0 1px rgba(0,190,215,.1),
-            inset 0 1px 0 rgba(255,255,255,.18);
-          backdrop-filter:blur(20px);
+            0 8px 40px rgba(0,0,0,.14),
+            0 0 0 1px rgba(0,200,225,.14),
+            inset 0 1.5px 0 rgba(255,255,255,.65),
+            inset 0 0 60px rgba(255,255,255,.06);
+          backdrop-filter:blur(28px) brightness(1.18);
+          -webkit-backdrop-filter:blur(28px) brightness(1.18);
         }
         .mo-acc-trigger {
           width:100%; display:flex; align-items:center; gap:14px;
@@ -333,9 +335,9 @@ export default function MosadLanding() {
         }
         .mo-acc-item.open .mo-acc-body { max-height:200px; padding:0 20px 18px; }
         .mo-acc-body-inner {
-          border-top:1px solid rgba(255,255,255,.1);
+          border-top:1px solid rgba(255,255,255,.25);
           padding-top:14px;
-          font-size:13.5px; color:rgba(255,255,255,.6); line-height:1.65;
+          font-size:13.5px; color:rgba(255,255,255,.82); line-height:1.65;
         }
 
         /* ── FLOW ── */
