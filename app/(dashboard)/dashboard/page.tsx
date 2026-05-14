@@ -15,6 +15,10 @@ export default async function DashboardPage() {
     .from('profiles').select('role, full_name').eq('id', user.id).single()
   if (!profile) redirect('/login')
 
+  /* ── non-admin roles go to their own home ── */
+  if (profile.role === 'מועמדת') redirect('/jobs')
+  if (profile.role === 'מוסד')   redirect('/institution/jobs')
+
   /* ── הנהלה ── */
   if (['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)) {
     return <DashboardClient fullName={profile.full_name} />
