@@ -481,7 +481,7 @@ export default function MosadLanding() {
         </div>
 
         {/* ══ STEPS ══ */}
-        <div id="steps" style={{ background:'rgba(255,255,255,.012)', borderTop:'1px solid rgba(255,255,255,.055)', borderBottom:'1px solid rgba(255,255,255,.055)' }}>
+        <div id="steps">
           <div className="mo-section">
             <div className="mo-section-label">תהליך הכניסה</div>
             <h2 className="mo-section-title">שלושה צעדים פשוטים</h2>
@@ -529,7 +529,7 @@ export default function MosadLanding() {
         </div>
 
         {/* ══ APPLICATION FLOW ══ */}
-        <div style={{ background:'rgba(255,255,255,.01)', borderTop:'1px solid rgba(255,255,255,.05)' }}>
+        <div>
           <div className="mo-section" style={{ paddingTop:'56px', paddingBottom:'56px' }}>
             <div className="mo-section-label">מחזור חיים של מועמדות</div>
             <h2 className="mo-section-title" style={{ fontSize:'clamp(22px,3.5vw,32px)', marginBottom:'8px' }}>איך נראה התהליך?</h2>
