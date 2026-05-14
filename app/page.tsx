@@ -258,16 +258,20 @@ export default function LandingPage() {
         .lp-logo { display:flex; align-items:center; gap:11px; text-decoration:none; }
         .lp-logo-box {
           position: relative;
-          width:44px; height:44px; background:rgba(255,255,255,.86); border-radius:12px;
+          width:44px; height:44px;
+          background: rgba(255,255,255,.07);
+          backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+          border-radius:12px;
           display:flex; align-items:center; justify-content:center;
-          box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 2px 12px rgba(0,0,0,.28);
-          padding:3px; flex-shrink:0;
+          border: 1px solid rgba(255,255,255,.1);
+          padding:2px; flex-shrink:0;
+          filter: drop-shadow(0 0 12px rgba(0,200,235,.3));
         }
         .lp-logo-box::before {
           content:'';
-          position:absolute; inset:-9px; border-radius:21px;
-          background: radial-gradient(ellipse, rgba(0,200,235,.12) 0%, transparent 65%);
-          filter: blur(10px);
+          position:absolute; inset:-12px; border-radius:24px;
+          background: radial-gradient(ellipse, rgba(0,200,235,.16) 0%, transparent 65%);
+          filter: blur(14px);
           animation: pulseGlow 5s ease-in-out infinite;
           pointer-events:none;
         }
@@ -338,24 +342,28 @@ export default function LandingPage() {
         }
         .lp-brand-logo {
           position: relative;
-          width: 64px; height: 64px; background: rgba(255,255,255,.9); border-radius: 18px;
+          width: 68px; height: 68px;
+          background: rgba(255,255,255,.08);
+          backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+          border-radius: 20px;
           display: flex; align-items: center; justify-content: center;
-          box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 8px 32px rgba(0,0,0,.4);
-          padding: 5px; margin-bottom: 2px;
+          border: 1px solid rgba(255,255,255,.12);
+          padding: 6px; margin-bottom: 2px;
+          filter: drop-shadow(0 0 20px rgba(0,200,235,.28)) drop-shadow(0 0 40px rgba(201,168,76,.12));
         }
         .lp-brand-logo::before {
           content:'';
-          position:absolute; inset:-14px; border-radius:32px;
-          background: radial-gradient(ellipse, rgba(0,190,225,.14) 0%, rgba(201,168,76,.07) 50%, transparent 70%);
-          filter: blur(18px);
+          position:absolute; inset:-18px; border-radius:38px;
+          background: radial-gradient(ellipse, rgba(0,190,225,.18) 0%, rgba(201,168,76,.08) 50%, transparent 70%);
+          filter: blur(20px);
           animation: pulseGlow 5s ease-in-out infinite;
           pointer-events:none; z-index:-1;
         }
         .lp-brand-logo::after {
           content:'';
-          position:absolute; inset:-4px; border-radius:22px;
-          border: 1px solid rgba(0,200,235,.1);
-          box-shadow: 0 0 20px rgba(0,190,220,.07);
+          position:absolute; inset:-5px; border-radius:25px;
+          border: 1px solid rgba(0,200,235,.13);
+          box-shadow: 0 0 24px rgba(0,190,220,.08);
           animation: pulseWarm 6s ease-in-out infinite;
           pointer-events:none;
         }
