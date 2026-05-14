@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Suspense } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
@@ -9,6 +9,7 @@ import { KeyRound, Sparkles, ClipboardCheck, HeartHandshake } from 'lucide-react
 
 function LoginPageInner() {
   const supabase = createClient()
+  const router   = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState('')
   const [mounted, setMounted] = useState(false)
@@ -19,7 +20,17 @@ function LoginPageInner() {
     const err = searchParams.get('error')
     if (err === 'oauth')    setError('שגיאה בהתחברות עם Google — בדקי שהחשבון מורשה')
     if (err === 'exchange') setError('שגיאה בקבלת הסשן — נסי שוב')
-  }, [searchParams])
+    // redirect already-logged-in users
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+      if (!profile) return
+      const home = profile.role === 'מועמדת' ? '/jobs'
+        : profile.role === 'מוסד' ? '/institution/jobs'
+        : '/dashboard'
+      router.replace(home)
+    })
+  }, [searchParams, router, supabase])
 
   async function signInWithGoogle() {
     setLoading(true); setError('')

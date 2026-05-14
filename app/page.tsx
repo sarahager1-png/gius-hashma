@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import {
   FileText, Search, Star, MessageCircle, Bell,
-  CheckCircle, ClipboardList, MapPin, BookOpen, Users, Building2, ChevronDown, X,
+  CheckCircle, ClipboardList, MapPin, BookOpen, Users, Building2, ChevronDown, X, ChevronLeft,
 } from 'lucide-react'
 
 /* ─────────────────────────── data ─────────────────────────── */
@@ -50,24 +51,24 @@ type Panel = 'journey' | 'features' | 'network' | null
 
 /* ─────────────────────────── component ─────────────────────────── */
 export default function LandingPage() {
-  const [pending, setPending]   = useState(false)
-  const [err, setErr]           = useState('')
-  const [visible, setVisible]   = useState(false)
-  const [panel, setPanel]       = useState<Panel>(null)
+  const router = useRouter()
+  const [visible, setVisible] = useState(false)
+  const [panel, setPanel]     = useState<Panel>(null)
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80)
-    return () => clearTimeout(t)
-  }, [])
-
-  async function signIn() {
-    setPending(true); setErr('')
-    const { error } = await createClient().auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    // redirect logged-in users to their home
+    createClient().auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return
+      const { data: profile } = await createClient().from('profiles').select('role').eq('id', user.id).single()
+      if (!profile) return
+      const home = profile.role === 'מועמדת' ? '/jobs'
+        : profile.role === 'מוסד' ? '/institution/jobs'
+        : '/dashboard'
+      router.replace(home)
     })
-    if (error) { setErr('שגיאה בכניסה עם Google'); setPending(false) }
-  }
+    return () => clearTimeout(t)
+  }, [router])
 
   const togglePanel = (id: Panel) => setPanel(p => p === id ? null : id)
 
@@ -424,25 +425,17 @@ export default function LandingPage() {
         }
         .lp-card-title { font-size: 14.5px; font-weight: 800; color: #fff; margin-bottom: 2px; }
         .lp-card-sub   { font-size: 11px; color: rgba(255,255,255,.55); margin-bottom: 15px; }
-        .lp-goog-btn {
+        .lp-enter-btn {
           width: 100%; height: 50px; border-radius: 14px;
-          display: flex; align-items: center; justify-content: center; gap: 11px;
-          font-family: 'Heebo',system-ui,sans-serif; font-size: 14.5px; font-weight: 700;
-          cursor: pointer; outline: none; position: relative; overflow:hidden;
-          background: linear-gradient(160deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.06) 100%);
-          border: 1px solid rgba(255,255,255,.2);
+          display: flex; align-items: center; justify-content: center; gap: 10px;
+          font-family: 'Heebo',system-ui,sans-serif; font-size: 15px; font-weight: 700;
+          text-decoration: none; position: relative; overflow:hidden;
+          background: linear-gradient(135deg, rgba(0,185,215,.38) 0%, rgba(0,155,190,.28) 100%);
+          border: 1px solid rgba(0,200,230,.38);
           color: #fff; transition: all .28s cubic-bezier(.16,1,.3,1); letter-spacing: -.01em;
-          box-shadow: inset 0 1.5px 0 rgba(255,255,255,.15), 0 4px 20px rgba(0,0,0,.25), 0 0 0 1px rgba(0,180,220,.04);
+          box-shadow: inset 0 1.5px 0 rgba(255,255,255,.18), 0 4px 20px rgba(0,0,0,.25), 0 0 28px rgba(0,195,225,.14);
         }
-        .lp-goog-btn::before {
-          content:''; position:absolute; inset:0; border-radius:inherit;
-          background:linear-gradient(160deg,rgba(255,255,255,.08) 0%,transparent 60%);
-          opacity:0; transition:opacity .28s;
-        }
-        .lp-goog-btn:hover { transform:translateY(-2px); box-shadow: inset 0 1.5px 0 rgba(255,255,255,.18), 0 10px 30px rgba(0,0,0,.35), 0 0 24px rgba(0,190,220,.1); border-color:rgba(255,255,255,.32); }
-        .lp-goog-btn:hover::before { opacity:1; }
-        .lp-goog-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
-        .lp-goog-icon { background:rgba(255,255,255,.92); border-radius:8px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .lp-enter-btn:hover { transform:translateY(-2px); box-shadow: inset 0 1.5px 0 rgba(255,255,255,.22), 0 10px 30px rgba(0,0,0,.35), 0 0 36px rgba(0,195,225,.22); border-color:rgba(0,215,245,.52); }
         .lp-mosad-link {
           display: flex; align-items: center; justify-content: center; gap: 6px;
           margin-top: 10px; padding: 9px;
@@ -450,7 +443,6 @@ export default function LandingPage() {
           text-decoration: none; border-radius: 10px; transition: all .2s;
         }
         .lp-mosad-link:hover { color: rgba(0,200,224,.95); background: rgba(0,180,204,.07); }
-        .lp-err { background:rgba(220,38,38,.14); border:1px solid rgba(220,38,38,.28); border-radius:8px; padding:8px 12px; font-size:12px; color:#FCA5A5; margin-top:8px; text-align:center; }
 
         /* ── ACCORDION BOTTOM BAR ── */
         .lp-acc-bar {
@@ -657,13 +649,12 @@ export default function LandingPage() {
           <p className="lp-tagline lp-fade lp-d2">לא עוד חיפוש עבודה — מציאת השביל שלך</p>
 
           <div className="lp-card lp-fade lp-d3">
-            <div className="lp-card-title">כניסה למערכת המועמדת</div>
+            <div className="lp-card-title">הצטרפי לרשת השמה של חב״ד</div>
             <div className="lp-card-sub">מועמדת חדשה? הפרופיל נפתח אוטומטית</div>
-            <button className="lp-goog-btn" onClick={signIn} disabled={pending}>
-              <div className="lp-goog-icon"><GoogleIcon /></div>
-              <span>{pending ? 'מחברת...' : 'כניסה / הרשמה עם Google'}</span>
-            </button>
-            {err && <div className="lp-err">{err}</div>}
+            <a href="/login" className="lp-enter-btn">
+              <span>כניסה / הרשמה</span>
+              <ChevronLeft size={17} />
+            </a>
             <a href="/mosad" className="lp-mosad-link">
               <Building2 size={13} />
               כניסה למערכת המוסד
