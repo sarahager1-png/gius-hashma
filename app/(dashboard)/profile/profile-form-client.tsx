@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { AVAILABILITY_STATUSES, ACADEMIC_LEVELS, ACADEMIC_LEVELS_WITH_EXPERIENCE, DISTRICTS, SPECIALIZATIONS } from '@/lib/constants'
 import type { Profile, Candidate } from '@/lib/types'
-import { Upload, FileText, ExternalLink } from 'lucide-react'
 
 const MARITAL_STATUSES = ['רווקה', 'נשואה', 'גרושה', 'אלמנה']
 const HANDWRITING_FONTS = ['כתב ויצמן', 'כתב רש"י', 'כתב מודפס', 'אחר']
@@ -61,36 +60,21 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
     handwriting_font:    candidate?.handwriting_font ?? '',
     years_experience:    candidate?.years_experience?.toString() ?? '',
     seniority_years:     candidate?.seniority_years ?? '',
+    prev_employer:       candidate?.prev_employer ?? '',
+    prev_role:           candidate?.prev_role ?? '',
     past_projects:       candidate?.past_projects ?? '',
     technical_skills:    candidate?.technical_skills ?? '',
     interpersonal_skills:candidate?.interpersonal_skills ?? '',
+    special_skills:      candidate?.special_skills ?? '',
     bio:                 candidate?.bio ?? '',
     personal_note:       candidate?.personal_note ?? '',
-    cv_url:              candidate?.cv_url ?? '',
     whatsapp_preference: candidate?.whatsapp_preference ?? true,
   })
-  const [saving, setSaving]       = useState(false)
-  const [saved, setSaved]         = useState(false)
-  const [cvUploading, setCvUploading] = useState(false)
-  const [cvError, setCvError]     = useState('')
-  const cvInputRef = useRef<HTMLInputElement>(null)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved]   = useState(false)
 
   function setP(k: string, v: string) { setProfileForm(f => ({ ...f, [k]: v })) }
   function setC(k: string, v: string | boolean) { setCandForm(f => ({ ...f, [k]: v })) }
-
-  async function handleCvUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setCvUploading(true); setCvError('')
-    const fd = new FormData()
-    fd.append('file', file)
-    const res = await fetch('/api/candidates/cv-upload', { method: 'POST', body: fd })
-    const json = await res.json()
-    if (res.ok) setC('cv_url', json.url)
-    else setCvError(json.error ?? 'שגיאה בהעלאה')
-    setCvUploading(false)
-    if (cvInputRef.current) cvInputRef.current.value = ''
-  }
 
   const showExperience = ACADEMIC_LEVELS_WITH_EXPERIENCE.includes(candForm.academic_level as never)
 
@@ -236,8 +220,16 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
       {/* ── ניסיון ── */}
       <section>
         <SectionTitle title="ניסיון ופרויקטים" />
-        <div className="grid grid-cols-1 gap-4">
-          <Field label="פרויקטים ותפקידים קודמים">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field label="מעסיק קודם">
+            {inp(candForm.prev_employer, v => setC('prev_employer', v), { placeholder: 'שם בית הספר / מוסד' })}
+          </Field>
+          <Field label="תפקיד קודם">
+            {inp(candForm.prev_role, v => setC('prev_role', v), { placeholder: 'למשל: גננת, מורה לכיתות א-ג' })}
+          </Field>
+        </div>
+        <div className="grid grid-cols-1 gap-4 mt-4">
+          <Field label="פרויקטים ותפקידים נוספים">
             <textarea
               value={candForm.past_projects}
               onChange={e => setC('past_projects', e.target.value)}
@@ -274,6 +266,16 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
               placeholder="למשל: יכולת הכלה, עבודת צוות, יוזמה..."
             />
           </Field>
+          <Field label="כישורים מיוחדים">
+            <textarea
+              value={candForm.special_skills}
+              onChange={e => setC('special_skills', e.target.value)}
+              rows={2}
+              className="w-full rounded-[10px] border px-3 py-2.5 text-[14px] outline-none resize-none"
+              style={inputStyle}
+              placeholder="למשל: ניגון בכלי, ספורט, אמנות..."
+            />
+          </Field>
         </div>
       </section>
 
@@ -299,34 +301,6 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
               style={inputStyle}
               placeholder="מידע נוסף שתרצי לשתף..."
             />
-          </Field>
-          <Field label="קורות חיים">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => cvInputRef.current?.click()}
-                  disabled={cvUploading}
-                  className="flex items-center gap-2 h-9 px-4 rounded-[10px] text-[13px] font-semibold border transition-all"
-                  style={{ borderColor: 'var(--line)', color: 'var(--ink-2)', background: '#fff' }}>
-                  <Upload size={14} />
-                  {cvUploading ? 'מעלה...' : 'העלאת קובץ (PDF / Word)'}
-                </button>
-                {candForm.cv_url && (
-                  <a href={candForm.cv_url} target="_blank" rel="noreferrer"
-                    className="flex items-center gap-1.5 h-9 px-3 rounded-[10px] text-[13px] font-semibold no-underline"
-                    style={{ background: 'var(--purple-050)', color: 'var(--purple)' }}>
-                    <FileText size={13} />צפייה <ExternalLink size={11} />
-                  </a>
-                )}
-                <input ref={cvInputRef} type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={handleCvUpload} />
-              </div>
-              {cvError && <p className="text-[12px] font-semibold" style={{ color: 'var(--red)' }}>{cvError}</p>}
-              <div>
-                <p className="text-[11px] mb-1" style={{ color: 'var(--ink-4)' }}>או הדביקי קישור ישיר:</p>
-                {inp(candForm.cv_url, v => setC('cv_url', v), { dir: 'ltr', placeholder: 'https://' })}
-              </div>
-            </div>
           </Field>
         </div>
       </section>

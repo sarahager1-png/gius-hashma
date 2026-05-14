@@ -56,12 +56,13 @@ export async function PATCH(request: Request) {
   if (candidate) {
     const ALLOWED = [
       'city', 'college', 'graduation_year', 'specialization', 'academic_level',
-      'availability_status', 'bio', 'cv_url', 'district', 'address', 'birth_year',
+      'availability_status', 'bio', 'district', 'address', 'birth_year',
       'marital_status', 'maiden_name', 'seniority_years', 'handwriting_font',
-      'technical_skills', 'interpersonal_skills', 'experiences', 'practical_work',
+      'technical_skills', 'interpersonal_skills', 'special_skills',
+      'experiences', 'practical_work',
       'shlichut_location', 'shlichut_years', 'past_projects', 'personal_note',
       'availability_from', 'availability_to', 'study_day',
-      'years_experience', 'whatsapp_preference',
+      'years_experience', 'prev_employer', 'prev_role', 'whatsapp_preference',
     ]
     const safe = Object.fromEntries(Object.entries(candidate).filter(([k]) => ALLOWED.includes(k)))
     if (Object.keys(safe).length > 0) {
