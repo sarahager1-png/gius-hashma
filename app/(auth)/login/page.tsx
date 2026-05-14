@@ -449,9 +449,9 @@ function LoginPageInner() {
 
             <div className="lg-features">
               {([
-                { Icon: Sparkles,       color: '#00B4CC', text: 'התאמה חכמה של משרות ומועמדות' },
-                { Icon: ClipboardCheck, color: '#C9A84C', text: 'ניהול הגשות ומעקב בזמן אמת'   },
-                { Icon: HeartHandshake, color: '#7B5AC4', text: 'ליווי אישי לאורך כל התהליך'   },
+                { Icon: Sparkles,       color: '#00B4CC', text: 'חיבור מועמדות למוסדות חינוך חב״ד בלבד' },
+                { Icon: ClipboardCheck, color: '#C9A84C', text: 'עדכוני התקדמות ישירות ב-WhatsApp'       },
+                { Icon: HeartHandshake, color: '#7B5AC4', text: 'התאמה לפי עיר, גיל, סוג מוסד ושליחות'  },
               ] as { Icon: React.ElementType; color: string; text: string }[]).map(({ Icon, color, text }) => (
                 <div key={text} className="lg-feat-row" style={{ '--accent': color } as React.CSSProperties}>
                   <div className="lg-feat-icon" style={{ background:`${color}18`, border:`1px solid ${color}30`, boxShadow:`0 0 12px ${color}22` }}>
