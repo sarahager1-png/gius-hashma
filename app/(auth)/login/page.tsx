@@ -226,23 +226,23 @@ function LoginPageInner() {
         .lg-form {
           flex:1; display:flex; flex-direction:column;
           position:relative; overflow:hidden;
-          background:#060F1A;
+          background:linear-gradient(160deg, #EEF3F9 0%, #E4EBF4 50%, #EBF0F7 100%);
         }
         .lg-form::before {
           content:''; position:absolute; top:-120px; right:-120px;
           width:420px; height:420px; border-radius:50%;
-          background:radial-gradient(circle, rgba(0,150,185,.07) 0%, transparent 70%);
+          background:radial-gradient(circle, rgba(0,150,185,.1) 0%, transparent 70%);
           pointer-events:none;
         }
         .lg-form::after {
           content:''; position:absolute; bottom:-80px; left:-80px;
           width:360px; height:360px; border-radius:50%;
-          background:radial-gradient(circle, rgba(201,168,76,.04) 0%, transparent 70%);
+          background:radial-gradient(circle, rgba(201,168,76,.07) 0%, transparent 70%);
           pointer-events:none;
         }
         .lg-form-grain {
           position:absolute; inset:0; pointer-events:none; z-index:1;
-          opacity:.022;
+          opacity:.007;
           background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
           background-size:180px 180px;
           animation:grainAnim .4s steps(1) infinite;
@@ -255,12 +255,12 @@ function LoginPageInner() {
           display:flex; align-items:center; gap:6px;
           padding:7px 14px; border-radius:10px;
           font-size:12px; font-weight:600;
-          color:rgba(255,255,255,.3);
-          background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);
+          color:rgba(26,46,66,.45);
+          background:rgba(26,46,66,.06); border:1px solid rgba(26,46,66,.1);
           text-decoration:none; transition:all .2s;
           font-family:'Heebo',system-ui,sans-serif;
         }
-        .lg-admin-btn:hover { background:rgba(255,255,255,.07); color:rgba(255,255,255,.6); border-color:rgba(255,255,255,.14); }
+        .lg-admin-btn:hover { background:rgba(26,46,66,.1); color:rgba(26,46,66,.75); border-color:rgba(26,46,66,.18); }
 
         /* Mobile brand */
         .lg-mobile-brand {
@@ -271,8 +271,8 @@ function LoginPageInner() {
         @media(max-width:1023px){ .lg-mobile-brand { display:flex; } }
         .lg-mobile-logo {
           width:64px; height:64px; border-radius:18px;
-          background:rgba(255,252,248,.93);
-          box-shadow:0 4px 20px rgba(0,0,0,.4), 0 0 32px rgba(0,175,215,.16);
+          background:rgba(255,252,248,.95);
+          box-shadow:0 4px 20px rgba(26,46,66,.15), 0 0 32px rgba(0,175,215,.12);
           display:flex; align-items:center; justify-content:center;
           margin-bottom:12px;
         }
@@ -284,14 +284,14 @@ function LoginPageInner() {
         }
         .lg-card {
           width:100%; max-width:400px;
-          background:rgba(255,255,255,.09);
-          backdrop-filter:blur(24px) saturate(140%); -webkit-backdrop-filter:blur(24px) saturate(140%);
-          border:1px solid rgba(255,255,255,.2);
+          background:rgba(7,18,32,.82);
+          backdrop-filter:blur(28px) saturate(140%); -webkit-backdrop-filter:blur(28px) saturate(140%);
+          border:1px solid rgba(255,255,255,.14);
           border-radius:24px; padding:40px 36px;
           box-shadow:
-            0 2px 0 rgba(255,255,255,.1) inset,
-            0 20px 60px rgba(0,0,0,.35),
-            0 0 0 1px rgba(0,180,220,.04);
+            0 2px 0 rgba(255,255,255,.07) inset,
+            0 24px 70px rgba(26,46,66,.25),
+            0 0 0 1px rgba(0,180,220,.05);
           animation:floatCard 6s ease-in-out infinite;
         }
 
@@ -316,27 +316,30 @@ function LoginPageInner() {
 
         /* Tabs */
         .lg-tabs {
-          display:flex; gap:0;
-          border:1px solid rgba(255,255,255,.1);
-          background:rgba(255,255,255,.04);
-          border-radius:13px; overflow:hidden;
+          display:flex; gap:8px;
+          background:transparent; border:none;
           margin-bottom:24px;
           animation:fadeUp .5s .1s cubic-bezier(.16,1,.3,1) both;
         }
         .lg-tab {
-          flex:1; padding:10px;
-          font-size:13px; font-weight:600;
-          color:rgba(255,255,255,.35);
-          background:transparent; border:none; cursor:pointer;
-          transition:all .2s; font-family:'Heebo',system-ui,sans-serif;
+          flex:1; padding:11px 10px;
+          font-size:13px; font-weight:700;
+          color:rgba(255,255,255,.38);
+          background:rgba(255,255,255,.07);
+          border:1px solid rgba(255,255,255,.1);
+          border-radius:13px; cursor:pointer;
+          transition:all .22s cubic-bezier(.16,1,.3,1);
+          font-family:'Heebo',system-ui,sans-serif;
+          backdrop-filter:blur(10px);
+          letter-spacing:-.01em;
         }
         .lg-tab.active {
-          background:rgba(0,175,210,.32); color:rgba(255,255,255,.92);
-          box-shadow:inset 0 0 0 1px rgba(0,195,225,.22);
+          color:#fff;
+          background:rgba(0,175,210,.3);
+          border-color:rgba(0,195,225,.4);
+          box-shadow:0 4px 18px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.12), 0 0 18px rgba(0,195,225,.14);
         }
-        .lg-tab:first-child { border-radius:12px 0 0 12px; }
-        .lg-tab:last-child  { border-radius:0 12px 12px 0; }
-        .lg-tab:hover:not(.active) { background:rgba(255,255,255,.05); color:rgba(255,255,255,.6); }
+        .lg-tab:hover:not(.active) { color:rgba(255,255,255,.72); background:rgba(255,255,255,.11); border-color:rgba(255,255,255,.18); transform:translateY(-1px); }
 
         /* Google button — matches landing page */
         .lg-goog-btn {
@@ -387,7 +390,7 @@ function LoginPageInner() {
 
         .lg-form-footer {
           position:relative; z-index:2; text-align:center; padding:0 0 20px;
-          font-size:10.5px; color:rgba(255,255,255,.12); letter-spacing:.04em;
+          font-size:10.5px; color:rgba(26,46,66,.3); letter-spacing:.04em;
         }
       `}</style>
 
@@ -414,11 +417,10 @@ function LoginPageInner() {
 
             <div className="lg-quote-card">
               <div className="lg-quote-mark">&ldquo;</div>
-              <div className="lg-quote-text">
-                דְּרָכֶיהָ דַרְכֵי נֹעַם<br/>
-                <em>וְכָל נְתִיבוֹתֶיהָ שָׁלוֹם</em>
+              <div className="lg-quote-text" style={{ fontSize:'13px', fontWeight:500, lineHeight:1.75 }}>
+                עבודה במוסד של כ&rdquo;ק מו&rdquo;ח אדמו&rdquo;ר זצוקללה&rdquo;ה נבג&rdquo;מ זי&rdquo;ע ובפרט במקצוע <em>החינוך על טהרת הקודש</em> – הרי זה צינור וכלי לקבלת ברכות השי&rdquo;ת בכלל.
               </div>
-              <div className="lg-quote-src">משלי ג׳, יז</div>
+              <div className="lg-quote-src">הרבי · התקשרות · עמוד 115</div>
             </div>
 
             <div className="lg-features">
@@ -456,10 +458,10 @@ function LoginPageInner() {
             <div className="lg-mobile-logo">
               <Image src="/logo-chabad.png" alt="השביל" width={44} height={44} style={{ objectFit:'contain' }} />
             </div>
-            <div style={{ fontSize:'22px', fontWeight:900, color:'rgba(255,255,255,.9)', letterSpacing:'-.03em', marginBottom:'4px' }}>
+            <div style={{ fontSize:'22px', fontWeight:900, color:'#1A2E42', letterSpacing:'-.03em', marginBottom:'4px' }}>
               הַשְּׁבִיל
             </div>
-            <div style={{ fontSize:'13px', color:'rgba(255,255,255,.38)' }}>
+            <div style={{ fontSize:'13px', color:'#5A7085' }}>
               מערכת חכמה לגיוס והשמה
             </div>
           </div>
