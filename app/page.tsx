@@ -621,19 +621,6 @@ export default function LandingPage() {
               ))}
             </div>
 
-            <div className="lp-stats-row">
-              {[
-                { val:'500+', lbl:'מועמדות רשומות', c:'#00B4CC' },
-                { val:'80+',  lbl:'מוסדות פעילים',  c:'#C9A84C' },
-                { val:'300+', lbl:'התאמות מוצלחות', c:'#7B5AC4' },
-                { val:'95%',  lbl:'שביעות רצון',    c:'#15803D' },
-              ].map(({ val, lbl, c }) => (
-                <div key={lbl} className="lp-stat-item">
-                  <span className="lp-stat-val" style={{ color: c }}>{val}</span>
-                  <span className="lp-stat-lbl">{lbl}</span>
-                </div>
-              ))}
-            </div>
 
           </div>
         </div>
