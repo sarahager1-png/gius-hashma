@@ -99,7 +99,7 @@ export default function LandingPage() {
         .lp-root {
           height: 100svh;
           overflow: hidden;
-          background: #060F1A;
+          background: #0D1E30;
           color: #fff;
           font-family: 'Heebo', system-ui, sans-serif;
           direction: rtl;
@@ -112,19 +112,19 @@ export default function LandingPage() {
         .lp-bg {
           position: absolute; inset: 0; pointer-events: none; z-index: 0;
           background:
-            radial-gradient(ellipse 160% 55% at 50% 0%,   rgba(0,195,225,.72)  0%, rgba(0,145,185,.28) 38%, transparent 60%),
-            radial-gradient(ellipse 80%  55% at 50% 42%,  rgba(201,168,76,.1)   0%, transparent 58%),
-            radial-gradient(ellipse 55%  38% at 92% 80%,  rgba(201,168,76,.12)  0%, transparent 55%),
-            radial-gradient(ellipse 42%  30% at 6%  62%,  rgba(91,58,171,.09)   0%, transparent 55%),
-            linear-gradient(180deg, #061520 0%, #050D18 100%);
+            radial-gradient(ellipse 160% 45% at 50% 0%,   rgba(0,175,210,.38)  0%, rgba(0,120,165,.14) 40%, transparent 62%),
+            radial-gradient(ellipse 70%  50% at 50% 44%,  rgba(201,168,76,.09)  0%, transparent 58%),
+            radial-gradient(ellipse 50%  35% at 90% 78%,  rgba(201,168,76,.11)  0%, transparent 55%),
+            radial-gradient(ellipse 38%  28% at 8%  62%,  rgba(91,58,171,.06)   0%, transparent 55%),
+            linear-gradient(180deg, #0E2030 0%, #0C1C2C 100%);
         }
-        /* warm light leak breathing */
+        /* warm light — champagne gold dominant */
         .lp-bg::before {
           content:'';
           position:absolute; inset:0;
           background:
-            linear-gradient(125deg, rgba(201,168,76,.1) 0%, transparent 35%),
-            linear-gradient(245deg, rgba(0,155,195,.08) 0%, transparent 30%);
+            linear-gradient(125deg, rgba(201,168,76,.14) 0%, transparent 40%),
+            linear-gradient(245deg, rgba(0,150,185,.05) 0%, transparent 30%);
           animation: lightLeak 14s ease-in-out infinite alternate;
         }
         /* star field */
@@ -148,7 +148,7 @@ export default function LandingPage() {
         /* cinematic grain */
         .lp-grain {
           position: absolute; inset: 0; pointer-events:none; z-index:3;
-          opacity: .038;
+          opacity: .016;
           background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
           background-size: 180px 180px;
           animation: grainAnim 0.4s steps(1) infinite;
@@ -249,11 +249,11 @@ export default function LandingPage() {
         .lp-nav {
           position: relative; z-index: 10;
           display: flex; align-items: center; justify-content: space-between;
-          padding: 16px 20px;
+          padding: 14px 20px;
           flex-shrink: 0;
-          background: linear-gradient(180deg, rgba(5,12,22,.76) 0%, rgba(6,15,26,.16) 100%);
-          backdrop-filter: blur(24px) saturate(120%); -webkit-backdrop-filter: blur(24px) saturate(120%);
-          border-bottom: 1px solid rgba(255,255,255,.04);
+          background: linear-gradient(180deg, rgba(10,24,38,.72) 0%, rgba(13,30,48,.08) 100%);
+          backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+          border-bottom: 1px solid rgba(255,255,255,.06);
         }
         .lp-logo { display:flex; align-items:center; gap:11px; text-decoration:none; }
         .lp-logo-box {
@@ -296,13 +296,13 @@ export default function LandingPage() {
         }
         .lp-quote-box {
           max-width: 560px; margin: 0 auto;
-          background: rgba(201,168,76,.03);
-          backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-          border: 1px solid rgba(201,168,76,.12);
+          background: rgba(201,168,76,.055);
+          backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+          border: 1px solid rgba(201,168,76,.22);
           border-radius: 16px;
           padding: 12px 16px 12px 14px;
           display: flex; align-items: flex-start; gap: 10px;
-          box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 0 24px rgba(201,168,76,.05);
+          box-shadow: 0 1px 0 rgba(255,255,255,.07) inset, 0 0 28px rgba(201,168,76,.09);
         }
         .lp-quote-mark-sm {
           font-size: 22px; line-height: 1.2; flex-shrink:0; margin-top: 1px;
@@ -312,7 +312,7 @@ export default function LandingPage() {
         }
         .lp-quote-content { flex: 1; }
         .lp-quote-text-sm {
-          font-size: 11px; font-weight: 400; color: rgba(255,255,255,.55);
+          font-size: 11px; font-weight: 400; color: rgba(255,255,255,.75);
           line-height: 1.65;
           white-space: normal;
         }
@@ -344,39 +344,37 @@ export default function LandingPage() {
         }
         .lp-brand-logo {
           position: relative;
-          width: 66px; height: 66px;
+          width: 64px; height: 64px;
           background: rgba(255,252,248,.93);
           border-radius: 18px;
           display: flex; align-items: center; justify-content: center;
           padding: 5px; margin-bottom: 2px;
           box-shadow:
-            inset 0 2px 0 rgba(255,255,255,.98),
-            inset 0 -1px 0 rgba(0,0,0,.05),
-            0 6px 28px rgba(0,0,0,.55),
-            0 0 50px rgba(0,185,225,.22),
-            0 0 90px rgba(0,185,225,.09);
+            inset 0 1.5px 0 rgba(255,255,255,.95),
+            0 4px 18px rgba(0,0,0,.35),
+            0 0 32px rgba(0,175,215,.16),
+            0 0 60px rgba(201,168,76,.08);
         }
         .lp-brand-logo::before {
           content:'';
-          position:absolute; inset:-22px; border-radius:40px;
-          background: radial-gradient(ellipse, rgba(0,190,225,.22) 0%, rgba(201,168,76,.09) 50%, transparent 70%);
-          filter: blur(22px);
-          animation: pulseGlow 5s ease-in-out infinite;
+          position:absolute; inset:-18px; border-radius:36px;
+          background: radial-gradient(ellipse, rgba(0,175,215,.14) 0%, rgba(201,168,76,.08) 55%, transparent 72%);
+          filter: blur(20px);
+          animation: pulseGlow 6s ease-in-out infinite;
           pointer-events:none; z-index:-1;
         }
         .lp-brand-logo::after {
           content:'';
-          position:absolute; inset:-5px; border-radius:23px;
-          border: 1px solid rgba(0,200,235,.18);
-          box-shadow: 0 0 30px rgba(0,190,220,.1);
-          animation: pulseWarm 6s ease-in-out infinite;
+          position:absolute; inset:-4px; border-radius:22px;
+          border: 1px solid rgba(201,168,76,.14);
+          animation: pulseWarm 7s ease-in-out infinite;
           pointer-events:none;
         }
         .lp-brand-name {
           font-size: 30px; font-weight: 900; color: #fff; letter-spacing: -.04em; line-height:1;
         }
         .lp-brand-sub {
-          font-size: 10.5px; font-weight: 500; color: rgba(255,255,255,.35); letter-spacing: .1em;
+          font-size: 10.5px; font-weight: 500; color: rgba(255,255,255,.5); letter-spacing: .1em;
         }
 
         /* headline glow backdrop */
@@ -414,19 +412,18 @@ export default function LandingPage() {
         /* CTA card */
         .lp-card {
           width: 100%; max-width: 368px;
-          background: rgba(255,255,255,.055);
-          backdrop-filter: blur(28px) saturate(160%); -webkit-backdrop-filter: blur(28px) saturate(160%);
-          border: 1px solid rgba(255,255,255,.14);
-          border-radius: 26px; padding: 22px 22px 16px;
+          background: rgba(255,255,255,.09);
+          backdrop-filter: blur(24px) saturate(140%); -webkit-backdrop-filter: blur(24px) saturate(140%);
+          border: 1px solid rgba(255,255,255,.2);
+          border-radius: 24px; padding: 22px 22px 16px;
           box-shadow:
-            0 2px 0 rgba(255,255,255,.07) inset,
-            0 24px 56px rgba(0,0,0,.5),
-            0 0 0 1px rgba(0,180,220,.06),
-            0 0 48px rgba(0,120,160,.08);
+            0 2px 0 rgba(255,255,255,.1) inset,
+            0 16px 40px rgba(0,0,0,.3),
+            0 0 0 1px rgba(0,180,220,.05);
           animation: floatCard 6s ease-in-out infinite;
         }
         .lp-card-title { font-size: 14.5px; font-weight: 800; color: #fff; margin-bottom: 2px; }
-        .lp-card-sub   { font-size: 11px; color: rgba(255,255,255,.38); margin-bottom: 15px; }
+        .lp-card-sub   { font-size: 11px; color: rgba(255,255,255,.55); margin-bottom: 15px; }
         .lp-goog-btn {
           width: 100%; height: 50px; border-radius: 14px;
           display: flex; align-items: center; justify-content: center; gap: 11px;
@@ -483,21 +480,19 @@ export default function LandingPage() {
         /* ── BOTTOM SHEET ── */
         .lp-overlay {
           position: fixed; inset: 0; z-index: 40;
-          background: rgba(0,0,0,.62); backdrop-filter: blur(6px);
+          background: rgba(0,0,0,.45); backdrop-filter: blur(4px);
           animation: fadeIn .2s ease;
           display: flex; align-items: flex-end;
         }
         .lp-sheet {
           width: 100%; max-height: 74svh;
-          background:
-            radial-gradient(ellipse 100% 28% at 50% 0%, rgba(0,175,215,.07) 0%, transparent 55%),
-            linear-gradient(180deg, #091420 0%, #060F1A 100%);
-          border-top: 1px solid rgba(0,180,220,.1);
-          border-radius: 28px 28px 0 0;
+          background: linear-gradient(180deg, #142840 0%, #102235 100%);
+          border-top: 1px solid rgba(255,255,255,.1);
+          border-radius: 26px 26px 0 0;
           padding: 18px 20px 36px;
           overflow-y: auto;
           animation: slideUp .32s cubic-bezier(.16,1,.3,1);
-          box-shadow: 0 -1px 0 rgba(0,210,240,.06) inset, 0 -50px 100px rgba(0,0,0,.5);
+          box-shadow: 0 -1px 0 rgba(255,255,255,.07) inset, 0 -30px 60px rgba(0,0,0,.3);
         }
         .lp-sheet-handle {
           width: 32px; height: 3px; border-radius: 2px;
@@ -509,7 +504,7 @@ export default function LandingPage() {
           display: flex; align-items: center; justify-content: space-between;
         }
         .lp-sheet-sub {
-          font-size: 12.5px; color: rgba(255,255,255,.32);
+          font-size: 12.5px; color: rgba(255,255,255,.5);
           margin-bottom: 22px; line-height: 1.5; letter-spacing: .01em;
         }
         .lp-sheet-close {
@@ -542,15 +537,15 @@ export default function LandingPage() {
         .lp-step-row {
           display: flex; align-items: flex-start; gap: 14px;
           padding: 14px 16px; border-radius: 16px;
-          background: rgba(255,255,255,.035);
-          border: 1px solid rgba(255,255,255,.065);
+          background: rgba(255,255,255,.06);
+          border: 1px solid rgba(255,255,255,.1);
           position: relative; z-index: 1;
           transition: background .25s, border-color .25s, box-shadow .25s;
         }
         .lp-step-row:hover {
-          background: rgba(255,255,255,.055);
-          border-color: rgba(255,255,255,.1);
-          box-shadow: 0 6px 24px rgba(0,0,0,.3), 0 0 0 1px rgba(0,180,220,.04);
+          background: rgba(255,255,255,.09);
+          border-color: rgba(255,255,255,.16);
+          box-shadow: 0 4px 16px rgba(0,0,0,.2);
         }
         .lp-step-num-sm {
           width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
@@ -558,36 +553,36 @@ export default function LandingPage() {
           font-size: 12px; font-weight: 800;
         }
         .lp-step-info-title { font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 2px; letter-spacing: -.01em; }
-        .lp-step-info-sub { font-size: 12px; color: rgba(255,255,255,.38); line-height: 1.45; }
+        .lp-step-info-sub { font-size: 12px; color: rgba(255,255,255,.58); line-height: 1.45; }
 
         /* Features in sheet */
         .lp-feat-grid-sm { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
         @media(min-width:480px){ .lp-feat-grid-sm { grid-template-columns: repeat(4,1fr); } }
         .lp-feat-sm {
-          background: rgba(255,255,255,.035);
-          border: 1px solid rgba(255,255,255,.065);
+          background: rgba(255,255,255,.06);
+          border: 1px solid rgba(255,255,255,.1);
           border-radius: 16px; padding: 16px 14px;
           transition: background .25s, border-color .25s, transform .25s, box-shadow .25s;
           cursor: default;
         }
         .lp-feat-sm:hover {
-          background: rgba(255,255,255,.06);
-          border-color: rgba(255,255,255,.1);
+          background: rgba(255,255,255,.1);
+          border-color: rgba(255,255,255,.18);
           transform: translateY(-2px);
-          box-shadow: 0 8px 28px rgba(0,0,0,.32), 0 0 0 1px rgba(0,180,220,.04);
+          box-shadow: 0 6px 20px rgba(0,0,0,.2);
         }
         .lp-feat-sm-icon { width:36px; height:36px; border-radius:11px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
         .lp-feat-sm-title { font-size: 13px; font-weight: 800; color: #fff; margin-bottom: 3px; letter-spacing: -.01em; }
-        .lp-feat-sm-desc  { font-size: 11px; color: rgba(255,255,255,.38); line-height: 1.45; }
+        .lp-feat-sm-desc  { font-size: 11px; color: rgba(255,255,255,.58); line-height: 1.45; }
 
         /* Network grid in sheet */
         .lp-net-pills { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .lp-net-pill {
           display: flex; align-items: center; gap: 9px;
-          background: rgba(255,255,255,.04);
-          border: 1px solid rgba(255,255,255,.08);
+          background: rgba(255,255,255,.07);
+          border: 1px solid rgba(255,255,255,.12);
           border-radius: 14px; padding: 14px 16px;
-          font-size: 13px; font-weight: 600; color: rgba(255,255,255,.6);
+          font-size: 13px; font-weight: 600; color: rgba(255,255,255,.75);
           transition: background .22s, color .22s, transform .22s, box-shadow .22s;
           cursor: default;
         }
