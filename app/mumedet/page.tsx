@@ -107,15 +107,10 @@ export default function MumedetLanding() {
         }
         .mm-stars { display: none; }
         .mm-orb { position:absolute; border-radius:50%; pointer-events:none; }
-        .mm-orb-1 { top:5%;   right:-10%; width:440px; height:440px; background:radial-gradient(circle, rgba(123,90,196,.38) 0%, transparent 65%); animation:floatA 12s ease-in-out infinite; }
-        .mm-orb-2 { bottom:8%; left:-8%;  width:360px; height:360px; background:radial-gradient(circle, rgba(0,180,204,.16)  0%, transparent 65%); animation:floatB 15s ease-in-out infinite; }
-        .mm-orb-3 { top:40%;  right:20%; width:200px; height:200px; background:radial-gradient(circle, rgba(201,168,76,.1)   0%, transparent 65%); animation:floatA 9s  ease-in-out infinite 2s; }
-        .mm-vline {
-          position:absolute; top:0; left:50%; transform:translateX(-50%);
-          width:1px; height:100%;
-          background:linear-gradient(180deg, transparent 0%, rgba(155,114,207,.2) 30%, rgba(155,114,207,.32) 55%, rgba(155,114,207,.1) 80%, transparent 100%);
-          pointer-events:none;
-        }
+        .mm-orb-1 { top:5%;   right:-10%; width:440px; height:440px; background:radial-gradient(circle, rgba(123,90,196,.16) 0%, transparent 65%); animation:floatA 16s ease-in-out infinite; }
+        .mm-orb-2 { bottom:8%; left:-8%;  width:360px; height:360px; background:radial-gradient(circle, rgba(0,180,204,.09)  0%, transparent 65%); animation:floatB 20s ease-in-out infinite; }
+        .mm-orb-3 { display:none; }
+        .mm-vline { display:none; }
 
         /* ── NAV ── */
         .mm-nav {
@@ -168,17 +163,16 @@ export default function MumedetLanding() {
         .mm-badge-dot { width:6px; height:6px; border-radius:50%; background:#C9A84C; flex-shrink:0; }
 
         .mm-hero-title {
-          font-size:clamp(34px,7vw,60px);
-          font-weight:900; line-height:1.08; letter-spacing:-.04em;
-          margin:0 0 18px; color:#fff;
-          text-shadow:0 2px 30px rgba(0,0,0,.4);
+          font-size:clamp(28px,5vw,44px);
+          font-weight:800; line-height:1.15; letter-spacing:-.025em;
+          margin:0 0 16px; color:#fff;
         }
         .mm-hero-em {
           background:linear-gradient(90deg, #C9A84C 0%, #F0D080 35%, #C9A84C 65%, #E8C870 100%);
           background-size:200% auto;
           -webkit-background-clip:text; background-clip:text;
           -webkit-text-fill-color:transparent;
-          animation:shimP 5s linear infinite;
+          animation:shimP 10s linear infinite;
           display:block;
         }
         .mm-hero-sub {
@@ -231,18 +225,19 @@ export default function MumedetLanding() {
         .mm-goog-btn {
           width:100%; height:54px; border-radius:16px;
           display:flex; align-items:center; justify-content:center; gap:12px;
-          font-family:'Heebo',system-ui,sans-serif; font-size:15px; font-weight:800;
-          cursor:pointer; border:none; outline:none; position:relative; overflow:hidden;
-          background:linear-gradient(135deg, #3D2480 0%, #5B3AAB 45%, #7B5AC4 100%);
-          background-size:200% 100%;
+          font-family:'Heebo',system-ui,sans-serif; font-size:15px; font-weight:700;
+          cursor:pointer; outline:none; position:relative; overflow:hidden;
+          background:rgba(255,255,255,.08);
+          backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+          border:1px solid rgba(255,255,255,.22);
           color:#fff;
-          box-shadow:0 8px 30px rgba(91,58,171,.52), 0 2px 8px rgba(0,0,0,.3);
+          box-shadow:0 4px 20px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.12);
           transition:all .25s; letter-spacing:-.01em;
         }
-        .mm-goog-btn:hover { background-position:100% 0; box-shadow:0 12px 40px rgba(91,58,171,.68), 0 0 0 1px rgba(255,255,255,.15); transform:translateY(-1px); }
+        .mm-goog-btn:hover { background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.35); box-shadow:0 6px 28px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.18); transform:translateY(-1px); }
         .mm-goog-btn:active { transform:scale(.98); }
-        .mm-goog-btn:disabled { opacity:.58; cursor:not-allowed; transform:none; }
-        .mm-goog-icon { background:rgba(255,255,255,.14); border-radius:9px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .mm-goog-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+        .mm-goog-icon { background:rgba(255,255,255,.92); border-radius:8px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 
         /* Trust bar */
         .mm-trust { display:flex; align-items:center; justify-content:center; gap:14px; margin-top:16px; flex-wrap:wrap; }
@@ -446,7 +441,7 @@ export default function MumedetLanding() {
               </div>
               <div>
                 <div className="mm-logo-name">הַשְּׁבִיל</div>
-                <div className="mm-logo-sub">רשת חינוך חב״ד</div>
+                <div className="mm-logo-sub">מערכת חכמה לגיוס והשמה</div>
               </div>
             </a>
             <div className="mm-nav-links">
@@ -475,14 +470,6 @@ export default function MumedetLanding() {
               פלטפורמת הגיוס הרשמית של רשת חינוך חב״ד —<br />
               פרופיל אחד, כל המשרות, עדכון בוואטסאפ
             </p>
-
-            <div className="mm-hero-micro mm-fadein mm-d2">
-              הרשמה חינמית<span>•</span>חיפוש מתקדם<span>•</span>התאמה אישית<span>•</span>עדכוני WhatsApp
-            </div>
-
-            <div className="mm-tagline mm-fadein mm-d3">
-              לא עוד חיפוש עבודה — מציאת השביל שלך
-            </div>
 
             {/* GLASS CTA CARD */}
             <div className="mm-card mm-fadein mm-d3">
@@ -675,7 +662,7 @@ export default function MumedetLanding() {
         {/* ══ FOOTER ══ */}
         <div className="mm-footer">
           <div className="mm-footer-left">
-            © 2026 הַשְּׁבִיל · רשת חינוך חב״ד · כל הזכויות שמורות
+            © 2026 הַשְּׁבִיל · עתודות לשליחות · כל הזכויות שמורות
           </div>
           <div className="mm-footer-links">
             <a href="/"       className="mm-footer-link">עמוד הבית</a>

@@ -114,15 +114,10 @@ export default function MosadLanding() {
             linear-gradient(170deg, #0E2230 0%, #122838 40%, #0E1E2C 75%, #0D1520 100%);
         }
         .mo-orb { position:absolute; border-radius:50%; pointer-events:none; }
-        .mo-orb-1 { top:5%;   right:-10%; width:440px; height:440px; background:radial-gradient(circle, rgba(0,180,204,.32) 0%, transparent 65%); animation:floatA 13s ease-in-out infinite; }
-        .mo-orb-2 { bottom:8%; left:-8%;  width:360px; height:360px; background:radial-gradient(circle, rgba(123,90,196,.14) 0%, transparent 65%); animation:floatB 15s ease-in-out infinite; }
-        .mo-orb-3 { top:42%;  right:22%; width:190px; height:190px; background:radial-gradient(circle, rgba(201,168,76,.1)  0%, transparent 65%); animation:floatA 10s ease-in-out infinite 2s; }
-        .mo-vline {
-          position:absolute; top:0; left:50%; transform:translateX(-50%);
-          width:1px; height:100%;
-          background:linear-gradient(180deg, transparent 0%, rgba(0,180,204,.22) 30%, rgba(0,180,204,.34) 55%, rgba(0,180,204,.1) 80%, transparent 100%);
-          pointer-events:none;
-        }
+        .mo-orb-1 { top:5%;   right:-10%; width:440px; height:440px; background:radial-gradient(circle, rgba(0,180,204,.14) 0%, transparent 65%); animation:floatA 16s ease-in-out infinite; }
+        .mo-orb-2 { bottom:8%; left:-8%;  width:360px; height:360px; background:radial-gradient(circle, rgba(123,90,196,.08) 0%, transparent 65%); animation:floatB 20s ease-in-out infinite; }
+        .mo-orb-3 { display:none; }
+        .mo-vline { display:none; }
 
         /* ── NAV ── */
         .mo-nav {
@@ -175,17 +170,16 @@ export default function MosadLanding() {
         .mo-badge-dot { width:6px; height:6px; border-radius:50%; background:#00B4CC; flex-shrink:0; }
 
         .mo-hero-title {
-          font-size:clamp(32px,6.5vw,56px);
-          font-weight:900; line-height:1.1; letter-spacing:-.04em;
-          margin:0 0 20px; color:#fff;
-          text-shadow:0 2px 30px rgba(0,0,0,.4);
+          font-size:clamp(26px,5vw,42px);
+          font-weight:800; line-height:1.15; letter-spacing:-.025em;
+          margin:0 0 18px; color:#fff;
         }
         .mo-hero-em {
           background:linear-gradient(90deg, #4ECFDB 0%, #9EF0F8 35%, #4ECFDB 65%, #8EE8F0 100%);
           background-size:200% auto;
           -webkit-background-clip:text; background-clip:text;
           -webkit-text-fill-color:transparent;
-          animation:shimT 5s linear infinite;
+          animation:shimT 10s linear infinite;
           display:block;
         }
         .mo-hero-sub {
@@ -245,18 +239,19 @@ export default function MosadLanding() {
         .mo-goog-btn {
           width:100%; height:54px; border-radius:16px;
           display:flex; align-items:center; justify-content:center; gap:12px;
-          font-family:'Heebo',system-ui,sans-serif; font-size:15px; font-weight:800;
-          cursor:pointer; border:none; outline:none; position:relative; overflow:hidden;
-          background:linear-gradient(135deg, #006B78 0%, #008C9C 45%, #00B4CC 100%);
-          background-size:200% 100%;
+          font-family:'Heebo',system-ui,sans-serif; font-size:15px; font-weight:700;
+          cursor:pointer; outline:none; position:relative; overflow:hidden;
+          background:rgba(255,255,255,.08);
+          backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+          border:1px solid rgba(255,255,255,.22);
           color:#fff;
-          box-shadow:0 8px 30px rgba(0,140,160,.5), 0 2px 8px rgba(0,0,0,.3);
+          box-shadow:0 4px 20px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.12);
           transition:all .25s; letter-spacing:-.01em;
         }
-        .mo-goog-btn:hover { background-position:100% 0; box-shadow:0 12px 40px rgba(0,140,160,.68), 0 0 0 1px rgba(255,255,255,.15); transform:translateY(-1px); }
+        .mo-goog-btn:hover { background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.35); box-shadow:0 6px 28px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.18); transform:translateY(-1px); }
         .mo-goog-btn:active { transform:scale(.98); }
-        .mo-goog-btn:disabled { opacity:.58; cursor:not-allowed; transform:none; }
-        .mo-goog-icon { background:rgba(255,255,255,.14); border-radius:9px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .mo-goog-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+        .mo-goog-icon { background:rgba(255,255,255,.92); border-radius:8px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 
         /* Trust */
         .mo-trust { display:flex; align-items:center; justify-content:center; gap:14px; margin-top:16px; flex-wrap:wrap; }
@@ -405,7 +400,7 @@ export default function MosadLanding() {
               </div>
               <div>
                 <div className="mo-logo-name">הַשְּׁבִיל</div>
-                <div className="mo-logo-sub">רשת חינוך חב״ד</div>
+                <div className="mo-logo-sub">מערכת חכמה לגיוס והשמה</div>
               </div>
             </a>
             <div className="mo-nav-links">
@@ -584,7 +579,7 @@ export default function MosadLanding() {
         {/* ══ FOOTER ══ */}
         <div className="mo-footer">
           <div className="mo-footer-left">
-            © 2026 הַשְּׁבִיל · רשת חינוך חב״ד · כל הזכויות שמורות
+            © 2026 הַשְּׁבִיל · עתודות לשליחות · כל הזכויות שמורות
           </div>
           <div className="mo-footer-links">
             <a href="/"        className="mo-footer-link">עמוד הבית</a>

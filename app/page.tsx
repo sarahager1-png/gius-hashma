@@ -102,16 +102,10 @@ export default function LandingPage() {
         .lp-stars { display: none; }
         /* Floating orbs */
         .lp-orb { position:absolute; border-radius:50%; pointer-events:none; }
-        .lp-orb-1 { top:8%; right:-12%; width:480px; height:480px; background:radial-gradient(circle, rgba(91,58,171,.32) 0%, transparent 65%); animation:float 12s ease-in-out infinite; }
-        .lp-orb-2 { bottom:10%; left:-10%; width:380px; height:380px; background:radial-gradient(circle, rgba(0,180,204,.2) 0%, transparent 65%); animation:float 15s ease-in-out infinite reverse; }
-        .lp-orb-3 { top:45%; right:25%; width:220px; height:220px; background:radial-gradient(circle, rgba(201,168,76,.12) 0%, transparent 65%); animation:float 9s ease-in-out infinite 2s; }
-        /* Gold vertical line */
-        .lp-vline {
-          position:absolute; top:0; left:50%; transform:translateX(-50%);
-          width:1px; height:100%;
-          background:linear-gradient(180deg, transparent 0%, rgba(201,168,76,.18) 30%, rgba(201,168,76,.28) 55%, rgba(201,168,76,.1) 80%, transparent 100%);
-          pointer-events:none;
-        }
+        .lp-orb-1 { top:8%; right:-12%; width:480px; height:480px; background:radial-gradient(circle, rgba(91,58,171,.16) 0%, transparent 65%); animation:float 16s ease-in-out infinite; }
+        .lp-orb-2 { bottom:10%; left:-10%; width:380px; height:380px; background:radial-gradient(circle, rgba(0,180,204,.1) 0%, transparent 65%); animation:float 20s ease-in-out infinite reverse; }
+        .lp-orb-3 { display:none; }
+        .lp-vline { display:none; }
 
         /* Atmospheric silhouettes */
         .lp-silhouettes {
@@ -171,17 +165,16 @@ export default function LandingPage() {
         .lp-badge-dot { width:6px; height:6px; border-radius:50%; background:#C9A84C; }
 
         .lp-hero-title {
-          font-size: clamp(34px, 7vw, 58px);
-          font-weight:900; line-height:1.1; letter-spacing:-.035em;
-          margin:0 0 18px; color:#fff;
-          text-shadow:0 2px 30px rgba(0,0,0,.4);
+          font-size: clamp(28px, 5vw, 44px);
+          font-weight:800; line-height:1.15; letter-spacing:-.025em;
+          margin:0 0 16px; color:#fff;
         }
         .lp-hero-title-em {
           background:linear-gradient(90deg, #D4B06A 0%, #F5E090 40%, #D4B06A 70%, #F0D080 100%);
           background-size:200% auto;
           -webkit-background-clip:text; background-clip:text;
           -webkit-text-fill-color:transparent;
-          animation:shimG 5s linear infinite;
+          animation:shimG 10s linear infinite;
           display:block;
         }
         .lp-hero-sub {
@@ -236,24 +229,26 @@ export default function LandingPage() {
         .lp-goog-btn {
           width:100%; height:54px; border-radius:16px;
           display:flex; align-items:center; justify-content:center; gap:12px;
-          font-family:'Heebo',system-ui,sans-serif; font-size:15px; font-weight:800;
-          cursor:pointer; border:none; outline:none; position:relative; overflow:hidden;
-          background:linear-gradient(135deg,#3D2480 0%,#5B3AAB 50%,#3D2480 100%);
-          background-size:200% 100%;
+          font-family:'Heebo',system-ui,sans-serif; font-size:15px; font-weight:700;
+          cursor:pointer; outline:none; position:relative; overflow:hidden;
+          background:rgba(255,255,255,.08);
+          backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+          border:1px solid rgba(255,255,255,.22);
           color:#fff;
-          box-shadow:0 8px 28px rgba(91,58,171,.5), 0 2px 8px rgba(0,0,0,.3);
+          box-shadow:0 4px 20px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.12);
           transition:all .25s; letter-spacing:-.01em;
         }
         .lp-goog-btn:hover {
-          background-position:100% 0;
-          box-shadow:0 10px 36px rgba(91,58,171,.65), 0 0 0 1px rgba(255,255,255,.15);
+          background:rgba(255,255,255,.14);
+          border-color:rgba(255,255,255,.35);
+          box-shadow:0 6px 28px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.18);
           transform:translateY(-1px);
         }
         .lp-goog-btn:active { transform:scale(.98); }
-        .lp-goog-btn:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+        .lp-goog-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
         .lp-goog-icon {
-          background:rgba(255,255,255,.14); border-radius:9px;
-          width:32px; height:32px;
+          background:rgba(255,255,255,.92); border-radius:8px;
+          width:30px; height:30px;
           display:flex; align-items:center; justify-content:center; flex-shrink:0;
         }
 
@@ -458,7 +453,7 @@ export default function LandingPage() {
               </div>
               <div>
                 <div className="lp-logo-text-name">הַשְּׁבִיל</div>
-                <div className="lp-logo-text-sub">רשת חינוך חב״ד</div>
+                <div className="lp-logo-text-sub">מערכת חכמה לגיוס והשמה</div>
               </div>
             </div>
             <div className="lp-nav-links">
@@ -485,14 +480,6 @@ export default function LandingPage() {
             <p className={`lp-hero-sub lp-fadein lp-delay-2`}>
               השביל שמחבר בין אנשים לשליחות חינוכית
             </p>
-
-            <div className={`lp-hero-micro lp-fadein lp-delay-2`}>
-              פרופיל אחד<span>•</span>כל המשרות<span>•</span>התאמה אישית<span>•</span>עדכוני WhatsApp
-            </div>
-
-            <div className={`lp-tagline lp-fadein lp-delay-3`}>
-              לא עוד חיפוש עבודה — מציאת השביל שלך
-            </div>
 
             {/* GLASS CTA CARD */}
             <div className={`lp-card lp-fadein lp-delay-3`}>
@@ -637,7 +624,7 @@ export default function LandingPage() {
         {/* ══ FOOTER ══ */}
         <div className="lp-footer">
           <div className="lp-footer-left">
-            © 2026 הַשְּׁבִיל · רשת חינוך חב״ד · כל הזכויות שמורות
+            © 2026 הַשְּׁבִיל · עתודות לשליחות · כל הזכויות שמורות
           </div>
           <div className="lp-footer-links">
             <a href="/mosad" className="lp-footer-link">פורטל מוסד</a>

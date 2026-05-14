@@ -65,7 +65,7 @@ export async function GET(request: Request) {
       approved_at:      new Date().toISOString(),
     })
     await service.from('pre_registered_institutions').delete().eq('email', email)
-    return NextResponse.redirect(`${origin}/dashboard`)
+    return NextResponse.redirect(`${origin}/institution/jobs`)
   }
 
   // Unknown Google user — create a minimal 'מועמדת' profile + blank candidates row
@@ -81,5 +81,7 @@ export async function GET(request: Request) {
 }
 
 function roleHome(role: string): string {
+  if (role === 'מועמדת') return '/jobs'
+  if (role === 'מוסד')   return '/institution/jobs'
   return '/dashboard'
 }

@@ -31,7 +31,7 @@ export default function LoginPage() {
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
 
         @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(20px); }
+          from { opacity: 0; transform: translateY(16px); }
           to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes fadeIn {
@@ -43,16 +43,16 @@ export default function LoginPage() {
           100% { background-position: 200% center; }
         }
         @keyframes float1 {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50%       { transform: translateY(-18px) rotate(3deg); }
+          0%, 100% { transform: translateY(0px) scale(1); }
+          50%       { transform: translateY(-20px) scale(1.03); }
         }
         @keyframes float2 {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50%       { transform: translateY(-12px) rotate(-2deg); }
+          0%, 100% { transform: translateY(0px) scale(1); }
+          50%       { transform: translateY(-14px) scale(0.97); }
         }
-        @keyframes pulse-glow {
-          0%, 100% { opacity: 0.18; }
-          50%       { opacity: 0.32; }
+        @keyframes pulse-soft {
+          0%, 100% { opacity: 0.55; }
+          50%       { opacity: 0.85; }
         }
 
         .login-root {
@@ -61,82 +61,72 @@ export default function LoginPage() {
           display: flex;
           direction: rtl;
           font-family: 'Heebo', system-ui, sans-serif;
-          background: #F5F3F9;
+          background: #0E0B1D;
         }
 
-        /* ── Hero panel (right, 42%) ── */
+        /* ── Hero panel (right, 44%) ── */
         .hero-panel {
-          width: 42%;
+          width: 44%;
           flex-shrink: 0;
           position: relative;
           overflow: hidden;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          background: #1A0D38;
         }
         @media (max-width: 1023px) { .hero-panel { display: none; } }
 
-        .hero-grad-base {
+        .hero-bg {
           position: absolute; inset: 0;
           background: linear-gradient(160deg,
-            #0D0820 0%, #1E1040 25%, #2A1558 50%, #1A0D38 75%, #120828 100%
+            #110820 0%, #1E1040 25%, #281450 50%, #1A0D38 75%, #0E0818 100%
           );
         }
-        .hero-grad-purple {
+        .hero-glow-top {
           position: absolute; inset: 0;
-          background: radial-gradient(ellipse 120% 80% at 50% -10%,
-            rgba(91,63,163,.55) 0%, transparent 65%
+          background: radial-gradient(ellipse 110% 70% at 50% -5%,
+            rgba(100,65,180,.5) 0%, transparent 65%
           );
-          animation: pulse-glow 5s ease-in-out infinite;
+          animation: pulse-soft 7s ease-in-out infinite;
         }
-        .hero-grad-gold {
+        .hero-glow-gold {
           position: absolute; inset: 0;
-          background: radial-gradient(ellipse 60% 40% at 80% 85%,
-            rgba(212,176,106,.18) 0%, transparent 60%
+          background: radial-gradient(ellipse 55% 38% at 78% 88%,
+            rgba(212,176,106,.14) 0%, transparent 60%
           );
         }
-        .hero-grad-left {
+        .hero-glow-side {
           position: absolute; inset: 0;
-          background: radial-gradient(ellipse 55% 45% at -10% 40%,
-            rgba(67,40,116,.35) 0%, transparent 65%
+          background: radial-gradient(ellipse 50% 42% at -8% 42%,
+            rgba(60,35,110,.38) 0%, transparent 65%
           );
         }
         .hero-pattern {
           position: absolute; inset: 0;
-          opacity: 0.045;
+          opacity: 0.04;
           background-image:
-            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpolygon points='40,8 46.9,24.6 65,21 54.5,35.8 65,50.6 46.9,47 40,63.6 33.1,47 15,50.6 25.5,35.8 15,21 33.1,24.6' fill='none' stroke='white' stroke-width='0.8'/%3E%3C/svg%3E");
-          background-size: 80px 80px;
+            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cpolygon points='36,6 42.2,22 60,19 50,33 60,47 42.2,44 36,60 29.8,44 12,47 22,33 12,19 29.8,22' fill='none' stroke='white' stroke-width='0.7'/%3E%3C/svg%3E");
+          background-size: 72px 72px;
         }
         .hero-grid {
           position: absolute; inset: 0;
-          opacity: 0.035;
+          opacity: 0.028;
           background-image:
-            linear-gradient(rgba(255,255,255,.8) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,.8) 1px, transparent 1px);
-          background-size: 40px 40px;
+            linear-gradient(rgba(255,255,255,.9) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.9) 1px, transparent 1px);
+          background-size: 44px 44px;
         }
         .hero-orb-1 {
-          position: absolute; top: 10%; right: -8%;
-          width: 300px; height: 300px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(91,63,163,.28) 0%, transparent 70%);
-          animation: float1 9s ease-in-out infinite;
+          position: absolute; top: 8%; right: -10%;
+          width: 320px; height: 320px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(100,65,180,.22) 0%, transparent 70%);
+          animation: float1 10s ease-in-out infinite;
         }
         .hero-orb-2 {
-          position: absolute; bottom: 12%; left: -10%;
-          width: 260px; height: 260px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(212,176,106,.15) 0%, transparent 70%);
-          animation: float2 11s ease-in-out infinite;
-        }
-        .hero-gold-line {
-          position: absolute; top: 0; left: 50%;
-          transform: translateX(-50%);
-          width: 1px; height: 100%;
-          background: linear-gradient(180deg,
-            transparent 0%, rgba(212,176,106,.15) 30%,
-            rgba(212,176,106,.22) 50%, rgba(212,176,106,.08) 75%, transparent 100%
-          );
+          position: absolute; bottom: 10%; left: -12%;
+          width: 280px; height: 280px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(212,176,106,.12) 0%, transparent 70%);
+          animation: float2 13s ease-in-out infinite;
         }
 
         .hero-content {
@@ -144,78 +134,70 @@ export default function LoginPage() {
           flex: 1;
           display: flex; flex-direction: column;
           align-items: center; justify-content: center;
-          padding: 32px 40px;
+          padding: 32px 44px;
           text-align: center;
-          overflow: hidden;
         }
 
-        /* Logo */
-        .hero-logo-wrap { position: relative; margin-bottom: 32px; }
+        .hero-logo-wrap {
+          position: relative; margin-bottom: 28px;
+          display: flex; align-items: center; justify-content: center;
+        }
         .hero-logo-halo {
-          position: absolute; top: 50%; left: 50%;
-          transform: translate(-50%, -50%);
-          width: 130px; height: 130px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(212,176,106,.22) 0%, transparent 70%);
+          position: absolute;
+          width: 110px; height: 110px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(212,176,106,.18) 0%, transparent 70%);
         }
         .hero-logo-img {
           position: relative; z-index: 1;
-          width: 64px; height: 64px; object-fit: contain;
-          filter: brightness(0) invert(1); opacity: 0.9;
+          width: 60px; height: 60px; object-fit: contain;
+          filter: brightness(0) invert(1); opacity: 0.88;
         }
 
-        .hero-gold-divider {
-          width: 40px; height: 2px;
-          background: linear-gradient(90deg, transparent, rgba(212,176,106,.7), transparent);
-          margin: 0 auto 10px;
+        .hero-eyebrow {
+          font-size: 10px; font-weight: 700;
+          letter-spacing: 0.18em; text-transform: uppercase;
+          color: rgba(212,176,106,.55);
+          margin-bottom: 8px;
         }
-        .hero-name-badge {
-          font-size: 10.5px; font-weight: 600;
-          letter-spacing: 0.14em;
-          color: rgba(212,176,106,.6);
-          text-transform: uppercase;
-          margin-bottom: 36px;
+        .hero-divider {
+          width: 36px; height: 1.5px;
+          background: linear-gradient(90deg, transparent, rgba(212,176,106,.6), transparent);
+          margin: 0 auto 18px;
         }
 
-        /* System name */
         .hero-system-name {
-          font-size: 48px; font-weight: 900;
+          font-size: 52px; font-weight: 900;
           color: #ffffff;
           letter-spacing: -0.04em;
           line-height: 1;
-          margin-bottom: 6px;
-          text-shadow: 0 2px 24px rgba(0,0,0,.4);
+          margin-bottom: 7px;
         }
         .hero-system-sub {
-          font-size: 13px; font-weight: 400;
-          color: rgba(255,255,255,.38);
-          letter-spacing: 0.06em;
-          margin-bottom: 44px;
+          font-size: 12.5px; font-weight: 400;
+          color: rgba(255,255,255,.32);
+          letter-spacing: 0.08em;
+          margin-bottom: 48px;
         }
 
-        /* Quote block */
         .hero-quote-block {
-          width: 100%; max-width: 280px;
-          margin: 0 auto 40px;
-          padding: 22px 24px;
-          border-radius: 16px;
+          width: 100%; max-width: 290px;
+          margin: 0 auto 44px;
+          padding: 24px 26px;
+          border-radius: 18px;
           background: rgba(255,255,255,.04);
-          border: 1px solid rgba(212,176,106,.18);
-          backdrop-filter: blur(8px);
+          border: 1px solid rgba(212,176,106,.15);
+          backdrop-filter: blur(10px);
           position: relative;
         }
         .hero-quote-mark {
-          position: absolute;
-          top: -14px; right: 20px;
-          font-size: 52px; line-height: 1;
-          color: rgba(212,176,106,.35);
-          font-family: Georgia, serif;
+          position: absolute; top: -12px; right: 22px;
+          font-size: 48px; line-height: 1;
+          color: rgba(212,176,106,.3); font-family: Georgia, serif;
         }
         .hero-quote-text {
-          font-size: 17px; font-weight: 700;
-          color: rgba(255,255,255,.88);
-          line-height: 1.55;
-          letter-spacing: 0.01em;
-          margin-bottom: 12px;
+          font-size: 16.5px; font-weight: 700;
+          color: rgba(255,255,255,.85);
+          line-height: 1.6; letter-spacing: 0.01em; margin-bottom: 10px;
         }
         .hero-quote-text em {
           font-style: normal;
@@ -223,70 +205,69 @@ export default function LoginPage() {
           background-size: 200% auto;
           -webkit-background-clip: text; background-clip: text;
           -webkit-text-fill-color: transparent;
-          animation: shimmer 5s linear infinite;
+          animation: shimmer 8s linear infinite;
         }
         .hero-quote-source {
-          font-size: 11px; font-weight: 600;
-          color: rgba(212,176,106,.55);
-          letter-spacing: 0.08em;
+          font-size: 10.5px; font-weight: 600;
+          color: rgba(212,176,106,.5); letter-spacing: 0.08em;
         }
 
-        /* Feature rows */
         .hero-features {
-          display: flex; flex-direction: column; gap: 10px;
-          width: 100%; max-width: 270px; margin: 0 auto;
+          display: flex; flex-direction: column; gap: 9px;
+          width: 100%; max-width: 278px; margin: 0 auto;
         }
         .hero-feature-row {
           display: flex; align-items: center; gap: 12px;
-          padding: 11px 14px; border-radius: 12px;
-          background: rgba(255,255,255,.035);
+          padding: 10px 14px; border-radius: 12px;
+          background: rgba(255,255,255,.03);
           border: 1px solid rgba(255,255,255,.05);
           transition: background 200ms;
         }
-        .hero-feature-row:hover { background: rgba(255,255,255,.06); }
+        .hero-feature-row:hover { background: rgba(255,255,255,.055); }
         .hero-feature-icon {
-          width: 32px; height: 32px; border-radius: 9px;
+          width: 30px; height: 30px; border-radius: 8px;
           display: flex; align-items: center; justify-content: center;
-          flex-shrink: 0; font-size: 15px;
-          background: rgba(212,176,106,.1);
-          border: 1px solid rgba(212,176,106,.15);
+          flex-shrink: 0; font-size: 14px;
+          background: rgba(212,176,106,.09);
+          border: 1px solid rgba(212,176,106,.13);
         }
         .hero-feature-text {
-          font-size: 12.5px; font-weight: 500;
-          color: rgba(255,255,255,.6);
-          text-align: right; flex: 1;
+          font-size: 12px; font-weight: 500;
+          color: rgba(255,255,255,.55); text-align: right; flex: 1;
         }
 
         .hero-footer {
           position: relative; z-index: 10;
           text-align: center; padding: 0 0 22px;
-          font-size: 10.5px; color: rgba(255,255,255,.15);
-          letter-spacing: 0.04em;
+          font-size: 10px; color: rgba(255,255,255,.12);
+          letter-spacing: 0.05em;
         }
 
-        /* ── Form panel (left, 58%) ── */
+        /* ── Form panel (left, 56%) ── */
         .form-panel {
           flex: 1; display: flex; flex-direction: column;
           position: relative; overflow: hidden;
-          background: #FAF9FC;
+          background: #090717;
           height: 100vh;
         }
-        .form-panel-grad-1 {
-          position: absolute; top: -120px; right: -120px;
-          width: 480px; height: 480px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(91,63,163,.06) 0%, transparent 70%);
+        .form-panel::before {
+          content: '';
+          position: absolute; top: -150px; right: -150px;
+          width: 500px; height: 500px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(80,50,150,.12) 0%, transparent 70%);
           pointer-events: none;
         }
-        .form-panel-grad-2 {
-          position: absolute; bottom: -80px; left: -80px;
-          width: 380px; height: 380px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(212,176,106,.06) 0%, transparent 70%);
+        .form-panel::after {
+          content: '';
+          position: absolute; bottom: -100px; left: -100px;
+          width: 400px; height: 400px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(212,176,106,.05) 0%, transparent 70%);
           pointer-events: none;
         }
         .form-panel-dots {
-          position: absolute; inset: 0; opacity: 0.022;
-          background-image: radial-gradient(circle, #432874 1px, transparent 1px);
-          background-size: 28px 28px; pointer-events: none;
+          position: absolute; inset: 0; opacity: 0.018;
+          background-image: radial-gradient(circle, rgba(180,140,255,1) 1px, transparent 1px);
+          background-size: 30px 30px; pointer-events: none;
         }
 
         .form-topbar {
@@ -296,14 +277,15 @@ export default function LoginPage() {
           display: flex; align-items: center; gap: 6px;
           padding: 7px 14px; border-radius: 10px;
           font-size: 12px; font-weight: 600;
-          color: rgba(67,40,116,.5);
-          background: rgba(67,40,116,.06);
-          border: 1px solid rgba(67,40,116,.1);
+          color: rgba(180,160,220,.45);
+          background: rgba(255,255,255,.04);
+          border: 1px solid rgba(255,255,255,.08);
           text-decoration: none; transition: all 200ms;
         }
         .form-admin-btn:hover {
-          background: rgba(67,40,116,.12); color: #432874;
-          border-color: rgba(67,40,116,.22);
+          background: rgba(255,255,255,.08);
+          color: rgba(200,180,240,.75);
+          border-color: rgba(255,255,255,.14);
         }
 
         /* Mobile brand */
@@ -315,8 +297,8 @@ export default function LoginPage() {
         @media (max-width: 1023px) { .mobile-brand { display: flex; } }
         .mobile-logo-ring {
           width: 68px; height: 68px; border-radius: 20px;
-          background: linear-gradient(135deg, #432874 0%, #5B3FA3 100%);
-          box-shadow: 0 8px 28px rgba(67,40,116,.32);
+          background: linear-gradient(135deg, #2E1860 0%, #5B3FA3 100%);
+          box-shadow: 0 8px 28px rgba(67,40,116,.45);
           display: flex; align-items: center; justify-content: center;
           margin-bottom: 14px;
         }
@@ -326,10 +308,19 @@ export default function LoginPage() {
           align-items: center; justify-content: center;
           padding: 40px 24px; position: relative; z-index: 1;
         }
-        .form-card { width: 100%; max-width: 400px; }
+        .form-card {
+          width: 100%; max-width: 400px;
+          background: rgba(255,255,255,.05);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid rgba(255,255,255,.09);
+          border-radius: 24px;
+          padding: 40px 36px;
+          box-shadow: 0 24px 80px rgba(0,0,0,.45), 0 8px 32px rgba(0,0,0,.3);
+        }
 
         .form-welcome {
-          margin-bottom: 36px;
+          margin-bottom: 32px;
           animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
         }
         .form-welcome-eyebrow {
@@ -340,91 +331,90 @@ export default function LoginPage() {
           background: linear-gradient(135deg, #D4B06A, #F0D08A); flex-shrink: 0;
         }
         .form-welcome-eyebrow-text {
-          font-size: 11.5px; font-weight: 700;
-          letter-spacing: 0.1em; color: rgba(67,40,116,.5);
+          font-size: 11px; font-weight: 700;
+          letter-spacing: 0.12em; color: rgba(212,176,106,.6);
           text-transform: uppercase;
         }
         .form-heading {
-          font-size: 30px; font-weight: 900;
-          color: #1A0D38; line-height: 1.18;
+          font-size: 28px; font-weight: 900;
+          color: rgba(255,255,255,.92); line-height: 1.2;
           letter-spacing: -0.03em; margin-bottom: 8px;
         }
         .form-sub {
-          font-size: 14px; color: #6B6688;
+          font-size: 13.5px; color: rgba(255,255,255,.38);
           line-height: 1.65; font-weight: 400;
         }
 
         /* Tabs */
         .form-tabs {
           display: flex; gap: 0;
-          border: 1.5px solid rgba(67,40,116,.15);
+          border: 1px solid rgba(255,255,255,.1);
+          background: rgba(255,255,255,.03);
           border-radius: 12px; overflow: hidden;
-          margin-bottom: 28px;
+          margin-bottom: 26px;
           animation: fadeUp 0.5s 0.1s cubic-bezier(0.16,1,0.3,1) both;
         }
         .form-tab {
           flex: 1; padding: 10px;
           font-size: 13px; font-weight: 600;
-          color: rgba(67,40,116,.45);
+          color: rgba(255,255,255,.35);
           background: transparent; border: none;
           cursor: pointer; transition: all 200ms;
           font-family: 'Heebo', system-ui, sans-serif;
         }
         .form-tab.active {
-          background: linear-gradient(135deg, #432874, #5B3FA3);
-          color: #ffffff;
+          background: rgba(100,65,180,.45);
+          color: rgba(255,255,255,.92);
+          box-shadow: inset 0 0 0 1px rgba(255,255,255,.12);
         }
         .form-tab:first-child { border-radius: 10px 0 0 10px; }
         .form-tab:last-child  { border-radius: 0 10px 10px 0; }
+        .form-tab:hover:not(.active) { background: rgba(255,255,255,.05); color: rgba(255,255,255,.6); }
 
+        /* Google button — glassmorphism style */
         .form-google-btn {
-          position: relative; width: 100%; height: 56px;
-          border-radius: 16px;
+          position: relative; width: 100%; height: 54px;
+          border-radius: 14px;
           display: flex; align-items: center; justify-content: center; gap: 12px;
           font-family: 'Heebo', system-ui, sans-serif;
           font-size: 15px; font-weight: 700;
           cursor: pointer; transition: all 260ms cubic-bezier(0.16,1,0.3,1);
-          border: none; outline: none;
+          border: 1px solid rgba(255,255,255,.22);
+          outline: none;
           animation: fadeUp 0.6s 0.2s cubic-bezier(0.16,1,0.3,1) both;
           overflow: hidden;
+          color: rgba(255,255,255,.92);
+          background: rgba(255,255,255,.08);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          box-shadow: 0 4px 20px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.1);
         }
-        .form-google-btn::before {
-          content: ''; position: absolute; inset: 0;
-          background: linear-gradient(135deg, #432874 0%, #5B3FA3 60%, #432874 100%);
-          background-size: 200% 100%;
-          transition: background-position 400ms ease;
+        .form-google-btn:hover {
+          background: rgba(255,255,255,.13);
+          border-color: rgba(255,255,255,.35);
+          box-shadow: 0 8px 32px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.15);
+          transform: translateY(-1px);
         }
-        .form-google-btn:hover::before { background-position: 100% 0; }
-        .form-google-btn::after {
-          content: ''; position: absolute; inset: 0;
-          box-shadow: 0 8px 32px rgba(67,40,116,.38), 0 2px 8px rgba(67,40,116,.22);
-          border-radius: 16px; transition: opacity 260ms;
-        }
-        .form-google-btn:hover::after {
-          box-shadow: 0 12px 40px rgba(67,40,116,.52), 0 4px 12px rgba(67,40,116,.3);
-        }
-        .form-google-btn:active { transform: scale(0.985); }
-        .form-google-btn:disabled { opacity: 0.68; cursor: not-allowed; transform: none; }
-        .form-google-btn span { position: relative; z-index: 1; color: #ffffff; }
+        .form-google-btn:active { transform: scale(0.985) translateY(0); }
+        .form-google-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         .form-google-btn .btn-icon {
-          position: relative; z-index: 1;
-          background: rgba(255,255,255,.12); border-radius: 8px;
+          background: rgba(255,255,255,.92); border-radius: 8px;
           width: 32px; height: 32px;
           display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
 
         .form-divider {
           display: flex; align-items: center; gap: 14px;
-          margin: 22px 0;
+          margin: 20px 0;
           animation: fadeIn 0.5s 0.3s both;
         }
         .form-divider-line {
           flex: 1; height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(67,40,116,.12), transparent);
+          background: rgba(255,255,255,.08);
         }
         .form-divider-text {
-          font-size: 11.5px; font-weight: 600;
-          color: rgba(107,102,136,.5); letter-spacing: 0.06em;
+          font-size: 11px; font-weight: 600;
+          color: rgba(255,255,255,.25); letter-spacing: 0.08em;
         }
 
         .form-register-link {
@@ -432,25 +422,28 @@ export default function LoginPage() {
           animation: fadeIn 0.5s 0.35s both;
         }
         .form-register-link a {
-          font-size: 13.5px; font-weight: 600;
-          color: #5B3AAB; text-decoration: none;
-          border-bottom: 1px solid rgba(91,58,171,.2);
-          transition: border-color 200ms;
+          font-size: 13px; font-weight: 600;
+          color: rgba(160,130,220,.7); text-decoration: none;
+          border-bottom: 1px solid rgba(160,130,220,.2);
+          transition: all 200ms;
         }
-        .form-register-link a:hover { border-color: rgba(91,58,171,.6); }
+        .form-register-link a:hover {
+          color: rgba(190,165,240,.9);
+          border-color: rgba(190,165,240,.45);
+        }
 
         .form-error {
           margin-top: 12px; padding: 10px 14px;
           border-radius: 12px; font-size: 13px; font-weight: 600;
-          color: #C83B3B; background: #FEE8E8;
-          border: 1px solid #FECACA; text-align: center;
+          color: #FF9999; background: rgba(200,60,60,.15);
+          border: 1px solid rgba(200,60,60,.25); text-align: center;
           animation: fadeUp 0.3s ease both;
         }
 
         .form-footer {
           position: relative; z-index: 1;
           text-align: center; padding: 0 0 20px;
-          font-size: 11px; color: rgba(107,102,136,.38);
+          font-size: 10.5px; color: rgba(255,255,255,.12);
         }
       `}</style>
 
@@ -458,15 +451,14 @@ export default function LoginPage() {
 
         {/* ══ Hero Panel ══ */}
         <div className="hero-panel">
-          <div className="hero-grad-base" />
-          <div className="hero-grad-purple" />
-          <div className="hero-grad-gold" />
-          <div className="hero-grad-left" />
+          <div className="hero-bg" />
+          <div className="hero-glow-top" />
+          <div className="hero-glow-gold" />
+          <div className="hero-glow-side" />
           <div className="hero-pattern" />
           <div className="hero-grid" />
           <div className="hero-orb-1" />
           <div className="hero-orb-2" />
-          <div className="hero-gold-line" />
 
           <div className="hero-content" style={{ opacity: mounted ? 1 : 0, transition: 'opacity 800ms ease' }}>
 
@@ -475,18 +467,17 @@ export default function LoginPage() {
               <Image
                 src="/logo-chabad.png"
                 alt="רשת אהלי יוסף יצחק"
-                width={64} height={64}
+                width={60} height={60}
                 className="hero-logo-img"
               />
             </div>
 
-            <div className="hero-gold-divider" />
-            <div className="hero-name-badge">מערכת גיוס והשמה · רשת חינוך חב״ד</div>
+            <div className="hero-eyebrow">מערכת גיוס והשמה · רשת חינוך חב״ד</div>
+            <div className="hero-divider" />
 
             <div className="hero-system-name">הַשְּׁבִיל</div>
-            <div className="hero-system-sub">מצאי את שביל השליחות שלך</div>
+            <div className="hero-system-sub">מערכת חכמה לגיוס והשמה</div>
 
-            {/* Quote block */}
             <div className="hero-quote-block">
               <div className="hero-quote-mark">&ldquo;</div>
               <div className="hero-quote-text">
@@ -511,14 +502,12 @@ export default function LoginPage() {
           </div>
 
           <div className="hero-footer">
-            השביל · רשת חינוך חב״ד · 2026
+            הַשְּׁבִיל · עתודות לשליחות · 2026
           </div>
         </div>
 
         {/* ══ Form Panel ══ */}
         <div className="form-panel">
-          <div className="form-panel-grad-1" />
-          <div className="form-panel-grad-2" />
           <div className="form-panel-dots" />
 
           <div className="form-topbar">
@@ -538,11 +527,11 @@ export default function LoginPage() {
                 style={{ filter: 'brightness(0) invert(1)', objectFit: 'contain' }}
               />
             </div>
-            <div style={{ fontSize: '24px', fontWeight: 900, color: '#1A0D38', letterSpacing: '-0.03em', marginBottom: '4px' }}>
+            <div style={{ fontSize: '22px', fontWeight: 900, color: 'rgba(255,255,255,.9)', letterSpacing: '-0.03em', marginBottom: '4px' }}>
               הַשְּׁבִיל
             </div>
-            <div style={{ fontSize: '13px', color: '#6B6688' }}>
-              מערכת גיוס והשמה · רשת חינוך חב״ד
+            <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.38)' }}>
+              מערכת חכמה לגיוס והשמה
             </div>
           </div>
 
@@ -566,7 +555,7 @@ export default function LoginPage() {
               {/* Tabs */}
               <div className="form-tabs">
                 <button className="form-tab active">מועמדת</button>
-                <button className="form-tab">מוסד</button>
+                <a href="/mosad" className="form-tab" style={{ textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>מוסד</a>
               </div>
 
               <button

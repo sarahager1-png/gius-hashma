@@ -6,20 +6,25 @@ import AppSidebar from '@/components/layout/app-sidebar'
 import WaFloatButton from '@/components/layout/wa-float-button'
 import type { UserRole } from '@/lib/types'
 
+function roleHome(role: string): string {
+  if (role === 'מועמדת') return '/jobs'
+  if (role === 'מוסד')   return '/institution/jobs'
+  return '/dashboard'
+}
+
 function canAccess(role: string, pathname: string): boolean {
   // admins can access everything
   if (['מנהלת מערכת', 'אדמין מערכת'].includes(role)) return true
 
-  // candidate: only her own pages
+  // candidate: own pages — NOT /dashboard
   if (role === 'מועמדת') {
-    const allowed = ['/dashboard', '/jobs', '/my-applications', '/my-invitations', '/notifications', '/history', '/profile', '/help', '/institutions']
+    const allowed = ['/jobs', '/my-applications', '/my-invitations', '/book-interview', '/inbox', '/notifications', '/history', '/profile', '/help', '/institutions']
     return allowed.some(p => pathname === p || pathname.startsWith(p + '/'))
   }
 
-  // institution: only institution sub-pages + individual candidate profiles
+  // institution: own pages — NOT /dashboard
   if (role === 'מוסד') {
-    const allowed = ['/dashboard', '/institution', '/notifications', '/history', '/help', '/settings', '/candidates']
-    // allow /candidates/[id] (single profile) but not /candidates (admin list)
+    const allowed = ['/institution', '/notifications', '/history', '/help', '/settings', '/candidates']
     if (/^\/candidates\/[^/]+$/.test(pathname)) return true
     return allowed.some(p => pathname === p || pathname.startsWith(p + '/'))
   }
@@ -45,10 +50,15 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const hdrs = await headers()
   const pathname = hdrs.get('x-pathname') ?? ''
   if (pathname && !canAccess(profile.role, pathname)) {
-    redirect('/dashboard')
+    redirect(roleHome(profile.role))
   }
 
-  const waPhone = process.env.NEXT_PUBLIC_WA_SUPPORT_NUMBER ?? ''
+  const { data: waRow } = await service
+    .from('system_settings')
+    .select('value')
+    .eq('key', 'support_wa_number')
+    .single()
+  const waPhone = waRow?.value || process.env.NEXT_PUBLIC_WA_SUPPORT_NUMBER || ''
 
   let pendingInstitutions   = 0
   let pendingApplications   = 0
