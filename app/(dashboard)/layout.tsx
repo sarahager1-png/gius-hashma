@@ -14,7 +14,7 @@ function roleHome(role: string): string {
 
 function canAccess(role: string, pathname: string): boolean {
   // admins can access everything
-  if (['מנהלת מערכת', 'אדמין מערכת'].includes(role)) return true
+  if (['מנהל רשת', 'מנהלת מערכת', 'אדמין מערכת'].includes(role)) return true
 
   // candidate: own pages — NOT /dashboard
   if (role === 'מועמדת') {
@@ -71,7 +71,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   let pendingInquiries      = 0
   let pendingCandidateReqs  = 0
 
-  if (['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)) {
+  if (['מנהל רשת', 'מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)) {
     const [instRes, reqRes] = await Promise.all([
       service.from('institutions').select('*', { count: 'exact', head: true }).eq('is_approved', false),
       Promise.resolve(

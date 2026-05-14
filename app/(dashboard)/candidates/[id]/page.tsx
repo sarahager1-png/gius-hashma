@@ -50,7 +50,7 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
   const { data: viewerProfile } = await service
     .from('profiles').select('role').eq('id', user.id).single()
 
-  const allowed = ['מנהלת מערכת', 'אדמין מערכת', 'מוסד']
+  const allowed = ['מנהל רשת', 'מנהלת מערכת', 'אדמין מערכת', 'מוסד']
   if (!viewerProfile || !allowed.includes(viewerProfile.role)) redirect('/dashboard')
 
   const { data: candidate } = await service
