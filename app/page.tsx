@@ -76,7 +76,7 @@ export default function LandingPage() {
         *, *::before, *::after { box-sizing: border-box; }
 
         .lp-root {
-          background: #4A4899;
+          background: #0D1520;
           color: #fff;
           font-family: 'Heebo', system-ui, sans-serif;
           direction: rtl;
@@ -94,16 +94,16 @@ export default function LandingPage() {
         .lp-hero-bg {
           position: absolute; inset: 0;
           background:
-            radial-gradient(ellipse 100% 60% at 50% -5%, rgba(160,120,255,.28) 0%, transparent 60%),
-            radial-gradient(ellipse 65% 45% at 80% 92%,  rgba(0,180,204,.14) 0%, transparent 55%),
-            radial-gradient(ellipse 55% 38% at -5% 50%,  rgba(201,168,76,.08) 0%, transparent 55%),
-            linear-gradient(170deg, #524FA8 0%, #4E4CA4 40%, #40488E 75%, #4A4899 100%);
+            radial-gradient(ellipse 100% 65% at 50% -5%,  rgba(0,140,160,.55)  0%, transparent 58%),
+            radial-gradient(ellipse 60%  48% at 85% 88%,  rgba(201,168,76,.15) 0%, transparent 55%),
+            radial-gradient(ellipse 52%  38% at -8% 55%,  rgba(123,90,196,.1)  0%, transparent 52%),
+            linear-gradient(170deg, #0E2230 0%, #122838 40%, #0E1E2C 75%, #0D1520 100%);
         }
         .lp-stars { display: none; }
         /* Floating orbs */
         .lp-orb { position:absolute; border-radius:50%; pointer-events:none; }
-        .lp-orb-1 { top:8%; right:-12%; width:480px; height:480px; background:radial-gradient(circle, rgba(91,58,171,.16) 0%, transparent 65%); animation:float 16s ease-in-out infinite; }
-        .lp-orb-2 { bottom:10%; left:-10%; width:380px; height:380px; background:radial-gradient(circle, rgba(0,180,204,.1) 0%, transparent 65%); animation:float 20s ease-in-out infinite reverse; }
+        .lp-orb-1 { top:5%; right:-10%; width:440px; height:440px; background:radial-gradient(circle, rgba(0,180,204,.14) 0%, transparent 65%); animation:float 16s ease-in-out infinite; }
+        .lp-orb-2 { bottom:8%; left:-8%; width:360px; height:360px; background:radial-gradient(circle, rgba(123,90,196,.08) 0%, transparent 65%); animation:float 20s ease-in-out infinite reverse; }
         .lp-orb-3 { display:none; }
         .lp-vline { display:none; }
 
