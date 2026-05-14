@@ -11,7 +11,7 @@ export default async function InstitutionProfilePage() {
 
   const { data: institution } = await service
     .from('institutions')
-    .select('id, institution_name, city, district, address, phone, institution_type, whatsapp_preference, is_approved, profiles(full_name, phone)')
+    .select('id, institution_name, city, district, address, phone, institution_type, school_type, principal_name, whatsapp_preference, is_approved, profiles(full_name, phone)')
     .eq('profile_id', user.id)
     .single()
 

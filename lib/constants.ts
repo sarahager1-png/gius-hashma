@@ -23,6 +23,22 @@ export const JOB_STATUSES: JobStatus[] = ['פעילה', 'מושהית', 'אוי�
 
 export const JOB_TYPES: JobType[] = ["סטאג'", 'חלקי', 'מלא']
 
+export const SCHOOL_TYPES = [
+  'יסודי - קהילתי',
+  'יסודי - בית חינוך',
+  'יסודי - שלהבות',
+  'חט"ב',
+  'תיכון',
+]
+
+export const SCHOOL_TYPE_COLORS: Record<string, { bg: string; color: string; border: string }> = {
+  'יסודי - קהילתי':   { bg: '#EFF6FF', color: '#1D4ED8', border: '#BFDBFE' },
+  'יסודי - בית חינוך': { bg: '#F5F3FF', color: '#6D28D9', border: '#DDD6FE' },
+  'יסודי - שלהבות':   { bg: '#FFF7ED', color: '#C2410C', border: '#FED7AA' },
+  'חט"ב':              { bg: '#F0FDF4', color: '#15803D', border: '#BBF7D0' },
+  'תיכון':             { bg: '#FFF1F2', color: '#BE123C', border: '#FECDD3' },
+}
+
 export const SPECIALIZATIONS: Specialization[] = ['יסודי', 'חט"ב', 'מתמטיקה', 'אנגלית', 'חינוך מיוחד', 'אחר']
 
 export const PLACEMENT_TYPES = ['שיבוץ לשנה', 'שיבוץ קבוע', 'מילוי מקום לחופשת לידה']

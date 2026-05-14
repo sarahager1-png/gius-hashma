@@ -77,6 +77,8 @@ export interface Institution {
   address: string | null
   phone: string | null
   institution_type: string | null
+  school_type: string | null
+  principal_name: string | null
   is_approved: boolean
   approved_at: string | null
   approved_by: string | null
@@ -90,6 +92,7 @@ export interface Job {
   title: string
   description: string | null
   city: string | null
+  district: string | null
   specialization: Specialization | null
   job_type: JobType | null
   job_types?: string[]
@@ -100,6 +103,9 @@ export interface Job {
   expires_at: string | null
   created_at: string
   updated_at: string
+  role: string | null
+  classes: string | null
+  hours: string | null
   institutions?: Institution
 }
 

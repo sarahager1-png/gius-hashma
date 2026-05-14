@@ -14,7 +14,7 @@ export default async function EditJobPage({ params }: { params: Promise<{ id: st
 
   const { data: institution } = await service
     .from('institutions')
-    .select('id, is_approved')
+    .select('id, institution_name, city, district, principal_name, school_type, is_approved')
     .eq('profile_id', user.id)
     .single()
 
@@ -22,7 +22,7 @@ export default async function EditJobPage({ params }: { params: Promise<{ id: st
 
   const { data: job } = await service
     .from('jobs')
-    .select('id, title, description, district, city, specialization, job_type, placement_type, expires_at, start_date, end_date')
+    .select('id, title, role, classes, hours, description, district, city, specialization, job_type, job_types, placement_type, expires_at, start_date, end_date')
     .eq('id', id)
     .eq('institution_id', institution.id)
     .single()
@@ -42,7 +42,17 @@ export default async function EditJobPage({ params }: { params: Promise<{ id: st
         </h1>
         <p className="text-[13px] mt-1" style={{ color: 'var(--ink-3)' }}>{job.title}</p>
       </div>
-      <JobFormClient institutionId={institution.id} job={job} />
+      <JobFormClient
+        institutionId={institution.id}
+        school={{
+          institution_name: institution.institution_name,
+          city: institution.city,
+          district: institution.district,
+          principal_name: institution.principal_name,
+          school_type: institution.school_type,
+        }}
+        job={{ ...job, role: job.role ?? null, classes: job.classes ?? null, hours: job.hours ?? null }}
+      />
     </div>
   )
 }

@@ -20,7 +20,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 
   const body = await request.json()
-  const allowed = ['institution_name', 'city', 'district', 'address', 'phone', 'institution_type', 'whatsapp_preference']
+  const allowed = ['institution_name', 'city', 'district', 'address', 'phone', 'institution_type', 'school_type', 'principal_name', 'whatsapp_preference']
   const instUpdate = Object.fromEntries(Object.entries(body).filter(([k]) => allowed.includes(k)))
 
   const { error } = await service.from('institutions').update(instUpdate).eq('id', id)

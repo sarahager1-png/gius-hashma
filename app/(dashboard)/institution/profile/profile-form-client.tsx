@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { DISTRICTS } from '@/lib/constants'
+import { DISTRICTS, SCHOOL_TYPES, SCHOOL_TYPE_COLORS } from '@/lib/constants'
 
 interface Props {
   institution: {
@@ -11,6 +11,8 @@ interface Props {
     district: string | null
     address: string | null
     phone: string | null
+    school_type: string | null
+    principal_name: string | null
     whatsapp_preference: boolean
   }
   profile: {
@@ -26,7 +28,8 @@ export default function InstitutionProfileFormClient({ institution, profile }: P
     district: institution.district ?? '',
     address: institution.address ?? '',
     phone: institution.phone ?? '',
-    principal_name: profile.full_name ?? '',
+    school_type: institution.school_type ?? '',
+    principal_name: institution.principal_name ?? profile.full_name ?? '',
     principal_phone: profile.phone ?? '',
     whatsapp_preference: institution.whatsapp_preference,
   })
@@ -68,6 +71,22 @@ export default function InstitutionProfileFormClient({ institution, profile }: P
             <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>שם המוסד *</label>
             <input value={form.institution_name} onChange={e => set('institution_name', e.target.value)}
               className={inputCls} style={inputStyle} />
+          </div>
+          <div className="col-span-2 space-y-2">
+            <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>סוג בית הספר</label>
+            <div className="flex flex-wrap gap-2">
+              {SCHOOL_TYPES.map(t => {
+                const sel = form.school_type === t
+                const c = SCHOOL_TYPE_COLORS[t]
+                return (
+                  <button key={t} type="button" onClick={() => set('school_type', sel ? '' : t)}
+                    className="px-3.5 py-1.5 rounded-full text-[13px] font-semibold border-2 transition-all"
+                    style={{ background: sel ? c.bg : '#fff', borderColor: sel ? c.color : 'var(--line)', color: sel ? c.color : 'var(--ink-3)' }}>
+                    {t}
+                  </button>
+                )
+              })}
+            </div>
           </div>
           <div className="space-y-1">
             <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>מחוז</label>

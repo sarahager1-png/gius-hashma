@@ -26,7 +26,7 @@ export default async function NewJobPage({
 
   const { data: institution } = await service
     .from('institutions')
-    .select('id, is_approved')
+    .select('id, institution_name, city, district, principal_name, school_type, is_approved')
     .eq('profile_id', user.id)
     .single()
 
@@ -75,7 +75,18 @@ export default async function NewJobPage({
           </p>
         )}
       </div>
-      <JobFormClient institutionId={institution.id} job={sourceJob} templates={(templates ?? []) as JobTemplate[]} />
+      <JobFormClient
+        institutionId={institution.id}
+        school={{
+          institution_name: institution.institution_name,
+          city: institution.city,
+          district: institution.district,
+          principal_name: institution.principal_name,
+          school_type: institution.school_type,
+        }}
+        job={sourceJob}
+        templates={(templates ?? []) as JobTemplate[]}
+      />
     </div>
   )
 }
