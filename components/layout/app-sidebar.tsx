@@ -28,11 +28,6 @@ interface NavGroup {
 const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
   'מועמדת': [
     {
-      items: [
-        { href: '/dashboard',       label: 'בית',           icon: LayoutDashboard },
-      ],
-    },
-    {
       label: 'חיפוש ומשרות',
       items: [
         { href: '/jobs',            label: 'משרות פתוחות',  icon: Briefcase       },
