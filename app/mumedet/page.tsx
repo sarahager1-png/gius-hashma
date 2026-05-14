@@ -344,14 +344,6 @@ export default function MumedetLanding() {
           border-bottom:1px solid rgba(255,255,255,.05);
         }
         .mm-trust-inner { max-width:800px; margin:0 auto; text-align:center; }
-        .mm-trust-pills { display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:28px; }
-        .mm-trust-pill {
-          display:flex; align-items:center; gap:7px;
-          background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
-          border-radius:999px; padding:8px 16px;
-          font-size:12.5px; font-weight:600; color:rgba(255,255,255,.62);
-        }
-        .mm-trust-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
 
         /* ── QUOTE ── */
         .mm-quote-section { padding:72px 24px; text-align:center; }
@@ -618,20 +610,6 @@ export default function MumedetLanding() {
               פלטפורמה רשמית לרשת חינוך חב״ד — מוסדות, שלוחים ומועמדות
             </p>
 
-            <div className="mm-trust-pills">
-              {[
-                { label:'בתי חינוך',              dot:'#C9A84C' },
-                { label:'בתי ספר קהילתיים',       dot:'#9B72CF' },
-                { label:'בתי ספר שלהבות',         dot:'#00B4CC' },
-                { label:'תיכונים וחט״ב',           dot:'#15803D' },
-              ].map(({ label, dot }) => (
-                <div key={label} className="mm-trust-pill">
-                  <span className="mm-trust-dot" style={{ background:dot }} />
-                  <Sparkles size={12} color={dot} />
-                  {label}
-                </div>
-              ))}
-            </div>
           </div>
         </div>
 
