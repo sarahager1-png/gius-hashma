@@ -1,27 +1,47 @@
-﻿import { redirect, notFound } from 'next/navigation'
+import { redirect, notFound } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import type { Candidate } from '@/lib/types'
 import Link from 'next/link'
-import {
-  ArrowRight, MapPin, Phone, GraduationCap, BookOpen,
-  Briefcase, Calendar, MessageCircle, Building2, FileText,
-} from 'lucide-react'
+import { ArrowRight, Phone, MessageCircle } from 'lucide-react'
 import InviteButton from './invite-button'
 import SendMessageButton from './send-message-button'
 
-const AVAIL_PILL: Record<string, { bg: string; color: string; dot: string }> = {
-  "מחפשת סטאג'":       { bg: '#EDE9FE', color: '#5B21B6', dot: '#8B5CF6' },
-  'פתוחה להצעות':       { bg: '#DDFAFB', color: '#007A84', dot: '#00BCC8' },
-  'משובצת':             { bg: '#DCFCE7', color: '#166534', dot: '#22C55E' },
-  'בוגרת מחפשת משרה':  { bg: '#FEF3C7', color: '#92400E', dot: '#F59E0B' },
-  'לא פעילה':           { bg: '#F3F4F6', color: '#6B7280', dot: '#9CA3AF' },
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+type WorkEntry = { workplace: string; manager: string }
+
+function CardSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="px-6 py-4" style={{ borderTop: '1px solid var(--line)' }}>
+      <p className="text-[10px] font-bold uppercase tracking-[.12em] mb-3" style={{ color: 'var(--ink-4)' }}>{title}</p>
+      <div className="space-y-2">{children}</div>
+    </div>
+  )
 }
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+function CardRow({ label, value, ltr }: { label: string; value?: string | null; ltr?: boolean }) {
+  if (!value) return null
+  return (
+    <div className="flex items-start gap-3">
+      <span className="text-[12px] font-semibold shrink-0 w-24" style={{ color: 'var(--ink-3)' }}>{label}</span>
+      <span className="text-[13px] font-medium" style={{ color: 'var(--ink)', direction: ltr ? 'ltr' : undefined }}>{value}</span>
+    </div>
+  )
+}
+
+function SkillTags({ value }: { value?: string | null }) {
+  const items = value ? value.split(',').map(s => s.trim()).filter(Boolean) : []
+  if (!items.length) return null
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {items.map(s => <span key={s} className="px-2.5 py-0.5 rounded-full text-[11.5px] font-semibold" style={{ background: 'var(--purple-050)', color: 'var(--purple)' }}>{s}</span>)}
+    </div>
+  )
+}
 
 export default async function CandidateDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   if (!UUID_RE.test(id)) notFound()
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -40,12 +60,7 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
     .single()
   if (!candidate) notFound()
 
-  const { count: appsCount } = await service
-    .from('applications')
-    .select('*', { count: 'exact', head: true })
-    .eq('candidate_id', id)
-
-  // For institution viewers: load their active jobs for the invite button
+  // For institution viewers: load their active jobs
   let institutionForInvite: { id: string; institution_name: string } | null = null
   let activeJobsForInvite: { id: string; title: string }[] = []
   if (viewerProfile.role === 'מוסד') {
@@ -67,11 +82,9 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
   }
 
   type ProfileRow = { full_name?: string | null; phone?: string | null }
-  const name     = (candidate.profiles as ProfileRow | null)?.full_name ?? '—'
-  const phone    = (candidate.profiles as ProfileRow | null)?.phone ?? null
+  const name    = (candidate.profiles as ProfileRow | null)?.full_name ?? '—'
+  const phone   = (candidate.profiles as ProfileRow | null)?.phone ?? null
   const initials = name !== '—' ? name.split(' ').slice(0, 2).map((w: string) => w[0]).join('') : '?'
-  const sc       = AVAIL_PILL[candidate.availability_status] ?? AVAIL_PILL['לא פעילה']
-  const isStage  = ["שנה ב' - סטאג'", "שנה ג' - סטאג'", "סטאג'"].includes(candidate.academic_level ?? '')
   const backHref = viewerProfile.role === 'מוסד' ? '/institution/candidates' : '/candidates'
 
   const waLink = phone ? (() => {
@@ -80,60 +93,62 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
     return `https://wa.me/${n}?text=${t}`
   })() : null
 
+  const workHistory: WorkEntry[] = Array.isArray(candidate.experiences)
+    ? (candidate.experiences as WorkEntry[]).filter(e => e?.workplace?.trim())
+    : []
+
+  const showExperience = ['סטאג׳', "שנה ב' - סטאג'", "שנה ג' - סטאג'"].includes(candidate.academic_level ?? '')
+
   return (
     <div className="p-4 md:p-8 max-w-2xl" dir="rtl">
       <Link href={backHref}
-        className="inline-flex items-center gap-2 text-[13px] font-semibold mb-6 no-underline transition-colors"
+        className="inline-flex items-center gap-2 text-[13px] font-semibold mb-6 no-underline"
         style={{ color: 'var(--ink-3)' }}>
         <ArrowRight size={14} />חזרה למועמדות
       </Link>
 
-      {/* Hero card */}
-      <div className="rounded-[20px] overflow-hidden mb-4"
-        style={{ background: '#fff', border: '1px solid var(--line)', boxShadow: '0 4px 24px rgba(15,11,35,.08)' }}>
-        <div className="h-1.5" style={{ background: 'linear-gradient(90deg, var(--purple), var(--teal))' }} />
-        <div className="p-6">
+      <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>
+
+        {/* Header */}
+        <div className="px-6 py-6" style={{ background: 'linear-gradient(135deg, #3B1F6E 0%, #5B3AAB 100%)' }}>
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 rounded-full flex items-center justify-center text-[20px] font-bold text-white shrink-0"
-              style={{ background: 'linear-gradient(135deg, var(--purple), var(--teal))' }}>
+            <div className="w-14 h-14 rounded-full flex items-center justify-center text-[20px] font-black shrink-0"
+              style={{ background: 'rgba(255,255,255,.18)', color: '#fff', letterSpacing: '-.02em' }}>
               {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-[24px] font-extrabold leading-tight" style={{ color: 'var(--ink)', letterSpacing: '-.02em' }}>
-                {name}
-              </h1>
-              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 text-[12px] font-bold px-2.5 py-1 rounded-full"
-                  style={{ background: sc.bg, color: sc.color }}>
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: sc.dot }} />
-                  {candidate.availability_status}
-                </span>
-                {candidate.city && (
-                  <span className="flex items-center gap-1 text-[13px]" style={{ color: 'var(--ink-3)' }}>
-                    <MapPin size={12} />{candidate.city}
-                  </span>
-                )}
-              </div>
+              <h1 className="text-[19px] font-black text-white leading-tight">{name}</h1>
+              {candidate.specialization && (
+                <p className="text-[13px] font-semibold mt-1" style={{ color: 'rgba(255,255,255,.8)' }}>{candidate.specialization}</p>
+              )}
             </div>
           </div>
 
-          {/* Contact buttons */}
-          <div className="flex gap-3 mt-5 flex-wrap">
+          {candidate.availability_status && (
+            <div className="mt-4">
+              <span className="inline-block px-3 py-1 rounded-full text-[11.5px] font-bold"
+                style={{ background: 'rgba(255,255,255,.18)', color: '#fff' }}>
+                {candidate.availability_status}
+              </span>
+            </div>
+          )}
+
+          {/* Action buttons */}
+          <div className="flex gap-2 mt-4 flex-wrap">
             {phone && (
               <a href={`tel:${phone}`}
-                className="flex items-center gap-2 h-10 px-5 rounded-[10px] text-[13.5px] font-bold no-underline transition-all"
-                style={{ background: 'var(--bg-2)', color: 'var(--ink-2)', border: '1px solid var(--line)' }}>
-                <Phone size={15} />{phone}
+                className="flex items-center gap-1.5 h-9 px-4 rounded-[10px] text-[12.5px] font-bold no-underline"
+                style={{ background: 'rgba(255,255,255,.15)', color: '#fff', border: '1px solid rgba(255,255,255,.25)' }}>
+                <Phone size={13} />{phone}
               </a>
             )}
             {waLink && (
               <a href={waLink} target="_blank" rel="noreferrer"
-                className="flex items-center gap-2 h-10 px-5 rounded-[10px] text-[13.5px] font-bold text-white no-underline transition-all"
-                style={{ background: '#25D366', boxShadow: '0 3px 12px rgba(37,211,102,.3)' }}>
-                <MessageCircle size={15} />וואצאפ
+                className="flex items-center gap-1.5 h-9 px-4 rounded-[10px] text-[12.5px] font-bold no-underline"
+                style={{ background: '#25D366', color: '#fff' }}>
+                <MessageCircle size={13} />וואצאפ
               </a>
             )}
-            {/* Invite button for institution viewers */}
             {institutionForInvite && (
               <InviteButton
                 candidateId={id}
@@ -144,7 +159,6 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
                 activeJobs={activeJobsForInvite}
               />
             )}
-            {/* Send message — institution viewers with an approved institution */}
             {viewerProfile.role === 'מוסד' && institutionForInvite && candidate.profile_id && (
               <SendMessageButton
                 toCandidateName={name}
@@ -154,123 +168,111 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
             )}
           </div>
         </div>
-      </div>
 
-      {/* Study day — highlighted */}
-      {(candidate as Candidate).study_day && (
-        <div className="flex items-center gap-3 px-5 py-3.5 rounded-[14px] mb-4"
-          style={{ background: '#FFFBEB', border: '1px solid #FDE68A', boxShadow: 'var(--shadow-sm)' }}>
-          <BookOpen size={18} style={{ color: '#D97706', flexShrink: 0 }} />
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[.07em]" style={{ color: '#92400E' }}>יום לימודים</p>
-            <p className="text-[14px] font-extrabold" style={{ color: '#78350F' }}>{(candidate as Candidate).study_day}</p>
-          </div>
-        </div>
-      )}
-
-      <div className="space-y-4">
-        {/* Academic */}
-        <Section title="השכלה ורמה אקדמית">
-          <Row icon={<GraduationCap size={15} />} label="רמה"       value={candidate.academic_level ?? '—'} />
-          <Row icon={<Building2 size={15} />}     label="מכללה"     value={candidate.college ?? '—'} />
-          {candidate.graduation_year && (
-            <Row icon={<Calendar size={15} />} label="שנת סיום" value={String(candidate.graduation_year)} />
-          )}
-          {candidate.specialization && (
-            <Row icon={<Briefcase size={15} />} label="התמחות" value={candidate.specialization} />
-          )}
-        </Section>
-
-        {/* Stage / Experience */}
-        {isStage ? (
-          <Section title="פרטי סטאג׳">
-            <Row icon={<MapPin size={15} />} label="מקום שליחות" value={candidate.placement_location ?? 'לא צוין'} />
-          </Section>
-        ) : (candidate.prev_employer || candidate.prev_role || candidate.years_experience) ? (
-          <Section title="ניסיון קודם">
-            {candidate.prev_role     && <Row icon={<Briefcase size={15} />} label="תפקיד"      value={candidate.prev_role} />}
-            {candidate.prev_employer && <Row icon={<Building2 size={15} />} label="מקום עבודה" value={candidate.prev_employer} />}
-            {!!candidate.years_experience && (
-              <Row icon={<Calendar size={15} />} label="שנות ניסיון" value={`${candidate.years_experience} שנים`} />
-            )}
-          </Section>
-        ) : null}
+        {/* Personal */}
+        <CardSection title="פרטים אישיים">
+          <CardRow label="טלפון" value={phone} ltr />
+          <CardRow label="עיר / ישוב" value={candidate.city} />
+          <CardRow label="כתובת" value={candidate.address} />
+          <CardRow label="מחוז" value={candidate.district} />
+          <CardRow label="שנת לידה" value={candidate.birth_year ? String(candidate.birth_year) : null} />
+          <CardRow label="מצב משפחתי" value={candidate.marital_status} />
+        </CardSection>
 
         {/* Availability */}
         {(candidate.availability_from || candidate.availability_to) && (
-          <Section title="זמינות">
-            {candidate.availability_from && <Row icon={<Calendar size={15} />} label="מ-" value={new Date(candidate.availability_from).toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' })} />}
-            {candidate.availability_to   && <Row icon={<Calendar size={15} />} label="עד" value={new Date(candidate.availability_to).toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' })} />}
-          </Section>
+          <CardSection title="זמינות">
+            <CardRow label="מ-" value={candidate.availability_from} ltr />
+            <CardRow label="עד-" value={candidate.availability_to} ltr />
+          </CardSection>
+        )}
+
+        {/* Shlichut */}
+        {(candidate.shlichut_location || candidate.shlichut_years || candidate.study_day) && (
+          <CardSection title="שליחות">
+            <CardRow label="מיקום" value={candidate.shlichut_location} />
+            <CardRow label="שנים" value={candidate.shlichut_years} />
+            <CardRow label="יום לימוד" value={candidate.study_day} />
+          </CardSection>
+        )}
+
+        {/* Academic */}
+        {(candidate.college || candidate.academic_level || candidate.graduation_year || candidate.seniority_years) && (
+          <CardSection title="הכשרה אקדמית">
+            <CardRow label="מוסד" value={candidate.college} />
+            <CardRow label="רמה" value={candidate.academic_level} />
+            <CardRow label="שנת סיום" value={candidate.graduation_year ? String(candidate.graduation_year) : null} />
+            <CardRow label="ותק" value={candidate.seniority_years ? `${candidate.seniority_years} שנים` : null} />
+            {showExperience && <CardRow label="שנות ניסיון" value={candidate.years_experience ? String(candidate.years_experience) : null} />}
+          </CardSection>
+        )}
+
+        {/* Work history */}
+        {(workHistory.length > 0 || candidate.past_projects) && (
+          <CardSection title="ניסיון">
+            {workHistory.length > 0 && (
+              <div className="space-y-2">
+                {workHistory.map((e, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <span className="text-[12px] font-semibold shrink-0 w-24" style={{ color: 'var(--ink-3)' }}>מקום {i + 1}</span>
+                    <div>
+                      <p className="text-[13px] font-semibold" style={{ color: 'var(--ink)' }}>{e.workplace}</p>
+                      {e.manager && <p className="text-[12px]" style={{ color: 'var(--ink-3)' }}>מנהלת: {e.manager}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {candidate.past_projects && (
+              <div className={workHistory.length > 0 ? 'mt-2' : ''}>
+                <p className="text-[12px] font-semibold mb-1" style={{ color: 'var(--ink-3)' }}>פרויקטים נוספים</p>
+                <p className="text-[13px] whitespace-pre-wrap" style={{ color: 'var(--ink)' }}>{candidate.past_projects}</p>
+              </div>
+            )}
+          </CardSection>
         )}
 
         {/* Skills */}
-        {(candidate.technical_skills || candidate.interpersonal_skills) && (
-          <Section title="כישורים">
-            {candidate.technical_skills    && <TextBlock label="מקצועיים" text={candidate.technical_skills} />}
-            {candidate.interpersonal_skills && <TextBlock label="בין-אישיים" text={candidate.interpersonal_skills} />}
-          </Section>
+        {(candidate.technical_skills || candidate.interpersonal_skills || candidate.special_skills) && (
+          <CardSection title="כישורים">
+            {candidate.technical_skills && (
+              <div className="space-y-1">
+                <p className="text-[11px] font-bold" style={{ color: 'var(--ink-3)' }}>מקצועיים</p>
+                <SkillTags value={candidate.technical_skills} />
+              </div>
+            )}
+            {candidate.interpersonal_skills && (
+              <div className="space-y-1">
+                <p className="text-[11px] font-bold" style={{ color: 'var(--ink-3)' }}>בין-אישיים</p>
+                <SkillTags value={candidate.interpersonal_skills} />
+              </div>
+            )}
+            {candidate.special_skills && (
+              <div className="space-y-1">
+                <p className="text-[11px] font-bold" style={{ color: 'var(--ink-3)' }}>מיוחדים</p>
+                <SkillTags value={candidate.special_skills} />
+              </div>
+            )}
+          </CardSection>
         )}
 
-        {/* Bio / personal note */}
+        {/* Bio */}
         {(candidate.bio || candidate.personal_note) && (
-          <Section title="אודות">
-            {candidate.bio          && <TextBlock label="ביוגרפיה" text={candidate.bio} />}
-            {candidate.personal_note && <TextBlock label="הערה אישית" text={candidate.personal_note} />}
-          </Section>
+          <CardSection title="ביטוי אישי">
+            {candidate.bio && <p className="text-[13px] leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--ink)' }}>{candidate.bio}</p>}
+            {candidate.personal_note && <p className="text-[12px] mt-2" style={{ color: 'var(--ink-3)' }}>{candidate.personal_note}</p>}
+          </CardSection>
         )}
 
-        {/* CV link */}
-        {candidate.cv_url && (
-          <div className="rounded-[14px] border p-4 flex items-center gap-3"
-            style={{ background: '#fff', borderColor: 'var(--line)', boxShadow: 'var(--shadow-sm)' }}>
-            <FileText size={18} style={{ color: 'var(--purple)', flexShrink: 0 }} />
-            <a href={candidate.cv_url} target="_blank" rel="noreferrer"
-              className="text-[14px] font-bold no-underline"
-              style={{ color: 'var(--purple)' }}>
-              קורות חיים ↗
-            </a>
+        {/* Footer */}
+        {candidate.whatsapp_preference !== undefined && (
+          <div className="px-6 py-4" style={{ borderTop: '1px solid var(--line)' }}>
+            <span className="text-[11px] font-semibold" style={{ color: 'var(--ink-4)' }}>
+              עדכונים דרך: {candidate.whatsapp_preference ? 'WhatsApp' : 'SMS'}
+            </span>
           </div>
         )}
-
-        {/* Stats */}
-        {viewerProfile.role !== 'מוסד' && (
-          <Section title="נתונים">
-            <Row icon={<Briefcase size={15} />} label="הגשות" value={`${appsCount ?? 0}`} />
-          </Section>
-        )}
       </div>
-    </div>
-  )
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-[14px] overflow-hidden"
-      style={{ background: '#fff', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>
-      <div className="px-5 py-3" style={{ borderBottom: '1px solid var(--line-soft)', background: 'var(--bg)' }}>
-        <p className="text-[11px] font-bold uppercase tracking-[.08em]" style={{ color: 'var(--ink-4)' }}>{title}</p>
-      </div>
-      <div className="px-5 py-4 space-y-3">{children}</div>
-    </div>
-  )
-}
-
-function Row({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="w-5 shrink-0 flex justify-center" style={{ color: 'var(--ink-4)' }}>{icon}</span>
-      <span className="text-[13px] font-medium w-28 shrink-0" style={{ color: 'var(--ink-3)' }}>{label}</span>
-      <span className="text-[13.5px] font-semibold" style={{ color: 'var(--ink)' }}>{value}</span>
-    </div>
-  )
-}
-
-function TextBlock({ label, text }: { label: string; text: string }) {
-  return (
-    <div>
-      <p className="text-[11.5px] font-bold uppercase tracking-[.06em] mb-1.5" style={{ color: 'var(--ink-4)' }}>{label}</p>
-      <p className="text-[13.5px] leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--ink-2)' }}>{text}</p>
     </div>
   )
 }
