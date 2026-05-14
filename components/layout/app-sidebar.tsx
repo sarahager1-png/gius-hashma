@@ -59,32 +59,16 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
   ],
   'מוסד': [
     {
+      label: 'גיוס',
       items: [
-        { href: '/dashboard',                label: 'בית',             icon: LayoutDashboard },
-      ],
-    },
-    {
-      label: 'ניהול גיוס',
-      items: [
-        { href: '/institution/jobs',         label: 'משרות',           icon: Briefcase       },
+        { href: '/institution/jobs',         label: 'פרסום משרות',     icon: Briefcase       },
+        { href: '/institution/candidates',   label: 'חיפוש מועמדות',  icon: Users           },
         { href: '/institution/matches',      label: 'התאמות',          icon: Sparkles        },
-        { href: '/institution/applications', label: 'הגשות',           icon: FileStack       },
-        { href: '/institution/candidates',   label: 'מועמדות',         icon: Users           },
-      ],
-    },
-    {
-      label: 'תקשורת',
-      items: [
-        { href: '/institution/inquiries',    label: 'פניות',           icon: Inbox           },
-        { href: '/institution/interviews',   label: 'לוח ראיונות',    icon: CalendarDays    },
-        { href: '/institution/invitations',  label: 'הזמנות שנשלחו',  icon: Send            },
-        { href: '/notifications',            label: 'התראות',          icon: BellRing        },
       ],
     },
     {
       label: 'חשבון',
       items: [
-        { href: '/history',                  label: 'היסטוריה',        icon: History         },
         { href: '/institution/profile',      label: 'פרופיל המוסד',   icon: UserCog         },
         { href: '/settings',                 label: 'הגדרות',          icon: Settings        },
         { href: '/help',                     label: 'הנחיות',          icon: HelpCircle      },

@@ -22,10 +22,16 @@ function canAccess(role: string, pathname: string): boolean {
     return allowed.some(p => pathname === p || pathname.startsWith(p + '/'))
   }
 
-  // institution: own pages — NOT /dashboard
+  // institution: only recruitment core + account
   if (role === 'מוסד') {
-    const allowed = ['/institution', '/notifications', '/history', '/help', '/settings', '/candidates']
-    if (/^\/candidates\/[^/]+$/.test(pathname)) return true
+    const allowed = [
+      '/institution/jobs',
+      '/institution/candidates',
+      '/institution/matches',
+      '/institution/profile',
+      '/settings',
+      '/help',
+    ]
     return allowed.some(p => pathname === p || pathname.startsWith(p + '/'))
   }
 
