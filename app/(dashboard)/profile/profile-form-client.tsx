@@ -77,9 +77,38 @@ const CITIES = [
   'אחר',
 ]
 
+const COLLEGES = [
+  'אוניברסיטת תל אביב',
+  'האוניברסיטה העברית בירושלים',
+  'אוניברסיטת בר-אילן',
+  'אוניברסיטת חיפה',
+  'אוניברסיטת בן-גוריון בנגב',
+  'הטכניון',
+  'האוניברסיטה הפתוחה',
+  'מכללת לוינסקי לחינוך',
+  'מכללת בית ברל',
+  'מכללת סמינר הקיבוצים',
+  'מכללת גורדון',
+  'מכללת תלפיות',
+  'מכללת אחוה',
+  'מכללת קיי',
+  'מכללת הרצוג',
+  'מדרשת ליפשיץ',
+  'מכללת אוהלו',
+  'מכללת ספיר',
+  'מכללת עמק יזרעאל',
+  'מכללת צפת',
+  'מכון לב',
+  'מכון טל',
+  'מכללת אריאל',
+  'המכללה האקדמית נתניה',
+  'אחר',
+]
+
+const SENIORITY_YEARS = Array.from({ length: 20 }, (_, i) => String(i + 1))
+
 const MARITAL_STATUSES = ['רווקה', 'נשואה', 'גרושה', 'אלמנה']
 const STUDY_DAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי']
-const SENIORITY_OPTIONS = ['שנה ראשונה', '1–2 שנים', '3–5 שנים', '5–10 שנים', '10+ שנים']
 
 const TECHNICAL_SKILLS_OPTIONS = [
   'לוח חכם', 'Google Classroom', 'כלים דיגיטליים', 'Office Suite',
@@ -353,15 +382,15 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
 
       <AccSection id="education" title="הכשרה אקדמית" open={open.has('education')} onToggle={() => toggle('education')}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="מכללה / אוניברסיטה">{inp(candForm.college, v => setC('college', v))}</Field>
+          <Field label="מכללה / אוניברסיטה">{sel(candForm.college, v => setC('college', v), COLLEGES, 'בחרי מוסד')}</Field>
           <Field label="שנת סיום">{inp(candForm.graduation_year, v => setC('graduation_year', v), { type: 'number', dir: 'ltr', placeholder: '2025' })}</Field>
           <Field label="רמה אקדמית">{sel(candForm.academic_level, v => setC('academic_level', v), ACADEMIC_LEVELS)}</Field>
           {showExperience && (
             <Field label="שנות ניסיון">{inp(candForm.years_experience, v => setC('years_experience', v), { type: 'number', min: 0, dir: 'ltr', placeholder: '0' })}</Field>
           )}
         </div>
-        <Field label="ותק">
-          <Chips value={candForm.seniority_years} onChange={v => setC('seniority_years', v)} options={SENIORITY_OPTIONS} />
+        <Field label="ותק (שנים)">
+          {sel(candForm.seniority_years, v => setC('seniority_years', v), SENIORITY_YEARS, 'בחרי')}
         </Field>
       </AccSection>
 
