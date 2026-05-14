@@ -112,20 +112,20 @@ export default function LandingPage() {
         .lp-bg {
           position: absolute; inset: 0; pointer-events: none; z-index: 0;
           background:
-            radial-gradient(ellipse 150% 60% at 50% 6%,  rgba(0,195,225,.42)  0%, rgba(0,130,170,.12) 40%, transparent 60%),
-            radial-gradient(ellipse 70%  50% at 50% 45%,  rgba(201,168,76,.06)  0%, transparent 60%),
-            radial-gradient(ellipse 50%  35% at 90% 80%,  rgba(201,168,76,.08)  0%, transparent 55%),
-            radial-gradient(ellipse 38%  28% at 8%  65%,  rgba(91,58,171,.06)   0%, transparent 55%),
-            linear-gradient(180deg, #071820 0%, #060F1A 100%);
+            radial-gradient(ellipse 160% 55% at 50% 0%,   rgba(0,195,225,.72)  0%, rgba(0,145,185,.28) 38%, transparent 60%),
+            radial-gradient(ellipse 80%  55% at 50% 42%,  rgba(201,168,76,.1)   0%, transparent 58%),
+            radial-gradient(ellipse 55%  38% at 92% 80%,  rgba(201,168,76,.12)  0%, transparent 55%),
+            radial-gradient(ellipse 42%  30% at 6%  62%,  rgba(91,58,171,.09)   0%, transparent 55%),
+            linear-gradient(180deg, #061520 0%, #050D18 100%);
         }
         /* warm light leak breathing */
         .lp-bg::before {
           content:'';
           position:absolute; inset:0;
           background:
-            linear-gradient(125deg, rgba(201,168,76,.05) 0%, transparent 32%),
-            linear-gradient(245deg, rgba(0,155,195,.04) 0%, transparent 28%);
-          animation: lightLeak 18s ease-in-out infinite alternate;
+            linear-gradient(125deg, rgba(201,168,76,.1) 0%, transparent 35%),
+            linear-gradient(245deg, rgba(0,155,195,.08) 0%, transparent 30%);
+          animation: lightLeak 14s ease-in-out infinite alternate;
         }
         /* star field */
         .lp-bg::after {
@@ -148,7 +148,7 @@ export default function LandingPage() {
         /* cinematic grain */
         .lp-grain {
           position: absolute; inset: 0; pointer-events:none; z-index:3;
-          opacity: .028;
+          opacity: .038;
           background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
           background-size: 180px 180px;
           animation: grainAnim 0.4s steps(1) infinite;
@@ -286,43 +286,44 @@ export default function LandingPage() {
         }
         .lp-nav-btn:hover { color:#fff; background:rgba(255,255,255,.13); border-color:rgba(255,255,255,.25); box-shadow:0 4px 16px rgba(0,0,0,.2); }
 
-        /* ── QUOTE — atmospheric floating whisper ── */
+        /* ── QUOTE — atmospheric card ── */
         .lp-quote {
           position: relative; z-index: 10;
-          padding: 8px 20px 8px;
+          padding: 6px 20px;
           flex-shrink: 0;
           animation: floatQuote 9s ease-in-out 1s infinite;
         }
         .lp-quote-box {
           max-width: 560px; margin: 0 auto;
-          background: rgba(201,168,76,.012);
+          background: rgba(201,168,76,.03);
           backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-          border: 1px solid rgba(201,168,76,.07);
-          border-radius: 999px;
-          padding: 9px 18px 9px 14px;
-          display: flex; align-items: center; gap: 10px;
-          box-shadow: 0 1px 0 rgba(255,255,255,.02) inset, 0 0 20px rgba(201,168,76,.02);
+          border: 1px solid rgba(201,168,76,.12);
+          border-radius: 16px;
+          padding: 12px 16px 12px 14px;
+          display: flex; align-items: flex-start; gap: 10px;
+          box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 0 24px rgba(201,168,76,.05);
         }
         .lp-quote-mark-sm {
-          font-size: 19px; line-height: 1; flex-shrink:0;
+          font-size: 22px; line-height: 1.2; flex-shrink:0; margin-top: 1px;
           background: linear-gradient(135deg, #D4A840, #EDD870, #C9941C);
           -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
           font-family: Georgia, serif;
-          opacity: .75;
         }
+        .lp-quote-content { flex: 1; }
         .lp-quote-text-sm {
-          font-size: 11px; font-weight: 400; color: rgba(255,255,255,.46);
-          line-height: 1.5; flex:1;
-          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+          font-size: 11px; font-weight: 400; color: rgba(255,255,255,.55);
+          line-height: 1.65;
+          white-space: normal;
         }
-        @media(max-width:480px){ .lp-quote-text-sm { font-size:10px; } }
+        @media(max-width:480px){ .lp-quote-text-sm { font-size:10.5px; } }
         .lp-quote-src {
-          font-size: 9px; font-weight: 700; letter-spacing: .1em;
-          flex-shrink:0; opacity: .72;
+          display: block; margin-top: 7px;
+          font-size: 9px; font-weight: 700; letter-spacing: .12em;
           background: linear-gradient(90deg, #C9A84C, #E8C96A, #C9A84C);
           background-size: 200% auto;
           -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
           animation: shimGold 6s linear infinite;
+          opacity: .8;
         }
 
         /* ── HERO BODY ── */
@@ -337,8 +338,8 @@ export default function LandingPage() {
           gap: 0;
         }
         .lp-brand {
-          display: flex; flex-direction: column; align-items: center; gap: 5px;
-          margin-bottom: 14px;
+          display: flex; flex-direction: column; align-items: center; gap: 4px;
+          margin-bottom: 10px;
         }
         .lp-brand-logo {
           position: relative;
@@ -402,7 +403,7 @@ export default function LandingPage() {
         .lp-tagline {
           font-size: 11.5px; font-style: italic; font-weight: 500;
           color: rgba(201,168,76,.6);
-          letter-spacing: .04em; margin-bottom: 18px; margin-top: 8px;
+          letter-spacing: .04em; margin-bottom: 12px; margin-top: 6px;
           line-height: 1.5;
         }
 
@@ -625,10 +626,12 @@ export default function LandingPage() {
         <div className="lp-quote" style={{ opacity: visible ? 1 : 0, transition:'opacity .5s' }}>
           <div className="lp-quote-box">
             <span className="lp-quote-mark-sm">&ldquo;</span>
-            <p className="lp-quote-text-sm">
-              עבודה במוסד של כ&quot;ק מו&quot;ח אדמו&quot;ר זצוקללה&quot;ה נבג&quot;מ זי&quot;ע ובפרט במקצוע החינוך על טהרת הקודש – הרי זה צינור וכלי לקבלת ברכות השי&quot;ת בכלל.
-            </p>
-            <div className="lp-quote-src">הרבי · התקשרות · עמוד 115</div>
+            <div className="lp-quote-content">
+              <p className="lp-quote-text-sm">
+                עבודה במוסד של כ&quot;ק מו&quot;ח אדמו&quot;ר זצוקללה&quot;ה נבג&quot;מ זי&quot;ע ובפרט במקצוע החינוך על טהרת הקודש – הרי זה צינור וכלי לקבלת ברכות השי&quot;ת בכלל.
+              </p>
+              <div className="lp-quote-src">הרבי · התקשרות · עמוד 115</div>
+            </div>
           </div>
         </div>
 
