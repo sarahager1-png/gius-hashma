@@ -38,567 +38,483 @@ function LoginPageInner() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
 
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(16px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to   { opacity: 1; }
-        }
-        @keyframes shimmer {
-          0%   { background-position: -200% center; }
-          100% { background-position: 200% center; }
-        }
-        @keyframes float1 {
-          0%, 100% { transform: translateY(0px) scale(1); }
-          50%       { transform: translateY(-20px) scale(1.03); }
-        }
-        @keyframes float2 {
-          0%, 100% { transform: translateY(0px) scale(1); }
-          50%       { transform: translateY(-14px) scale(0.97); }
-        }
-        @keyframes pulse-soft {
-          0%, 100% { opacity: 0.55; }
-          50%       { opacity: 0.85; }
-        }
+        @keyframes shimG        { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes shimGold     { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes fadeUp       { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes fadeIn       { from{opacity:0} to{opacity:1} }
+        @keyframes pulseGlow    { 0%,100%{opacity:.28} 50%{opacity:.6} }
+        @keyframes pulseWarm    { 0%,100%{opacity:.18} 50%{opacity:.42} }
+        @keyframes lightLeak    { 0%,100%{opacity:.03} 50%{opacity:.08} }
+        @keyframes grainAnim    { 0%,100%{transform:translate(0,0)} 20%{transform:translate(-2px,1px)} 40%{transform:translate(1px,-1px)} 60%{transform:translate(-1px,2px)} 80%{transform:translate(2px,-2px)} }
+        @keyframes floatCard    { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+        @keyframes dustRise     { 0%{opacity:0;transform:translateY(0)} 15%{opacity:.55} 85%{opacity:.18} 100%{opacity:0;transform:translateY(-90px)} }
 
-        .login-root {
-          height: 100vh;
-          overflow: hidden;
-          display: flex;
-          direction: rtl;
+        *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+        .lg-root {
+          height: 100svh; overflow: hidden;
+          display: flex; direction: rtl;
           font-family: 'Heebo', system-ui, sans-serif;
-          background: #0E0B1D;
+          background: #060F1A;
         }
 
-        /* ── Hero panel (right, 44%) ── */
-        .hero-panel {
-          width: 44%;
-          flex-shrink: 0;
-          position: relative;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-        }
-        @media (max-width: 1023px) { .hero-panel { display: none; } }
-
-        .hero-bg {
-          position: absolute; inset: 0;
-          background: linear-gradient(160deg,
-            #110820 0%, #1E1040 25%, #281450 50%, #1A0D38 75%, #0E0818 100%
-          );
-        }
-        .hero-glow-top {
-          position: absolute; inset: 0;
-          background: radial-gradient(ellipse 110% 70% at 50% -5%,
-            rgba(100,65,180,.5) 0%, transparent 65%
-          );
-          animation: pulse-soft 7s ease-in-out infinite;
-        }
-        .hero-glow-gold {
-          position: absolute; inset: 0;
-          background: radial-gradient(ellipse 55% 38% at 78% 88%,
-            rgba(212,176,106,.14) 0%, transparent 60%
-          );
-        }
-        .hero-glow-side {
-          position: absolute; inset: 0;
-          background: radial-gradient(ellipse 50% 42% at -8% 42%,
-            rgba(60,35,110,.38) 0%, transparent 65%
-          );
-        }
-        .hero-pattern {
-          position: absolute; inset: 0;
-          opacity: 0.04;
-          background-image:
-            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cpolygon points='36,6 42.2,22 60,19 50,33 60,47 42.2,44 36,60 29.8,44 12,47 22,33 12,19 29.8,22' fill='none' stroke='white' stroke-width='0.7'/%3E%3C/svg%3E");
-          background-size: 72px 72px;
-        }
-        .hero-grid {
-          position: absolute; inset: 0;
-          opacity: 0.028;
-          background-image:
-            linear-gradient(rgba(255,255,255,.9) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,.9) 1px, transparent 1px);
-          background-size: 44px 44px;
-        }
-        .hero-orb-1 {
-          position: absolute; top: 8%; right: -10%;
-          width: 320px; height: 320px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(100,65,180,.22) 0%, transparent 70%);
-          animation: float1 10s ease-in-out infinite;
-        }
-        .hero-orb-2 {
-          position: absolute; bottom: 10%; left: -12%;
-          width: 280px; height: 280px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(212,176,106,.12) 0%, transparent 70%);
-          animation: float2 13s ease-in-out infinite;
-        }
-
-        .hero-content {
-          position: relative; z-index: 10;
-          flex: 1;
-          display: flex; flex-direction: column;
-          align-items: center; justify-content: center;
-          padding: 32px 44px;
-          text-align: center;
-        }
-
-        .hero-logo-wrap {
-          position: relative; margin-bottom: 28px;
-          display: flex; align-items: center; justify-content: center;
-        }
-        .hero-logo-halo {
-          position: absolute;
-          width: 110px; height: 110px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(212,176,106,.18) 0%, transparent 70%);
-        }
-        .hero-logo-img {
-          position: relative; z-index: 1;
-          width: 60px; height: 60px; object-fit: contain;
-          filter: brightness(0) invert(1); opacity: 0.88;
-        }
-
-        .hero-eyebrow {
-          font-size: 10px; font-weight: 700;
-          letter-spacing: 0.18em; text-transform: uppercase;
-          color: rgba(212,176,106,.55);
-          margin-bottom: 8px;
-        }
-        .hero-divider {
-          width: 36px; height: 1.5px;
-          background: linear-gradient(90deg, transparent, rgba(212,176,106,.6), transparent);
-          margin: 0 auto 18px;
-        }
-
-        .hero-system-name {
-          font-size: 52px; font-weight: 900;
-          color: #ffffff;
-          letter-spacing: -0.04em;
-          line-height: 1;
-          margin-bottom: 7px;
-        }
-        .hero-system-sub {
-          font-size: 12.5px; font-weight: 400;
-          color: rgba(255,255,255,.32);
-          letter-spacing: 0.08em;
-          margin-bottom: 48px;
-        }
-
-        .hero-quote-block {
-          width: 100%; max-width: 290px;
-          margin: 0 auto 44px;
-          padding: 24px 26px;
-          border-radius: 18px;
-          background: rgba(255,255,255,.04);
-          border: 1px solid rgba(212,176,106,.15);
-          backdrop-filter: blur(10px);
-          position: relative;
-        }
-        .hero-quote-mark {
-          position: absolute; top: -12px; right: 22px;
-          font-size: 48px; line-height: 1;
-          color: rgba(212,176,106,.3); font-family: Georgia, serif;
-        }
-        .hero-quote-text {
-          font-size: 16.5px; font-weight: 700;
-          color: rgba(255,255,255,.85);
-          line-height: 1.6; letter-spacing: 0.01em; margin-bottom: 10px;
-        }
-        .hero-quote-text em {
-          font-style: normal;
-          background: linear-gradient(90deg, #D4B06A 0%, #F0D08A 50%, #D4B06A 100%);
-          background-size: 200% auto;
-          -webkit-background-clip: text; background-clip: text;
-          -webkit-text-fill-color: transparent;
-          animation: shimmer 8s linear infinite;
-        }
-        .hero-quote-source {
-          font-size: 10.5px; font-weight: 600;
-          color: rgba(212,176,106,.5); letter-spacing: 0.08em;
-        }
-
-        .hero-features {
-          display: flex; flex-direction: column; gap: 9px;
-          width: 100%; max-width: 278px; margin: 0 auto;
-        }
-        .hero-feature-row {
-          display: flex; align-items: center; gap: 12px;
-          padding: 10px 14px; border-radius: 12px;
-          background: rgba(255,255,255,.03);
-          border: 1px solid rgba(255,255,255,.05);
-          transition: background 200ms;
-        }
-        .hero-feature-row:hover { background: rgba(255,255,255,.055); }
-        .hero-feature-icon {
-          width: 30px; height: 30px; border-radius: 8px;
-          display: flex; align-items: center; justify-content: center;
-          flex-shrink: 0; font-size: 14px;
-          background: rgba(212,176,106,.09);
-          border: 1px solid rgba(212,176,106,.13);
-        }
-        .hero-feature-text {
-          font-size: 12px; font-weight: 500;
-          color: rgba(255,255,255,.55); text-align: right; flex: 1;
-        }
-
-        .hero-footer {
-          position: relative; z-index: 10;
-          text-align: center; padding: 0 0 22px;
-          font-size: 10px; color: rgba(255,255,255,.12);
-          letter-spacing: 0.05em;
-        }
-
-        /* ── Form panel (left, 56%) ── */
-        .form-panel {
-          flex: 1; display: flex; flex-direction: column;
+        /* ══ HERO PANEL (right, 44%) ══ */
+        .lg-hero {
+          width: 44%; flex-shrink: 0;
           position: relative; overflow: hidden;
-          background: #090717;
-          height: 100vh;
+          display: flex; flex-direction: column;
         }
-        .form-panel::before {
-          content: '';
-          position: absolute; top: -150px; right: -150px;
-          width: 500px; height: 500px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(80,50,150,.12) 0%, transparent 70%);
-          pointer-events: none;
+        @media(max-width:1023px){ .lg-hero { display:none; } }
+
+        .lg-hero-bg {
+          position:absolute; inset:0;
+          background:
+            radial-gradient(ellipse 160% 45% at 50% 0%,   rgba(0,195,225,.65)  0%, rgba(0,140,185,.22) 40%, transparent 62%),
+            radial-gradient(ellipse 60%  55% at 50% 50%,  rgba(201,168,76,.07)  0%, transparent 58%),
+            radial-gradient(ellipse 45%  35% at 92% 80%,  rgba(201,168,76,.10)  0%, transparent 55%),
+            radial-gradient(ellipse 35%  28% at 6%  65%,  rgba(0,140,180,.06)   0%, transparent 55%),
+            linear-gradient(180deg, #071820 0%, #060F18 100%);
         }
-        .form-panel::after {
-          content: '';
-          position: absolute; bottom: -100px; left: -100px;
-          width: 400px; height: 400px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(212,176,106,.05) 0%, transparent 70%);
-          pointer-events: none;
+        .lg-hero-bg::before {
+          content:''; position:absolute; inset:0;
+          background:
+            linear-gradient(125deg, rgba(201,168,76,.08) 0%, transparent 40%),
+            linear-gradient(245deg, rgba(0,155,195,.04) 0%, transparent 30%);
+          animation: lightLeak 14s ease-in-out infinite alternate;
         }
-        .form-panel-dots {
-          position: absolute; inset: 0; opacity: 0.018;
-          background-image: radial-gradient(circle, rgba(180,140,255,1) 1px, transparent 1px);
-          background-size: 30px 30px; pointer-events: none;
+        .lg-hero-bg::after {
+          content:''; position:absolute; inset:0;
+          background-image:
+            radial-gradient(1px 1px at 18% 18%, rgba(255,255,255,.18) 0%, transparent 100%),
+            radial-gradient(1px 1px at 74% 10%, rgba(255,255,255,.14) 0%, transparent 100%),
+            radial-gradient(1.5px 1.5px at 44% 32%, rgba(255,255,255,.12) 0%, transparent 100%),
+            radial-gradient(1px 1px at 90% 55%, rgba(255,255,255,.1) 0%, transparent 100%),
+            radial-gradient(1px 1px at 30% 68%, rgba(255,255,255,.09) 0%, transparent 100%),
+            radial-gradient(1px 1px at 62% 80%, rgba(255,255,255,.08) 0%, transparent 100%),
+            radial-gradient(1px 1px at 8%  44%, rgba(255,255,255,.11) 0%, transparent 100%),
+            radial-gradient(1px 1px at 52% 90%, rgba(255,255,255,.07) 0%, transparent 100%),
+            radial-gradient(1px 1px at 35% 5%,  rgba(255,255,255,.14) 0%, transparent 100%);
+          filter:blur(.3px); opacity:.65;
+        }
+        .lg-hero-grain {
+          position:absolute; inset:0; pointer-events:none; z-index:2;
+          opacity:.028;
+          background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+          background-size:180px 180px;
+          animation:grainAnim .4s steps(1) infinite;
+        }
+        .lg-hero-dust {
+          position:absolute; inset:0; pointer-events:none; z-index:2; overflow:hidden;
+        }
+        .lg-hero-dust::before {
+          content:''; position:absolute; bottom:35%; left:46%;
+          width:2px; height:2px; border-radius:50%;
+          background:rgba(201,168,76,.35);
+          box-shadow:14px 9px 0 0 rgba(201,168,76,.18),-20px 16px 0 1px rgba(0,200,235,.12),38px -6px 0 0 rgba(255,255,255,.07),-10px -22px 0 1px rgba(201,168,76,.1);
+          animation:dustRise 11s ease-out 1.8s infinite;
         }
 
-        .form-topbar {
-          position: absolute; top: 20px; left: 24px; z-index: 10;
+        .lg-hero-content {
+          position:relative; z-index:10;
+          flex:1; display:flex; flex-direction:column;
+          align-items:center; justify-content:center;
+          padding:32px 44px; text-align:center;
         }
-        .form-admin-btn {
-          display: flex; align-items: center; gap: 6px;
-          padding: 7px 14px; border-radius: 10px;
-          font-size: 12px; font-weight: 600;
-          color: rgba(180,160,220,.45);
-          background: rgba(255,255,255,.04);
-          border: 1px solid rgba(255,255,255,.08);
-          text-decoration: none; transition: all 200ms;
+
+        /* logo box — matches landing page */
+        .lg-logo-wrap { position:relative; margin-bottom:24px; }
+        .lg-logo-box {
+          position:relative;
+          width:72px; height:72px;
+          background:rgba(255,252,248,.93);
+          border-radius:20px;
+          display:flex; align-items:center; justify-content:center;
+          padding:6px; margin:0 auto;
+          box-shadow:
+            inset 0 1.5px 0 rgba(255,255,255,.95),
+            0 4px 20px rgba(0,0,0,.4),
+            0 0 36px rgba(0,175,215,.2),
+            0 0 70px rgba(201,168,76,.1);
         }
-        .form-admin-btn:hover {
-          background: rgba(255,255,255,.08);
-          color: rgba(200,180,240,.75);
-          border-color: rgba(255,255,255,.14);
+        .lg-logo-box::before {
+          content:''; position:absolute; inset:-20px; border-radius:40px;
+          background:radial-gradient(ellipse, rgba(0,175,215,.16) 0%, rgba(201,168,76,.09) 55%, transparent 70%);
+          filter:blur(22px); animation:pulseGlow 6s ease-in-out infinite; pointer-events:none;
         }
+        .lg-logo-box::after {
+          content:''; position:absolute; inset:-5px; border-radius:25px;
+          border:1px solid rgba(201,168,76,.16);
+          animation:pulseWarm 7s ease-in-out infinite; pointer-events:none;
+        }
+
+        .lg-hero-eyebrow {
+          font-size:10px; font-weight:700; letter-spacing:.18em;
+          color:rgba(0,195,225,.55); margin-bottom:8px;
+        }
+        .lg-hero-divider {
+          width:36px; height:1.5px;
+          background:linear-gradient(90deg, transparent, rgba(0,195,225,.5), transparent);
+          margin:0 auto 16px;
+        }
+        .lg-hero-name {
+          font-size:52px; font-weight:900; letter-spacing:-.04em; line-height:1;
+          color:#fff; margin-bottom:6px;
+        }
+        .lg-hero-sub {
+          font-size:12px; font-weight:400; letter-spacing:.08em;
+          color:rgba(255,255,255,.32); margin-bottom:44px;
+        }
+
+        /* quote card — matches landing style */
+        .lg-quote-card {
+          width:100%; max-width:298px; margin:0 auto 40px;
+          background:rgba(201,168,76,.055);
+          backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+          border:1px solid rgba(201,168,76,.22);
+          border-radius:18px; padding:20px 22px;
+          box-shadow:0 1px 0 rgba(255,255,255,.07) inset, 0 0 28px rgba(201,168,76,.09);
+          position:relative;
+        }
+        .lg-quote-mark {
+          position:absolute; top:-10px; right:18px;
+          font-size:40px; line-height:1;
+          background:linear-gradient(135deg, #D4A840, #EDD870, #C9941C);
+          -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+          font-family:Georgia,serif;
+        }
+        .lg-quote-text {
+          font-size:16px; font-weight:700;
+          color:rgba(255,255,255,.88); line-height:1.65; margin-bottom:10px;
+        }
+        .lg-quote-text em {
+          font-style:normal;
+          background:linear-gradient(90deg, #C8A040 0%, #EDD070 30%, #F8E898 55%, #EDD070 75%, #C8A040 100%);
+          background-size:200% auto;
+          -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+          animation:shimG 8s linear infinite;
+        }
+        .lg-quote-src {
+          font-size:10px; font-weight:700; letter-spacing:.12em;
+          background:linear-gradient(90deg, #C9A84C, #E8C96A, #C9A84C);
+          background-size:200% auto;
+          -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+          animation:shimGold 6s linear infinite; opacity:.8;
+        }
+
+        /* feature rows */
+        .lg-features { display:flex; flex-direction:column; gap:8px; width:100%; max-width:280px; margin:0 auto; }
+        .lg-feat-row {
+          display:flex; align-items:center; gap:12px;
+          padding:10px 14px; border-radius:13px;
+          background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+          transition:background .2s;
+        }
+        .lg-feat-row:hover { background:rgba(255,255,255,.07); }
+        .lg-feat-icon {
+          width:30px; height:30px; border-radius:8px; flex-shrink:0;
+          display:flex; align-items:center; justify-content:center; font-size:13px;
+          background:rgba(0,175,210,.09); border:1px solid rgba(0,175,210,.14);
+        }
+        .lg-feat-text { font-size:12px; font-weight:500; color:rgba(255,255,255,.5); flex:1; text-align:right; }
+
+        .lg-hero-footer {
+          position:relative; z-index:10; text-align:center; padding:0 0 20px;
+          font-size:10px; color:rgba(255,255,255,.12); letter-spacing:.05em;
+        }
+
+        /* ══ FORM PANEL (left, 56%) ══ */
+        .lg-form {
+          flex:1; display:flex; flex-direction:column;
+          position:relative; overflow:hidden;
+          background:#060F1A;
+        }
+        .lg-form::before {
+          content:''; position:absolute; top:-120px; right:-120px;
+          width:420px; height:420px; border-radius:50%;
+          background:radial-gradient(circle, rgba(0,150,185,.07) 0%, transparent 70%);
+          pointer-events:none;
+        }
+        .lg-form::after {
+          content:''; position:absolute; bottom:-80px; left:-80px;
+          width:360px; height:360px; border-radius:50%;
+          background:radial-gradient(circle, rgba(201,168,76,.04) 0%, transparent 70%);
+          pointer-events:none;
+        }
+        .lg-form-grain {
+          position:absolute; inset:0; pointer-events:none; z-index:1;
+          opacity:.022;
+          background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+          background-size:180px 180px;
+          animation:grainAnim .4s steps(1) infinite;
+        }
+
+        .lg-topbar {
+          position:absolute; top:20px; left:24px; z-index:10;
+        }
+        .lg-admin-btn {
+          display:flex; align-items:center; gap:6px;
+          padding:7px 14px; border-radius:10px;
+          font-size:12px; font-weight:600;
+          color:rgba(255,255,255,.3);
+          background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);
+          text-decoration:none; transition:all .2s;
+          font-family:'Heebo',system-ui,sans-serif;
+        }
+        .lg-admin-btn:hover { background:rgba(255,255,255,.07); color:rgba(255,255,255,.6); border-color:rgba(255,255,255,.14); }
 
         /* Mobile brand */
-        .mobile-brand {
-          display: none; flex-direction: column;
-          align-items: center; padding: 52px 24px 20px;
-          text-align: center; position: relative; z-index: 1;
+        .lg-mobile-brand {
+          display:none; flex-direction:column;
+          align-items:center; padding:52px 24px 20px;
+          text-align:center; position:relative; z-index:2;
         }
-        @media (max-width: 1023px) { .mobile-brand { display: flex; } }
-        .mobile-logo-ring {
-          width: 68px; height: 68px; border-radius: 20px;
-          background: linear-gradient(135deg, #2E1860 0%, #5B3FA3 100%);
-          box-shadow: 0 8px 28px rgba(67,40,116,.45);
-          display: flex; align-items: center; justify-content: center;
-          margin-bottom: 14px;
-        }
-
-        .form-main {
-          flex: 1; display: flex;
-          align-items: center; justify-content: center;
-          padding: 40px 24px; position: relative; z-index: 1;
-        }
-        .form-card {
-          width: 100%; max-width: 400px;
-          background: rgba(255,255,255,.05);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255,255,255,.09);
-          border-radius: 24px;
-          padding: 40px 36px;
-          box-shadow: 0 24px 80px rgba(0,0,0,.45), 0 8px 32px rgba(0,0,0,.3);
+        @media(max-width:1023px){ .lg-mobile-brand { display:flex; } }
+        .lg-mobile-logo {
+          width:64px; height:64px; border-radius:18px;
+          background:rgba(255,252,248,.93);
+          box-shadow:0 4px 20px rgba(0,0,0,.4), 0 0 32px rgba(0,175,215,.16);
+          display:flex; align-items:center; justify-content:center;
+          margin-bottom:12px;
         }
 
-        .form-welcome {
-          margin-bottom: 32px;
-          animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
+        /* form area */
+        .lg-form-main {
+          flex:1; display:flex; align-items:center; justify-content:center;
+          padding:40px 24px; position:relative; z-index:2;
         }
-        .form-welcome-eyebrow {
-          display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+        .lg-card {
+          width:100%; max-width:400px;
+          background:rgba(255,255,255,.09);
+          backdrop-filter:blur(24px) saturate(140%); -webkit-backdrop-filter:blur(24px) saturate(140%);
+          border:1px solid rgba(255,255,255,.2);
+          border-radius:24px; padding:40px 36px;
+          box-shadow:
+            0 2px 0 rgba(255,255,255,.1) inset,
+            0 20px 60px rgba(0,0,0,.35),
+            0 0 0 1px rgba(0,180,220,.04);
+          animation:floatCard 6s ease-in-out infinite;
         }
-        .form-welcome-dot {
-          width: 6px; height: 6px; border-radius: 50%;
-          background: linear-gradient(135deg, #D4B06A, #F0D08A); flex-shrink: 0;
+
+        .lg-welcome { margin-bottom:30px; animation:fadeUp .6s cubic-bezier(.16,1,.3,1) both; }
+        .lg-eyebrow-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+        .lg-eyebrow-dot {
+          width:6px; height:6px; border-radius:50%; flex-shrink:0;
+          background:linear-gradient(135deg, #C9A84C, #E8C96A);
         }
-        .form-welcome-eyebrow-text {
-          font-size: 11px; font-weight: 700;
-          letter-spacing: 0.12em; color: rgba(212,176,106,.6);
-          text-transform: uppercase;
+        .lg-eyebrow-text {
+          font-size:11px; font-weight:700; letter-spacing:.12em;
+          color:rgba(201,168,76,.65); text-transform:uppercase;
         }
-        .form-heading {
-          font-size: 28px; font-weight: 900;
-          color: rgba(255,255,255,.92); line-height: 1.2;
-          letter-spacing: -0.03em; margin-bottom: 8px;
+        .lg-heading {
+          font-size:28px; font-weight:900; color:rgba(255,255,255,.92);
+          line-height:1.2; letter-spacing:-.03em; margin-bottom:8px;
         }
-        .form-sub {
-          font-size: 13.5px; color: rgba(255,255,255,.38);
-          line-height: 1.65; font-weight: 400;
+        .lg-sub {
+          font-size:13.5px; color:rgba(255,255,255,.38);
+          line-height:1.65; font-weight:400;
         }
 
         /* Tabs */
-        .form-tabs {
-          display: flex; gap: 0;
-          border: 1px solid rgba(255,255,255,.1);
-          background: rgba(255,255,255,.03);
-          border-radius: 12px; overflow: hidden;
-          margin-bottom: 26px;
-          animation: fadeUp 0.5s 0.1s cubic-bezier(0.16,1,0.3,1) both;
+        .lg-tabs {
+          display:flex; gap:0;
+          border:1px solid rgba(255,255,255,.1);
+          background:rgba(255,255,255,.04);
+          border-radius:13px; overflow:hidden;
+          margin-bottom:24px;
+          animation:fadeUp .5s .1s cubic-bezier(.16,1,.3,1) both;
         }
-        .form-tab {
-          flex: 1; padding: 10px;
-          font-size: 13px; font-weight: 600;
-          color: rgba(255,255,255,.35);
-          background: transparent; border: none;
-          cursor: pointer; transition: all 200ms;
-          font-family: 'Heebo', system-ui, sans-serif;
+        .lg-tab {
+          flex:1; padding:10px;
+          font-size:13px; font-weight:600;
+          color:rgba(255,255,255,.35);
+          background:transparent; border:none; cursor:pointer;
+          transition:all .2s; font-family:'Heebo',system-ui,sans-serif;
         }
-        .form-tab.active {
-          background: rgba(100,65,180,.45);
-          color: rgba(255,255,255,.92);
-          box-shadow: inset 0 0 0 1px rgba(255,255,255,.12);
+        .lg-tab.active {
+          background:rgba(0,175,210,.32); color:rgba(255,255,255,.92);
+          box-shadow:inset 0 0 0 1px rgba(0,195,225,.22);
         }
-        .form-tab:first-child { border-radius: 10px 0 0 10px; }
-        .form-tab:last-child  { border-radius: 0 10px 10px 0; }
-        .form-tab:hover:not(.active) { background: rgba(255,255,255,.05); color: rgba(255,255,255,.6); }
+        .lg-tab:first-child { border-radius:12px 0 0 12px; }
+        .lg-tab:last-child  { border-radius:0 12px 12px 0; }
+        .lg-tab:hover:not(.active) { background:rgba(255,255,255,.05); color:rgba(255,255,255,.6); }
 
-        /* Google button — glassmorphism style */
-        .form-google-btn {
-          position: relative; width: 100%; height: 54px;
-          border-radius: 14px;
-          display: flex; align-items: center; justify-content: center; gap: 12px;
-          font-family: 'Heebo', system-ui, sans-serif;
-          font-size: 15px; font-weight: 700;
-          cursor: pointer; transition: all 260ms cubic-bezier(0.16,1,0.3,1);
-          border: 1px solid rgba(255,255,255,.22);
-          outline: none;
-          animation: fadeUp 0.6s 0.2s cubic-bezier(0.16,1,0.3,1) both;
-          overflow: hidden;
-          color: rgba(255,255,255,.92);
-          background: rgba(255,255,255,.08);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          box-shadow: 0 4px 20px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.1);
+        /* Google button — matches landing page */
+        .lg-goog-btn {
+          width:100%; height:52px; border-radius:14px;
+          display:flex; align-items:center; justify-content:center; gap:11px;
+          font-family:'Heebo',system-ui,sans-serif; font-size:14.5px; font-weight:700;
+          cursor:pointer; outline:none; position:relative; overflow:hidden;
+          background:linear-gradient(160deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.06) 100%);
+          border:1px solid rgba(255,255,255,.2);
+          color:#fff; transition:all .28s cubic-bezier(.16,1,.3,1); letter-spacing:-.01em;
+          box-shadow:inset 0 1.5px 0 rgba(255,255,255,.15), 0 4px 20px rgba(0,0,0,.25), 0 0 0 1px rgba(0,180,220,.04);
+          animation:fadeUp .6s .2s cubic-bezier(.16,1,.3,1) both;
         }
-        .form-google-btn:hover {
-          background: rgba(255,255,255,.13);
-          border-color: rgba(255,255,255,.35);
-          box-shadow: 0 8px 32px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.15);
-          transform: translateY(-1px);
+        .lg-goog-btn::before {
+          content:''; position:absolute; inset:0; border-radius:inherit;
+          background:linear-gradient(160deg,rgba(255,255,255,.08) 0%,transparent 60%);
+          opacity:0; transition:opacity .28s;
         }
-        .form-google-btn:active { transform: scale(0.985) translateY(0); }
-        .form-google-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .form-google-btn .btn-icon {
-          background: rgba(255,255,255,.92); border-radius: 8px;
-          width: 32px; height: 32px;
-          display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        }
+        .lg-goog-btn:hover { transform:translateY(-2px); box-shadow:inset 0 1.5px 0 rgba(255,255,255,.18), 0 10px 30px rgba(0,0,0,.35), 0 0 24px rgba(0,190,220,.1); border-color:rgba(255,255,255,.32); }
+        .lg-goog-btn:hover::before { opacity:1; }
+        .lg-goog-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+        .lg-goog-icon { background:rgba(255,255,255,.92); border-radius:8px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 
-        .form-divider {
-          display: flex; align-items: center; gap: 14px;
-          margin: 20px 0;
-          animation: fadeIn 0.5s 0.3s both;
+        .lg-divider {
+          display:flex; align-items:center; gap:14px;
+          margin:18px 0; animation:fadeIn .5s .3s both;
         }
-        .form-divider-line {
-          flex: 1; height: 1px;
-          background: rgba(255,255,255,.08);
-        }
-        .form-divider-text {
-          font-size: 11px; font-weight: 600;
-          color: rgba(255,255,255,.25); letter-spacing: 0.08em;
-        }
+        .lg-divider-line { flex:1; height:1px; background:rgba(255,255,255,.08); }
+        .lg-divider-text { font-size:11px; font-weight:600; color:rgba(255,255,255,.25); letter-spacing:.08em; }
 
-        .form-register-link {
-          display: block; text-align: center;
-          animation: fadeIn 0.5s 0.35s both;
+        .lg-register {
+          display:block; text-align:center; animation:fadeIn .5s .35s both;
         }
-        .form-register-link a {
-          font-size: 13px; font-weight: 600;
-          color: rgba(160,130,220,.7); text-decoration: none;
-          border-bottom: 1px solid rgba(160,130,220,.2);
-          transition: all 200ms;
+        .lg-register a {
+          font-size:13px; font-weight:600;
+          color:rgba(0,180,204,.65); text-decoration:none;
+          border-bottom:1px solid rgba(0,180,204,.2); transition:all .2s;
         }
-        .form-register-link a:hover {
-          color: rgba(190,165,240,.9);
-          border-color: rgba(190,165,240,.45);
+        .lg-register a:hover { color:rgba(0,200,224,.95); border-color:rgba(0,200,224,.45); }
+
+        .lg-error {
+          margin-top:12px; padding:10px 14px;
+          border-radius:12px; font-size:13px; font-weight:600;
+          color:#FCA5A5; background:rgba(200,60,60,.14);
+          border:1px solid rgba(200,60,60,.25); text-align:center;
+          animation:fadeUp .3s ease both;
         }
 
-        .form-error {
-          margin-top: 12px; padding: 10px 14px;
-          border-radius: 12px; font-size: 13px; font-weight: 600;
-          color: #FF9999; background: rgba(200,60,60,.15);
-          border: 1px solid rgba(200,60,60,.25); text-align: center;
-          animation: fadeUp 0.3s ease both;
-        }
-
-        .form-footer {
-          position: relative; z-index: 1;
-          text-align: center; padding: 0 0 20px;
-          font-size: 10.5px; color: rgba(255,255,255,.12);
+        .lg-form-footer {
+          position:relative; z-index:2; text-align:center; padding:0 0 20px;
+          font-size:10.5px; color:rgba(255,255,255,.12); letter-spacing:.04em;
         }
       `}</style>
 
-      <div className="login-root">
+      <div className="lg-root">
 
         {/* ══ Hero Panel ══ */}
-        <div className="hero-panel">
-          <div className="hero-bg" />
-          <div className="hero-glow-top" />
-          <div className="hero-glow-gold" />
-          <div className="hero-glow-side" />
-          <div className="hero-pattern" />
-          <div className="hero-grid" />
-          <div className="hero-orb-1" />
-          <div className="hero-orb-2" />
+        <div className="lg-hero">
+          <div className="lg-hero-bg" />
+          <div className="lg-hero-grain" />
+          <div className="lg-hero-dust" />
 
-          <div className="hero-content" style={{ opacity: mounted ? 1 : 0, transition: 'opacity 800ms ease' }}>
+          <div className="lg-hero-content" style={{ opacity: mounted ? 1 : 0, transition: 'opacity .8s ease' }}>
 
-            <div className="hero-logo-wrap">
-              <div className="hero-logo-halo" />
-              <Image
-                src="/logo-chabad.png"
-                alt="רשת אהלי יוסף יצחק"
-                width={60} height={60}
-                className="hero-logo-img"
-              />
+            <div className="lg-logo-wrap">
+              <div className="lg-logo-box">
+                <Image src="/logo-chabad.png" alt="השביל" width={58} height={58} style={{ objectFit:'contain' }} />
+              </div>
             </div>
 
-            <div className="hero-eyebrow">מערכת גיוס והשמה · רשת חינוך חב״ד</div>
-            <div className="hero-divider" />
+            <div className="lg-hero-eyebrow">מערכת גיוס והשמה · רשת חינוך חב״ד</div>
+            <div className="lg-hero-divider" />
+            <div className="lg-hero-name">הַשְּׁבִיל</div>
+            <div className="lg-hero-sub">מערכת חכמה לגיוס והשמה</div>
 
-            <div className="hero-system-name">הַשְּׁבִיל</div>
-            <div className="hero-system-sub">מערכת חכמה לגיוס והשמה</div>
-
-            <div className="hero-quote-block">
-              <div className="hero-quote-mark">&ldquo;</div>
-              <div className="hero-quote-text">
+            <div className="lg-quote-card">
+              <div className="lg-quote-mark">&ldquo;</div>
+              <div className="lg-quote-text">
                 דְּרָכֶיהָ דַרְכֵי נֹעַם<br/>
                 <em>וְכָל נְתִיבוֹתֶיהָ שָׁלוֹם</em>
               </div>
-              <div className="hero-quote-source">משלי ג׳, יז</div>
+              <div className="lg-quote-src">משלי ג׳, יז</div>
             </div>
 
-            <div className="hero-features">
+            <div className="lg-features">
               {[
                 { icon: '✦', text: 'התאמה חכמה של משרות ומועמדות' },
                 { icon: '◈', text: 'ניהול הגשות ומעקב בזמן אמת' },
                 { icon: '❋', text: 'ליווי אישי לאורך כל התהליך' },
               ].map(({ icon, text }) => (
-                <div key={text} className="hero-feature-row">
-                  <div className="hero-feature-icon">{icon}</div>
-                  <span className="hero-feature-text">{text}</span>
+                <div key={text} className="lg-feat-row">
+                  <div className="lg-feat-icon">{icon}</div>
+                  <span className="lg-feat-text">{text}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="hero-footer">
+          <div className="lg-hero-footer">
             הַשְּׁבִיל · עתודות לשליחות · 2026
           </div>
         </div>
 
         {/* ══ Form Panel ══ */}
-        <div className="form-panel">
-          <div className="form-panel-dots" />
+        <div className="lg-form">
+          <div className="lg-form-grain" />
 
-          <div className="form-topbar">
-            <a href="/register/admin" className="form-admin-btn">
+          <div className="lg-topbar">
+            <a href="/register/admin" className="lg-admin-btn">
               <KeyRound size={12} />
               הנהלה
             </a>
           </div>
 
           {/* Mobile brand */}
-          <div className="mobile-brand">
-            <div className="mobile-logo-ring">
-              <Image
-                src="/logo-chabad.png"
-                alt="השביל"
-                width={36} height={36}
-                style={{ filter: 'brightness(0) invert(1)', objectFit: 'contain' }}
-              />
+          <div className="lg-mobile-brand">
+            <div className="lg-mobile-logo">
+              <Image src="/logo-chabad.png" alt="השביל" width={44} height={44} style={{ objectFit:'contain' }} />
             </div>
-            <div style={{ fontSize: '22px', fontWeight: 900, color: 'rgba(255,255,255,.9)', letterSpacing: '-0.03em', marginBottom: '4px' }}>
+            <div style={{ fontSize:'22px', fontWeight:900, color:'rgba(255,255,255,.9)', letterSpacing:'-.03em', marginBottom:'4px' }}>
               הַשְּׁבִיל
             </div>
-            <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.38)' }}>
+            <div style={{ fontSize:'13px', color:'rgba(255,255,255,.38)' }}>
               מערכת חכמה לגיוס והשמה
             </div>
           </div>
 
-          <div className="form-main">
-            <div
-              className="form-card"
-              style={{ opacity: mounted ? 1 : 0, transition: 'opacity 600ms 100ms ease' }}
-            >
-              <div className="form-welcome">
-                <div className="form-welcome-eyebrow">
-                  <div className="form-welcome-dot" />
-                  <span className="form-welcome-eyebrow-text">כניסה למערכת</span>
+          <div className="lg-form-main">
+            <div className="lg-card" style={{ opacity: mounted ? 1 : 0, transition: 'opacity .6s .1s ease' }}>
+
+              <div className="lg-welcome">
+                <div className="lg-eyebrow-row">
+                  <div className="lg-eyebrow-dot" />
+                  <span className="lg-eyebrow-text">כניסה למערכת</span>
                 </div>
-                <h1 className="form-heading">ברוכה הבאה,</h1>
-                <p className="form-sub">
+                <h1 className="lg-heading">ברוכה הבאה,</h1>
+                <p className="lg-sub">
                   היכנסי עם חשבון Google שלך כדי<br />
                   לגשת למערכת הגיוס וההשמה
                 </p>
               </div>
 
-              {/* Tabs */}
-              <div className="form-tabs">
-                <button className="form-tab active">מועמדת</button>
-                <a href="/mosad" className="form-tab" style={{ textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>מוסד</a>
+              <div className="lg-tabs">
+                <button className="lg-tab active">מועמדת</button>
+                <a href="/mosad" className="lg-tab" style={{ textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>מוסד</a>
               </div>
 
-              <button
-                onClick={signInWithGoogle}
-                disabled={loading}
-                className="form-google-btn"
-              >
+              <button onClick={signInWithGoogle} disabled={loading} className="lg-goog-btn">
                 {loading ? (
                   <span>מתחברת...</span>
                 ) : (
                   <>
-                    <div className="btn-icon"><GoogleIcon /></div>
+                    <div className="lg-goog-icon"><GoogleIcon /></div>
                     <span>כניסה עם Google</span>
                   </>
                 )}
               </button>
 
-              {error && <div className="form-error">{error}</div>}
+              {error && <div className="lg-error">{error}</div>}
 
-              <div className="form-divider">
-                <div className="form-divider-line" />
-                <span className="form-divider-text">או</span>
-                <div className="form-divider-line" />
+              <div className="lg-divider">
+                <div className="lg-divider-line" />
+                <span className="lg-divider-text">או</span>
+                <div className="lg-divider-line" />
               </div>
 
-              <div className="form-register-link">
+              <div className="lg-register">
                 <a href="/register">הגשת מועמדות חדשה ←</a>
               </div>
+
             </div>
           </div>
 
-          <div className="form-footer">
+          <div className="lg-form-footer">
             © 2026 רשת חינוך חב״ד · כל הזכויות שמורות
           </div>
         </div>
+
       </div>
     </>
   )
