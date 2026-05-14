@@ -300,22 +300,21 @@ function LoginPageInner() {
         }
         .lg-card {
           width:100%; max-width:400px;
-          background:rgba(8,22,40,.48);
-          backdrop-filter:blur(40px) saturate(200%); -webkit-backdrop-filter:blur(40px) saturate(200%);
-          border:1px solid rgba(255,255,255,.18);
-          border-top:1px solid rgba(255,255,255,.28);
+          background:rgba(255,255,255,.72);
+          backdrop-filter:blur(40px) saturate(180%); -webkit-backdrop-filter:blur(40px) saturate(180%);
+          border:1px solid rgba(255,255,255,.9);
+          border-top:1px solid rgba(255,255,255,.95);
           border-radius:24px; padding:40px 36px;
           box-shadow:
-            0 2px 0 rgba(255,255,255,.12) inset,
-            0 28px 80px rgba(10,24,50,.18),
-            0 0 60px rgba(0,175,210,.07),
-            0 0 0 1px rgba(0,180,220,.08);
+            0 2px 0 rgba(255,255,255,.95) inset,
+            0 20px 60px rgba(10,30,60,.14),
+            0 4px 16px rgba(10,30,60,.08);
           animation:floatCard 6s ease-in-out infinite;
           position:relative;
         }
         .lg-card::before {
           content:''; position:absolute; top:0; left:16px; right:16px; height:1px;
-          background:linear-gradient(90deg, transparent, rgba(0,195,225,.45), rgba(201,168,76,.25), transparent);
+          background:linear-gradient(90deg, transparent, rgba(0,175,210,.5), rgba(201,168,76,.3), transparent);
           border-radius:1px;
         }
 
@@ -323,18 +322,18 @@ function LoginPageInner() {
         .lg-eyebrow-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
         .lg-eyebrow-dot {
           width:6px; height:6px; border-radius:50%; flex-shrink:0;
-          background:linear-gradient(135deg, #C9A84C, #E8C96A);
+          background:linear-gradient(135deg, #B8920A, #D4A820);
         }
         .lg-eyebrow-text {
           font-size:11px; font-weight:700; letter-spacing:.12em;
-          color:rgba(201,168,76,.65); text-transform:uppercase;
+          color:rgba(160,118,10,.8); text-transform:uppercase;
         }
         .lg-heading {
-          font-size:28px; font-weight:900; color:rgba(255,255,255,.92);
+          font-size:28px; font-weight:900; color:rgba(8,24,44,.9);
           line-height:1.2; letter-spacing:-.03em; margin-bottom:8px;
         }
         .lg-sub {
-          font-size:13.5px; color:rgba(255,255,255,.38);
+          font-size:13.5px; color:rgba(8,24,44,.46);
           line-height:1.65; font-weight:400;
         }
 
@@ -348,61 +347,54 @@ function LoginPageInner() {
         .lg-tab {
           flex:1; padding:11px 10px;
           font-size:13px; font-weight:700;
-          color:rgba(255,255,255,.38);
-          background:rgba(255,255,255,.07);
-          border:1px solid rgba(255,255,255,.1);
+          color:rgba(8,24,44,.42);
+          background:rgba(8,24,44,.06);
+          border:1px solid rgba(8,24,44,.1);
           border-radius:13px; cursor:pointer;
           transition:all .22s cubic-bezier(.16,1,.3,1);
           font-family:'Heebo',system-ui,sans-serif;
-          backdrop-filter:blur(10px);
           letter-spacing:-.01em;
         }
         .lg-tab.active {
           color:#fff;
-          background:rgba(0,175,210,.3);
-          border-color:rgba(0,195,225,.4);
-          box-shadow:0 4px 18px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.12), 0 0 18px rgba(0,195,225,.14);
+          background:linear-gradient(135deg, #007A8C, #00A4BC);
+          border-color:rgba(0,164,188,.6);
+          box-shadow:0 4px 18px rgba(0,140,175,.3), inset 0 1px 0 rgba(255,255,255,.2);
         }
-        .lg-tab:hover:not(.active) { color:rgba(255,255,255,.72); background:rgba(255,255,255,.11); border-color:rgba(255,255,255,.18); transform:translateY(-1px); }
+        .lg-tab:hover:not(.active) { color:rgba(8,24,44,.72); background:rgba(8,24,44,.1); border-color:rgba(8,24,44,.16); transform:translateY(-1px); }
 
-        /* Google button — matches landing page */
+        /* Google button */
         .lg-goog-btn {
           width:100%; height:52px; border-radius:14px;
           display:flex; align-items:center; justify-content:center; gap:11px;
           font-family:'Heebo',system-ui,sans-serif; font-size:14.5px; font-weight:700;
           cursor:pointer; outline:none; position:relative; overflow:hidden;
-          background:linear-gradient(160deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.06) 100%);
-          border:1px solid rgba(255,255,255,.2);
-          color:#fff; transition:all .28s cubic-bezier(.16,1,.3,1); letter-spacing:-.01em;
-          box-shadow:inset 0 1.5px 0 rgba(255,255,255,.15), 0 4px 20px rgba(0,0,0,.25), 0 0 0 1px rgba(0,180,220,.04);
+          background:rgba(8,24,44,.07);
+          border:1px solid rgba(8,24,44,.14);
+          color:rgba(8,24,44,.82); transition:all .28s cubic-bezier(.16,1,.3,1); letter-spacing:-.01em;
+          box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 2px 8px rgba(10,30,60,.08);
           animation:fadeUp .6s .2s cubic-bezier(.16,1,.3,1) both;
         }
-        .lg-goog-btn::before {
-          content:''; position:absolute; inset:0; border-radius:inherit;
-          background:linear-gradient(160deg,rgba(255,255,255,.08) 0%,transparent 60%);
-          opacity:0; transition:opacity .28s;
-        }
-        .lg-goog-btn:hover { transform:translateY(-2px); box-shadow:inset 0 1.5px 0 rgba(255,255,255,.18), 0 10px 30px rgba(0,0,0,.35), 0 0 24px rgba(0,190,220,.1); border-color:rgba(255,255,255,.32); }
-        .lg-goog-btn:hover::before { opacity:1; }
+        .lg-goog-btn:hover { transform:translateY(-2px); background:rgba(8,24,44,.11); border-color:rgba(8,24,44,.22); box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 6px 20px rgba(10,30,60,.12); }
         .lg-goog-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
-        .lg-goog-icon { background:rgba(255,255,255,.92); border-radius:8px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .lg-goog-icon { background:rgba(255,255,255,.9); border-radius:8px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 1px 4px rgba(0,0,0,.1); }
 
         .lg-divider {
           display:flex; align-items:center; gap:14px;
           margin:18px 0; animation:fadeIn .5s .3s both;
         }
-        .lg-divider-line { flex:1; height:1px; background:rgba(255,255,255,.08); }
-        .lg-divider-text { font-size:11px; font-weight:600; color:rgba(255,255,255,.25); letter-spacing:.08em; }
+        .lg-divider-line { flex:1; height:1px; background:rgba(8,24,44,.1); }
+        .lg-divider-text { font-size:11px; font-weight:600; color:rgba(8,24,44,.32); letter-spacing:.08em; }
 
         .lg-register {
           display:block; text-align:center; animation:fadeIn .5s .35s both;
         }
         .lg-register a {
           font-size:13px; font-weight:600;
-          color:rgba(0,180,204,.65); text-decoration:none;
-          border-bottom:1px solid rgba(0,180,204,.2); transition:all .2s;
+          color:rgba(0,130,155,.85); text-decoration:none;
+          border-bottom:1px solid rgba(0,130,155,.25); transition:all .2s;
         }
-        .lg-register a:hover { color:rgba(0,200,224,.95); border-color:rgba(0,200,224,.45); }
+        .lg-register a:hover { color:rgba(0,155,185,.95); border-color:rgba(0,155,185,.5); }
 
         .lg-error {
           margin-top:12px; padding:10px 14px;
