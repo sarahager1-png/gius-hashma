@@ -300,16 +300,16 @@ function LoginPageInner() {
         }
         .lg-card {
           width:100%; max-width:400px;
-          background:rgba(6,16,28,.86);
-          backdrop-filter:blur(28px) saturate(140%); -webkit-backdrop-filter:blur(28px) saturate(140%);
-          border:1px solid rgba(255,255,255,.13);
-          border-top:1px solid rgba(255,255,255,.2);
+          background:rgba(8,22,40,.48);
+          backdrop-filter:blur(40px) saturate(200%); -webkit-backdrop-filter:blur(40px) saturate(200%);
+          border:1px solid rgba(255,255,255,.18);
+          border-top:1px solid rgba(255,255,255,.28);
           border-radius:24px; padding:40px 36px;
           box-shadow:
-            0 2px 0 rgba(255,255,255,.08) inset,
-            0 28px 80px rgba(10,24,50,.28),
-            0 0 60px rgba(0,175,210,.08),
-            0 0 0 1px rgba(0,180,220,.06);
+            0 2px 0 rgba(255,255,255,.12) inset,
+            0 28px 80px rgba(10,24,50,.18),
+            0 0 60px rgba(0,175,210,.07),
+            0 0 0 1px rgba(0,180,220,.08);
           animation:floatCard 6s ease-in-out infinite;
           position:relative;
         }
