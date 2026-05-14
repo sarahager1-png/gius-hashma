@@ -65,12 +65,21 @@ export default function InstitutionProfileFormClient({ institution, profile }: P
     <div className="space-y-6 rounded-[18px] border p-6" style={{ background: '#fff', borderColor: 'var(--line)', boxShadow: 'var(--shadow-sm)' }}>
 
       <section>
-        <h2 className="text-[13px] font-bold uppercase tracking-[.08em] mb-4" style={{ color: 'var(--ink-3)' }}>פרטי המוסד</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="col-span-2 space-y-1">
-            <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>שם המוסד *</label>
+            <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>שם בית הספר *</label>
             <input value={form.institution_name} onChange={e => set('institution_name', e.target.value)}
-              className={inputCls} style={inputStyle} />
+              className={inputCls} style={inputStyle} placeholder="שם בית הספר" />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>עיר</label>
+            <input value={form.city} onChange={e => set('city', e.target.value)}
+              className={inputCls} style={inputStyle} placeholder="עיר" />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>שם מנהלת</label>
+            <input value={form.principal_name} onChange={e => set('principal_name', e.target.value)}
+              className={inputCls} style={inputStyle} placeholder="שם מלא" />
           </div>
           <div className="col-span-2 space-y-2">
             <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>סוג בית הספר</label>
@@ -88,6 +97,14 @@ export default function InstitutionProfileFormClient({ institution, profile }: P
               })}
             </div>
           </div>
+        </div>
+      </section>
+
+      <hr style={{ borderColor: 'var(--line)' }} />
+
+      <section>
+        <h2 className="text-[13px] font-bold uppercase tracking-[.08em] mb-4" style={{ color: 'var(--ink-3)' }}>פרטים נוספים</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1">
             <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>מחוז</label>
             <select value={form.district} onChange={e => set('district', e.target.value)}
@@ -97,31 +114,13 @@ export default function InstitutionProfileFormClient({ institution, profile }: P
             </select>
           </div>
           <div className="space-y-1">
-            <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>עיר</label>
-            <input value={form.city} onChange={e => set('city', e.target.value)}
-              className={inputCls} style={inputStyle} />
-          </div>
-          <div className="space-y-1">
-            <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>כתובת</label>
-            <input value={form.address} onChange={e => set('address', e.target.value)}
-              className={inputCls} style={inputStyle} />
-          </div>
-          <div className="space-y-1">
             <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>טלפון מוסד</label>
             <input value={form.phone} onChange={e => set('phone', e.target.value)}
               className={inputCls} style={inputStyle} dir="ltr" />
           </div>
-        </div>
-      </section>
-
-      <hr style={{ borderColor: 'var(--line)' }} />
-
-      <section>
-        <h2 className="text-[13px] font-bold uppercase tracking-[.08em] mb-4" style={{ color: 'var(--ink-3)' }}>פרטי איש הקשר</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>שם מנהל/ת</label>
-            <input value={form.principal_name} onChange={e => set('principal_name', e.target.value)}
+            <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>כתובת</label>
+            <input value={form.address} onChange={e => set('address', e.target.value)}
               className={inputCls} style={inputStyle} />
           </div>
           <div className="space-y-1">
