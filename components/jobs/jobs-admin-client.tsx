@@ -20,12 +20,6 @@ const TYPE_CFG: Record<string, { border: string; tag: string; tagText: string }>
 }
 const DEFAULT_TYPE = { border: '#D1D5DB', tag: '#F3F4F6', tagText: '#6B7280' }
 
-const INST_TYPE_CFG: Record<string, { bg: string; color: string }> = {
-  'שלהבות חב"ד': { bg: 'var(--purple-050)', color: 'var(--purple)'   },
-  'בית חינוך':    { bg: 'var(--teal-050)',   color: 'var(--teal-600)' },
-  'קהילתי':       { bg: 'var(--amber-bg)',   color: 'var(--amber)'    },
-}
-
 const STATUSES = ['הכל', 'פעילה', 'מושהית', 'אוישה']
 
 function daysSince(d: string) {
@@ -118,15 +112,13 @@ export default function JobsAdminClient({ jobs, initialSearch = '' }: Props) {
       ) : (
         <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))' }}>
           {filtered.map(job => {
-            const instObj  = job.institutions as { institution_name?: string; institution_type?: string; city?: string } | undefined
+            const instObj  = job.institutions as { institution_name?: string; city?: string } | undefined
             const inst     = instObj?.institution_name
-            const instType = instObj?.institution_type
             const city     = job.city ?? instObj?.city
             const sc       = STATUS_CFG[job.status]       ?? STATUS_CFG['בוטלה']
             const tc       = TYPE_CFG[job.job_type ?? ''] ?? DEFAULT_TYPE
             const apps     = (job as { appCount?: number }).appCount ?? 0
             const newApps  = (job as { newAppCount?: number }).newAppCount ?? 0
-            const itc      = instType ? (INST_TYPE_CFG[instType] ?? { bg: '#F3F4F6', color: '#6B7280' }) : null
 
             return (
               <div
@@ -186,12 +178,6 @@ export default function JobsAdminClient({ jobs, initialSearch = '' }: Props) {
                     <span className="flex items-center gap-1">
                       <Clock size={11} />{daysSince(job.created_at)}
                     </span>
-                    {itc && instType && (
-                      <span className="text-[10.5px] font-bold px-1.5 py-0.5 rounded-full"
-                        style={{ background: itc.bg, color: itc.color }}>
-                        {instType}
-                      </span>
-                    )}
                   </div>
 
                   {/* Date range */}

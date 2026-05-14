@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { INSTITUTION_TYPES, DISTRICTS } from '@/lib/constants'
+import { DISTRICTS } from '@/lib/constants'
 
 interface Props {
   institution: {
@@ -11,7 +11,6 @@ interface Props {
     district: string | null
     address: string | null
     phone: string | null
-    institution_type: string | null
     whatsapp_preference: boolean
   }
   profile: {
@@ -27,7 +26,6 @@ export default function InstitutionProfileFormClient({ institution, profile }: P
     district: institution.district ?? '',
     address: institution.address ?? '',
     phone: institution.phone ?? '',
-    institution_type: institution.institution_type ?? '',
     principal_name: profile.full_name ?? '',
     principal_phone: profile.phone ?? '',
     whatsapp_preference: institution.whatsapp_preference,
@@ -70,14 +68,6 @@ export default function InstitutionProfileFormClient({ institution, profile }: P
             <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>שם המוסד *</label>
             <input value={form.institution_name} onChange={e => set('institution_name', e.target.value)}
               className={inputCls} style={inputStyle} />
-          </div>
-          <div className="space-y-1">
-            <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>סוג מוסד</label>
-            <select value={form.institution_type} onChange={e => set('institution_type', e.target.value)}
-              className={inputCls} style={inputStyle}>
-              <option value="">— בחרי —</option>
-              {INSTITUTION_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
           </div>
           <div className="space-y-1">
             <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>מחוז</label>

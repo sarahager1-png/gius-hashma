@@ -4,20 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { X, Plus, Building2, Send, CheckCircle2 } from 'lucide-react'
 
-const INST_TYPES = [
-  'שלהבות חב"ד',
-  'בית חינוך',
-  'קהילתי',
-  'גן ילדים',
-  'בית ספר יסודי',
-  'חטיבת ביניים',
-  'מוסד אחר',
-]
-
-
 interface FormState {
   name: string
-  type: string
   city: string
   principal: string
   phone: string
@@ -25,7 +13,7 @@ interface FormState {
   address: string
 }
 
-const EMPTY: FormState = { name: '', type: '', city: '', principal: '', phone: '', email: '', address: '' }
+const EMPTY: FormState = { name: '', city: '', principal: '', phone: '', email: '', address: '' }
 
 export default function AddInstitutionModal() {
   const router = useRouter()
@@ -149,19 +137,10 @@ export default function AddInstitutionModal() {
                     />
                   </div>
 
-                  {/* סוג מוסד + עיר */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="field-label">סוג מוסד</label>
-                      <select className="field-input" value={form.type} onChange={e => set('type', e.target.value)}>
-                        <option value="">בחר סוג</option>
-                        {INST_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="field-label">עיר</label>
-                      <input className="field-input" value={form.city} onChange={e => set('city', e.target.value)} placeholder="ירושלים" />
-                    </div>
+                  {/* עיר */}
+                  <div>
+                    <label className="field-label">עיר</label>
+                    <input className="field-input" value={form.city} onChange={e => set('city', e.target.value)} placeholder="ירושלים" />
                   </div>
 
                   {/* מנהל + טלפון */}

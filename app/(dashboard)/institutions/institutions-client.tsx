@@ -5,31 +5,16 @@ import { Search, Plus, MapPin, CheckCircle, Clock, X, Phone, User, MessageCircle
 import { useRouter } from 'next/navigation'
 import type { Institution } from '@/lib/types'
 
-const INST_TYPES = ['בית חינוך', 'קהילתי', 'שלהבות חב"ד']
-
-const TYPE_STYLE: Record<string, { bg: string; color: string; dot: string }> = {
-  'בית חינוך':      { bg: '#EDE9FE', color: 'var(--purple)', dot: '#7C3AED' },
-  'קהילתי':         { bg: '#E0F2FE', color: '#0369A1', dot: '#0EA5E9' },
-  'שלהבות חב"ד':   { bg: '#FEF3C7', color: '#92400E', dot: '#F59E0B' },
-}
-
-const TYPE_AVATAR: Record<string, { bg: string; color: string }> = {
-  'בית חינוך':      { bg: '#EDE9FE', color: 'var(--purple)' },
-  'קהילתי':         { bg: '#E0F2FE', color: '#0369A1' },
-  'שלהבות חב"ד':   { bg: '#FEF3C7', color: '#92400E' },
-}
-
 interface Props { institutions: Institution[] }
 
 export default function InstitutionsClient({ institutions }: Props) {
   const [search, setSearch]           = useState('')
   const [filter, setFilter]           = useState('הכל')
-  const [typeFilter, setTypeFilter]   = useState('הכל')
   const [approvingId, setApprovingId]       = useState<string | null>(null)
   const [approvedName, setApprovedName]     = useState<string | null>(null)
   const [approvedNotify, setApprovedNotify] = useState<{ name: string; phone: string } | null>(null)
   const [showAdd, setShowAdd]           = useState(false)
-  const [addForm, setAddForm]           = useState({ name: '', city: '', type: INST_TYPES[0], principal: '', phone: '', address: '' })
+  const [addForm, setAddForm]           = useState({ name: '', city: '', principal: '', phone: '', address: '' })
   const [saved, setSaved]               = useState(false)
   const [saving, setSaving]             = useState(false)
   const [saveError, setSaveError]       = useState('')
@@ -53,7 +38,7 @@ export default function InstitutionsClient({ institutions }: Props) {
     setSaved(true)
     setTimeout(() => {
       setSaved(false); setShowAdd(false)
-      setAddForm({ name: '', city: '', type: INST_TYPES[0], principal: '', phone: '', address: '' })
+      setAddForm({ name: '', city: '', principal: '', phone: '', address: '' })
       startTransition(() => router.refresh())
     }, 1800)
   }
@@ -81,7 +66,6 @@ export default function InstitutionsClient({ institutions }: Props) {
   const filtered = institutions.filter(i => {
     if (filter === 'ממתינים' && i.is_approved)  return false
     if (filter === 'פעילים'  && !i.is_approved) return false
-    if (typeFilter !== 'הכל' && i.institution_type !== typeFilter) return false
     const q = search.toLowerCase()
     if (q && !i.institution_name.includes(q) && !(i.city ?? '').includes(q)) return false
     return true
@@ -159,18 +143,6 @@ export default function InstitutionsClient({ institutions }: Props) {
           ))}
         </div>
 
-        {/* Type filter */}
-        <div className="flex rounded-lg p-0.5 gap-0.5" style={{ background: 'var(--bg-2)' }}>
-          {(['הכל', ...INST_TYPES] as string[]).map(t => (
-            <button key={t} onClick={() => setTypeFilter(t)}
-              className="px-3 py-1.5 rounded-md text-[12.5px] font-semibold transition-all"
-              style={typeFilter === t
-                ? { background: '#fff', color: 'var(--purple)', boxShadow: '0 1px 2px rgba(0,0,0,.05)' }
-                : { color: 'var(--ink-3)' }}>
-              {t}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Add Institution Modal */}
@@ -198,20 +170,11 @@ export default function InstitutionsClient({ institutions }: Props) {
                     className="w-full h-9 rounded-[8px] border px-3 text-[13px] font-medium outline-none"
                     style={{ borderColor: 'var(--line)', color: 'var(--ink)', background: '#fff' }} />
                 </FRow>
-                <div className="grid grid-cols-2 gap-3">
-                  <FRow label="עיר">
-                    <input value={addForm.city} onChange={e => setAddForm(f => ({ ...f, city: e.target.value }))}
-                      className="w-full h-9 rounded-[8px] border px-3 text-[13px] font-medium outline-none"
-                      style={{ borderColor: 'var(--line)', color: 'var(--ink)', background: '#fff' }} />
-                  </FRow>
-                  <FRow label="סוג מוסד">
-                    <select value={addForm.type} onChange={e => setAddForm(f => ({ ...f, type: e.target.value }))}
-                      className="w-full h-9 rounded-[8px] border px-3 text-[13px] font-medium outline-none"
-                      style={{ borderColor: 'var(--line)', color: 'var(--ink)', background: '#fff' }}>
-                      {INST_TYPES.map(t => <option key={t}>{t}</option>)}
-                    </select>
-                  </FRow>
-                </div>
+                <FRow label="עיר">
+                  <input value={addForm.city} onChange={e => setAddForm(f => ({ ...f, city: e.target.value }))}
+                    className="w-full h-9 rounded-[8px] border px-3 text-[13px] font-medium outline-none"
+                    style={{ borderColor: 'var(--line)', color: 'var(--ink)', background: '#fff' }} />
+                </FRow>
                 <div className="grid grid-cols-2 gap-3">
                   <FRow label="שם מנהלת">
                     <input value={addForm.principal} onChange={e => setAddForm(f => ({ ...f, principal: e.target.value }))}
@@ -261,8 +224,7 @@ export default function InstitutionsClient({ institutions }: Props) {
           {filtered.map(inst => {
             const initials = inst.institution_name.trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('')
             const isPending = !inst.is_approved
-            const typeStyle = TYPE_STYLE[inst.institution_type ?? ''] ?? { bg: 'var(--purple-050)', color: 'var(--purple)', dot: 'var(--purple)' }
-            const avatarStyle = TYPE_AVATAR[inst.institution_type ?? ''] ?? { bg: 'var(--purple-050)', color: 'var(--purple)' }
+            const avatarStyle = { bg: 'var(--purple-050)', color: 'var(--purple)' }
             const prof = inst.profiles as { full_name: string | null; phone: string | null } | null
 
             return (
@@ -286,13 +248,6 @@ export default function InstitutionsClient({ institutions }: Props) {
                       <p className="font-extrabold text-[15px] leading-snug" style={{ color: 'var(--ink)' }}>
                         {inst.institution_name}
                       </p>
-                      {inst.institution_type && (
-                        <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[11px] font-bold"
-                          style={typeStyle}>
-                          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: typeStyle.dot }} />
-                          {inst.institution_type}
-                        </span>
-                      )}
                     </div>
                     {/* Status dot */}
                     <span className="inline-flex items-center gap-1 shrink-0 text-[11.5px] font-bold px-2 py-1 rounded-full"

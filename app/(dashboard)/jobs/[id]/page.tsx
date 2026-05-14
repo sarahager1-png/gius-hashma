@@ -163,7 +163,6 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
         <div className="divide-y" style={{ borderColor: 'var(--line-soft)' }}>
           {inst?.city && <DetailRow icon={<MapPin size={15} />} label="מיקום" value={inst.city} />}
           {inst?.institution_name && <DetailRow icon={<Building2 size={15} />} label="מוסד" value={inst.institution_name} />}
-          {inst?.institution_type && <DetailRow icon={<Briefcase size={15} />} label="סוג מוסד" value={inst.institution_type} />}
           {job.specialization && <DetailRow icon={<GraduationCap size={15} />} label="התמחות" value={job.specialization} />}
           {job.placement_type && <DetailRow icon={null} label="אופי המשרה" value={job.placement_type} />}
           <DetailRow

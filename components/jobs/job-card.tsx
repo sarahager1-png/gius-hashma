@@ -6,7 +6,7 @@ import { formatDate } from '@/lib/utils'
 import type { Job } from '@/lib/types'
 
 interface Props {
-  job: Job & { institutions?: { institution_name: string; city: string | null; institution_type: string | null } }
+  job: Job & { institutions?: { institution_name: string; city: string | null } }
   applied: boolean
   candidateId: string | null
 }
@@ -15,12 +15,6 @@ const TYPE_CFG: Record<string, { bg: string; color: string }> = {
   "סטאג'": { bg: 'var(--purple-050)', color: 'var(--purple)'    },
   'חלקי':  { bg: 'var(--teal-050)',   color: 'var(--teal-600)'  },
   'מלא':   { bg: 'var(--green-bg)',   color: 'var(--green)'     },
-}
-
-const INST_TYPE_CFG: Record<string, { bg: string; color: string }> = {
-  'שלהבות חב"ד': { bg: 'var(--purple-050)', color: 'var(--purple)'   },
-  'בית חינוך':    { bg: 'var(--teal-050)',   color: 'var(--teal-600)' },
-  'קהילתי':       { bg: 'var(--amber-bg)',   color: 'var(--amber)'    },
 }
 
 export default function JobCard({ job, applied: initialApplied, candidateId }: Props) {
@@ -108,15 +102,6 @@ export default function JobCard({ job, applied: initialApplied, candidateId }: P
               {job.specialization}
             </span>
           )}
-          {inst?.institution_type && (() => {
-            const itc = INST_TYPE_CFG[inst.institution_type!] ?? { bg: '#F3F4F6', color: '#6B7280' }
-            return (
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full"
-                style={{ background: itc.bg, color: itc.color }}>
-                {inst.institution_type}
-              </span>
-            )
-          })()}
           {(job.start_date || job.end_date) && (
             <span className="flex items-center gap-1 text-[13px] font-semibold px-2 py-0.5 rounded-full"
               style={{ background: 'var(--teal-050)', color: 'var(--teal-700)' }}>

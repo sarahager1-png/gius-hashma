@@ -27,7 +27,7 @@ interface MatchedJob {
   job_type: string | null
   specialization: string | null
   description: string | null
-  institutions: { institution_name: string; institution_type: string | null; city: string | null } | null
+  institutions: { institution_name: string; city: string | null } | null
 }
 
 interface Interview {
@@ -432,7 +432,6 @@ export default function CandidateDashboard({ fullName, availabilityStatus, profi
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {matchedJobs.map((job, idx) => {
               const inst = job.institutions
-              const instType = inst?.institution_type ?? ''
               const gradients = [
                 'linear-gradient(135deg, #4B2E83 0%, #00A7B5 100%)',
                 'linear-gradient(135deg, #2D1B5C 0%, #4B2E83 100%)',
@@ -465,12 +464,6 @@ export default function CandidateDashboard({ fullName, availabilityStatus, profi
                     style={{ background: gradients[idx % 3] }}>
                     <div className="absolute inset-0 opacity-20"
                       style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,.3) 0%, transparent 60%)' }} />
-                    {instType && (
-                      <span className="relative text-[11px] font-bold px-2 py-0.5 rounded-full"
-                        style={{ background: 'rgba(255,255,255,.18)', color: '#fff', border: '1px solid rgba(255,255,255,.25)' }}>
-                        {instType}
-                      </span>
-                    )}
                   </div>
 
                   {/* Body */}

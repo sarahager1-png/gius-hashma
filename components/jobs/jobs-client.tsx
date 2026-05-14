@@ -8,7 +8,7 @@ import { SPECIALIZATIONS, JOB_TYPES } from '@/lib/constants'
 import type { Job } from '@/lib/types'
 
 interface Props {
-  jobs: (Job & { institutions?: { institution_name: string; city: string | null; institution_type: string | null } })[]
+  jobs: (Job & { institutions?: { institution_name: string; city: string | null } })[]
   appliedJobIds: Set<string>
   candidateId: string | null
   initialSearch?: string

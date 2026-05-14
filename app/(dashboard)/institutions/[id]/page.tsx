@@ -67,11 +67,6 @@ export default async function InstitutionDetailPage({ params }: { params: Promis
                 <Clock size={11} />ממתין לאישור
               </span>
             )}
-            {institution.institution_type && (
-              <span className="text-[13px] font-medium" style={{ color: 'var(--ink-3)' }}>
-                {institution.institution_type}
-              </span>
-            )}
           </div>
         </div>
       </div>

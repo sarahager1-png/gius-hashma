@@ -4,22 +4,6 @@ import { formatDate } from '@/lib/utils'
 import ApproveButton from './approve-button'
 import AddInstitutionModal from './add-institution-modal'
 
-const INST_TYPE_CFG: Record<string, { bg: string; color: string }> = {
-  'שלהבות חב"ד': { bg: 'var(--purple-050)',  color: 'var(--purple)'   },
-  'בית חינוך':    { bg: 'var(--teal-050)',    color: 'var(--teal-600)' },
-  'קהילתי':       { bg: 'var(--amber-bg)',    color: 'var(--amber)'    },
-}
-
-function InstTypeBadge({ type }: { type: string | null }) {
-  if (!type) return null
-  const cfg = INST_TYPE_CFG[type] ?? { bg: '#F3F4F6', color: '#6B7280' }
-  return (
-    <span className="inline-flex items-center text-[11px] font-bold px-2.5 py-0.5 rounded-full"
-      style={{ background: cfg.bg, color: cfg.color }}>
-      {type}
-    </span>
-  )
-}
 
 export default async function AdminInstitutionsPage() {
   const supabase = await createClient()
@@ -72,8 +56,7 @@ export default async function AdminInstitutionsPage() {
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-[15px] font-bold" style={{ color: 'var(--ink)' }}>{inst.institution_name}</span>
-                      <InstTypeBadge type={inst.institution_type} />
-                    </div>
+                      </div>
                     <div className="text-[13px]" style={{ color: 'var(--ink-3)' }}>{inst.city}</div>
                     <div className="text-[12.5px] mt-0.5" style={{ color: 'var(--ink-3)' }}>
                       {(inst.owner as { full_name: string | null; phone: string | null } | null)?.full_name} · {(inst.owner as { full_name: string | null; phone: string | null } | null)?.phone}
@@ -102,7 +85,6 @@ export default async function AdminInstitutionsPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="text-[14px] font-semibold" style={{ color: 'var(--ink)' }}>{inst.institution_name}</span>
-                    <InstTypeBadge type={inst.institution_type} />
                   </div>
                   <div className="text-[12.5px]" style={{ color: 'var(--ink-3)' }}>
                     {inst.city}
@@ -136,7 +118,6 @@ export default async function AdminInstitutionsPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="text-[14px] font-semibold" style={{ color: 'var(--ink)' }}>{inst.institution_name}</span>
-                    <InstTypeBadge type={inst.institution_type} />
                   </div>
                   <div className="text-[12.5px]" style={{ color: 'var(--ink-3)' }}>{inst.city}</div>
                 </div>
