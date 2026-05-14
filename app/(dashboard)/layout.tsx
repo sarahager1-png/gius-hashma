@@ -7,7 +7,7 @@ import WaFloatButton from '@/components/layout/wa-float-button'
 import type { UserRole } from '@/lib/types'
 
 function roleHome(role: string): string {
-  if (role === 'מועמדת') return '/jobs'
+  if (role === 'מועמדת') return '/profile'
   if (role === 'מוסד')   return '/institution/jobs'
   return '/dashboard'
 }

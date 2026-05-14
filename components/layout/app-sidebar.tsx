@@ -28,12 +28,19 @@ interface NavGroup {
 const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
   'מועמדת': [
     {
-      label: 'חיפוש ומשרות',
+      label: 'הכרטיס שלי',
+      items: [
+        { href: '/profile',         label: 'הפרופיל שלי',  icon: Users           },
+      ],
+    },
+    {
+      label: 'משרות',
       items: [
         { href: '/jobs',            label: 'משרות פתוחות',  icon: Briefcase       },
         { href: '/my-applications', label: 'הגשות שלי',     icon: ClipboardList   },
         { href: '/my-invitations',  label: 'הזמנות לראיון', icon: Mail            },
         { href: '/book-interview',  label: 'קביעת ראיון',   icon: CalendarCheck   },
+        { href: '/history',         label: 'היסטוריה',      icon: History         },
       ],
     },
     {
@@ -41,13 +48,10 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
       items: [
         { href: '/inbox',           label: 'הודעות',        icon: MailOpen        },
         { href: '/notifications',   label: 'התראות',        icon: BellRing        },
-        { href: '/history',         label: 'היסטוריה',      icon: History         },
       ],
     },
     {
-      label: 'חשבון',
       items: [
-        { href: '/profile',         label: 'הפרופיל שלי',  icon: Users           },
         { href: '/help',            label: 'הנחיות',        icon: HelpCircle      },
       ],
     },

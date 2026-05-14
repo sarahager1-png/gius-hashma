@@ -560,7 +560,7 @@ function RegisterCandidateForm() {
     }
 
     if (isGoogleFlow) {
-      router.push('/jobs')
+      router.push('/profile')
     } else {
       setDone(true)
     }

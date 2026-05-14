@@ -89,7 +89,7 @@ export default function ActivateCandidatePage() {
       return
     }
 
-    router.push('/dashboard')
+    router.push('/profile')
     router.refresh()
   }
 
