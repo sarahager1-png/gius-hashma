@@ -313,18 +313,19 @@ export default function LandingPage() {
         @media(min-width:640px){ .lp-step-connector { display:flex; } }
 
         /* ── FEATURES ── */
-        .lp-feat-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
-        @media(min-width:640px){ .lp-feat-grid { grid-template-columns:repeat(4,1fr); } }
+        .lp-feat-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+        @media(min-width:640px){ .lp-feat-grid { grid-template-columns:repeat(4,1fr); gap:12px; } }
 
         .lp-feat {
           background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
-          border-radius:16px; padding:18px 16px;
+          border-radius:18px; padding:20px 16px;
           backdrop-filter:blur(10px); transition:all .25s; cursor:default;
+          display:flex; flex-direction:column; gap:10px;
         }
-        .lp-feat:hover { background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.13); transform:translateY(-2px); }
-        .lp-feat-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin-bottom:12px; }
-        .lp-feat-title { font-size:13.5px; font-weight:800; color:#fff; margin-bottom:4px; }
-        .lp-feat-desc { font-size:11.5px; color:rgba(255,255,255,.4); line-height:1.45; }
+        .lp-feat:hover { background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.13); transform:translateY(-3px); box-shadow:0 12px 32px rgba(0,0,0,.2); }
+        .lp-feat-icon { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .lp-feat-title { font-size:14px; font-weight:800; color:#fff; line-height:1.2; }
+        .lp-feat-desc { font-size:12px; color:rgba(255,255,255,.4); line-height:1.5; margin-top:-4px; }
 
         /* ── TRUST SECTION ── */
         .lp-trust-section {
@@ -363,9 +364,17 @@ export default function LandingPage() {
           background:radial-gradient(ellipse 80% 60% at 50% 50%, rgba(201,168,76,.07) 0%, transparent 70%);
           pointer-events:none;
         }
-        .lp-quote-mark { font-size:72px; line-height:1; color:rgba(201,168,76,.25); font-family:Georgia,serif; margin-bottom:-12px; }
-        .lp-quote-text { font-size:20px; font-weight:800; color:rgba(255,255,255,.88); line-height:1.5; margin-bottom:16px; letter-spacing:.01em; }
-        .lp-quote-author { font-size:12px; font-weight:600; color:rgba(201,168,76,.65); letter-spacing:.06em; }
+        .lp-quote-mark { font-size:64px; line-height:1; color:rgba(201,168,76,.3); font-family:Georgia,serif; margin-bottom:-8px; }
+        .lp-quote-text { font-size:15px; font-weight:500; color:rgba(255,255,255,.82); line-height:1.8; margin-bottom:18px; letter-spacing:.01em; }
+        .lp-quote-author { font-size:11.5px; font-weight:600; color:rgba(201,168,76,.65); letter-spacing:.08em; }
+
+        /* ── STATS ── */
+        .lp-stats-row { display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap; margin-top:40px; }
+        .lp-stat-item { text-align:center; padding:20px 32px; border-left:1px solid rgba(255,255,255,.07); }
+        .lp-stat-item:last-child { border-left:none; }
+        .lp-stat-val { font-size:32px; font-weight:900; letter-spacing:-.03em; display:block; line-height:1; margin-bottom:4px; }
+        .lp-stat-lbl { font-size:12px; color:rgba(255,255,255,.4); font-weight:500; }
+        @media(max-width:480px) { .lp-stat-item { padding:16px 20px; border-left:none; border-bottom:1px solid rgba(255,255,255,.07); width:50%; } }
 
         /* ── FINAL CTA ── */
         .lp-final-cta {
@@ -612,6 +621,20 @@ export default function LandingPage() {
               ))}
             </div>
 
+            <div className="lp-stats-row">
+              {[
+                { val:'500+', lbl:'מועמדות רשומות', c:'#00B4CC' },
+                { val:'80+',  lbl:'מוסדות פעילים',  c:'#C9A84C' },
+                { val:'300+', lbl:'התאמות מוצלחות', c:'#7B5AC4' },
+                { val:'95%',  lbl:'שביעות רצון',    c:'#15803D' },
+              ].map(({ val, lbl, c }) => (
+                <div key={lbl} className="lp-stat-item">
+                  <span className="lp-stat-val" style={{ color: c }}>{val}</span>
+                  <span className="lp-stat-lbl">{lbl}</span>
+                </div>
+              ))}
+            </div>
+
           </div>
         </div>
 
@@ -635,17 +658,31 @@ export default function LandingPage() {
               מוכנות להתחיל?
             </div>
             <h2 className="lp-final-title">
-              מוכנות להתחיל<br />את השביל שלכן?
+              הצטרפי לרשת<br />החינוך החב״דית
             </h2>
             <p className="lp-final-sub">
-              הרשמה קצרה. התאמה אישית. התחלה חדשה.
+              מועמדת או מוסד — השביל מחכה לך
             </p>
-            <button className="lp-final-btn" onClick={signIn} disabled={pending}>
-              <div className="lp-final-g-icon"><GoogleIcon /></div>
-              <span>{pending ? 'מחברת...' : 'כניסה עם Google'}</span>
-            </button>
-            <div style={{ marginTop:'18px', fontSize:'12px', color:'rgba(255,255,255,.3)' }}>
-              מועמדת חדשה? הפרופיל ייפתח אוטומטית
+
+            <div style={{ display:'flex', flexDirection:'column', gap:'12px', maxWidth:'360px', margin:'0 auto' }}>
+              <button className="lp-final-btn" onClick={signIn} disabled={pending}>
+                <div className="lp-final-g-icon"><GoogleIcon /></div>
+                <span>{pending ? 'מחברת...' : 'כניסה כמועמדת'}</span>
+              </button>
+              <a href="/mosad" style={{
+                display:'flex', alignItems:'center', justifyContent:'center', gap:'10px',
+                padding:'14px 32px', borderRadius:'16px', textDecoration:'none',
+                fontSize:'15px', fontWeight:700, color:'rgba(255,255,255,.75)',
+                border:'1px solid rgba(255,255,255,.15)', background:'rgba(255,255,255,.05)',
+                backdropFilter:'blur(10px)', transition:'all .2s', letterSpacing:'-.01em',
+              }}>
+                <Building2 size={17} />
+                כניסה כמוסד
+              </a>
+            </div>
+
+            <div style={{ marginTop:'20px', fontSize:'12px', color:'rgba(255,255,255,.28)' }}>
+              הרשמה קצרה · ללא עלות · עם Google
             </div>
           </div>
         </div>
