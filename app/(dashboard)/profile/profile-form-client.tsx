@@ -135,10 +135,22 @@ function Chips({ value, onChange, options }: { value: string; onChange: (v: stri
 
 function MultiChips({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: string[] }) {
   const selected = value ? value.split(',').map(s => s.trim()).filter(Boolean) : []
+  const [showInput, setShowInput] = useState(false)
+  const [customVal, setCustomVal] = useState('')
+
   function toggle(o: string) {
     const next = selected.includes(o) ? selected.filter(s => s !== o) : [...selected, o]
     onChange(next.join(', '))
   }
+  function addCustom() {
+    const t = customVal.trim()
+    if (!t || selected.includes(t)) { setShowInput(false); setCustomVal(''); return }
+    onChange([...selected, t].join(', '))
+    setCustomVal('')
+    setShowInput(false)
+  }
+  const customSelected = selected.filter(s => !options.includes(s))
+
   return (
     <div className="flex flex-wrap gap-2">
       {options.map(o => (
@@ -152,6 +164,33 @@ function MultiChips({ value, onChange, options }: { value: string; onChange: (v:
           {o}
         </button>
       ))}
+      {customSelected.map(o => (
+        <button key={o} type="button" onClick={() => toggle(o)}
+          className="h-8 px-3 rounded-full text-[12px] font-semibold border transition-all"
+          style={{ borderColor: 'var(--purple)', background: 'var(--purple-050)', color: 'var(--purple)' }}>
+          {o} ×
+        </button>
+      ))}
+      {showInput ? (
+        <div className="flex items-center gap-1">
+          <input autoFocus value={customVal} onChange={e => setCustomVal(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustom() } }}
+            className="h-8 px-2 rounded-[8px] border text-[12px] outline-none w-32"
+            style={{ borderColor: 'var(--purple)', color: 'var(--ink)', background: '#fff' }}
+            placeholder="הוסיפי..." />
+          <button type="button" onClick={addCustom}
+            className="h-8 px-3 rounded-[8px] text-[12px] font-bold text-white"
+            style={{ background: 'var(--purple)' }}>+</button>
+          <button type="button" onClick={() => { setShowInput(false); setCustomVal('') }}
+            className="h-8 px-2 text-[13px]" style={{ color: 'var(--ink-4)' }}>×</button>
+        </div>
+      ) : (
+        <button type="button" onClick={() => setShowInput(true)}
+          className="h-8 px-3 rounded-full text-[12px] font-semibold border border-dashed transition-all"
+          style={{ borderColor: 'var(--purple)', color: 'var(--purple)', background: '#fff' }}>
+          + אחר
+        </button>
+      )}
     </div>
   )
 }
