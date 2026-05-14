@@ -76,7 +76,7 @@ export default function LandingPage() {
         *, *::before, *::after { box-sizing: border-box; }
 
         .lp-root {
-          background: #1A1640;
+          background: #20224A;
           color: #fff;
           font-family: 'Heebo', system-ui, sans-serif;
           direction: rtl;
@@ -94,10 +94,10 @@ export default function LandingPage() {
         .lp-hero-bg {
           position: absolute; inset: 0;
           background:
-            radial-gradient(ellipse 110% 70% at 50% -10%, rgba(110,75,200,.45) 0%, transparent 60%),
-            radial-gradient(ellipse 70% 50% at 80% 90%,  rgba(0,180,204,.18)  0%, transparent 55%),
-            radial-gradient(ellipse 60% 40% at -5% 50%,  rgba(201,168,76,.1) 0%, transparent 55%),
-            linear-gradient(170deg, #221E48 0%, #251F50 40%, #1A2845 75%, #1A1640 100%);
+            radial-gradient(ellipse 100% 65% at 50% -5%, rgba(120,85,210,.4) 0%, transparent 60%),
+            radial-gradient(ellipse 65% 45% at 80% 92%,  rgba(0,180,204,.16) 0%, transparent 55%),
+            radial-gradient(ellipse 55% 38% at -5% 50%,  rgba(201,168,76,.09) 0%, transparent 55%),
+            linear-gradient(170deg, #272555 0%, #262252 40%, #1E2B50 75%, #20224A 100%);
         }
         .lp-stars { display: none; }
         /* Floating orbs */
@@ -121,14 +121,14 @@ export default function LandingPage() {
           padding: 22px 24px 0;
           max-width:1100px; margin:0 auto; width:100%;
         }
-        .lp-logo-wrap { display:flex; align-items:center; gap:12px; text-decoration:none; }
+        .lp-logo-wrap { display:flex; align-items:center; gap:14px; text-decoration:none; }
         .lp-logo-box {
-          width:50px; height:50px; background:#fff; border-radius:14px;
+          width:60px; height:60px; background:#fff; border-radius:16px;
           display:flex; align-items:center; justify-content:center;
-          box-shadow:0 4px 18px rgba(0,0,0,.28); padding:4px; flex-shrink:0;
+          box-shadow:0 6px 24px rgba(0,0,0,.32); padding:5px; flex-shrink:0;
         }
-        .lp-logo-text-name { font-size:20px; font-weight:900; color:#fff; letter-spacing:-.025em; }
-        .lp-logo-text-sub  { font-size:10px; font-weight:500; color:rgba(255,255,255,.4); letter-spacing:.06em; }
+        .lp-logo-text-name { font-size:26px; font-weight:900; color:#fff; letter-spacing:-.03em; line-height:1; }
+        .lp-logo-text-sub  { font-size:10.5px; font-weight:500; color:rgba(255,255,255,.45); letter-spacing:.06em; margin-top:2px; }
         .lp-nav-links { display:flex; align-items:center; gap:6px; }
         .lp-nav-link {
           padding:8px 14px; border-radius:10px; font-size:13px; font-weight:600;
@@ -449,7 +449,7 @@ export default function LandingPage() {
           <nav className="lp-nav">
             <div className="lp-logo-wrap">
               <div className="lp-logo-box">
-                <Image src="/logo-chabad.png" alt="השביל" width={42} height={42} style={{ objectFit:'contain' }} />
+                <Image src="/logo-chabad.png" alt="השביל" width={50} height={50} style={{ objectFit:'contain' }} />
               </div>
               <div>
                 <div className="lp-logo-text-name">הַשְּׁבִיל</div>
@@ -465,6 +465,24 @@ export default function LandingPage() {
 
           {/* HERO BODY */}
           <div className="lp-hero-body" style={{ opacity: visible ? 1 : 0, transition:'opacity .5s ease' }}>
+
+            {/* Brand */}
+            <div className={`lp-fadein lp-delay-1`} style={{ marginBottom:'28px', display:'flex', flexDirection:'column', alignItems:'center', gap:'10px' }}>
+              <div style={{
+                width:'76px', height:'76px', background:'#fff', borderRadius:'22px',
+                display:'flex', alignItems:'center', justifyContent:'center',
+                boxShadow:'0 8px 32px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.12)',
+                padding:'6px', flexShrink:0,
+              }}>
+                <Image src="/logo-chabad.png" alt="השביל" width={60} height={60} style={{ objectFit:'contain' }} />
+              </div>
+              <div style={{ fontSize:'38px', fontWeight:900, color:'#fff', letterSpacing:'-.035em', lineHeight:1 }}>
+                הַשְּׁבִיל
+              </div>
+              <div style={{ fontSize:'12px', fontWeight:500, color:'rgba(255,255,255,.45)', letterSpacing:'.08em' }}>
+                מערכת חכמה לגיוס והשמה
+              </div>
+            </div>
 
             <div className={`lp-badge lp-fadein lp-delay-1`}>
               <div className="lp-badge-dot" />
