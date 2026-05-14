@@ -10,8 +10,17 @@ export default async function SearchCandidatesPage() {
 
   const service = createServiceClient()
 
-  const { data: institution } = await service
-    .from('institutions').select('id, institution_name, is_approved').eq('profile_id', user.id).single()
+  const { data: viewerProfile } = await service.from('profiles').select('role').eq('id', user.id).single()
+  const isAdmin = viewerProfile && ['מנהל רשת', 'מנהלת מערכת', 'אדמין מערכת'].includes(viewerProfile.role)
+
+  let institution = null as { id: string; institution_name: string; is_approved: boolean } | null
+  if (isAdmin) {
+    const { data } = await service.from('institutions').select('id, institution_name, is_approved').eq('is_approved', true).limit(1).single()
+    institution = data
+  } else {
+    const { data } = await service.from('institutions').select('id, institution_name, is_approved').eq('profile_id', user.id).single()
+    institution = data
+  }
   if (!institution?.is_approved) redirect('/institution/profile')
 
   const [candidatesRes, jobsRes] = await Promise.all([

@@ -4,6 +4,8 @@ import type { Job } from '@/lib/types'
 import Link from 'next/link'
 import JobsListClient from './jobs-list-client'
 
+const ADMIN_ROLES = ['מנהל רשת', 'מנהלת מערכת', 'אדמין מערכת']
+
 export default async function InstitutionJobsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -11,11 +13,19 @@ export default async function InstitutionJobsPage() {
 
   const service = createServiceClient()
 
-  const { data: institution } = await service
-    .from('institutions')
-    .select('id, institution_name, is_approved')
-    .eq('profile_id', user.id)
-    .single()
+  const { data: viewerProfile } = await service.from('profiles').select('role').eq('id', user.id).single()
+  const isAdmin = viewerProfile && ADMIN_ROLES.includes(viewerProfile.role)
+
+  let institution = null as { id: string; institution_name: string; is_approved: boolean } | null
+
+  if (isAdmin) {
+    // admin: use first approved institution for preview
+    const { data } = await service.from('institutions').select('id, institution_name, is_approved').eq('is_approved', true).limit(1).single()
+    institution = data
+  } else {
+    const { data } = await service.from('institutions').select('id, institution_name, is_approved').eq('profile_id', user.id).single()
+    institution = data
+  }
 
   if (!institution) redirect('/institution/profile')
   if (!institution.is_approved) redirect('/institution/profile')
