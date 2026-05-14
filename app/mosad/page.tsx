@@ -296,16 +296,17 @@ export default function MosadLanding() {
           transition:background .3s, border-color .3s, box-shadow .3s;
         }
         .mo-acc-item.open {
-          background:linear-gradient(160deg, rgba(255,255,255,.32) 0%, rgba(200,240,248,.22) 100%);
-          border-color:rgba(0,200,225,.55);
+          background:linear-gradient(160deg, rgba(220,242,252,.92) 0%, rgba(200,235,250,.88) 100%);
+          border-color:rgba(0,175,210,.6);
           box-shadow:
-            0 8px 40px rgba(0,0,0,.14),
-            0 0 0 1px rgba(0,200,225,.14),
-            inset 0 1.5px 0 rgba(255,255,255,.65),
-            inset 0 0 60px rgba(255,255,255,.06);
-          backdrop-filter:blur(28px) brightness(1.18);
-          -webkit-backdrop-filter:blur(28px) brightness(1.18);
+            0 10px 44px rgba(0,0,0,.2),
+            0 0 0 1px rgba(0,175,210,.18),
+            inset 0 1.5px 0 rgba(255,255,255,.9);
+          backdrop-filter:blur(20px);
+          -webkit-backdrop-filter:blur(20px);
         }
+        .mo-acc-item.open .mo-acc-label { color:rgba(5,25,45,.92); }
+        .mo-acc-item.open .mo-acc-chevron { color:rgba(0,150,190,.9); }
         .mo-acc-trigger {
           width:100%; display:flex; align-items:center; gap:14px;
           padding:16px 20px; cursor:pointer; background:transparent;
@@ -335,9 +336,9 @@ export default function MosadLanding() {
         }
         .mo-acc-item.open .mo-acc-body { max-height:200px; padding:0 20px 18px; }
         .mo-acc-body-inner {
-          border-top:1px solid rgba(255,255,255,.25);
+          border-top:1px solid rgba(0,150,190,.2);
           padding-top:14px;
-          font-size:13.5px; color:rgba(255,255,255,.82); line-height:1.65;
+          font-size:13.5px; color:rgba(5,30,55,.72); line-height:1.65;
         }
 
         /* ── FLOW ── */
