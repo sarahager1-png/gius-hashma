@@ -264,7 +264,7 @@ export default function AppSidebar({
                 color: '#ffffff', letterSpacing: '-.03em',
                 lineHeight: 1.2,
               }}>
-                עתודות לשליחות
+                הַשְּׁבִיל
               </div>
               <div style={{
                 fontSize: '10.5px', fontWeight: 600,
