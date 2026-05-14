@@ -302,6 +302,19 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
   return (
     <div className="space-y-3">
 
+      <div className="rounded-[14px] px-5 py-4 flex items-start gap-3"
+        style={{ background: 'linear-gradient(135deg, #F0EBFF 0%, #EAF6FF 100%)', border: '1px solid #D8CCFF' }}>
+        <span style={{ fontSize: '18px', lineHeight: 1, marginTop: '1px' }}>✨</span>
+        <div>
+          <p className="text-[13.5px] font-bold" style={{ color: '#4B2E83' }}>
+            תוספת פרטים תעלה את רמת ההתאמה שלך למשרות
+          </p>
+          <p className="text-[12px] mt-0.5" style={{ color: '#6B5EA0' }}>
+            רק הפרטים האישיים נדרשים. שאר הסקציות אופציונליות — פרופיל מלא מקבל עדיפות בהתאמה.
+          </p>
+        </div>
+      </div>
+
       <AccSection id="personal" title="פרטים אישיים" open={open.has('personal')} onToggle={() => toggle('personal')}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="שם מלא *">{inp(profileForm.full_name, v => setP('full_name', v))}</Field>
