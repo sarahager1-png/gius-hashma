@@ -224,6 +224,50 @@ function MultiChips({ value, onChange, options }: { value: string; onChange: (v:
   )
 }
 
+function TechSkillsInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const toArr = (v: string) => v ? v.split(',').map(s => s.trim()).filter(Boolean) : ['']
+  const [items, setItems] = useState<string[]>(() => { const a = toArr(value); return a.length ? a : [''] })
+
+  function update(i: number, val: string) {
+    const next = items.map((s, idx) => idx === i ? val : s)
+    setItems(next)
+    onChange(next.filter(Boolean).join(', '))
+  }
+  function add() { if (items.length < 5) setItems(p => [...p, '']) }
+  function remove(i: number) {
+    const next = items.filter((_, idx) => idx !== i)
+    const final = next.length ? next : ['']
+    setItems(final)
+    onChange(final.filter(Boolean).join(', '))
+  }
+
+  return (
+    <div className="space-y-2">
+      {items.map((item, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <input value={item} onChange={e => update(i, e.target.value)}
+            className={inputCls} style={inputStyle}
+            onFocus={e => Object.assign(e.currentTarget.style, inputFocus)}
+            onBlur={e => Object.assign(e.currentTarget.style, inputStyle)}
+            placeholder="תארי כישור מקצועי..." />
+          {items.length > 1 && (
+            <button type="button" onClick={() => remove(i)}
+              className="flex-shrink-0 w-8 h-8 rounded-[8px] text-[13px] font-bold"
+              style={{ background: '#FEE2E2', color: '#B91C1C' }}>×</button>
+          )}
+        </div>
+      ))}
+      {items.length < 5 && (
+        <button type="button" onClick={add}
+          className="h-8 px-3 rounded-full text-[12px] font-semibold border border-dashed"
+          style={{ borderColor: 'var(--purple)', color: 'var(--purple)', background: '#fff' }}>
+          + הוספה
+        </button>
+      )}
+    </div>
+  )
+}
+
 function AccSection({ id, title, open, onToggle, children }: {
   id: string; title: string; open: boolean; onToggle: () => void; children: React.ReactNode
 }) {
@@ -446,7 +490,7 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
 
       <AccSection id="skills" title="כישורים" open={open.has('skills')} onToggle={() => toggle('skills')}>
         <Field label="כישורים מקצועיים">
-          <MultiChips value={candForm.technical_skills} onChange={v => setC('technical_skills', v)} options={TECHNICAL_SKILLS_OPTIONS} />
+          <TechSkillsInput value={candForm.technical_skills} onChange={v => setC('technical_skills', v)} />
         </Field>
         <Field label="כישורים בין-אישיים">
           <MultiChips value={candForm.interpersonal_skills} onChange={v => setC('interpersonal_skills', v)} options={INTERPERSONAL_SKILLS_OPTIONS} />
