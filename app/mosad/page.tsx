@@ -157,7 +157,7 @@ export default function MosadLanding() {
           position:relative; z-index:10;
           display:flex; flex-direction:column;
           align-items:center; justify-content:center;
-          padding:32px 24px 48px;
+          padding:20px 24px 32px;
           text-align:center;
           max-width:740px; margin:0 auto; width:100%;
         }
@@ -271,7 +271,7 @@ export default function MosadLanding() {
         .mo-mm-link:hover { color:rgba(155,114,207,.9); border-color:rgba(155,114,207,.45); }
 
         /* ── SECTION BASE ── */
-        .mo-section { padding:88px 24px; max-width:1100px; margin:0 auto; }
+        .mo-section { padding:52px 24px; max-width:1100px; margin:0 auto; }
         .mo-section-label {
           font-size:11px; font-weight:700; letter-spacing:.14em;
           text-transform:uppercase; color:rgba(0,180,204,.7);
@@ -284,7 +284,7 @@ export default function MosadLanding() {
         }
         .mo-section-sub {
           font-size:15px; color:rgba(255,255,255,.42); line-height:1.65;
-          text-align:center; max-width:500px; margin:0 auto 52px;
+          text-align:center; max-width:500px; margin:0 auto 28px;
         }
 
         /* ── ACCORDION ── */
@@ -442,19 +442,6 @@ export default function MosadLanding() {
               הנתונים שלכם כבר קיימים במערכת —<br />
               כנסו עם Google, עדכנו פרטים ופרסמו משרות
             </p>
-
-            {/* REGISTERED BANNER */}
-            <div className="mo-registered-banner mo-fadein mo-d2">
-              <div className="mo-banner-icon">
-                <CheckCircle size={18} color="#00B4CC" />
-              </div>
-              <div>
-                <div className="mo-banner-title">כבר רשומים במערכת</div>
-                <div className="mo-banner-sub">
-                  כנסו עם המייל שבו המוסד שלכם רשום — הפרופיל ייפתח אוטומטית ללא שלבי הרשמה נוספים
-                </div>
-              </div>
-            </div>
 
             {/* GLASS CTA CARD */}
             <div className="mo-card mo-fadein mo-d3">
