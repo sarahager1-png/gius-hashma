@@ -288,7 +288,7 @@ export default function ProcessTracker() {
           style={{ color: 'var(--purple)' }}
           onMouseEnter={e => e.currentTarget.style.background = 'var(--purple-050)'}
           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-          onClick={() => router.push('/admin/applications')}
+          onClick={() => router.push('/admin/reports')}
         >
           כל התהליכים
           <ChevronLeft size={14} />

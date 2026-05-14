@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Users, MessageCircle, Download, Building2, Calendar, KeyRound, Eye, EyeOff, CheckCircle, Trash2 } from 'lucide-react'
+import { Users, MessageCircle, Download, Building2, Calendar, KeyRound, Eye, EyeOff, CheckCircle, Trash2, Phone, Mail } from 'lucide-react'
 import type { UserRole } from '@/lib/types'
 import PushToggle from '@/components/push-toggle'
 
@@ -72,9 +72,13 @@ const ITEMS: SettingItem[] = [
   },
 ]
 
-interface Props { role: UserRole }
+interface Props {
+  role: UserRole
+  initialWaNumber?: string
+  initialContactEmail?: string
+}
 
-export default function SettingsClient({ role }: Props) {
+export default function SettingsClient({ role, initialWaNumber = '', initialContactEmail = '' }: Props) {
   const router = useRouter()
   const supabase = createClient()
 
@@ -86,6 +90,13 @@ export default function SettingsClient({ role }: Props) {
   const [pwLoading, setPwLoading]   = useState(false)
   const [pwError, setPwError]       = useState('')
   const [pwSuccess, setPwSuccess]   = useState(false)
+
+  // System settings (admin only)
+  const [waNumber, setWaNumber]           = useState(initialWaNumber)
+  const [contactEmail, setContactEmail]   = useState(initialContactEmail)
+  const [sysLoading, setSysLoading]       = useState(false)
+  const [sysError, setSysError]           = useState('')
+  const [sysSuccess, setSysSuccess]       = useState(false)
 
   // Account deletion state
   const [deleteConfirm, setDeleteConfirm] = useState('')
@@ -159,6 +170,19 @@ export default function SettingsClient({ role }: Props) {
       setDeleteError('שגיאה בלתי צפויה')
       setDeleteLoading(false)
     }
+  }
+
+  async function handleSysSettings(e: React.FormEvent) {
+    e.preventDefault()
+    setSysError(''); setSysSuccess(false); setSysLoading(true)
+    const res = await fetch('/api/admin/system-settings', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ support_wa_number: waNumber, contact_email: contactEmail }),
+    })
+    setSysLoading(false)
+    if (res.ok) { setSysSuccess(true); router.refresh() }
+    else { const d = await res.json().catch(() => ({})); setSysError(d.error ?? 'שגיאה בשמירה') }
   }
 
   const inputStyle: React.CSSProperties = {
@@ -282,6 +306,92 @@ export default function SettingsClient({ role }: Props) {
           </button>
         </form>
       </div>
+
+      {/* System settings — admin only */}
+      {['מנהלת מערכת', 'אדמין מערכת'].includes(role) && (
+        <div
+          className="rounded-[14px] border p-5 mb-6"
+          style={{ background: '#fff', borderColor: 'var(--line)', boxShadow: 'var(--shadow-sm)' }}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0"
+              style={{ background: 'var(--teal-050)', color: 'var(--teal)' }}>
+              <Phone size={18} />
+            </div>
+            <div>
+              <div className="font-bold text-[15px]" style={{ color: 'var(--ink)' }}>פרטי יצירת קשר של המערכת</div>
+              <p className="text-[13px]" style={{ color: 'var(--ink-3)' }}>
+                מספר וואצאפ ואימייל שמועמדות ומוסדות רואים לצורך תמיכה
+              </p>
+            </div>
+          </div>
+
+          {sysSuccess && (
+            <div className="flex items-center gap-2 rounded-[10px] p-3 mb-4 text-[13px] font-semibold"
+              style={{ background: 'var(--green-bg)', color: 'var(--green)' }}>
+              <CheckCircle size={15} />הפרטים נשמרו בהצלחה
+            </div>
+          )}
+          {sysError && (
+            <div className="rounded-[10px] p-3 mb-4 text-[13px] font-semibold"
+              style={{ background: 'var(--red-bg)', color: 'var(--red)' }}>
+              {sysError}
+            </div>
+          )}
+
+          <form onSubmit={handleSysSettings} className="flex flex-col gap-4">
+            <div>
+              <label className="flex items-center gap-1.5 text-[12px] font-bold mb-1.5" style={{ color: 'var(--ink-2)' }}>
+                <Phone size={13} />מספר וואצאפ לתמיכה
+              </label>
+              <input
+                type="tel"
+                value={waNumber}
+                onChange={e => setWaNumber(e.target.value)}
+                placeholder="לדוגמה: 0521234567"
+                dir="ltr"
+                style={{ ...inputStyle, padding: '0 12px' }}
+                onFocus={e => { e.currentTarget.style.borderColor = 'var(--teal)'; e.currentTarget.style.background = 'white' }}
+                onBlur={e => { e.currentTarget.style.borderColor = 'var(--line)'; e.currentTarget.style.background = 'var(--bg-2)' }}
+              />
+              <p className="text-[11.5px] mt-1" style={{ color: 'var(--ink-4)' }}>
+                מספר זה יופיע בכפתור הוואצאפ הצף בכל עמוד ובדף העזרה
+              </p>
+            </div>
+
+            <div>
+              <label className="flex items-center gap-1.5 text-[12px] font-bold mb-1.5" style={{ color: 'var(--ink-2)' }}>
+                <Mail size={13} />אימייל ליצירת קשר
+              </label>
+              <input
+                type="email"
+                value={contactEmail}
+                onChange={e => setContactEmail(e.target.value)}
+                placeholder="לדוגמה: support@example.org"
+                dir="ltr"
+                style={{ ...inputStyle, padding: '0 12px' }}
+                onFocus={e => { e.currentTarget.style.borderColor = 'var(--teal)'; e.currentTarget.style.background = 'white' }}
+                onBlur={e => { e.currentTarget.style.borderColor = 'var(--line)'; e.currentTarget.style.background = 'var(--bg-2)' }}
+              />
+              <p className="text-[11.5px] mt-1" style={{ color: 'var(--ink-4)' }}>
+                מופיע בדף העזרה כאפשרות פנייה למועמדות ומוסדות
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              disabled={sysLoading}
+              className="h-10 rounded-[10px] text-[13.5px] font-bold text-white transition-all"
+              style={{
+                background: sysLoading ? 'var(--ink-4)' : 'var(--teal)',
+                boxShadow: sysLoading ? 'none' : '0 4px 12px rgba(0,177,174,.25)',
+              }}
+            >
+              {sysLoading ? 'שומרת...' : 'שמרי פרטי קשר'}
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* Role-specific admin items */}
       {visibleItems.length > 0 && (

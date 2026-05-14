@@ -31,6 +31,14 @@
     {
       "path": "/api/cron/placement-surveys",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/send-reminders",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/reflection-followups",
+      "schedule": "0 6 * * *"
     }
   ]
 }

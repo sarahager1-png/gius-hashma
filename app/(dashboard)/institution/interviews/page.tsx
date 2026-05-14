@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import InterviewsClient, { type InterviewRow } from './interviews-client'
 
@@ -15,7 +15,7 @@ export default async function InstitutionInterviewsPage() {
     .eq('profile_id', user.id)
     .single()
 
-  if (!institution?.is_approved) redirect('/dashboard')
+  if (!institution?.is_approved) redirect('/institution/profile')
 
   // 1) job IDs
   const { data: jobs } = await service

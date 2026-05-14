@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import InquiriesClient from './inquiries-client'
 
@@ -15,7 +15,7 @@ export default async function InstitutionInquiriesPage() {
     .eq('profile_id', user.id)
     .single()
 
-  if (!institution?.is_approved) redirect('/dashboard')
+  if (!institution?.is_approved) redirect('/institution/profile')
 
   const { data: inquiries } = await service
     .from('candidate_inquiries')

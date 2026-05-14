@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import AppsAllClient, { type AppRow } from './apps-client'
 
@@ -15,7 +15,7 @@ export default async function InstitutionApplicationsPage() {
     .eq('profile_id', user.id)
     .single()
 
-  if (!institution?.is_approved) redirect('/dashboard')
+  if (!institution?.is_approved) redirect('/institution/profile')
 
   // 1) Fetch all institution jobs
   const { data: jobs } = await service

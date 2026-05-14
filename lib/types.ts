@@ -167,3 +167,99 @@ export interface Interview {
   created_at: string
   applications?: Application
 }
+
+// ── Communication Layer ───────────────────────────────────────────────
+
+export interface MessageTemplate {
+  id: string
+  key: string
+  name: string
+  channel: 'wa' | 'sms' | 'both'
+  wa_text: string | null
+  sms_text: string | null
+  variables: string[]
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface CommunicationLog {
+  id: string
+  recipient_profile_id: string | null
+  recipient_phone: string | null
+  recipient_name: string | null
+  template_key: string | null
+  channel: 'wa' | 'sms' | 'email' | 'in_app'
+  message_body: string
+  status: 'sent' | 'delivered' | 'failed' | 'pending'
+  context_type: string | null
+  context_id: string | null
+  sent_by: string | null
+  sent_at: string
+}
+
+export interface InterviewSlot {
+  id: string
+  slot_date: string
+  slot_time: string
+  duration_minutes: number
+  location: string | null
+  meeting_link: string | null
+  notes: string | null
+  is_available: boolean
+  booked_by: string | null
+  booked_at: string | null
+  created_by: string | null
+  created_at: string
+  candidates?: Candidate
+}
+
+export type ReflectionStatus = 'ממתין לשיקוף' | 'שיקוף התקבל' | 'לא השיב' | 'דורש בירור'
+
+export interface LearningDay {
+  id: string
+  title: string
+  day_date: string
+  location: string | null
+  description: string | null
+  reflection_prompt: string | null
+  reflection_sent_at: string | null
+  created_by: string | null
+  created_at: string
+}
+
+export interface LearningDayAttendee {
+  id: string
+  learning_day_id: string
+  candidate_id: string
+  attended: boolean
+  added_at: string
+  candidates?: Candidate
+}
+
+export interface LearningDayReflection {
+  id: string
+  learning_day_id: string
+  candidate_id: string
+  status: ReflectionStatus
+  reflection_text: string | null
+  submitted_at: string | null
+  reviewed_by: string | null
+  review_notes: string | null
+  candidates?: Candidate
+}
+
+export interface Reminder {
+  id: string
+  target_profile_id: string | null
+  title: string
+  body: string
+  channel: 'wa' | 'sms' | 'in_app'
+  scheduled_at: string
+  sent_at: string | null
+  status: 'pending' | 'sent' | 'cancelled' | 'failed'
+  context_type: string | null
+  context_id: string | null
+  created_by: string | null
+  created_at: string
+}

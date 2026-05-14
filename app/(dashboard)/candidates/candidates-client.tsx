@@ -499,17 +499,17 @@ export default function CandidatesClient({ candidates, initialSearch = '' }: Pro
                     style={{ background: `linear-gradient(90deg, ${sc.dot} 0%, ${sc.dot}88 80%, transparent 100%)` }} />
 
                   {/* Header */}
-                  <div className="p-5 pb-4 flex items-start gap-3.5" style={{ background: 'var(--bg-2)' }}>
+                  <div className="p-4 pb-3 flex items-start gap-3" style={{ background: 'var(--bg-2)' }}>
                     {/* Avatar with ring */}
-                    <div className="shrink-0 p-[2.5px] rounded-full" style={{ background: grad }}>
-                      <div className="w-12 h-12 rounded-full flex items-center justify-center text-[15px] font-bold text-white"
-                        style={{ background: grad, outline: '2.5px solid #FDFCFF', outlineOffset: '-2px' }}>
+                    <div className="shrink-0 p-[2px] rounded-full" style={{ background: grad }}>
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center text-[13px] font-semibold text-white"
+                        style={{ background: grad, outline: '2px solid #FDFCFF', outlineOffset: '-2px' }}>
                         {initials}
                       </div>
                     </div>
                     <div className="flex-1 min-w-0 pt-0.5">
                       <div className="flex items-start justify-between gap-2">
-                        <p className="text-[15.5px] font-extrabold leading-snug truncate" style={{ color: 'var(--ink)' }}>{name}</p>
+                        <p className="text-[14px] font-semibold leading-snug truncate" style={{ color: 'var(--ink)' }}>{name}</p>
                         <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full shrink-0"
                           style={{ background: sc.bg, color: sc.color, border: `1.5px solid ${sc.border ?? sc.dot}` }}>
                           <span className="w-1.5 h-1.5 rounded-full inline-block shrink-0" style={{ background: sc.dot }} />
@@ -525,7 +525,7 @@ export default function CandidatesClient({ candidates, initialSearch = '' }: Pro
                   <div style={{ borderTop: '1px solid var(--line-soft)' }} />
 
                   {/* Details */}
-                  <div className="px-5 py-4 flex-1 space-y-2.5">
+                  <div className="px-4 py-3 flex-1 space-y-2">
                     <DataRow icon={<GraduationCap size={13} />} value={c.academic_level ?? '—'} />
 
                     {isStage ? (

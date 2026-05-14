@@ -22,10 +22,10 @@ interface Notif {
 }
 
 const ROLE_LABELS: Record<string, string> = {
-  'מועמדת':      'מועמדת',
-  'מוסד':        'מוסד חינוך',
-  'מנהל רשת':   'מנהל מערכת',
-  'אדמין מערכת': 'אדמין מערכת',
+  'מועמדת':       'מועמדת',
+  'מוסד':         'מוסד חינוך',
+  'מנהלת מערכת': 'מנהלת מערכת',
+  'אדמין מערכת':  'אדמין מערכת',
 }
 
 function timeAgo(iso: string) {
@@ -124,7 +124,7 @@ export default function AppHeader({ fullName, role }: Props) {
   }
 
   const profileHref = role === 'מועמדת' ? '/profile' : '/settings'
-  const isAdmin = ['מנהל רשת', 'אדמין מערכת'].includes(role)
+  const isAdmin = ['מנהלת מערכת', 'אדמין מערכת'].includes(role)
 
   return (
     <header

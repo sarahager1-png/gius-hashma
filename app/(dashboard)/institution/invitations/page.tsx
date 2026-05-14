@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Calendar, Clock, CheckCircle, XCircle, Send } from 'lucide-react'
@@ -36,7 +36,7 @@ export default async function InstitutionInvitationsPage() {
     .eq('profile_id', user.id)
     .single()
 
-  if (!institution?.is_approved) redirect('/dashboard')
+  if (!institution?.is_approved) redirect('/institution/profile')
 
   const { data } = await service
     .from('invitations')

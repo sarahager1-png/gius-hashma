@@ -17,8 +17,8 @@ export default async function InstitutionJobsPage() {
     .eq('profile_id', user.id)
     .single()
 
-  if (!institution) redirect('/dashboard')
-  if (!institution.is_approved) redirect('/dashboard')
+  if (!institution) redirect('/institution/profile')
+  if (!institution.is_approved) redirect('/institution/profile')
 
   type JobWithApps = Job & { applications?: { count: number }[] }
 

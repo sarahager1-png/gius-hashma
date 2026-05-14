@@ -25,7 +25,7 @@ export default function QuickActions() {
   const ACTIONS: QA[] = [
     { icon: Check,        title: 'אישור מוסדות',       desc: pending > 0 ? `${pending} ממתינים לאישור` : 'אין ממתינים',     href: '/admin/institutions',  badge: pending || undefined },
     { icon: Users,        title: 'מועמדות',             desc: 'חיפוש וסינון לפי תחום ומיקום',                               href: '/candidates'                                          },
-    { icon: Briefcase,    title: 'משרות',               desc: 'כל המשרות הפעילות ברשת',                                     href: '/admin/jobs'                                          },
+    { icon: Briefcase,    title: 'משרות',               desc: 'כל המשרות הפעילות ברשת',                                     href: '/jobs'                                                },
     { icon: MessageCircle,title: 'הודעות',              desc: 'inbox ושליחת הודעות ישירות',                                  href: '/inbox'                                               },
     { icon: CalendarDays, title: 'ראיונות',             desc: 'לוח ראיונות מתוזמנים',                                       href: '/institution/interviews'                              },
     { icon: Star,         title: 'סקרי משוב',           desc: 'תוצאות שביעות רצון לאחר שיבוץ',                              href: '/admin/surveys'                                       },

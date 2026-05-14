@@ -154,7 +154,7 @@ export default function NehalLanding() {
     const supabase = createClient()
     const { error: err } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=/dashboard` },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     })
     if (err) { setError('שגיאה בכניסה עם גוגל'); setLoading(false) }
   }

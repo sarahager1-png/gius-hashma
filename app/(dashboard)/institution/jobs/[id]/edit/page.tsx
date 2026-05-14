@@ -18,7 +18,7 @@ export default async function EditJobPage({ params }: { params: Promise<{ id: st
     .eq('profile_id', user.id)
     .single()
 
-  if (!institution?.is_approved) redirect('/dashboard')
+  if (!institution?.is_approved) redirect('/institution/profile')
 
   const { data: job } = await service
     .from('jobs')

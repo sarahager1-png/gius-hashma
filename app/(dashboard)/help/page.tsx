@@ -237,7 +237,20 @@ export default async function HelpPage() {
 
   const guide = GUIDES[profile.role] ?? GUIDES['מועמדת']
   const firstName = profile.full_name?.split(' ')[0] ?? ''
-  const waNumber = process.env.NEXT_PUBLIC_WA_SUPPORT_NUMBER ?? ''
+
+  const { data: waRow } = await service
+    .from('system_settings')
+    .select('value')
+    .eq('key', 'support_wa_number')
+    .single()
+  const { data: emailRow } = await service
+    .from('system_settings')
+    .select('value')
+    .eq('key', 'contact_email')
+    .single()
+
+  const waNumber = waRow?.value || process.env.NEXT_PUBLIC_WA_SUPPORT_NUMBER || ''
+  const contactEmail = emailRow?.value || ''
   const waLink = waNumber
     ? `https://wa.me/${waNumber.replace(/\D/g, '')}?text=${encodeURIComponent('שלום, יש לי שאלה לגבי מערכת הגיוס')}`
     : null
@@ -368,20 +381,38 @@ export default async function HelpPage() {
         </ul>
       </div>
 
-      {/* WA support */}
-      {waLink && (
-        <a href={waLink} target="_blank" rel="noreferrer"
-          className="flex items-center gap-3 rounded-[14px] p-4 border no-underline transition-all"
-          style={{ background: '#E7FBF0', borderColor: '#bbf7d0' }}>
-          <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-[20px] shrink-0"
-            style={{ background: '#25D366' }}>
-            💬
-          </div>
-          <div>
-            <p className="text-[14px] font-bold" style={{ color: '#166534' }}>צרי קשר עם התמיכה</p>
-            <p className="text-[12.5px]" style={{ color: '#15803D' }}>שלחי הודעה בוואצאפ ונחזור אליך בהקדם</p>
-          </div>
-        </a>
+      {/* Support contact */}
+      {(waLink || contactEmail) && (
+        <div className="space-y-3">
+          {waLink && (
+            <a href={waLink} target="_blank" rel="noreferrer"
+              className="flex items-center gap-3 rounded-[14px] p-4 border no-underline transition-all"
+              style={{ background: '#E7FBF0', borderColor: '#bbf7d0' }}>
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-[20px] shrink-0"
+                style={{ background: '#25D366' }}>
+                💬
+              </div>
+              <div>
+                <p className="text-[14px] font-bold" style={{ color: '#166534' }}>צרי קשר בוואצאפ</p>
+                <p className="text-[12.5px]" style={{ color: '#15803D' }}>שלחי הודעה ונחזור אליך בהקדם</p>
+              </div>
+            </a>
+          )}
+          {contactEmail && (
+            <a href={`mailto:${contactEmail}`}
+              className="flex items-center gap-3 rounded-[14px] p-4 border no-underline transition-all"
+              style={{ background: 'var(--purple-050)', borderColor: 'var(--purple-100)' }}>
+              <div className="w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0"
+                style={{ background: 'var(--purple)', color: '#fff', fontSize: '18px' }}>
+                ✉️
+              </div>
+              <div>
+                <p className="text-[14px] font-bold" style={{ color: 'var(--purple)' }}>שלחי מייל</p>
+                <p className="text-[12.5px] font-medium" style={{ color: 'var(--ink-3)' }} dir="ltr">{contactEmail}</p>
+              </div>
+            </a>
+          )}
+        </div>
       )}
     </div>
   )

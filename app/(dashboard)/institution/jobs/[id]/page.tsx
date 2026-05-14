@@ -18,7 +18,7 @@ export default async function InstitutionJobDetailPage({ params }: { params: Pro
   const service = createServiceClient()
 
   const { data: institution } = await service.from('institutions').select('id').eq('profile_id', user.id).single()
-  if (!institution) redirect('/dashboard')
+  if (!institution) redirect('/institution/profile')
 
   const { data: jobData } = await service.from('jobs').select('*').eq('id', id).eq('institution_id', institution.id).single()
   if (!jobData) notFound()

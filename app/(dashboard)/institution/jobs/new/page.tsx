@@ -30,7 +30,7 @@ export default async function NewJobPage({
     .eq('profile_id', user.id)
     .single()
 
-  if (!institution?.is_approved) redirect('/dashboard')
+  if (!institution?.is_approved) redirect('/institution/profile')
 
   // Fetch templates for this institution
   const { data: templates } = await service

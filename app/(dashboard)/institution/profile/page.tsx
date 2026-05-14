@@ -15,8 +15,7 @@ export default async function InstitutionProfilePage() {
     .eq('profile_id', user.id)
     .single()
 
-  if (!institution) redirect('/dashboard')
-  if (!institution.is_approved) redirect('/dashboard')
+  if (!institution) redirect('/login')
 
   const prof = institution.profiles as unknown as { full_name: string | null; phone: string | null } | null
 

@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import { createClient } from '@/lib/supabase/client'
 import { ACADEMIC_LEVELS, DISTRICTS } from '@/lib/constants'
 import {
   CheckCircle, ChevronDown, ChevronLeft, ChevronRight,
@@ -417,6 +419,18 @@ function StepPersonalExpression({ form, set }: { form: Record<string, string>; s
    Main wizard
 ════════════════════════════════════════════════ */
 export default function RegisterCandidatePage() {
+  return (
+    <Suspense>
+      <RegisterCandidateForm />
+    </Suspense>
+  )
+}
+
+function RegisterCandidateForm() {
+  const searchParams = useSearchParams()
+  const router       = useRouter()
+  const isGoogleFlow = searchParams.get('google') === '1'
+
   const [step, setStep]   = useState(0)
   const [form, setForm]   = useState({
     full_name: '', phone: '', email: '',
@@ -437,6 +451,21 @@ export default function RegisterCandidatePage() {
   const [loading, setLoading]     = useState(false)
   const [error, setError]         = useState('')
   const [done, setDone]           = useState(false)
+
+  // Pre-fill from Google session when coming from OAuth
+  useEffect(() => {
+    if (!isGoogleFlow) return
+    const supabase = createClient()
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) return
+      const meta = session.user.user_metadata
+      setForm(f => ({
+        ...f,
+        full_name: meta?.full_name ?? f.full_name,
+        email:     session.user.email ?? f.email,
+      }))
+    })
+  }, [isGoogleFlow])
 
   function set(k: string, v: string) { setForm(f => ({ ...f, [k]: v })) }
   function toggleSpec(s: string)     { setSpecs(p => p.includes(s) ? p.filter(x => x !== s) : [...p, s]) }
@@ -465,47 +494,76 @@ export default function RegisterCandidatePage() {
 
   async function handleSubmit() {
     setLoading(true); setError('')
-    const hasExp      = experiences.some(ex => ex.role.trim() || ex.employer.trim())
+    const hasExp       = experiences.some(ex => ex.role.trim() || ex.employer.trim())
     const hasPractical = practicalWork.some(pw => pw.school_name.trim() || pw.supervisor_name.trim())
-    const res = await fetch('/api/candidate-requests', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        full_name:            form.full_name.trim(),
-        phone:                form.phone.trim(),
-        email:                form.email.trim() || null,
-        district:             form.district || null,
-        city:                 form.city.trim() || null,
-        address:              form.address.trim() || null,
-        birth_year:           form.birth_year ? parseInt(form.birth_year) : null,
-        marital_status:       form.marital_status || null,
-        maiden_name:          form.maiden_name.trim() || null,
-        college:              form.college.trim() || null,
-        academic_level:       form.academic_level || null,
-        seniority_years:      form.seniority_years || null,
-        specialization:       buildSpec(),
-        handwriting_font:     form.handwriting_font || null,
-        technical_skills:     form.technical_skills.trim() || null,
-        interpersonal_skills: form.interpersonal_skills.trim() || null,
-        study_day:            form.study_day && form.study_day !== "אין יום לימודים" ? form.study_day : null,
-        experiences:          hasExp ? experiences.filter(ex => ex.role.trim() || ex.employer.trim()) : null,
-        practical_work:       hasPractical ? practicalWork.filter(pw => pw.school_name.trim() || pw.supervisor_name.trim()) : null,
-        availability_from:    form.availability_from || null,
-        availability_to:      form.availability_to || null,
-        shlichut_location:    form.shlichut_location.trim() || null,
-        shlichut_years:       form.shlichut_years.trim() || null,
-        past_projects:        form.past_projects.trim() || null,
-        personal_note:        form.personal_note.trim() || null,
-        whatsapp_preference:  whatsappPref,
-      }),
-    })
+
+    const sharedPayload = {
+      college:              form.college.trim() || null,
+      academic_level:       form.academic_level || null,
+      seniority_years:      form.seniority_years || null,
+      specialization:       buildSpec(),
+      handwriting_font:     form.handwriting_font || null,
+      technical_skills:     form.technical_skills.trim() || null,
+      interpersonal_skills: form.interpersonal_skills.trim() || null,
+      study_day:            form.study_day && form.study_day !== "אין יום לימודים" ? form.study_day : null,
+      experiences:          hasExp ? experiences.filter(ex => ex.role.trim() || ex.employer.trim()) : null,
+      practical_work:       hasPractical ? practicalWork.filter(pw => pw.school_name.trim() || pw.supervisor_name.trim()) : null,
+      availability_from:    form.availability_from || null,
+      availability_to:      form.availability_to || null,
+      shlichut_location:    form.shlichut_location.trim() || null,
+      shlichut_years:       form.shlichut_years.trim() || null,
+      past_projects:        form.past_projects.trim() || null,
+      personal_note:        form.personal_note.trim() || null,
+      district:             form.district || null,
+      city:                 form.city.trim() || null,
+      address:              form.address.trim() || null,
+      birth_year:           form.birth_year ? parseInt(form.birth_year) : null,
+      marital_status:       form.marital_status || null,
+      maiden_name:          form.maiden_name.trim() || null,
+      whatsapp_preference:  whatsappPref,
+    }
+
+    let res: Response
+
+    if (isGoogleFlow) {
+      // Google user — already has profile+candidates row; just PATCH the candidates record
+      res = await fetch('/api/candidates', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          profile: {
+            full_name: form.full_name.trim(),
+            phone:     form.phone.trim(),
+          },
+          candidate: sharedPayload,
+        }),
+      })
+    } else {
+      // Anonymous user — submit to pending approval queue
+      res = await fetch('/api/candidate-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          full_name: form.full_name.trim(),
+          phone:     form.phone.trim(),
+          email:     form.email.trim() || null,
+          ...sharedPayload,
+        }),
+      })
+    }
+
     setLoading(false)
     if (!res.ok) {
       const d = await res.json().catch(() => ({}))
       setError(d.error ?? 'שגיאה, נסי שוב')
       return
     }
-    setDone(true)
+
+    if (isGoogleFlow) {
+      router.push('/jobs')
+    } else {
+      setDone(true)
+    }
   }
 
   /* ── Success screen ── */
@@ -621,20 +679,31 @@ export default function RegisterCandidatePage() {
             {step === 0 && (
               <div className="rounded-[12px] p-3.5 mb-5"
                 style={{ background: 'var(--purple-050)', border: '1px solid var(--purple-200)' }}>
-                <p className="text-[12px] font-extrabold mb-2" style={{ color: 'var(--purple)' }}>איך זה עובד?</p>
-                <div className="flex flex-col gap-1.5">
-                  {[
-                    'מלאי את הטופס ושלחי בקשת הצטרפות',
-                    'מנהלת המערכת תאשר את בקשתך תוך 24 שעות',
-                    'תקבלי SMS — ותוכלי להיכנס עם Google',
-                  ].map((s, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <span className="w-4 h-4 rounded-full text-[10px] font-black flex items-center justify-center shrink-0"
-                        style={{ background: 'var(--purple)', color: '#fff' }}>{i + 1}</span>
-                      <span className="text-[12px]" style={{ color: 'var(--ink-2)' }}>{s}</span>
+                {isGoogleFlow ? (
+                  <>
+                    <p className="text-[12px] font-extrabold mb-1" style={{ color: 'var(--purple)' }}>כמעט סיימנו 🎉</p>
+                    <p className="text-[12px]" style={{ color: 'var(--ink-2)' }}>
+                      מלאי את הפרטים — הפרופיל שלך יהיה מוכן מיד ותוכלי להתחיל לחפש משרות
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-[12px] font-extrabold mb-2" style={{ color: 'var(--purple)' }}>איך זה עובד?</p>
+                    <div className="flex flex-col gap-1.5">
+                      {[
+                        'מלאי את הטופס ושלחי בקשת הצטרפות',
+                        'מנהלת המערכת תאשר את בקשתך תוך 24 שעות',
+                        'תקבלי SMS — ותוכלי להיכנס עם Google',
+                      ].map((s, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          <span className="w-4 h-4 rounded-full text-[10px] font-black flex items-center justify-center shrink-0"
+                            style={{ background: 'var(--purple)', color: '#fff' }}>{i + 1}</span>
+                          <span className="text-[12px]" style={{ color: 'var(--ink-2)' }}>{s}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </>
+                )}
               </div>
             )}
             {step === 0 && <StepPersonal form={form} set={set} />}
@@ -693,7 +762,7 @@ export default function RegisterCandidatePage() {
                   background: loading ? 'var(--ink-4)' : 'linear-gradient(135deg,var(--purple),var(--teal))',
                   boxShadow: loading ? 'none' : '0 4px 14px rgba(94,61,174,.28)',
                 }}>
-                {loading ? 'שולחת...' : 'שלחי בקשת הצטרפות ✓'}
+                {loading ? 'שולחת...' : isGoogleFlow ? 'סיימתי — לדשבורד ←' : 'שלחי בקשת הצטרפות ✓'}
               </button>
             )}
           </div>
