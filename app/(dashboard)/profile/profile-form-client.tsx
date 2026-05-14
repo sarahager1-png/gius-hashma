@@ -5,6 +5,78 @@ import { AVAILABILITY_STATUSES, ACADEMIC_LEVELS, ACADEMIC_LEVELS_WITH_EXPERIENCE
 import type { Profile, Candidate } from '@/lib/types'
 import { ChevronDown } from 'lucide-react'
 
+const CITIES = [
+  'אבן יהודה',
+  'אבני חפץ',
+  'אופקים',
+  'אור יהודה',
+  'אור עקיבא',
+  'אילת',
+  'אלעד',
+  'אריאל',
+  'אשדוד',
+  'אשקלון',
+  'באר שבע',
+  'בית שאן',
+  'בית שמש',
+  'ביתר עילית',
+  'בנימינה-גבעת עדה',
+  'בני ברק',
+  'בת ים',
+  'גבעת זאב',
+  'גבעת שמואל',
+  'גבעתיים',
+  'גדרה',
+  'גן יבנה',
+  'דימונה',
+  'הוד השרון',
+  'הרצליה',
+  'חדרה',
+  'חולון',
+  'חיפה',
+  'יבנה',
+  'יהוד-מונוסון',
+  'ירוחם',
+  'ירושלים',
+  'זיכרון יעקב',
+  'טבריה',
+  'טירת כרמל',
+  'כפר חב\"ד',
+  'כפר סבא',
+  'לוד',
+  'מבשרת ציון',
+  'מודיעין',
+  'מודיעין עילית',
+  'מעלה אדומים',
+  'מצפה רמון',
+  'נהריה',
+  'נס ציונה',
+  'נתיבות',
+  'נתניה',
+  'עכו',
+  'עמנואל',
+  'עפולה',
+  'ערד',
+  'פתח תקווה',
+  'צפת',
+  'קריית אתא',
+  'קריית ביאליק',
+  'קריית גת',
+  'קריית מוצקין',
+  'קריית מלאכי',
+  'קריית שמונה',
+  'ראש העין',
+  'ראשון לציון',
+  'רהט',
+  'רחובות',
+  'רמלה',
+  'רמת גן',
+  'רעננה',
+  'שדרות',
+  'תל אביב',
+  'אחר',
+]
+
 const MARITAL_STATUSES = ['רווקה', 'נשואה', 'גרושה', 'אלמנה']
 const STUDY_DAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי']
 const SENIORITY_OPTIONS = ['שנה ראשונה', '1–2 שנים', '3–5 שנים', '5–10 שנים', '10+ שנים']
@@ -107,8 +179,6 @@ function AccSection({ id, title, open, onToggle, children }: {
   )
 }
 
-const ALL_SECTIONS = ['personal', 'availability', 'shlichut', 'education', 'experience', 'skills', 'expression', 'comm']
-
 export default function ProfileFormClient({ profile, candidate }: Props) {
   const [open, setOpen] = useState<Set<string>>(new Set(['personal']))
   function toggle(s: string) {
@@ -193,14 +263,13 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
   return (
     <div className="space-y-3">
 
-      {/* ── פרטים אישיים ── */}
       <AccSection id="personal" title="פרטים אישיים" open={open.has('personal')} onToggle={() => toggle('personal')}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="שם מלא *">{inp(profileForm.full_name, v => setP('full_name', v))}</Field>
           <Field label="שם נעורים">{inp(candForm.maiden_name, v => setC('maiden_name', v))}</Field>
           <Field label="טלפון">{inp(profileForm.phone, v => setP('phone', v), { dir: 'ltr' })}</Field>
           <Field label="שנת לידה">{inp(candForm.birth_year, v => setC('birth_year', v), { type: 'number', min: 1960, max: 2010, dir: 'ltr', placeholder: '1998' })}</Field>
-          <Field label="עיר">{inp(candForm.city, v => setC('city', v))}</Field>
+          <Field label="עיר / ישוב">{sel(candForm.city, v => setC('city', v), CITIES, 'בחרי עיר')}</Field>
           <Field label="כתובת">{inp(candForm.address, v => setC('address', v))}</Field>
           <Field label="מחוז">{sel(candForm.district, v => setC('district', v), DISTRICTS)}</Field>
         </div>
@@ -209,10 +278,9 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
         </Field>
       </AccSection>
 
-      {/* ── זמינות ── */}
       <AccSection id="availability" title="זמינות ותפקיד" open={open.has('availability')} onToggle={() => toggle('availability')}>
         <Field label="התמחות">{sel(candForm.specialization, v => setC('specialization', v), SPECIALIZATIONS)}</Field>
-        <Field label="סטטוס זמינות">
+        <Field label="סטאטוס זמינות">
           <Chips value={candForm.availability_status} onChange={v => setC('availability_status', v)} options={AVAILABILITY_STATUSES} />
         </Field>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -221,18 +289,16 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
         </div>
       </AccSection>
 
-      {/* ── שליחות ── */}
       <AccSection id="shlichut" title="שליחות" open={open.has('shlichut')} onToggle={() => toggle('shlichut')}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="מיקום שליחות">{inp(candForm.shlichut_location, v => setC('shlichut_location', v), { placeholder: 'עיר / מוסד' })}</Field>
-          <Field label="שנות שליחות">{inp(candForm.shlichut_years, v => setC('shlichut_years', v), { placeholder: 'למשל: 2020–2022' })}</Field>
+          <Field label="שנות שליחות">{inp(candForm.shlichut_years, v => setC('shlichut_years', v), { placeholder: '2020–2022' })}</Field>
         </div>
         <Field label="יום לימוד שבועי">
           <Chips value={candForm.study_day} onChange={v => setC('study_day', v)} options={STUDY_DAYS} />
         </Field>
       </AccSection>
 
-      {/* ── הכשרה ── */}
       <AccSection id="education" title="הכשרה אקדמית" open={open.has('education')} onToggle={() => toggle('education')}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="מכללה / אוניברסיטה">{inp(candForm.college, v => setC('college', v))}</Field>
@@ -247,11 +313,10 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
         </Field>
       </AccSection>
 
-      {/* ── ניסיון ── */}
       <AccSection id="experience" title="ניסיון" open={open.has('experience')} onToggle={() => toggle('experience')}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="מעסיק קודם">{inp(candForm.prev_employer, v => setC('prev_employer', v), { placeholder: 'שם בית הספר / מוסד' })}</Field>
-          <Field label="תפקיד קודם">{inp(candForm.prev_role, v => setC('prev_role', v), { placeholder: 'למשל: גננת, מורה א–ג' })}</Field>
+          <Field label="תפקיד קודם">{inp(candForm.prev_role, v => setC('prev_role', v), { placeholder: 'גננת, מורה א–ג' })}</Field>
         </div>
         <Field label="פרויקטים ותפקידים נוספים">
           <textarea value={candForm.past_projects} onChange={e => setC('past_projects', e.target.value)}
@@ -260,7 +325,6 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
         </Field>
       </AccSection>
 
-      {/* ── כישורים ── */}
       <AccSection id="skills" title="כישורים" open={open.has('skills')} onToggle={() => toggle('skills')}>
         <Field label="כישורים מקצועיים">
           <MultiChips value={candForm.technical_skills} onChange={v => setC('technical_skills', v)} options={TECHNICAL_SKILLS_OPTIONS} />
@@ -273,7 +337,6 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
         </Field>
       </AccSection>
 
-      {/* ── ביטוי אישי ── */}
       <AccSection id="expression" title="ביטוי אישי" open={open.has('expression')} onToggle={() => toggle('expression')}>
         <Field label="ספרי לנו עליך">
           <textarea value={candForm.bio} onChange={e => setC('bio', e.target.value)}
@@ -287,9 +350,8 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
         </Field>
       </AccSection>
 
-      {/* ── תקשורת ── */}
       <AccSection id="comm" title="הגדרות תקשורת" open={open.has('comm')} onToggle={() => toggle('comm')}>
-        <p className="text-[13px]" style={{ color: 'var(--ink-3)' }}>ערוץ קבלת עדכונים על משרות וסטטוס הגשות</p>
+        <p className="text-[13px]" style={{ color: 'var(--ink-3)' }}>ערוץ קבלת עדכונים על משרות וסטאטוס הגשות</p>
         <div className="flex gap-2">
           {[{ label: 'WhatsApp', value: true }, { label: 'SMS', value: false }].map(opt => (
             <button key={String(opt.value)} type="button" onClick={() => setC('whatsapp_preference', opt.value)}
