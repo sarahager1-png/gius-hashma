@@ -131,35 +131,6 @@ export default function InstitutionProfileFormClient({ institution, profile }: P
         </div>
       </section>
 
-      <hr style={{ borderColor: 'var(--line)' }} />
-
-      <section>
-        <h2 className="text-[13px] font-bold uppercase tracking-[.08em] mb-4" style={{ color: 'var(--ink-3)' }}>הגדרות תקשורת</h2>
-        <div className="rounded-[12px] border p-4" style={{ borderColor: '#E9E3FC', background: '#FDFCFF' }}>
-          <p className="text-[14px] font-semibold mb-1" style={{ color: 'var(--ink)' }}>ערוץ קבלת עדכונים</p>
-          <p className="text-[12px] mb-3" style={{ color: 'var(--ink-4)' }}>בחרי את הערוץ שדרכו תקבלי עדכונים על הגשות ומועמדות</p>
-          <div className="flex gap-2">
-            {[
-              { label: 'WhatsApp', value: true },
-              { label: 'SMS', value: false },
-            ].map(opt => (
-              <button
-                key={String(opt.value)}
-                type="button"
-                onClick={() => set('whatsapp_preference', opt.value)}
-                className="flex-1 h-10 rounded-[10px] text-[13px] font-bold border-2 transition-all"
-                style={{
-                  borderColor: form.whatsapp_preference === opt.value ? 'var(--teal)' : 'var(--line)',
-                  background: form.whatsapp_preference === opt.value ? 'var(--teal-050)' : '#fff',
-                  color: form.whatsapp_preference === opt.value ? 'var(--teal-600)' : 'var(--ink-3)',
-                }}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {error && <p className="text-[13px] font-semibold" style={{ color: '#DC2626' }}>{error}</p>}
 
