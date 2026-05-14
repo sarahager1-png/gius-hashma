@@ -76,7 +76,7 @@ export default function LandingPage() {
         *, *::before, *::after { box-sizing: border-box; }
 
         .lp-root {
-          background: #183550;
+          background: #0D1520;
           color: #fff;
           font-family: 'Heebo', system-ui, sans-serif;
           direction: rtl;
@@ -94,10 +94,10 @@ export default function LandingPage() {
         .lp-hero-bg {
           position: absolute; inset: 0;
           background:
-            radial-gradient(ellipse 100% 65% at 50% -5%,  rgba(0,170,200,.6)   0%, transparent 58%),
-            radial-gradient(ellipse 60%  48% at 85% 88%,  rgba(201,168,76,.18) 0%, transparent 55%),
-            radial-gradient(ellipse 52%  38% at -8% 55%,  rgba(123,90,196,.12) 0%, transparent 52%),
-            linear-gradient(170deg, #1E4060 0%, #1C3D5C 40%, #162E4A 75%, #183550 100%);
+            radial-gradient(ellipse 120% 75% at 50% 10%,  rgba(0,190,220,.65)  0%, rgba(0,150,180,.3) 40%, transparent 68%),
+            radial-gradient(ellipse 70%  55% at 85% 85%,  rgba(201,168,76,.18) 0%, transparent 55%),
+            radial-gradient(ellipse 55%  40% at -5% 60%,  rgba(123,90,196,.12) 0%, transparent 52%),
+            linear-gradient(170deg, #0E2230 0%, #122838 40%, #0E1E2C 75%, #0D1520 100%);
         }
         .lp-stars { display: none; }
         /* Floating orbs */
@@ -370,7 +370,7 @@ export default function LandingPage() {
         /* ── FINAL CTA ── */
         .lp-final-cta {
           padding:100px 24px;
-          background:linear-gradient(160deg, #0D0B1E 0%, #1A1035 40%, #0D1A20 100%);
+          background:linear-gradient(160deg, #0E1E2C 0%, #0F2030 40%, #0D1A22 100%);
           border-top:1px solid rgba(255,255,255,.05);
           text-align:center; position:relative; overflow:hidden;
         }
