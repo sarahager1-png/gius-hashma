@@ -288,57 +288,76 @@ export default function MosadLanding() {
         }
 
         /* ── ACCORDION ── */
-        .mo-acc { display:flex; flex-direction:column; gap:8px; max-width:580px; margin:0 auto; }
+        .mo-acc { display:flex; flex-direction:column; gap:10px; max-width:580px; margin:0 auto; }
+
+        /* closed */
         .mo-acc-item {
-          background:rgba(255,255,255,.04);
-          border:1px solid rgba(255,255,255,.08);
-          border-radius:18px; overflow:hidden;
-          transition:background .3s, border-color .3s, box-shadow .3s;
+          border-radius:20px;
+          border:1px solid rgba(255,255,255,.1);
+          background:rgba(255,255,255,.05);
+          transition:border-color .3s, background .3s, box-shadow .3s;
+          position:relative;
         }
+        .mo-acc-item:hover:not(.open) {
+          background:rgba(255,255,255,.08);
+          border-color:rgba(255,255,255,.16);
+        }
+
+        /* open — bright light glass */
         .mo-acc-item.open {
-          background:linear-gradient(160deg, rgba(220,242,252,.92) 0%, rgba(200,235,250,.88) 100%);
-          border-color:rgba(0,175,210,.6);
+          background:#EAF6FC;
+          border-color:rgba(0,175,210,.55);
           box-shadow:
-            0 10px 44px rgba(0,0,0,.2),
-            0 0 0 1px rgba(0,175,210,.18),
-            inset 0 1.5px 0 rgba(255,255,255,.9);
-          backdrop-filter:blur(20px);
-          -webkit-backdrop-filter:blur(20px);
+            0 12px 48px rgba(0,100,150,.18),
+            0 0 0 1px rgba(0,175,210,.12),
+            inset 0 1px 0 rgba(255,255,255,.95);
         }
-        .mo-acc-item.open .mo-acc-label { color:rgba(5,25,45,.92); }
-        .mo-acc-item.open .mo-acc-chevron { color:rgba(0,150,190,.9); }
+        .mo-acc-item.open .mo-acc-label   { color:rgba(3,22,42,.9); }
+        .mo-acc-item.open .mo-acc-chevron { color:rgba(0,145,185,.85); }
+
+        /* trigger row */
         .mo-acc-trigger {
           width:100%; display:flex; align-items:center; gap:14px;
-          padding:16px 20px; cursor:pointer; background:transparent;
+          padding:18px 22px; cursor:pointer; background:transparent;
           border:none; font-family:'Heebo',system-ui,sans-serif;
-          text-align:right; transition:background .2s;
+          text-align:right;
         }
-        .mo-acc-trigger:hover { background:rgba(255,255,255,.04); }
         .mo-acc-num {
-          width:40px; height:40px; border-radius:50%; flex-shrink:0;
+          width:42px; height:42px; border-radius:50%; flex-shrink:0;
           display:flex; align-items:center; justify-content:center;
-          font-size:13px; font-weight:800;
+          font-size:13px; font-weight:900; letter-spacing:-.02em;
         }
         .mo-acc-icon-wrap {
           width:40px; height:40px; border-radius:12px; flex-shrink:0;
           display:flex; align-items:center; justify-content:center;
         }
-        .mo-acc-label { flex:1; font-size:14.5px; font-weight:800; color:#fff; letter-spacing:-.01em; }
-        .mo-acc-chevron {
-          flex-shrink:0; color:rgba(255,255,255,.28);
-          transition:transform .32s cubic-bezier(.16,1,.3,1), color .2s;
+        .mo-acc-label {
+          flex:1; font-size:15px; font-weight:800; color:#fff; letter-spacing:-.015em;
         }
-        .mo-acc-item.open .mo-acc-chevron { transform:rotate(180deg); color:rgba(0,200,225,.8); }
+        .mo-acc-chevron {
+          flex-shrink:0; width:28px; height:28px; border-radius:50%;
+          background:rgba(255,255,255,.08);
+          display:flex; align-items:center; justify-content:center;
+          color:rgba(255,255,255,.32);
+          transition:transform .32s cubic-bezier(.16,1,.3,1), color .22s, background .22s;
+        }
+        .mo-acc-item.open .mo-acc-chevron {
+          transform:rotate(180deg);
+          background:rgba(0,175,210,.15);
+          color:rgba(0,155,195,.9);
+        }
+
+        /* body */
         .mo-acc-body {
           overflow:hidden; max-height:0;
-          transition:max-height .38s cubic-bezier(.16,1,.3,1), padding .32s;
-          padding:0 20px;
+          transition:max-height .38s cubic-bezier(.16,1,.3,1);
         }
-        .mo-acc-item.open .mo-acc-body { max-height:200px; padding:0 20px 18px; }
+        .mo-acc-item.open .mo-acc-body { max-height:300px; }
         .mo-acc-body-inner {
-          border-top:1px solid rgba(0,150,190,.2);
-          padding-top:14px;
-          font-size:13.5px; color:rgba(5,30,55,.72); line-height:1.65;
+          padding:0 22px 20px;
+          border-top:1px solid rgba(0,150,195,.18);
+          padding-top:14px; margin:0 22px;
+          font-size:14px; color:rgba(5,35,60,.7); line-height:1.7;
         }
 
         /* ── FLOW ── */
