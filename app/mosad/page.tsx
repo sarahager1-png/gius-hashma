@@ -420,6 +420,11 @@ export default function MosadLanding() {
 
       <div className="mo-root">
 
+        {/* VERSION BANNER - REMOVE AFTER CONFIRM */}
+        <div style={{ background:'#FF3B30', color:'#fff', textAlign:'center', padding:'8px', fontSize:'13px', fontWeight:700, fontFamily:'Heebo,sans-serif' }}>
+          גרסה חדשה — אם אתה רואה את זה הדיפלוי עובד ✓
+        </div>
+
         {/* ══ HERO ══ */}
         <div className="mo-hero">
           <div className="mo-hero-bg" />
