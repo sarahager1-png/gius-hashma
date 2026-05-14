@@ -533,7 +533,7 @@ function LoginPageInner() {
               </div>
 
               <div className="lg-register">
-                <a href="/register">הגשת מועמדות חדשה ←</a>
+                <a href="/register/candidate">הגשת מועמדות חדשה ←</a>
               </div>
 
             </div>
