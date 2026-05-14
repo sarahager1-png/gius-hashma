@@ -89,6 +89,10 @@ export default function LandingPage() {
         @keyframes shimGold     { 0%{background-position:-200% center} 100%{background-position:200% center} }
         @keyframes breathe      { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
         @keyframes grainAnim    { 0%,100%{transform:translate(0,0)} 20%{transform:translate(-2px,1px)} 40%{transform:translate(1px,-1px)} 60%{transform:translate(-1px,2px)} 80%{transform:translate(2px,-2px)} }
+        @keyframes floatQuote   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+        @keyframes dustRise     { 0%{opacity:0;transform:translateY(0)} 15%{opacity:.55} 85%{opacity:.18} 100%{opacity:0;transform:translateY(-90px)} }
+        @keyframes dustRise2    { 0%{opacity:0;transform:translateY(0) translateX(0)} 15%{opacity:.4} 85%{opacity:.12} 100%{opacity:0;transform:translateY(-75px) translateX(22px)} }
+        @keyframes lightLeak    { 0%,100%{opacity:.03} 50%{opacity:.08} }
 
         *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
 
@@ -113,6 +117,15 @@ export default function LandingPage() {
             radial-gradient(ellipse 50%  35% at 90% 80%,  rgba(201,168,76,.08)  0%, transparent 55%),
             radial-gradient(ellipse 38%  28% at 8%  65%,  rgba(91,58,171,.06)   0%, transparent 55%),
             linear-gradient(180deg, #071820 0%, #060F1A 100%);
+        }
+        /* warm light leak breathing */
+        .lp-bg::before {
+          content:'';
+          position:absolute; inset:0;
+          background:
+            linear-gradient(125deg, rgba(201,168,76,.05) 0%, transparent 32%),
+            linear-gradient(245deg, rgba(0,155,195,.04) 0%, transparent 28%);
+          animation: lightLeak 18s ease-in-out infinite alternate;
         }
         /* star field */
         .lp-bg::after {
@@ -139,6 +152,40 @@ export default function LandingPage() {
           background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
           background-size: 180px 180px;
           animation: grainAnim 0.4s steps(1) infinite;
+        }
+
+        /* floating dust motes */
+        .lp-dust {
+          position: absolute; inset:0; pointer-events:none; z-index:2; overflow:hidden;
+        }
+        .lp-dust::before {
+          content:'';
+          position:absolute;
+          bottom: 38%; left: 48%;
+          width: 2px; height: 2px; border-radius:50%;
+          background: rgba(201,168,76,.35);
+          box-shadow:
+            14px 9px 0 0px rgba(201,168,76,.18),
+            -20px 16px 0 1px rgba(0,200,235,.12),
+            38px -6px 0 0px rgba(255,255,255,.07),
+            -10px -22px 0 1px rgba(201,168,76,.1),
+            58px 22px 0 0px rgba(0,200,235,.07),
+            -48px 7px 0 0px rgba(255,255,255,.05),
+            28px -32px 0 1px rgba(201,168,76,.08);
+          animation: dustRise 11s ease-out 1.8s infinite;
+        }
+        .lp-dust::after {
+          content:'';
+          position:absolute;
+          bottom: 30%; left: 54%;
+          width: 2px; height: 2px; border-radius:50%;
+          background: rgba(0,200,235,.25);
+          box-shadow:
+            -24px 14px 0 1px rgba(201,168,76,.12),
+            20px -10px 0 0px rgba(0,200,235,.09),
+            -44px -18px 0 1px rgba(255,255,255,.06),
+            34px 20px 0 0px rgba(201,168,76,.08);
+          animation: dustRise2 14s ease-out 5.5s infinite;
         }
 
         /* human warmth — two-layer soft presence */
@@ -204,16 +251,25 @@ export default function LandingPage() {
           display: flex; align-items: center; justify-content: space-between;
           padding: 16px 20px;
           flex-shrink: 0;
-          background: rgba(6,15,26,.4);
-          backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-          border-bottom: 1px solid rgba(255,255,255,.06);
+          background: linear-gradient(180deg, rgba(5,12,22,.76) 0%, rgba(6,15,26,.16) 100%);
+          backdrop-filter: blur(24px) saturate(120%); -webkit-backdrop-filter: blur(24px) saturate(120%);
+          border-bottom: 1px solid rgba(255,255,255,.04);
         }
         .lp-logo { display:flex; align-items:center; gap:11px; text-decoration:none; }
         .lp-logo-box {
-          width:52px; height:52px; background:#fff; border-radius:14px;
+          position: relative;
+          width:44px; height:44px; background:rgba(255,255,255,.86); border-radius:12px;
           display:flex; align-items:center; justify-content:center;
-          box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 4px 20px rgba(0,170,210,.22), 0 8px 32px rgba(0,0,0,.4);
-          padding:4px; flex-shrink:0;
+          box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 2px 12px rgba(0,0,0,.28);
+          padding:3px; flex-shrink:0;
+        }
+        .lp-logo-box::before {
+          content:'';
+          position:absolute; inset:-9px; border-radius:21px;
+          background: radial-gradient(ellipse, rgba(0,200,235,.12) 0%, transparent 65%);
+          filter: blur(10px);
+          animation: pulseGlow 5s ease-in-out infinite;
+          pointer-events:none;
         }
         .lp-logo-name { font-size:22px; font-weight:900; color:#fff; letter-spacing:-.03em; }
         .lp-nav-right { display:flex; align-items:center; gap:6px; }
@@ -226,37 +282,39 @@ export default function LandingPage() {
         }
         .lp-nav-btn:hover { color:#fff; background:rgba(255,255,255,.13); border-color:rgba(255,255,255,.25); box-shadow:0 4px 16px rgba(0,0,0,.2); }
 
-        /* ── QUOTE — glass whisper capsule ── */
+        /* ── QUOTE — atmospheric floating whisper ── */
         .lp-quote {
           position: relative; z-index: 10;
           padding: 8px 20px 8px;
           flex-shrink: 0;
+          animation: floatQuote 9s ease-in-out 1s infinite;
         }
         .lp-quote-box {
           max-width: 560px; margin: 0 auto;
-          background: rgba(201,168,76,.045);
-          backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-          border: 1px solid rgba(201,168,76,.18);
+          background: rgba(201,168,76,.012);
+          backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+          border: 1px solid rgba(201,168,76,.07);
           border-radius: 999px;
-          padding: 10px 20px 10px 16px;
+          padding: 9px 18px 9px 14px;
           display: flex; align-items: center; gap: 10px;
-          box-shadow: 0 1px 0 rgba(255,255,255,.05) inset, 0 2px 16px rgba(201,168,76,.04);
+          box-shadow: 0 1px 0 rgba(255,255,255,.02) inset, 0 0 20px rgba(201,168,76,.02);
         }
         .lp-quote-mark-sm {
-          font-size: 22px; line-height: 1; flex-shrink:0;
+          font-size: 19px; line-height: 1; flex-shrink:0;
           background: linear-gradient(135deg, #D4A840, #EDD870, #C9941C);
           -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
           font-family: Georgia, serif;
+          opacity: .75;
         }
         .lp-quote-text-sm {
-          font-size: 11.5px; font-weight: 400; color: rgba(255,255,255,.62);
+          font-size: 11px; font-weight: 400; color: rgba(255,255,255,.46);
           line-height: 1.5; flex:1;
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        @media(max-width:480px){ .lp-quote-text-sm { font-size:10.5px; } }
+        @media(max-width:480px){ .lp-quote-text-sm { font-size:10px; } }
         .lp-quote-src {
-          font-size: 9.5px; font-weight: 700; letter-spacing: .1em;
-          flex-shrink:0;
+          font-size: 9px; font-weight: 700; letter-spacing: .1em;
+          flex-shrink:0; opacity: .72;
           background: linear-gradient(90deg, #C9A84C, #E8C96A, #C9A84C);
           background-size: 200% auto;
           -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
@@ -279,11 +337,27 @@ export default function LandingPage() {
           margin-bottom: 14px;
         }
         .lp-brand-logo {
-          width: 62px; height: 62px; background: #fff; border-radius: 18px;
+          position: relative;
+          width: 64px; height: 64px; background: rgba(255,255,255,.9); border-radius: 18px;
           display: flex; align-items: center; justify-content: center;
-          box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 0 28px rgba(0,180,220,.2), 0 8px 32px rgba(0,0,0,.4);
+          box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 8px 32px rgba(0,0,0,.4);
           padding: 5px; margin-bottom: 2px;
+        }
+        .lp-brand-logo::before {
+          content:'';
+          position:absolute; inset:-14px; border-radius:32px;
+          background: radial-gradient(ellipse, rgba(0,190,225,.14) 0%, rgba(201,168,76,.07) 50%, transparent 70%);
+          filter: blur(18px);
           animation: pulseGlow 5s ease-in-out infinite;
+          pointer-events:none; z-index:-1;
+        }
+        .lp-brand-logo::after {
+          content:'';
+          position:absolute; inset:-4px; border-radius:22px;
+          border: 1px solid rgba(0,200,235,.1);
+          box-shadow: 0 0 20px rgba(0,190,220,.07);
+          animation: pulseWarm 6s ease-in-out infinite;
+          pointer-events:none;
         }
         .lp-brand-name {
           font-size: 30px; font-weight: 900; color: #fff; letter-spacing: -.04em; line-height:1;
@@ -381,17 +455,17 @@ export default function LandingPage() {
           display: flex; align-items: center; justify-content: center; gap: 6px;
           padding: 10px 12px; border-radius: 14px;
           font-family: 'Heebo',system-ui,sans-serif; font-size: 12.5px; font-weight: 700;
-          color: rgba(255,255,255,.55); cursor: pointer;
-          border: 1px solid rgba(255,255,255,.1);
-          background: rgba(255,255,255,.05);
+          color: rgba(255,255,255,.48); cursor: pointer;
+          border: 1px solid rgba(255,255,255,.07);
+          background: rgba(255,255,255,.04);
           backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
           transition: all .22s;
         }
         .lp-acc-btn.active {
-          color:#fff; background:rgba(255,255,255,.11); border-color:rgba(255,255,255,.22);
-          box-shadow: 0 4px 20px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.1);
+          color:#fff; background:rgba(255,255,255,.09); border-color:rgba(255,255,255,.16);
+          box-shadow: 0 4px 20px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.08);
         }
-        .lp-acc-btn:hover { color:rgba(255,255,255,.85); background:rgba(255,255,255,.09); transform:translateY(-1px); }
+        .lp-acc-btn:hover { color:rgba(255,255,255,.82); background:rgba(255,255,255,.07); transform:translateY(-1px); }
 
         /* ── BOTTOM SHEET ── */
         .lp-overlay {
@@ -465,6 +539,7 @@ export default function LandingPage() {
       <div className="lp-root">
         <div className="lp-bg" />
         <div className="lp-grain" />
+        <div className="lp-dust" />
         <div className="lp-human" />
         <div className="lp-path" />
 
