@@ -7,6 +7,16 @@ const HEBREW_MONTHS: Record<number, string> = {
   7:'יולי',8:'אוגוסט',9:'ספטמבר',10:'אוקטובר',11:'נובמבר',12:'דצמבר',
 }
 
+function computeDates() {
+  const now = Date.now()
+  const d6m = new Date(now); d6m.setMonth(d6m.getMonth() - 5); d6m.setDate(1)
+  return { now6mIso: d6m.toISOString(), cutoff30: new Date(now - 30 * 86400_000).toISOString(), cutoff7: new Date(now - 7 * 86400_000).toISOString(), now }
+}
+
+function daysSince(dateStr: string, now: number) {
+  return Math.round((now - new Date(dateStr).getTime()) / 86400_000)
+}
+
 export default async function AdminReportsPage({
   searchParams,
 }: {
@@ -55,9 +65,7 @@ export default async function AdminReportsPage({
   ])
 
   // ── 4 new queries ──────────────────────────────────────────────────────
-  const now6m = new Date(); now6m.setMonth(now6m.getMonth() - 5); now6m.setDate(1)
-  const cutoff30 = new Date(Date.now() - 30 * 86400_000).toISOString()
-  const cutoff7  = new Date(Date.now() -  7 * 86400_000).toISOString()
+  const { now6mIso, cutoff30, cutoff7, now: nowMs } = computeDates()
 
   const [
     { data: trendCands },
@@ -68,9 +76,9 @@ export default async function AdminReportsPage({
     { data: activeCandRows },
     { data: recentAppCandIds },
   ] = await Promise.all([
-    service.from('candidates').select('created_at').gte('created_at', now6m.toISOString()),
-    service.from('jobs').select('created_at').gte('created_at', now6m.toISOString()),
-    service.from('applications').select('updated_at').eq('status', 'התקבלה').gte('updated_at', now6m.toISOString()),
+    service.from('candidates').select('created_at').gte('created_at', now6mIso),
+    service.from('jobs').select('created_at').gte('created_at', now6mIso),
+    service.from('applications').select('updated_at').eq('status', 'התקבלה').gte('updated_at', now6mIso),
     // jobs with 0 applications, active for 7+ days
     service.from('jobs').select('id, title, created_at, institutions(institution_name), applications(count)').eq('status', 'פעילה').lt('created_at', cutoff7),
     // all applications for institution ranking
@@ -93,7 +101,7 @@ export default async function AdminReportsPage({
   const plMon   = countByMonth(trendPlacements as {updated_at:string}[]|null,'updated_at')
   const trendSlots: {label:string;candidates:number;jobs:number;placements:number}[] = []
   for (let i=5; i>=0; i--) {
-    const d = new Date(); d.setDate(1); d.setMonth(d.getMonth()-i)
+    const d = new Date(nowMs); d.setDate(1); d.setMonth(d.getMonth()-i)
     const k = mkKey(d)
     trendSlots.push({ label: HEBREW_MONTHS[d.getMonth()+1], candidates: candMon[k]??0, jobs: jobMon[k]??0, placements: plMon[k]??0 })
   }
@@ -411,7 +419,7 @@ export default async function AdminReportsPage({
               </thead>
               <tbody>
                 {zeroAppJobs.map(j=>{
-                  const days = Math.round((Date.now()-new Date(j.created_at).getTime())/86400_000)
+                  const days = daysSince(j.created_at, nowMs)
                   return (
                     <tr key={j.id} className="hover:bg-[var(--bg-3)]">
                       <td className="px-4 py-3 font-semibold" style={{ borderBottom:'1px solid var(--line-soft)', color:'var(--ink)' }}>{j.title}</td>

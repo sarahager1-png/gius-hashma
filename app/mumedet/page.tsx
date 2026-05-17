@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import {
   FileText, Search, Star, MessageCircle, Bell,
   CheckCircle, ClipboardList, MapPin, GraduationCap,
-  Building2, Sparkles, ArrowLeft,
+  Building2, ArrowLeft,
 } from 'lucide-react'
 
 /* ─────────────────────────── data ─────────────────────────── */
@@ -433,7 +434,7 @@ export default function MumedetLanding() {
 
           {/* NAV */}
           <nav className="mm-nav">
-            <a href="/" className="mm-logo-wrap">
+            <Link href="/" className="mm-logo-wrap">
               <div className="mm-logo-box">
                 <Image src="/logo-chabad.png" alt="השביל" width={42} height={42} style={{ objectFit:'contain' }} />
               </div>
@@ -441,7 +442,7 @@ export default function MumedetLanding() {
                 <div className="mm-logo-name">הַשְּׁבִיל</div>
                 <div className="mm-logo-sub">מערכת חכמה לגיוס והשמה</div>
               </div>
-            </a>
+            </Link>
             <div className="mm-nav-links">
               <a href="#journey" className="mm-nav-link">המסלול</a>
               <a href="#features" className="mm-nav-link">יכולות</a>
@@ -649,7 +650,7 @@ export default function MumedetLanding() {
             © 2026 הַשְּׁבִיל · עתודות לשליחות · כל הזכויות שמורות
           </div>
           <div className="mm-footer-links">
-            <a href="/"       className="mm-footer-link">עמוד הבית</a>
+            <Link href="/"       className="mm-footer-link">עמוד הבית</Link>
             <a href="/mosad"  className="mm-footer-link">פורטל מוסד</a>
           </div>
         </div>

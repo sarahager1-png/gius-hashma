@@ -80,8 +80,7 @@ export default function InstitutionsManagerClient({ institutions }: Props) {
     setTimeout(() => { setSent(null); setShowBulk(false) }, 3000)
   }
 
-  const filtered = useMemo(() => {
-    if (!search.trim()) return institutions
+  const filtered = !search.trim() ? institutions : (() => {
     const q = search.toLowerCase()
     return institutions.filter(i =>
       i.institution_name.toLowerCase().includes(q) ||
@@ -91,7 +90,7 @@ export default function InstitutionsManagerClient({ institutions }: Props) {
       (i.owner?.full_name ?? '').toLowerCase().includes(q) ||
       (i.owner?.phone ?? '').includes(q)
     )
-  }, [institutions, search])
+  })()
 
   const pending  = filtered.filter(i => !i.is_approved)
   const invited  = filtered.filter(i => i.is_approved && !i.approved_by)

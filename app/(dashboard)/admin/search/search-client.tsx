@@ -17,7 +17,10 @@ export default function AdminSearchClient() {
 
   useEffect(() => {
     if (timerRef.current) clearTimeout(timerRef.current)
-    if (q.trim().length < 2) { setResults(null); return }
+    if (q.trim().length < 2) {
+      timerRef.current = setTimeout(() => setResults(null), 0)
+      return
+    }
     timerRef.current = setTimeout(async () => {
       setLoading(true)
       const res = await fetch(`/api/admin/search?q=${encodeURIComponent(q)}`)

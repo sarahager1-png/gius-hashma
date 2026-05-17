@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import {
-  Briefcase, Search, MessageCircle, CheckCircle,
+  Briefcase, Search, MessageCircle,
   Calendar, ClipboardList, Bell, FileStack,
   Building2, LogIn, Settings, GraduationCap,
 } from 'lucide-react'
@@ -391,7 +392,7 @@ export default function MosadLanding() {
 
           {/* NAV */}
           <nav className="mo-nav">
-            <a href="/" className="mo-logo-wrap">
+            <Link href="/" className="mo-logo-wrap">
               <div className="mo-logo-box">
                 <Image src="/logo-chabad.png" alt="השביל" width={42} height={42} style={{ objectFit:'contain' }} />
               </div>
@@ -399,7 +400,7 @@ export default function MosadLanding() {
                 <div className="mo-logo-name">הַשְּׁבִיל</div>
                 <div className="mo-logo-sub">מערכת חכמה לגיוס והשמה</div>
               </div>
-            </a>
+            </Link>
             <div className="mo-nav-links">
               <a href="#steps"   className="mo-nav-link">תהליך הכניסה</a>
               <a href="#actions" className="mo-nav-link">מה עושים</a>
@@ -559,7 +560,7 @@ export default function MosadLanding() {
             © 2026 הַשְּׁבִיל · עתודות לשליחות · כל הזכויות שמורות
           </div>
           <div className="mo-footer-links">
-            <a href="/"        className="mo-footer-link">עמוד הבית</a>
+            <Link href="/"        className="mo-footer-link">עמוד הבית</Link>
             <a href="/mumedet" className="mo-footer-link">פורטל מועמדת</a>
           </div>
         </div>

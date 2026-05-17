@@ -11,16 +11,16 @@ function LoginPageInner() {
   const supabase = createClient()
   const router   = useRouter()
   const [loading, setLoading] = useState(false)
-  const [error, setError]     = useState('')
-  const [mounted, setMounted] = useState(false)
+  const [formError, setFormError] = useState('')
   const searchParams = useSearchParams()
 
+  const errParam = searchParams.get('error')
+  const urlError = errParam === 'oauth'    ? 'שגיאה בהתחברות עם Google — בדקי שהחשבון מורשה'
+                 : errParam === 'exchange' ? 'שגיאה בקבלת הסשן — נסי שוב'
+                 : ''
+  const error = urlError || formError
+
   useEffect(() => {
-    setMounted(true)
-    const err = searchParams.get('error')
-    if (err === 'oauth')    setError('שגיאה בהתחברות עם Google — בדקי שהחשבון מורשה')
-    if (err === 'exchange') setError('שגיאה בקבלת הסשן — נסי שוב')
-    // redirect already-logged-in users
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
@@ -30,10 +30,10 @@ function LoginPageInner() {
         : '/dashboard'
       router.replace(home)
     })
-  }, [searchParams, router, supabase])
+  }, [router, supabase])
 
   async function signInWithGoogle() {
-    setLoading(true); setError('')
+    setLoading(true); setFormError('')
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -41,7 +41,7 @@ function LoginPageInner() {
         queryParams: { prompt: 'select_account' },
       },
     })
-    if (error) { setError('שגיאה בכניסה עם Google'); setLoading(false) }
+    if (error) { setFormError('שגיאה בכניסה עם Google'); setLoading(false) }
   }
 
   return (
@@ -418,7 +418,7 @@ function LoginPageInner() {
           <div className="lg-hero-grain" />
           <div className="lg-hero-dust" />
 
-          <div className="lg-hero-content" style={{ opacity: mounted ? 1 : 0, transition: 'opacity .8s ease' }}>
+          <div className="lg-hero-content" style={{ opacity: 1, transition: 'opacity .8s ease' }}>
 
             <div className="lg-logo-wrap">
               <div className="lg-logo-box">
@@ -486,7 +486,7 @@ function LoginPageInner() {
           </div>
 
           <div className="lg-form-main">
-            <div className="lg-card" style={{ opacity: mounted ? 1 : 0, transition: 'opacity .6s .1s ease' }}>
+            <div className="lg-card" style={{ opacity: 1, transition: 'opacity .6s .1s ease' }}>
 
               <div className="lg-welcome">
                 <div className="lg-eyebrow-row">
