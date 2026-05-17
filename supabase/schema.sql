@@ -5,7 +5,7 @@
 -- profiles (extends auth.users)
 CREATE TABLE profiles (
   id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  role text NOT NULL CHECK (role IN ('מועמדת', 'מוסד', 'מנהלת מערכת', 'אדמין מערכת')),
+  role text NOT NULL CHECK (role IN ('מועמדת', 'מוסד', 'מנהלת מערכת', 'אדמין מערכת', 'מנהל רשת')),
   full_name text,
   phone text,
   created_at timestamptz DEFAULT now()

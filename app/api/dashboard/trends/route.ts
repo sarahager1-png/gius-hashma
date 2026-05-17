@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 const HEBREW_MONTHS: Record<number, string> = {
   1: 'ינואר', 2: 'פברואר', 3: 'מרץ', 4: 'אפריל',
@@ -7,18 +7,6 @@ const HEBREW_MONTHS: Record<number, string> = {
   9: 'ספטמבר', 10: 'אוקטובר', 11: 'נובמבר', 12: 'דצמבר',
 }
 
-const DEMO_6M = {
-  range: '6m',
-  data: [
-    { month: 'נובמבר', candidates: 8,  jobs: 3, placements: 4  },
-    { month: 'דצמבר',  candidates: 14, jobs: 5, placements: 7  },
-    { month: 'ינואר',  candidates: 19, jobs: 7, placements: 9  },
-    { month: 'פברואר', candidates: 23, jobs: 9, placements: 13 },
-    { month: 'מרץ',    candidates: 28, jobs: 8, placements: 16 },
-    { month: 'אפריל',  candidates: 35, jobs: 6, placements: 18 },
-  ],
-  totals: { candidates: 127, jobs: 38, placements: 67 },
-}
 
 function monthKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
@@ -36,6 +24,10 @@ function buildMonthSlotsBetween(from: Date, to: Date): { key: string; label: str
 }
 
 export async function GET(req: Request) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
   const { searchParams } = new URL(req.url)
   const range = searchParams.get('range') ?? '6m'
   const sinceParam = searchParams.get('since')
@@ -75,11 +67,11 @@ export async function GET(req: Request) {
     jobs  = res[1].data as { created_at: string }[]
     apps  = res[2].data as { updated_at: string }[]
   } catch {
-    return NextResponse.json({ ...DEMO_6M, range })
+    return NextResponse.json({ range, data: [], totals: { candidates: 0, jobs: 0, placements: 0 } })
   }
 
   const isEmpty = (cands?.length ?? 0) === 0 && (jobs?.length ?? 0) === 0
-  if (isEmpty) return NextResponse.json({ ...DEMO_6M, range })
+  if (isEmpty) return NextResponse.json({ range, data: [], totals: { candidates: 0, jobs: 0, placements: 0 } })
 
   const slots = buildMonthSlotsBetween(sinceDate, untilDate)
 

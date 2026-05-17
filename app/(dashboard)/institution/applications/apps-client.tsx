@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {
   CheckCircle2, XCircle, Calendar, MessageCircle, Clock,
   Eye, ChevronDown, MapPin, GraduationCap, Briefcase,
-  X, Phone, FileText, Search, Sparkles, StickyNote, Check,
+  X, Phone, FileText, Search, Sparkles, StickyNote, Check, Star, History,
 } from 'lucide-react'
 
 type AppStatus = 'ממתינה' | 'נצפתה' | 'התקבלה' | 'נדחתה' | 'בוטלה'
@@ -18,6 +18,7 @@ export interface AppRow {
   institution_notes: string | null
   job_id: string
   candidate_id: string
+  survey_token?: string | null
   jobs: { id: string; title: string; city: string | null } | null
   candidates: {
     id: string
@@ -87,6 +88,25 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
   const [notesOpen, setNotesOpen]     = useState<Set<string>>(new Set())
   const [savingNote, setSavingNote]   = useState<string | null>(null)
   const [savedNote, setSavedNote]     = useState<Set<string>>(new Set())
+
+  type LogEntry = { id: string; from_status: string | null; to_status: string; changed_at: string }
+  const [historyOpen, setHistoryOpen] = useState<Set<string>>(new Set())
+  const [historyData, setHistoryData] = useState<Record<string, LogEntry[]>>({})
+  const [historyLoading, setHistoryLoading] = useState<string | null>(null)
+
+  async function toggleHistory(appId: string) {
+    if (historyOpen.has(appId)) {
+      setHistoryOpen(prev => { const s = new Set(prev); s.delete(appId); return s })
+      return
+    }
+    setHistoryOpen(prev => new Set([...prev, appId]))
+    if (historyData[appId]) return
+    setHistoryLoading(appId)
+    const res = await fetch(`/api/applications/${appId}/history`)
+    const data = await res.json()
+    setHistoryData(prev => ({ ...prev, [appId]: Array.isArray(data) ? data : [] }))
+    setHistoryLoading(null)
+  }
 
   const counts = {
     'הכל':    apps.length,
@@ -214,8 +234,17 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
               paddingInlineEnd: '34px', paddingInlineStart: '12px', minWidth: 200 }} />
         </div>
 
-        {/* Status tabs */}
-        <div className="flex rounded-lg p-0.5 gap-0.5" style={{ background: 'var(--bg-2)' }}>
+        {/* Status tabs — mobile: select, desktop: tabs */}
+        <select
+          value={tab} onChange={e => setTab(e.target.value as AppStatus | 'הכל')}
+          className="md:hidden h-9 rounded-[10px] border text-[13px] font-medium outline-none px-3"
+          style={{ background: '#fff', borderColor: 'var(--line)', color: 'var(--ink)' }}>
+          {TABS.map(t => {
+            const cnt = counts[t.key as keyof typeof counts] ?? 0
+            return <option key={t.key} value={t.key}>{t.label}{cnt > 0 ? ` (${cnt})` : ''}</option>
+          })}
+        </select>
+        <div className="hidden md:flex rounded-lg p-0.5 gap-0.5" style={{ background: 'var(--bg-2)' }}>
           {TABS.map(t => {
             const cnt = counts[t.key as keyof typeof counts] ?? 0
             return (
@@ -471,58 +500,134 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
                               פרופיל מלא →
                             </Link>
                           )}
+                          {app.status === 'התקבלה' && app.survey_token && (
+                            <a
+                              href={`/survey?t=${app.survey_token}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="flex items-center gap-1 text-[12.5px] font-semibold no-underline"
+                              style={{ color: '#B45309' }}
+                            >
+                              <Star size={13} />תני משוב
+                            </a>
+                          )}
                         </div>
                       )}
 
-                      {/* Notes */}
+                      {/* Notes + History */}
                       <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--line)' }}>
-                        {!notesOpen.has(app.id) ? (
-                          <button
-                            onClick={() => setNotesOpen(prev => new Set([...prev, app.id]))}
-                            className="flex items-center gap-1.5 text-[12px] font-semibold py-1 px-2 rounded-[7px] transition-all w-full text-start"
-                            style={{ color: notes[app.id] ? 'var(--ink-2)' : 'var(--ink-4)', background: 'transparent' }}
-                            onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-2)' }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
-                          >
-                            <StickyNote size={12} style={{ flexShrink: 0 }} />
-                            {notes[app.id]
-                              ? <span className="truncate">{notes[app.id]}</span>
-                              : <span>+ הוסיפי הערה פנימית</span>
-                            }
-                            {savedNote.has(app.id) && (
-                              <span className="flex items-center gap-0.5 ms-auto text-[10px] font-bold" style={{ color: '#1A7A4A' }}>
-                                <Check size={10} />נשמר
-                              </span>
+                        <div className="flex items-start gap-2">
+                          {/* Notes */}
+                          <div className="flex-1 min-w-0">
+                            {!notesOpen.has(app.id) ? (
+                              <button
+                                onClick={() => setNotesOpen(prev => new Set([...prev, app.id]))}
+                                className="flex items-center gap-1.5 text-[12px] font-semibold py-1 px-2 rounded-[7px] transition-all w-full text-start"
+                                style={{ color: notes[app.id] ? 'var(--ink-2)' : 'var(--ink-4)', background: 'transparent' }}
+                                onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-2)' }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+                              >
+                                <StickyNote size={12} style={{ flexShrink: 0 }} />
+                                {notes[app.id]
+                                  ? <span className="truncate">{notes[app.id]}</span>
+                                  : <span>+ הוסיפי הערה פנימית</span>
+                                }
+                                {savedNote.has(app.id) && (
+                                  <span className="flex items-center gap-0.5 ms-auto text-[10px] font-bold" style={{ color: '#1A7A4A' }}>
+                                    <Check size={10} />נשמר
+                                  </span>
+                                )}
+                              </button>
+                            ) : (
+                              <div>
+                                <textarea
+                                  value={notes[app.id] ?? ''}
+                                  onChange={e => setNotes(prev => ({ ...prev, [app.id]: e.target.value }))}
+                                  placeholder="הערה פנימית (גלויה למוסד בלבד)..."
+                                  rows={2}
+                                  autoFocus
+                                  className="w-full px-3 py-2 rounded-[10px] border text-[12.5px] resize-none outline-none leading-relaxed"
+                                  style={{ borderColor: 'var(--purple-200)', background: 'var(--bg)', color: 'var(--ink)', fontFamily: 'inherit' }}
+                                />
+                                <div className="flex items-center gap-2 mt-1.5">
+                                  <button
+                                    onClick={() => saveNote(app.id)}
+                                    disabled={savingNote === app.id}
+                                    className="flex items-center gap-1 h-7 px-3 rounded-[7px] text-[12px] font-bold transition-all"
+                                    style={{ background: 'var(--purple)', color: '#fff', opacity: savingNote === app.id ? 0.6 : 1 }}
+                                  >
+                                    {savingNote === app.id ? 'שומרת...' : 'שמורי'}
+                                  </button>
+                                  <button
+                                    onClick={() => setNotesOpen(prev => { const s = new Set(prev); s.delete(app.id); return s })}
+                                    className="h-7 px-2 rounded-[7px] text-[12px] font-semibold"
+                                    style={{ color: 'var(--ink-3)' }}
+                                  >
+                                    ביטול
+                                  </button>
+                                </div>
+                              </div>
                             )}
+                          </div>
+
+                          {/* History toggle */}
+                          <button
+                            onClick={() => toggleHistory(app.id)}
+                            title="היסטוריית שינויים"
+                            className="flex items-center gap-1 h-7 px-2 rounded-[7px] text-[11.5px] font-semibold shrink-0 transition-all"
+                            style={{
+                              color: historyOpen.has(app.id) ? 'var(--purple)' : 'var(--ink-4)',
+                              background: historyOpen.has(app.id) ? 'var(--purple-050)' : 'transparent',
+                            }}
+                            onMouseEnter={e => { if (!historyOpen.has(app.id)) e.currentTarget.style.background = 'var(--bg-2)' }}
+                            onMouseLeave={e => { if (!historyOpen.has(app.id)) e.currentTarget.style.background = 'transparent' }}
+                          >
+                            <History size={12} />
+                            {historyLoading === app.id ? '...' : 'יומן'}
                           </button>
-                        ) : (
-                          <div>
-                            <textarea
-                              value={notes[app.id] ?? ''}
-                              onChange={e => setNotes(prev => ({ ...prev, [app.id]: e.target.value }))}
-                              placeholder="הערה פנימית (גלויה למוסד בלבד)..."
-                              rows={2}
-                              autoFocus
-                              className="w-full px-3 py-2 rounded-[10px] border text-[12.5px] resize-none outline-none leading-relaxed"
-                              style={{ borderColor: 'var(--purple-200)', background: 'var(--bg)', color: 'var(--ink)', fontFamily: 'inherit' }}
-                            />
-                            <div className="flex items-center gap-2 mt-1.5">
-                              <button
-                                onClick={() => saveNote(app.id)}
-                                disabled={savingNote === app.id}
-                                className="flex items-center gap-1 h-7 px-3 rounded-[7px] text-[12px] font-bold transition-all"
-                                style={{ background: 'var(--purple)', color: '#fff', opacity: savingNote === app.id ? 0.6 : 1 }}
-                              >
-                                {savingNote === app.id ? 'שומרת...' : 'שמורי'}
-                              </button>
-                              <button
-                                onClick={() => setNotesOpen(prev => { const s = new Set(prev); s.delete(app.id); return s })}
-                                className="h-7 px-2 rounded-[7px] text-[12px] font-semibold"
-                                style={{ color: 'var(--ink-3)' }}
-                              >
-                                ביטול
-                              </button>
+                        </div>
+
+                        {/* History timeline */}
+                        {historyOpen.has(app.id) && (
+                          <div className="mt-2 ms-1 ps-3 border-s-2 space-y-2" style={{ borderColor: 'var(--purple-200)' }}>
+                            {/* Initial "created" entry */}
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full -ms-[17px] shrink-0" style={{ background: 'var(--purple-200)' }} />
+                              <span className="text-[11px]" style={{ color: 'var(--ink-4)' }}>
+                                {new Date(app.applied_at).toLocaleDateString('he-IL', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                              <span className="text-[11.5px] font-semibold" style={{ color: 'var(--ink-3)' }}>הוגשה ←</span>
+                              <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full"
+                                style={{ background: STATUS_CFG['ממתינה'].bg, color: STATUS_CFG['ממתינה'].color }}>
+                                ממתינה
+                              </span>
                             </div>
+                            {historyLoading === app.id
+                              ? <p className="text-[11px] ps-1" style={{ color: 'var(--ink-4)' }}>טוענת...</p>
+                              : (historyData[app.id] ?? []).map(entry => {
+                                const sc = STATUS_CFG[entry.to_status as AppStatus] ?? { bg: '#F4F4F5', color: '#71717A' }
+                                return (
+                                  <div key={entry.id} className="flex items-center gap-2 flex-wrap">
+                                    <div className="w-2 h-2 rounded-full -ms-[17px] shrink-0" style={{ background: sc.color }} />
+                                    <span className="text-[11px]" style={{ color: 'var(--ink-4)' }}>
+                                      {new Date(entry.changed_at).toLocaleDateString('he-IL', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
+                                    </span>
+                                    {entry.from_status && (
+                                      <>
+                                        <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full"
+                                          style={{ background: (STATUS_CFG[entry.from_status as AppStatus] ?? { bg: '#F4F4F5', color: '#71717A' }).bg, color: (STATUS_CFG[entry.from_status as AppStatus] ?? { bg: '#F4F4F5', color: '#71717A' }).color }}>
+                                          {entry.from_status}
+                                        </span>
+                                        <span className="text-[11px]" style={{ color: 'var(--ink-4)' }}>←</span>
+                                      </>
+                                    )}
+                                    <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: sc.bg, color: sc.color }}>
+                                      {entry.to_status}
+                                    </span>
+                                  </div>
+                                )
+                              })
+                            }
                           </div>
                         )}
                       </div>

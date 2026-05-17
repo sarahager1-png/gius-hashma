@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { sendSms } from '@/lib/sms'
+import { sendWA } from '@/lib/whatsapp'
 
 // PATCH — candidate confirms/declines OR institution rates a past interview
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -58,17 +60,19 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   // notify institution when candidate confirms/declines
   const { data: fullIv } = await service
     .from('interviews')
-    .select('application_id, applications(job_id, jobs(title, institution_id, institutions(profile_id)), candidates(profiles(full_name)))')
+    .select('application_id, applications(job_id, jobs(title, institution_id, institutions(profile_id, phone, whatsapp_preference)), candidates(profiles(full_name)))')
     .eq('id', id)
     .single()
 
   type FullApp = {
     job_id: string
-    jobs: { title: string; institution_id: string; institutions: { profile_id: string | null } } | null
+    jobs: { title: string; institution_id: string; institutions: { profile_id: string | null; phone: string | null; whatsapp_preference: boolean | null } } | null
     candidates: { profiles: { full_name: string | null } | null } | null
   }
   const app = fullIv?.applications as unknown as FullApp | null
   const instProfileId = app?.jobs?.institutions?.profile_id
+  const instPhone = app?.jobs?.institutions?.phone ?? null
+  const instWaPref = app?.jobs?.institutions?.whatsapp_preference
   if (instProfileId) {
     const candidateName = app?.candidates?.profiles?.full_name ?? 'מועמדת'
     const jobTitle = app?.jobs?.title ?? ''
@@ -79,6 +83,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       body: `${confirmed ? 'אישור הגעה' : 'ביטול'} לראיון למשרת "${jobTitle}"`,
       related_id: fullIv?.application_id ?? null,
     })
+    // on cancellation also send SMS/WA to institution
+    if (!confirmed && instPhone) {
+      const msg = `${candidateName} ביטלה את הראיון למשרת "${jobTitle}". giuus.vercel.app/institution/candidates`
+      void Promise.allSettled([
+        instWaPref !== false ? sendWA(instPhone, msg) : Promise.resolve(),
+        sendSms(instPhone, msg),
+      ])
+    }
   }
 
   return NextResponse.json({ ok: true })

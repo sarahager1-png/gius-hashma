@@ -13,7 +13,7 @@ export default async function AdminCandidatesPage() {
 
   const { data: candidates } = await service
     .from('candidates')
-    .select('id, city, district, college, academic_level, specialization, availability_status, seniority_years, created_at, profiles(full_name, phone)')
+    .select('id, profile_id, city, district, college, academic_level, specialization, availability_status, seniority_years, created_at, profiles(full_name, phone)')
     .order('created_at', { ascending: false })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

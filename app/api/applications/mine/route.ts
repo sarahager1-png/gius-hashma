@@ -16,5 +16,25 @@ export async function GET() {
     .eq('candidate_id', cand.id)
     .order('applied_at', { ascending: false })
 
-  return NextResponse.json(data ?? [])
+  const apps = data ?? []
+
+  // attach survey token for accepted applications
+  const acceptedIds = apps.filter(a => a.status === 'התקבלה').map(a => a.id)
+  const surveyTokenMap: Record<string, string> = {}
+  if (acceptedIds.length > 0) {
+    const { data: surveys } = await service
+      .from('placement_surveys')
+      .select('application_id, token')
+      .in('application_id', acceptedIds)
+      .eq('survey_type', 'candidate_about_institution')
+      .is('submitted_at', null)
+    for (const s of surveys ?? []) {
+      surveyTokenMap[s.application_id] = s.token
+    }
+  }
+
+  return NextResponse.json(apps.map(a => ({
+    ...a,
+    survey_token: surveyTokenMap[a.id] ?? null,
+  })))
 }

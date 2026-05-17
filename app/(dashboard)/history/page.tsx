@@ -87,7 +87,7 @@ export default async function HistoryPage() {
     const { data: inst } = await service.from('institutions').select('id, is_approved').eq('profile_id', user.id).single()
     if (!inst?.is_approved) redirect('/dashboard')
 
-    const [appsRes, invRes, ivRes] = await Promise.all([
+    const [appsRes, invRes] = await Promise.all([
       service.from('applications')
         .select('id, status, applied_at, updated_at, candidates(profiles(full_name)), jobs!inner(title, institution_id)')
         .eq('jobs.institution_id', inst.id)
@@ -96,11 +96,17 @@ export default async function HistoryPage() {
         .select('id, status, created_at, scheduled_at, candidates(profiles(full_name)), jobs(title)')
         .eq('institution_id', inst.id)
         .order('created_at', { ascending: false }),
-      service.from('interviews')
-        .select('id, scheduled_at, candidate_confirmed, created_at, applications!inner(jobs!inner(institution_id), candidates(profiles(full_name)), jobs(title))')
-        .eq('applications.jobs.institution_id', inst.id)
-        .order('created_at', { ascending: false }),
     ])
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const appIds = (appsRes.data ?? []).map((a: any) => a.id as string)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ivRes: { data: any[] | null } = appIds.length === 0
+      ? { data: [] }
+      : await service.from('interviews')
+          .select('id, scheduled_at, candidate_confirmed, created_at, applications!inner(candidates(profiles(full_name)), jobs(title))')
+          .in('application_id', appIds)
+          .order('created_at', { ascending: false })
 
     for (const a of appsRes.data ?? []) {
       const candName = (a.candidates as CandRow | null)?.profiles?.full_name ?? 'מועמדת'

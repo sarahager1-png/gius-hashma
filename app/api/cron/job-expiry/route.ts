@@ -3,7 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { sendSms } from '@/lib/sms'
 
 // Vercel Cron Job — runs daily at 08:00 Israel time (05:00 UTC)
-// 1. Marks jobs past their expires_at as 'פגה תוקפה' and notifies institution
+// 1. Marks jobs past their expires_at as 'פג תוקפה' and notifies institution
 // 2. Warns institution 3 days before expiry
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization')
@@ -38,7 +38,7 @@ export async function GET(request: Request) {
 
     const { error: updateErr } = await service
       .from('jobs')
-      .update({ status: 'פגה תוקפה' })
+      .update({ status: 'פג תוקפה' })
       .eq('id', job.id)
 
     if (updateErr) {
@@ -50,7 +50,7 @@ export async function GET(request: Request) {
       await service.from('notifications').insert({
         profile_id: inst.profile_id,
         type: 'job_expired',
-        title: `המשרה "${job.title}" פגה תוקפה`,
+        title: `המשרה "${job.title}" פג תוקפה`,
         body: 'המשרה נסגרה אוטומטית. ניתן לפרסם משרה חדשה בניהול המשרות.',
         related_id: job.id,
       })
@@ -58,9 +58,34 @@ export async function GET(request: Request) {
 
     if (inst?.phone) {
       try {
-        await sendSms(inst.phone, `המשרה "${job.title}" פגה תוקפה ונסגרה אוטומטית. לפרסום משרה חדשה: giuus.vercel.app/institution/jobs`)
+        await sendSms(inst.phone, `המשרה "${job.title}" פג תוקפה ונסגרה אוטומטית. לפרסום משרה חדשה: giuus.vercel.app/institution/jobs`)
       } catch (err) {
         console.error('[CRON] job-expiry SMS failed:', inst.phone, err)
+      }
+    }
+
+    // notify candidates with pending applications to this job
+    const { data: pendingApps } = await service
+      .from('applications')
+      .select('id, candidates(profile_id, profiles(full_name, phone))')
+      .eq('job_id', job.id)
+      .in('status', ['ממתינה', 'נצפתה'])
+
+    for (const app of pendingApps ?? []) {
+      type CandFields = { profile_id: string | null; profiles: { full_name: string | null; phone: string | null } | null }
+      const cand = app.candidates as unknown as CandFields | null
+      if (!cand?.profile_id) continue
+
+      await service.from('notifications').insert({
+        profile_id: cand.profile_id,
+        type: 'job_expired_candidate',
+        title: `המשרה "${job.title}" נסגרה`,
+        body: `המשרה${inst?.institution_name ? ' ב' + inst.institution_name : ''} נסגרה. ניתן לחפש משרות נוספות.`,
+        related_id: job.id,
+      })
+
+      if (cand.profiles?.phone) {
+        void sendSms(cand.profiles.phone, `שלום ${cand.profiles.full_name ?? ''}! המשרה "${job.title}"${inst?.institution_name ? ' ב' + inst.institution_name : ''} נסגרה. לחיפוש משרות נוספות: giuus.vercel.app/jobs`).catch(() => null)
       }
     }
 

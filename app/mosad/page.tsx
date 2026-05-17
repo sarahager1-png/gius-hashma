@@ -95,6 +95,9 @@ export default function MosadLanding() {
           font-family:'Heebo',system-ui,sans-serif;
           direction:rtl;
           overflow-x:hidden;
+          width:100%;
+          max-width:100vw;
+          position:relative;
         }
 
         /* ── HERO ── */
@@ -134,6 +137,9 @@ export default function MosadLanding() {
         .mo-logo-name { font-size:20px; font-weight:900; color:#fff; letter-spacing:-.025em; }
         .mo-logo-sub  { font-size:10px; font-weight:500; color:rgba(255,255,255,.4); letter-spacing:.06em; }
         .mo-nav-links { display:flex; align-items:center; gap:6px; }
+        @media(max-width:540px){
+          .mo-nav-link { display:none; }
+        }
         .mo-nav-link {
           padding:8px 14px; border-radius:10px; font-size:13px; font-weight:600;
           color:rgba(255,255,255,.55); cursor:pointer; text-decoration:none;

@@ -427,7 +427,13 @@ export default function CandidatesClient({ candidates, initialSearch = '' }: Pro
               paddingInlineEnd: '34px', paddingInlineStart: '14px' }} />
         </div>
 
-        <div className="flex rounded-[10px] p-1 gap-0.5" style={{ background: 'var(--bg-2)', border: '1px solid var(--line)' }}>
+        <select
+          value={statusFilter} onChange={e => setFilter(e.target.value)}
+          className="md:hidden h-10 rounded-[10px] border text-[13px] font-medium outline-none px-3"
+          style={{ background: '#fff', borderColor: 'var(--line)', color: 'var(--ink)' }}>
+          {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <div className="hidden md:flex rounded-[10px] p-1 gap-0.5" style={{ background: 'var(--bg-2)', border: '1px solid var(--line)' }}>
           {STATUSES.map(s => (
             <button key={s} onClick={() => setFilter(s)}
               className="px-3.5 py-1.5 rounded-[8px] text-[12.5px] font-semibold transition-all"

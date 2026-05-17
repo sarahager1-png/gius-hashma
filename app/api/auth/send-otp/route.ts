@@ -72,7 +72,8 @@ export async function POST() {
   // Mask phone: keep last 2 digits
   const maskedPhone = profile.phone.replace(/\d(?=\d{2})/g, '*')
 
-  const devMode = !process.env.INFORU_USERNAME || !process.env.INFORU_API_KEY
+  const devMode = process.env.NODE_ENV !== 'production' &&
+    (!process.env.INFORU_USERNAME || !process.env.INFORU_API_KEY)
 
   return NextResponse.json({
     sent:        true,

@@ -33,7 +33,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
     .order('created_at', { ascending: false })
 
   const { data: candidate } = await service
-    .from('candidates').select('id').eq('profile_id', user.id).single()
+    .from('candidates').select('id').eq('profile_id', user.id).maybeSingle()
 
   const { data: myApps } = candidate
     ? await service.from('applications').select('job_id').eq('candidate_id', candidate.id)

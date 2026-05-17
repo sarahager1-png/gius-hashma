@@ -169,8 +169,8 @@ export default function CommunicationClient({ templates: initTemplates, logs: in
       {tab === 'logs' && (
         <div>
           <p className="text-[13px] mb-4" style={{ color: 'var(--ink-3)' }}>{logs.length} הודעות אחרונות</p>
-          <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--line)', boxShadow: 'var(--shadow-card)' }}>
-            <table className="w-full text-[12.5px]">
+          <div className="rounded-2xl overflow-hidden overflow-x-auto" style={{ border: '1px solid var(--line)', boxShadow: 'var(--shadow-card)' }}>
+            <table className="w-full text-[12.5px] min-w-[560px]">
               <thead>
                 <tr style={{ background: 'var(--bg-2)', borderBottom: '1px solid var(--line)' }}>
                   {['נמען', 'ערוץ', 'תבנית', 'הודעה', 'סטטוס', 'תאריך'].map(h => (
@@ -217,7 +217,7 @@ export default function CommunicationClient({ templates: initTemplates, logs: in
             </div>
 
             <div className="overflow-y-auto p-6 space-y-4 flex-1">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[12px] font-semibold mb-1" style={{ color: 'var(--ink-2)' }}>מזהה (key)</label>
                   <input value={form.key ?? ''} onChange={e => setForm(f => ({ ...f, key: e.target.value }))}

@@ -155,7 +155,15 @@ export default function CandidateSearchClient({ candidates, institutionId, insti
             style={{ background: '#fff', borderColor: 'var(--line)', color: 'var(--ink)',
               paddingInlineEnd: '36px', paddingInlineStart: '14px' }} />
         </div>
-        <div className="flex rounded-lg p-0.5 gap-0.5" style={{ background: 'var(--bg-2)' }}>
+        {/* Mobile: dropdown */}
+        <select
+          value={filter} onChange={e => setFilter(e.target.value)}
+          className="md:hidden h-10 rounded-[10px] border text-[13px] font-medium outline-none px-3"
+          style={{ background: '#fff', borderColor: 'var(--line)', color: 'var(--ink)' }}>
+          {STATUSES.map(s => <option key={s} value={s}>{s}{s === 'מועדפות' && favorites.size > 0 ? ` (${favorites.size})` : ''}</option>)}
+        </select>
+        {/* Desktop: tabs */}
+        <div className="hidden md:flex rounded-lg p-0.5 gap-0.5" style={{ background: 'var(--bg-2)' }}>
           {STATUSES.map(s => (
             <button key={s} onClick={() => setFilter(s)}
               className="flex items-center gap-1 px-3 py-1.5 rounded-md text-[12.5px] font-semibold transition-all"

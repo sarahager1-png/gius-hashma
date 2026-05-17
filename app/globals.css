@@ -144,6 +144,7 @@ html, body {
   color: var(--ink);
   direction: rtl;
   line-height: 1.55;
+  overflow-x: hidden;
 }
 
 button { font-family: inherit; cursor: pointer; }

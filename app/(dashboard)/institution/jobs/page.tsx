@@ -16,16 +16,9 @@ export default async function InstitutionJobsPage() {
   const { data: viewerProfile } = await service.from('profiles').select('role').eq('id', user.id).single()
   const isAdmin = viewerProfile && ADMIN_ROLES.includes(viewerProfile.role)
 
-  let institution = null as { id: string; institution_name: string; is_approved: boolean } | null
+  if (isAdmin) redirect('/admin/institutions')
 
-  if (isAdmin) {
-    // admin: use first approved institution for preview
-    const { data } = await service.from('institutions').select('id, institution_name, is_approved').eq('is_approved', true).limit(1).single()
-    institution = data
-  } else {
-    const { data } = await service.from('institutions').select('id, institution_name, is_approved').eq('profile_id', user.id).single()
-    institution = data
-  }
+  const { data: institution } = await service.from('institutions').select('id, institution_name, is_approved').eq('profile_id', user.id).single()
 
   if (!institution) redirect('/institution/profile')
   if (!institution.is_approved) redirect('/institution/profile')

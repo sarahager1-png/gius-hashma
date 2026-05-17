@@ -8,6 +8,11 @@ export function smsNewApplication(phone: string, candidateName: string, jobTitle
   return sendSms(phone, `הגשה חדשה! ${candidateName} הגישה מועמדות למשרת "${jobTitle}". לצפייה: giuus.vercel.app/institution/applications`)
 }
 
+export function smsCandidateApplicationConfirmed(phone: string, candidateName: string, jobTitle: string, institutionName: string) {
+  const inst = institutionName ? ` ב${institutionName}` : ''
+  return sendSms(phone, `שלום ${candidateName}! תודה שפנית אלינו 💙 הגשתך למשרת "${jobTitle}"${inst} התקבלה. נעדכן אותך בכל התפתחות.`)
+}
+
 export function smsApplicationViewed(phone: string, institutionName: string, jobTitle: string) {
   return sendSms(phone, `עדכון: ${institutionName} עיינה בהגשתך למשרת "${jobTitle}". בברכה, מערכת גיוס חב"ד`)
 }

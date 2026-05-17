@@ -27,6 +27,13 @@ interface AppListing {
 
 // ── POST: Receive incoming messages from Green API ───────────────────
 export async function POST(request: Request) {
+  const secret = process.env.GREENAPI_WEBHOOK_SECRET
+  if (secret) {
+    const { searchParams } = new URL(request.url)
+    const token = searchParams.get('token') ?? request.headers.get('x-webhook-token')
+    if (token !== secret) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
   let body: unknown
   try { body = await request.json() } catch { return NextResponse.json({ ok: true }) }
 

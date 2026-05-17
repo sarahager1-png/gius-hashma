@@ -156,7 +156,7 @@ export default function DashboardClient({ fullName }: Props) {
       </section>
 
       {/* Footer */}
-      <footer className="flex items-center justify-between mt-6 pt-4 text-[12.5px] font-medium flex-wrap gap-2" style={{ color: 'var(--ink-4)' }}>
+      <footer className="flex items-center justify-between mt-6 pt-4 text-[12.5px] font-medium flex-wrap gap-2" style={{ color: 'var(--ink-4)', borderTop: '1px solid var(--line)' }}>
         <div>
           רשת אהלי יוסף יצחק לובאוויטש
           <span className="mx-2.5 hidden sm:inline" style={{ color: 'var(--line)' }}>·</span>
@@ -165,7 +165,10 @@ export default function DashboardClient({ fullName }: Props) {
             onMouseLeave={e => { e.currentTarget.style.color = 'var(--ink-3)'; e.currentTarget.style.borderColor = 'transparent' }}
           >תנאי שימוש</a>
         </div>
-        <div>גרסה 1.0</div>
+        <div className="flex items-center gap-3">
+          <DownloadDemoButton />
+          <span>גרסה 1.0</span>
+        </div>
       </footer>
     </div>
   )
@@ -199,4 +202,40 @@ function LiveDate() {
     heb = raw
   } catch { /* browser may not support */ }
   return <>{greg}{heb ? ` · ${heb}` : ''}</>
+}
+
+function DownloadDemoButton() {
+  const [loading, setLoading] = useState(false)
+
+  async function download() {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/admin/export-demo')
+      if (!res.ok) throw new Error()
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      const date = new Date().toLocaleDateString('he-IL').replace(/\./g, '-')
+      a.href = url
+      a.download = `demo-data-${date}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <button
+      onClick={download}
+      disabled={loading}
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[12px] font-semibold transition-all disabled:opacity-50"
+      style={{ background: '#fff', borderColor: 'var(--line)', color: 'var(--ink-3)' }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--teal)'; e.currentTarget.style.color = 'var(--teal)' }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--line)'; e.currentTarget.style.color = 'var(--ink-3)' }}
+    >
+      <Download size={13} />
+      {loading ? 'מוריד...' : 'הורדת נתוני דמו'}
+    </button>
+  )
 }

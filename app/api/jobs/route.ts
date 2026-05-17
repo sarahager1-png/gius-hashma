@@ -4,6 +4,10 @@ import { sendNewJobMatchEmail } from '@/lib/email'
 import { sendExternal } from '@/lib/notify-external'
 
 export async function GET() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
   const service = createServiceClient()
   const { data } = await service
     .from('jobs')
@@ -51,6 +55,7 @@ export async function POST(request: Request) {
   const ALLOWED_JOB_FIELDS = [
     'title', 'description', 'city', 'district', 'specialization', 'job_type', 'job_types',
     'placement_type', 'status', 'expires_at', 'start_date', 'end_date',
+    'role', 'classes', 'hours',
   ]
   const safeRest = Object.fromEntries(Object.entries(rest).filter(([k]) => ALLOWED_JOB_FIELDS.includes(k)))
 

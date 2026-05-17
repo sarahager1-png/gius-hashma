@@ -1,5 +1,35 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { sendSms } from '@/lib/sms'
+import { sendWA } from '@/lib/whatsapp'
+
+// DELETE — institution cancels a pending invitation
+export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const supabase = await createClient()
+  const service = createServiceClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // resolve institution
+  const { data: inst } = await service.from('institutions').select('id').eq('profile_id', user.id).single()
+  if (!inst) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const { data: inv } = await service
+    .from('invitations')
+    .select('id, status, institution_id')
+    .eq('id', id)
+    .single()
+
+  if (!inv || inv.institution_id !== inst.id)
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (inv.status !== 'ממתינה')
+    return NextResponse.json({ error: 'ניתן לבטל רק הזמנות ממתינות' }, { status: 400 })
+
+  await service.from('invitations').delete().eq('id', id)
+  return NextResponse.json({ ok: true })
+}
 
 // PATCH — candidate accepts or declines an invitation
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -35,7 +65,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       .select('id')
       .eq('job_id', inv.job_id)
       .eq('candidate_id', cand.id)
-      .single()
+      .maybeSingle()
 
     const { data: app, error: appErr } = existing
       ? { data: existing, error: null }
@@ -70,6 +100,36 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         body: `המועמדת אישרה את ההזמנה לראיון למשרת "${jobTitle}"`,
         related_id: app?.id ?? null,
       })
+    }
+  }
+
+  // if declined → notify institution (in-app + SMS/WA)
+  if (status === 'נדחתה') {
+    const [instRes, candRes, jobRes] = await Promise.all([
+      service.from('institutions').select('profile_id, phone, whatsapp_preference').eq('id', inv.institution_id).single(),
+      service.from('candidates').select('profiles(full_name)').eq('id', cand.id).single(),
+      service.from('jobs').select('title').eq('id', inv.job_id).single(),
+    ])
+    const instProfileId = instRes.data?.profile_id
+    const instPhone = instRes.data?.phone ?? null
+    const instWaPref = instRes.data?.whatsapp_preference
+    const candidateName = (candRes.data?.profiles as unknown as { full_name: string | null } | null)?.full_name ?? 'מועמדת'
+    const jobTitle = jobRes.data?.title ?? ''
+    if (instProfileId) {
+      await service.from('notifications').insert({
+        profile_id: instProfileId,
+        type: 'invitation_declined',
+        title: `${candidateName} דחתה את ההזמנה`,
+        body: `המועמדת דחתה את ההזמנה לראיון למשרת "${jobTitle}"`,
+        related_id: inv.id,
+      })
+    }
+    if (instPhone) {
+      const msg = `${candidateName} דחתה את ההזמנה לראיון למשרת "${jobTitle}". ניתן להזמין מועמדת אחרת: giuus.vercel.app/institution/candidates`
+      void Promise.allSettled([
+        instWaPref !== false ? sendWA(instPhone, msg) : Promise.resolve(),
+        sendSms(instPhone, msg),
+      ])
     }
   }
 

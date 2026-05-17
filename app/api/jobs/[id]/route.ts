@@ -46,7 +46,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 
   const body = await request.json()
-  const allowed = ['title', 'description', 'district', 'city', 'specialization', 'job_type', 'job_types', 'placement_type', 'status', 'expires_at', 'start_date', 'end_date']
+  const allowed = ['title', 'description', 'district', 'city', 'specialization', 'job_type', 'job_types', 'placement_type', 'status', 'expires_at', 'start_date', 'end_date', 'role', 'classes', 'hours']
   const update = Object.fromEntries(Object.entries(body).filter(([k]) => allowed.includes(k)))
 
   const { error } = await service.from('jobs').update(update).eq('id', id)

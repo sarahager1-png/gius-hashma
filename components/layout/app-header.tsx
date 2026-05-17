@@ -217,6 +217,17 @@ export default function AppHeader({ fullName, role }: Props) {
       {/* Right controls */}
       <div className="flex items-center gap-1.5 ms-auto">
 
+        {/* Mobile logout — visible only on small screens */}
+        <button
+          onClick={signOut}
+          className="md:hidden flex items-center justify-center w-9 h-9 rounded-[9px] shrink-0 transition-all"
+          style={{ color: '#DC2626', border: '1.5px solid #FECACA', background: '#FEF2F2' }}
+          aria-label="התנתקות"
+          title="התנתקות"
+        >
+          <LogOut size={16} strokeWidth={2} />
+        </button>
+
         {/* Bell */}
         <div ref={bellRef} className="relative hidden md:block">
           <button

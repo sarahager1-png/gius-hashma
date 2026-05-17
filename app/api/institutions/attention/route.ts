@@ -1,25 +1,17 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
-const DEMO = [
-  { id: 'd1', name: 'בית ספר נצח ישראל',          principal: 'מרים לוי',       city: 'ירושלים', initials: 'בנ', color: 'red',   pendingCandidates: 4, daysWaiting: 18, status: 'קריטי' },
-  { id: 'd2', name: 'גן ילדים שמחה',               principal: 'רחל כהן',        city: 'בני ברק', initials: 'גי', color: 'amber', pendingCandidates: 3, daysWaiting: 11, status: 'דחוף'  },
-  { id: 'd3', name: 'מכון חינוך ע"ש מנחם מנדל',   principal: 'שרה גרינברג',    city: 'תל אביב', initials: 'מח', color: 'amber', pendingCandidates: 2, daysWaiting: 9,  status: 'דחוף'  },
-  { id: 'd4', name: 'בית ספר אורות',               principal: 'חנה ברקוביץ',   city: 'רמת גן',  initials: 'בא', color: 'teal',  pendingCandidates: 5, daysWaiting: 4,  status: 'בתהליך'},
-  { id: 'd5', name: 'גן ילדים אהבת ישראל',         principal: 'דינה שפירא',    city: 'חיפה',    initials: 'גא', color: 'soft',  pendingCandidates: 2, daysWaiting: 3,  status: 'בתהליך'},
-  { id: 'd6', name: 'בית ספר בנות חיה',            principal: 'לאה פרידמן',    city: 'אשדוד',   initials: 'בב', color: 'soft',  pendingCandidates: 1, daysWaiting: 2,  status: 'בתהליך'},
-]
 
 export async function GET() {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json(DEMO)
+    if (!user) return NextResponse.json([], { status: 401 })
 
     const service = createServiceClient()
     const { data: profile } = await service.from('profiles').select('role').eq('id', user.id).single()
     if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role))
-      return NextResponse.json(DEMO)
+      return NextResponse.json([])
 
     const { data: pending } = await service
       .from('applications')
@@ -27,7 +19,7 @@ export async function GET() {
       .eq('status', 'ממתינה')
       .order('applied_at', { ascending: true })
 
-    if (!pending || pending.length === 0) return NextResponse.json(DEMO)
+    if (!pending || pending.length === 0) return NextResponse.json([])
 
     const byInst: Record<string, { id: string; name: string; principal: string; city: string; pendingCount: number; oldestApplied: string }> = {}
 
@@ -54,6 +46,6 @@ export async function GET() {
 
     return NextResponse.json(result)
   } catch {
-    return NextResponse.json(DEMO)
+    return NextResponse.json([])
   }
 }

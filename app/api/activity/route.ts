@@ -16,18 +16,6 @@ function timeAgo(iso: string) {
   return new Date(iso).toLocaleDateString('he-IL', { day: 'numeric', month: 'long' })
 }
 
-const DEMO = [
-  { id: 1, color: 'green',  icon: 'check',    type: 'placement',   time: 'לפני 12 דקות', text: '<b>שרה לוי</b> התקבלה למשרת <b>גננת בכירה</b> ב<b>גן ילדים אהבת ישראל</b>' },
-  { id: 2, color: 'purple', icon: 'user',      type: 'application', time: 'לפני 28 דקות', text: '<b>רחל כהן</b> הגישה מועמדות למשרת <b>מורה מתמטיקה · בית ספר נצח ישראל</b>' },
-  { id: 3, color: 'teal',   icon: 'briefcase', type: 'application', time: 'לפני שעה',     text: '<b>בית ספר אורות</b> צפתה בפרטי מועמדת <b>מרים שפירא</b> — <b>מחנכת כיתה</b>' },
-  { id: 4, color: 'green',  icon: 'check',     type: 'interview',   time: 'לפני 2 שעות',  text: '<b>דינה גרינברג</b> אישרה ראיון ב<b>בית ספר בנות חיה</b> — 7 במאי' },
-  { id: 5, color: 'purple', icon: 'file',      type: 'invitation',  time: 'לפני 3 שעות',  text: '<b>מכון חינוך ע"ש מנחם מנדל</b> שלחה הזמנת ראיון ל<b>אסתר גולדשטיין</b> למשרת <b>רכזת חינוך</b>' },
-  { id: 6, color: 'teal',   icon: 'clock',     type: 'interview',   time: 'אתמול',         text: 'ראיון נקבע עם <b>חנה ברקוביץ</b> ב<b>גן ילדים שמחה</b> — 9 במאי · ממתין לאישור' },
-  { id: 7, color: 'purple', icon: 'user',      type: 'application', time: 'אתמול',         text: '<b>לאה פרידמן</b> הגישה מועמדות למשרת <b>מורה לימודי יהדות · בית ספר עוז</b>' },
-  { id: 8, color: 'amber',  icon: 'clock',     type: 'interview',   time: 'לפני 2 ימים',  text: '<b>מרים וייס</b> ביטלה ראיון ב<b>בית ספר תפארת</b> — 5 במאי' },
-  { id: 9, color: 'green',  icon: 'check',     type: 'placement',   time: 'לפני 2 ימים',  text: '<b>יעל אברהם</b> התקבלה למשרת <b>סייעת גן</b> ב<b>גן ילדים צמח</b>' },
-  { id: 10, color: 'red',   icon: 'x',         type: 'rejection',   time: 'לפני 3 ימים',  text: 'בקשת <b>שושנה לייבוביץ</b> ל<b>מורה אנגלית</b> נדחתה ע"י <b>בית ספר כוכב</b>' },
-]
 
 export async function GET(req: Request) {
   const supabase = await createClient()
@@ -67,7 +55,7 @@ export async function GET(req: Request) {
     const res = await Promise.all([appsQ, ivsQ, invitsQ])
     apps = res[0].data; ivs = res[1].data; invits = res[2].data
   } catch {
-    return NextResponse.json(DEMO)
+    return NextResponse.json([])
   }
 
   const events: { ts: string; id: string; color: EventColor; icon: EventIcon; text: string; time: string; type: string }[] = []
@@ -133,7 +121,7 @@ export async function GET(req: Request) {
     }
   }
 
-  if (events.length === 0) return NextResponse.json(DEMO)
+  if (events.length === 0) return NextResponse.json([])
 
   events.sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime())
   const result = events.slice(0, 20).map((e, i) => ({ ...e, id: i + 1 }))

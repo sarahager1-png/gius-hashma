@@ -79,7 +79,7 @@ export default async function AdminSurveysPage() {
       </div>
 
       {/* Split averages */}
-      <div className="grid grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <div className="rounded-[16px] border p-4" style={{ background: '#fff', borderColor: 'var(--line)' }}>
           <p className="text-[13px] font-bold mb-1" style={{ color: 'var(--ink)' }}>מועמדות על מוסד</p>
           <p className="text-[11px] mb-2" style={{ color: 'var(--ink-4)' }}>{candSurveys.length} תגובות</p>
@@ -93,8 +93,8 @@ export default async function AdminSurveysPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-[18px] border overflow-hidden" style={{ background: '#fff', borderColor: 'var(--line)' }}>
-        <table className="w-full text-[13px]" style={{ borderCollapse: 'collapse' }}>
+      <div className="rounded-[18px] border overflow-hidden overflow-x-auto" style={{ background: '#fff', borderColor: 'var(--line)' }}>
+        <table className="w-full text-[13px] min-w-[700px]" style={{ borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: 'var(--bg-2)', borderBottom: '1px solid var(--line)' }}>
               {['סוג', 'מועמדת', 'מוסד', 'משרה', 'ממוצע', 'ק2', 'ק3', 'ממליץ', 'הערות', 'נשלח'].map(h => (

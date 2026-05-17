@@ -20,11 +20,15 @@ export async function GET(req: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const service = createServiceClient()
+  const { data: profile } = await service.from('profiles').select('role').eq('id', user.id).single()
+  if (!profile || !['מנהלת מערכת', 'אדמין מערכת', 'מנהל רשת'].includes(profile.role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
   const { searchParams } = new URL(req.url)
   const since = searchParams.get('since')
   const until = searchParams.get('until')
-
-  const service = createServiceClient()
 
   let candQ  = service.from('candidates').select('*', { count: 'exact', head: true }).neq('availability_status', 'לא פעילה')
   let appsQ  = service.from('applications').select('candidate_id', { count: 'exact', head: true })

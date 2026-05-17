@@ -1,4 +1,4 @@
-﻿export type UserRole = 'מועמדת' | 'מוסד' | 'מנהלת מערכת' | 'אדמין מערכת'
+﻿export type UserRole = 'מועמדת' | 'מוסד' | 'מנהלת מערכת' | 'אדמין מערכת' | 'מנהל רשת'
 
 export type AvailabilityStatus =
   | "מחפשת סטאג'"
@@ -217,41 +217,6 @@ export interface InterviewSlot {
   booked_at: string | null
   created_by: string | null
   created_at: string
-  candidates?: Candidate
-}
-
-export type ReflectionStatus = 'ממתין לשיקוף' | 'שיקוף התקבל' | 'לא השיב' | 'דורש בירור'
-
-export interface LearningDay {
-  id: string
-  title: string
-  day_date: string
-  location: string | null
-  description: string | null
-  reflection_prompt: string | null
-  reflection_sent_at: string | null
-  created_by: string | null
-  created_at: string
-}
-
-export interface LearningDayAttendee {
-  id: string
-  learning_day_id: string
-  candidate_id: string
-  attended: boolean
-  added_at: string
-  candidates?: Candidate
-}
-
-export interface LearningDayReflection {
-  id: string
-  learning_day_id: string
-  candidate_id: string
-  status: ReflectionStatus
-  reflection_text: string | null
-  submitted_at: string | null
-  reviewed_by: string | null
-  review_notes: string | null
   candidates?: Candidate
 }
 

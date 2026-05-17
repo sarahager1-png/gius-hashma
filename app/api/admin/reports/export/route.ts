@@ -89,6 +89,36 @@ export async function GET(request: Request) {
     })
   }
 
+  if (type === 'institutions') {
+    const { data } = await service
+      .from('institutions')
+      .select('institution_name, city, district, address, phone, school_type, principal_name, is_approved, created_at, profiles(full_name, phone)')
+      .order('created_at', { ascending: false })
+
+    const headers = ['שם מוסד', 'סוג', 'עיר', 'מחוז', 'כתובת', 'טלפון מוסד', 'שם מנהלת', 'טלפון איש קשר', 'מאושר', 'תאריך הצטרפות']
+    type InstRow = { institution_name: string; city?: string|null; district?: string|null; address?: string|null; phone?: string|null; school_type?: string|null; principal_name?: string|null; is_approved: boolean; created_at: string; profiles?: { full_name?: string|null; phone?: string|null } | null }
+    const csvRows = ((data ?? []) as InstRow[]).map(i => [
+      i.institution_name,
+      i.school_type ?? '',
+      i.city ?? '',
+      i.district ?? '',
+      i.address ?? '',
+      i.phone ?? '',
+      i.principal_name ?? i.profiles?.full_name ?? '',
+      i.profiles?.phone ?? '',
+      i.is_approved ? 'כן' : 'לא',
+      new Date(i.created_at).toLocaleDateString('he-IL'),
+    ])
+
+    const csv = buildCsv(headers, csvRows)
+    return new NextResponse(csv, {
+      headers: {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="institutions-${today()}.csv"`,
+      },
+    })
+  }
+
   return NextResponse.json({ error: 'Unknown type' }, { status: 400 })
 }
 

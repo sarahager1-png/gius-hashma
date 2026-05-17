@@ -10,7 +10,7 @@ import {
   Settings, LogOut, ClipboardList, UserPlus, Sparkles,
   ShieldCheck, Mail, History, HelpCircle, MessageCircle, Send, UserCog, Inbox,
   FileStack, CalendarDays, BellRing, Upload, ScrollText, MailOpen, Star,
-  BookOpen, Radio, CalendarCheck,
+  Radio, CalendarCheck,
 } from 'lucide-react'
 
 interface NavItem {
@@ -66,6 +66,15 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
       ],
     },
     {
+      label: 'תקשורת',
+      items: [
+        { href: '/institution/applications', label: 'הגשות',           icon: ClipboardList   },
+        { href: '/institution/invitations',  label: 'הזמנות שליחה',   icon: Send            },
+        { href: '/institution/inquiries',    label: 'פניות',           icon: MessageCircle   },
+        { href: '/institution/interviews',   label: 'ראיונות',         icon: CalendarCheck   },
+      ],
+    },
+    {
       label: 'חשבון',
       items: [
         { href: '/institution/profile',      label: 'פרופיל המוסד',   icon: UserCog         },
@@ -112,6 +121,43 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
       items: [
         { href: '/admin/audit',              label: 'יומן פעולות',    icon: ScrollText      },
         { href: '/admin/admins',             label: 'מנהלי מערכת',    icon: ShieldCheck     },
+        { href: '/settings',                 label: 'הגדרות',          icon: Settings        },
+        { href: '/help',                     label: 'הנחיות',          icon: HelpCircle      },
+      ],
+    },
+  ],
+  'מנהל רשת': [
+    {
+      items: [
+        { href: '/dashboard',                label: 'דשבורד ראשי',    icon: LayoutDashboard },
+      ],
+    },
+    {
+      label: 'ניווט ומיון',
+      items: [
+        { href: '/candidates',               label: 'מועמדות',         icon: Users           },
+        { href: '/admin/matches',            label: 'שלבי המיון',      icon: Sparkles        },
+        { href: '/admin/interview-slots',    label: 'ראיונות',         icon: CalendarCheck   },
+        { href: '/admin/reports',            label: 'המלצות ושיבוצים', icon: BarChart3       },
+      ],
+    },
+    {
+      label: 'תפעול',
+      items: [
+        { href: '/admin/candidate-requests', label: 'בקשות הצטרפות',  icon: UserPlus        },
+        { href: '/jobs',                     label: 'משרות',           icon: Briefcase       },
+        { href: '/admin/institutions',       label: 'מוסדות',          icon: Building2       },
+      ],
+    },
+    {
+      label: 'תקשורת',
+      items: [
+        { href: '/messages',                 label: 'הודעות',          icon: MessageCircle   },
+      ],
+    },
+    {
+      label: 'מערכת',
+      items: [
         { href: '/settings',                 label: 'הגדרות',          icon: Settings        },
         { href: '/help',                     label: 'הנחיות',          icon: HelpCircle      },
       ],
@@ -214,6 +260,7 @@ export default function AppSidebar({
     'מוסד':         'פרופיל מוסד',
     'מנהלת מערכת': 'ניהול מערכת',
     'אדמין מערכת': 'ניהול מערכת',
+    'מנהל רשת':    'ניהול מערכת',
   }
 
   const homeHref =
@@ -341,6 +388,22 @@ export default function AppSidebar({
         borderTop: '1px solid rgba(255,255,255,.06)',
         padding: '10px 10px 14px',
       }}>
+        <a
+          href="https://wa.me/972503339770"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block w-full text-center no-underline mb-2"
+          style={{
+            fontSize: '10.5px',
+            color: 'rgba(255,255,255,.5)',
+            padding: '6px 8px',
+            lineHeight: 1.6,
+            borderTop: '1px solid rgba(255,255,255,.08)',
+          }}
+        >
+          פיתוח ובניית אתר: שרה הגר
+          <span style={{ display: 'block', color: 'rgba(0,212,232,.6)', fontSize: '10px' }}>0503339770</span>
+        </a>
         <button
           onClick={signOut}
           className="w-full flex items-center gap-2.5 rounded-[10px] transition-all"

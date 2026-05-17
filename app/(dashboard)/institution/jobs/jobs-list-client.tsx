@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Copy, Pencil } from 'lucide-react'
+import { Copy, Pencil, XCircle } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 
 const PLACEMENT_COLORS: Record<string, { bg: string; color: string; icon: string }> = {
@@ -39,12 +39,24 @@ interface Job {
 }
 
 interface Props {
-  jobs: Job[]
+  jobs: Job[]  // passed as initialJobs internally
 }
 
-export default function JobsListClient({ jobs }: Props) {
+export default function JobsListClient({ jobs: initialJobs }: Props) {
   const router = useRouter()
+  const [jobs, setJobs] = useState(initialJobs)
   const [duplicating, setDuplicating] = useState<string | null>(null)
+  const [closing, setClosing] = useState<string | null>(null)
+
+  async function handleClose(e: React.MouseEvent, jobId: string) {
+    e.preventDefault(); e.stopPropagation()
+    if (!confirm('לסגור את המשרה? ההגשות הפתוחות יסומנו כנדחות.')) return
+    setClosing(jobId)
+    await fetch(`/api/jobs/${jobId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'בוטלה' }) })
+    setJobs(prev => prev.map(j => j.id === jobId ? { ...j, status: 'בוטלה' } : j))
+    setClosing(null)
+    router.refresh()
+  }
 
   async function handleDuplicate(e: React.MouseEvent, jobId: string) {
     e.preventDefault()
@@ -71,6 +83,8 @@ export default function JobsListClient({ jobs }: Props) {
         const ss = STATUS_STYLE[job.status] ?? { bg: '#F4F4F5', color: '#71717A' }
         const pc = job.placement_type ? (PLACEMENT_COLORS[job.placement_type] ?? null) : null
         const isDuplicating = duplicating === job.id
+        const isClosing = closing === job.id
+        const canClose = job.status === 'פעילה'
 
         return (
           <div
@@ -139,6 +153,20 @@ export default function JobsListClient({ jobs }: Props) {
               className="absolute bottom-3 end-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
               style={{ pointerEvents: 'auto' }}
             >
+              {canClose && (
+                <button
+                  onClick={e => handleClose(e, job.id)}
+                  disabled={isClosing}
+                  title="סגרי משרה"
+                  className="flex items-center gap-1 h-7 px-2.5 rounded-[7px] text-[12px] font-bold transition-all"
+                  style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA' }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#FEE2E2'}
+                  onMouseLeave={e => e.currentTarget.style.background = '#FEF2F2'}
+                >
+                  <XCircle size={12} />
+                  {isClosing ? '...' : 'סגרי'}
+                </button>
+              )}
               <button
                 onClick={e => handleDuplicate(e, job.id)}
                 disabled={isDuplicating}

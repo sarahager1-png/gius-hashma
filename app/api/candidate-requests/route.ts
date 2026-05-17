@@ -1,6 +1,7 @@
 ﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { rateLimit } from '@/lib/rate-limit'
+import { sendSms } from '@/lib/sms'
 
 // POST — public, submit a request (auth optional — if authenticated via Google, profile_id is linked)
 export async function POST(request: Request) {
@@ -89,6 +90,9 @@ export async function POST(request: Request) {
       }))
     )
   }
+
+  // confirm receipt to candidate via SMS
+  void sendSms(phone.trim(), `שלום ${full_name.trim()}! קיבלנו את בקשת הצטרפותך למערכת הגיוס של רשת חב"ד. נבדוק ונחזור אליך בהקדם 🙏`).catch(() => null)
 
   return NextResponse.json({ ok: true }, { status: 201 })
 }

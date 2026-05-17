@@ -1,44 +1,44 @@
 {
   "crons": [
     {
+      "path": "/api/cron/job-expiry",
+      "schedule": "0 6 * * *"
+    },
+    {
       "path": "/api/cron/interview-reminders",
-      "schedule": "0 5 * * *"
+      "schedule": "5 6 * * *"
     },
     {
       "path": "/api/cron/invitation-reminders",
-      "schedule": "0 5 * * *"
-    },
-    {
-      "path": "/api/cron/stale-applications",
-      "schedule": "30 5 * * *"
-    },
-    {
-      "path": "/api/cron/weekly-summary",
-      "schedule": "0 4 * * 1"
+      "schedule": "10 6 * * *"
     },
     {
       "path": "/api/cron/pending-applications",
-      "schedule": "0 6 * * *"
+      "schedule": "15 6 * * *"
     },
     {
-      "path": "/api/cron/job-alerts",
-      "schedule": "0 5 * * 0"
+      "path": "/api/cron/candidate-pending-applications",
+      "schedule": "20 6 * * *"
     },
     {
-      "path": "/api/cron/job-expiry",
-      "schedule": "0 5 * * *"
+      "path": "/api/cron/stale-applications",
+      "schedule": "25 6 * * *"
     },
     {
       "path": "/api/cron/placement-surveys",
-      "schedule": "0 4 * * *"
+      "schedule": "30 6 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-summary",
+      "schedule": "0 6 * * 1"
+    },
+    {
+      "path": "/api/cron/job-alerts",
+      "schedule": "0 6 * * 0"
     },
     {
       "path": "/api/cron/send-reminders",
-      "schedule": "0 5 * * *"
-    },
-    {
-      "path": "/api/cron/reflection-followups",
-      "schedule": "0 6 * * *"
+      "schedule": "*/15 * * * *"
     }
   ]
 }

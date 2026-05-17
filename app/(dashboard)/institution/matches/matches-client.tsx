@@ -192,10 +192,11 @@ export default function MatchesClient({ institutionId }: { institutionId: string
                   const key = `${m.jobId}:${m.candidateId}`
                   const alreadyInvited = invitedKeys.has(key)
                   return (
-                    <div key={key} className="px-5 py-3.5 flex items-center gap-4 transition-colors"
+                    <div key={key} className="px-5 py-3.5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 transition-colors"
                       onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-2)')}
                       onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
 
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
                       <div className="w-9 h-9 rounded-[10px] flex items-center justify-center font-black text-[15px] shrink-0"
                         style={{ background: sc.bg, color: sc.color }}>{m.score}</div>
 
@@ -228,8 +229,9 @@ export default function MatchesClient({ institutionId }: { institutionId: string
                           </div>
                         )}
                       </div>
+                      </div>{/* end left flex */}
 
-                      <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="flex items-center gap-1.5 shrink-0 sm:ms-auto">
                         {m.cvUrl && (
                           <a href={m.cvUrl} target="_blank" rel="noreferrer"
                             className="flex items-center gap-1 h-8 px-2.5 rounded-[8px] border text-[11.5px] font-medium transition-all"

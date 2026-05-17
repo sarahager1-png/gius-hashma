@@ -19,6 +19,10 @@ export async function POST(request: Request) {
     .from('institutions').select('profile_id, institution_name').eq('id', institution_id).single()
   if (!inst) return NextResponse.json({ error: 'institution not found' }, { status: 404 })
 
+  const { data: cand } = await service
+    .from('candidates').select('id').eq('id', candidate_id).maybeSingle()
+  if (!cand) return NextResponse.json({ error: 'candidate not found' }, { status: 404 })
+
   const reasonsText = reasons?.length > 0 ? ` · ${(reasons as string[]).join(', ')}` : ''
   const noteText = note ? ` · "${note}"` : ''
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app'

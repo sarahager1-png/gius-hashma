@@ -5,15 +5,16 @@ import { sendWA } from '@/lib/whatsapp'
 import { sendSms } from '@/lib/sms'
 import { notify } from '@/lib/notify'
 
-export async function POST(req: Request) {
-  if (req.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`)
+export async function GET(req: Request) {
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret || req.headers.get('authorization') !== `Bearer ${cronSecret}`)
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const service = createServiceClient()
 
   const { data: reminders } = await service
     .from('reminders')
-    .select('*, profiles(phone)')
+    .select('*, profiles!target_profile_id(phone)')
     .eq('status', 'pending')
     .lte('scheduled_at', new Date().toISOString())
     .limit(50)

@@ -78,7 +78,25 @@ export default async function InstitutionApplicationsPage() {
       .map(c => [c.id, { ...c, profiles: profileMap[c.profile_id] ?? null }])
   )
 
-  // 6) Combine
+  // 6) Fetch institution survey tokens for accepted apps
+  const acceptedAppIds = ((appsRaw ?? []) as Record<string, unknown>[])
+    .filter(a => a.status === 'התקבלה')
+    .map(a => a.id as string)
+
+  const surveyTokenMap: Record<string, string> = {}
+  if (acceptedAppIds.length > 0) {
+    const { data: surveys } = await service
+      .from('placement_surveys')
+      .select('application_id, token')
+      .in('application_id', acceptedAppIds)
+      .eq('survey_type', 'institution_about_candidate')
+      .is('submitted_at', null)
+    for (const s of surveys ?? []) {
+      surveyTokenMap[(s as { application_id: string; token: string }).application_id] = (s as { application_id: string; token: string }).token
+    }
+  }
+
+  // 7) Combine
   const apps: AppRow[] = ((appsRaw ?? []) as Record<string, unknown>[]).map(a => ({
     id:                 a.id as string,
     status:             a.status as AppRow['status'],
@@ -87,6 +105,7 @@ export default async function InstitutionApplicationsPage() {
     institution_notes:  (a.institution_notes as string | null) ?? null,
     job_id:             a.job_id as string,
     candidate_id:       a.candidate_id as string,
+    survey_token:       surveyTokenMap[a.id as string] ?? null,
     jobs:               a.jobs as AppRow['jobs'],
     candidates:         (candMap[a.candidate_id as string] ?? null) as AppRow['candidates'],
   }))

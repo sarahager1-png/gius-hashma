@@ -533,6 +533,9 @@ function LoginPageInner() {
 
           <div className="lg-form-footer">
             © 2026 רשת חינוך חב״ד · כל הזכויות שמורות
+            <span className="mx-2" style={{ color: 'var(--line)' }}>|</span>
+            פיתוח ובניית אתר: שרה הגר&nbsp;
+            <a href="tel:0503339770" style={{ color: 'inherit', textDecoration: 'none' }}>0503339770</a>
           </div>
         </div>
 

@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendInterviewReminderEmail } from '@/lib/email'
 import { sendSms } from '@/lib/sms'
+import { sendWA } from '@/lib/whatsapp'
 
-// Vercel Cron Job — runs daily at 08:00 Israel time (05:00 UTC)
-// Sends email + SMS reminders for interviews scheduled in the next 24 hours
+// Vercel Cron Job — runs daily at 08:05 Israel time (06:05 UTC)
+// Sends reminders to both candidate and institution for interviews in the next 24 hours
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
@@ -14,11 +15,10 @@ export async function GET(request: Request) {
 
   const service = createServiceClient()
 
-  const now = new Date()
+  const now   = new Date()
   const in24h = new Date(now.getTime() + 24 * 60 * 60 * 1000)
   const in25h = new Date(now.getTime() + 25 * 60 * 60 * 1000)
 
-  // interviews scheduled between 24 and 25 hours from now (1-hour window to avoid duplicates)
   const { data: interviews, error } = await service
     .from('interviews')
     .select(`
@@ -27,7 +27,10 @@ export async function GET(request: Request) {
       location,
       applications(
         candidate_id,
-        jobs(title, institutions(institution_name)),
+        jobs(
+          title,
+          institutions(institution_name, phone, whatsapp_preference, profile_id)
+        ),
         candidates(profile_id, profiles(full_name, phone))
       )
     `)
@@ -39,7 +42,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  // Deduplication: skip interviews already reminded today
   const interviewIds = (interviews ?? []).map(i => i.id)
   const { data: alreadyReminded } = interviewIds.length
     ? await service
@@ -58,24 +60,39 @@ export async function GET(request: Request) {
 
     const app = interview.applications as unknown as {
       candidates: { profile_id: string; profiles: { full_name: string | null; phone: string | null } }
-      jobs: { title: string; institutions: { institution_name: string } }
+      jobs: {
+        title: string
+        institutions: {
+          institution_name: string
+          phone: string | null
+          whatsapp_preference: boolean | null
+          profile_id: string | null
+        }
+      }
     } | null
 
     if (!app) continue
 
     const candidateProfileId = app.candidates?.profile_id
-    const candidateName = app.candidates?.profiles?.full_name ?? 'מועמדת'
-    const candidatePhone = app.candidates?.profiles?.phone
-    const jobTitle = app.jobs?.title ?? ''
-    const institutionName = app.jobs?.institutions?.institution_name ?? ''
+    const candidateName      = app.candidates?.profiles?.full_name ?? 'מועמדת'
+    const candidatePhone     = app.candidates?.profiles?.phone
+    const jobTitle           = app.jobs?.title ?? ''
+    const institutionName    = app.jobs?.institutions?.institution_name ?? ''
+    const instPhone          = app.jobs?.institutions?.phone ?? null
+    const instWaPref         = app.jobs?.institutions?.whatsapp_preference
+    const instProfileId      = app.jobs?.institutions?.profile_id ?? null
 
+    const dt = new Date(interview.scheduled_at).toLocaleString('he-IL', {
+      day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
+    })
+
+    // ── Candidate reminder ──
     if (candidateProfileId) {
-      // Record reminder so deduplication works on re-run
       await service.from('notifications').insert({
         profile_id: candidateProfileId,
-        type: 'interview_reminder',
-        title: 'תזכורת לראיון מחר',
-        body: `ראיון עם ${institutionName} למשרת "${jobTitle}"`,
+        type:       'interview_reminder',
+        title:      'תזכורת לראיון מחר',
+        body:       `ראיון עם ${institutionName} למשרת "${jobTitle}"`,
         related_id: interview.id,
       })
 
@@ -86,21 +103,42 @@ export async function GET(request: Request) {
           jobTitle,
           institutionName,
           scheduledAt: interview.scheduled_at,
-          location: interview.location,
+          location:    interview.location,
         })
       } catch (err) {
-        console.error('[CRON] interview-reminders email failed:', candidateProfileId, err)
+        console.error('[CRON] interview-reminders candidate email failed:', err)
+      }
+
+      if (candidatePhone) {
+        try {
+          await sendSms(
+            candidatePhone,
+            `תזכורת: ראיון מחר! ${institutionName} · "${jobTitle}". תאריך: ${dt}${interview.location ? '. מיקום: ' + interview.location : ''}. בהצלחה! 🌟`
+          )
+        } catch (err) {
+          console.error('[CRON] interview-reminders candidate SMS failed:', err)
+        }
       }
     }
 
-    if (candidatePhone) {
+    // ── Institution reminder ──
+    if (instProfileId) {
+      await service.from('notifications').insert({
+        profile_id: instProfileId,
+        type:       'interview_reminder_institution',
+        title:      `תזכורת: ראיון מחר עם ${candidateName}`,
+        body:       `ראיון עם ${candidateName} למשרת "${jobTitle}". תאריך: ${dt}`,
+        related_id: interview.id,
+      })
+    }
+
+    if (instPhone) {
+      const msg = `תזכורת לראיון מחר 📅\nמועמדת: ${candidateName}\nמשרה: "${jobTitle}"\nתאריך: ${dt}${interview.location ? '\nמיקום: ' + interview.location : ''}`
       try {
-        const dt = new Date(interview.scheduled_at).toLocaleString('he-IL', {
-          day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
-        })
-        await sendSms(candidatePhone, `תזכורת: ראיון מחר! ${institutionName} · "${jobTitle}". תאריך: ${dt}${interview.location ? '. מיקום: ' + interview.location : ''}. בהצלחה! 🌟`)
+        if (instWaPref !== false) await sendWA(instPhone, msg)
+        else await sendSms(instPhone, msg)
       } catch (err) {
-        console.error('[CRON] interview-reminders SMS failed:', candidatePhone, err)
+        console.error('[CRON] interview-reminders institution msg failed:', err)
       }
     }
 

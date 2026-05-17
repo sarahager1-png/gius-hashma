@@ -1,7 +1,7 @@
 ﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendNewApplicationEmail } from '@/lib/email'
-import { smsNewApplication } from '@/lib/sms'
+import { smsNewApplication, smsCandidateApplicationConfirmed } from '@/lib/sms'
 import { sendWA } from '@/lib/whatsapp'
 
 export async function POST(request: Request) {
@@ -73,6 +73,19 @@ export async function POST(request: Request) {
         related_id: data.id,
       }))
     )
+  }
+
+  // confirm to candidate
+  await service.from('notifications').insert({
+    profile_id: user.id,
+    type: 'application_confirmed',
+    title: 'תודה שפנית אלינו 💙',
+    body: `הגשתך למשרת "${jobTitle}"${institutionName ? ' ב' + institutionName : ''} התקבלה. נעדכן אותך בכל התפתחות.`,
+    related_id: data.id,
+  })
+
+  if (candidatePhone) {
+    void smsCandidateApplicationConfirmed(candidatePhone, candidateName, jobTitle, institutionName).catch(() => null)
   }
 
   // fire-and-forget: email + SMS + WA to institution

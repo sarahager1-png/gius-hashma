@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Search, MessageCircle, Phone, MapPin, Users, Send, X, Copy, Check } from 'lucide-react'
+import { Search, MessageCircle, Phone, MapPin, Users, Send, X, Copy, Check, Download } from 'lucide-react'
 import { DISTRICTS } from '@/lib/constants'
+import ImpersonateButton from '@/components/admin/impersonate-button'
 
 interface Candidate {
   id: string
+  profile_id: string
   city: string | null
   district: string | null
   college: string | null
@@ -53,6 +55,28 @@ export default function CandidateManagerClient({ candidates }: Props) {
 
   const withPhone = filtered.filter(c => c.profiles?.phone)
 
+  function exportCsv() {
+    const headers = ['שם', 'טלפון', 'עיר', 'מחוז', 'מכללה', 'רמה', 'התמחות', 'וותק', 'סטטוס']
+    const rows = filtered.map(c => [
+      c.profiles?.full_name ?? '',
+      c.profiles?.phone ?? '',
+      c.city ?? '',
+      c.district ?? '',
+      c.college ?? '',
+      c.academic_level ?? '',
+      c.specialization ?? '',
+      c.seniority_years ?? '',
+      c.availability_status,
+    ])
+    const escape = (v: string) => v.includes(',') || v.includes('"') || v.includes('\n') ? `"${v.replace(/"/g, '""')}"` : v
+    const csv = '﻿' + [headers, ...rows].map(r => r.map(v => escape(String(v))).join(',')).join('\r\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href = url; a.download = `candidates-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click(); URL.revokeObjectURL(url)
+  }
+
   function copyAllPhones() {
     const phones = withPhone.map(c => c.profiles!.phone!).join('\n')
     navigator.clipboard.writeText(phones)
@@ -78,6 +102,12 @@ export default function CandidateManagerClient({ candidates }: Props) {
             {candidates.length} מועמדות במערכת · {filtered.length} מוצגות
           </p>
         </div>
+        <button
+          onClick={exportCsv}
+          className="flex items-center gap-2 h-10 px-4 rounded-[10px] text-[14px] font-semibold border"
+          style={{ background: '#fff', borderColor: 'var(--line)', color: 'var(--purple)' }}>
+          <Download size={15} />ייצוא ({filtered.length})
+        </button>
         <button
           onClick={() => setShowGroup(p => !p)}
           className="flex items-center gap-2 h-10 px-4 rounded-[10px] text-[14px] font-semibold text-white"
@@ -192,7 +222,7 @@ export default function CandidateManagerClient({ candidates }: Props) {
             <table className="w-full" style={{ fontSize: 13 }}>
               <thead>
                 <tr style={{ background: 'var(--bg-3)' }}>
-                  {['שם', 'טלפון', 'עיר', 'מחוז', 'מכללה', 'רמה', 'התמחות', 'סטטוס'].map(h => (
+                  {['שם', 'טלפון', 'עיר', 'מחוז', 'מכללה', 'רמה', 'התמחות', 'סטטוס', ''].map(h => (
                     <th key={h} className="text-start px-4 py-3 text-[11.5px] font-bold uppercase tracking-wider whitespace-nowrap"
                       style={{ color: 'var(--ink-3)', borderBottom: '1px solid var(--line)' }}>{h}</th>
                   ))}
@@ -242,6 +272,9 @@ export default function CandidateManagerClient({ candidates }: Props) {
                         <span className="inline-flex text-[11.5px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap" style={sc}>
                           {c.availability_status}
                         </span>
+                      </td>
+                      <td className="px-4 py-3" style={{ borderBottom: '1px solid var(--line-soft)' }}>
+                        <ImpersonateButton profileId={c.profile_id} label={c.profiles?.full_name ?? 'מועמדת'} />
                       </td>
                     </tr>
                   )

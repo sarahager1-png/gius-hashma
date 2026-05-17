@@ -4,6 +4,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import AppHeader from '@/components/layout/app-header'
 import AppSidebar from '@/components/layout/app-sidebar'
 import WaFloatButton from '@/components/layout/wa-float-button'
+import HelpFloatButton from '@/components/layout/help-float-button'
 import type { UserRole } from '@/lib/types'
 
 function roleHome(role: string): string {
@@ -28,6 +29,10 @@ function canAccess(role: string, pathname: string): boolean {
       '/institution/jobs',
       '/institution/candidates',
       '/institution/matches',
+      '/institution/applications',
+      '/institution/invitations',
+      '/institution/inquiries',
+      '/institution/interviews',
       '/institution/profile',
       '/settings',
       '/help',
@@ -124,6 +129,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       />
       <main style={{ minWidth: 0, minHeight: 0, overflowX: 'hidden', overflowY: 'auto' }}>{children}</main>
       {waPhone && <WaFloatButton phone={waPhone} />}
+      <HelpFloatButton hasWa={!!waPhone} />
     </div>
     </>
   )

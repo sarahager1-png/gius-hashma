@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Briefcase, MapPin, Clock, CheckCircle, XCircle, Eye } from 'lucide-react'
+import { Briefcase, MapPin, Clock, CheckCircle, XCircle, Eye, Star } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import WithdrawButton from './withdraw-button'
 
@@ -27,6 +27,7 @@ type AppItem = {
   status: string
   applied_at: string
   cover_letter: string | null
+  survey_token?: string | null
   jobs?: { title: string; city: string | null; job_type: string | null; institutions?: { institution_name: string } } | null
 }
 
@@ -111,6 +112,19 @@ export default function MyApplicationsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
+                  {app.status === 'התקבלה' && app.survey_token && (
+                    <a
+                      href={`/survey?t=${app.survey_token}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1.5 h-8 px-3 rounded-[8px] text-[12.5px] font-bold no-underline transition-all"
+                      style={{ background: '#FFFBEB', color: '#B45309', border: '1px solid #FDE68A' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = '#FEF3C7')}
+                      onMouseLeave={e => (e.currentTarget.style.background = '#FFFBEB')}
+                    >
+                      <Star size={13} />תני משוב
+                    </a>
+                  )}
                   {canWithdraw && (
                     <WithdrawButton applicationId={app.id} onWithdrawn={() => remove(app.id)} />
                   )}
