@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useState } from 'react'
-import { MapPin, GraduationCap, Send, CheckCircle2, CalendarDays } from 'lucide-react'
+import { MapPin, GraduationCap, Send, CheckCircle2, CalendarDays, Clock, Briefcase } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import type { Job } from '@/lib/types'
 
@@ -102,6 +102,19 @@ export default function JobCard({ job, applied: initialApplied, candidateId }: P
               {job.specialization}
             </span>
           )}
+          {job.placement_type && (
+            <span className="flex items-center gap-1 text-[13px] font-semibold px-2 py-0.5 rounded-full"
+              style={{ background: job.placement_type.includes('מילוי מקום') ? '#FEF3C7' : 'var(--purple-050)', color: job.placement_type.includes('מילוי מקום') ? '#92400E' : 'var(--purple)' }}>
+              <Briefcase size={12} />
+              {job.placement_type}
+            </span>
+          )}
+          {job.hours && (
+            <span className="flex items-center gap-1 text-[13px] font-medium" style={{ color: 'var(--ink-3)' }}>
+              <Clock size={12} />
+              {job.hours} ש&quot;פ
+            </span>
+          )}
           {(job.start_date || job.end_date) && (
             <span className="flex items-center gap-1 text-[13px] font-semibold px-2 py-0.5 rounded-full"
               style={{ background: 'var(--teal-050)', color: 'var(--teal-700)' }}>
@@ -154,7 +167,8 @@ export default function JobCard({ job, applied: initialApplied, candidateId }: P
             ) : applying ? (
               '...'
             ) : (
-              <><Send size={15} />לשליחת קו״ח</>
+              <><Send size={15} />הגישי פרופיל</>
+
             )}
           </button>
         ) : (

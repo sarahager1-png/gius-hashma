@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     }).select().single()
   if (ce) return NextResponse.json({ error: ce.message }, { status: 500 })
 
-  void notifyMatchingInstitutions(service, newCand.id, name, 'יסודי', null, city || null)
+  void notifyMatchingInstitutions(service, newCand.id, newProfile.id, name, 'יסודי', null, city || null)
 
   return NextResponse.json({ ok: true, id: newCand.id }, { status: 201 })
 }
@@ -80,7 +80,7 @@ export async function PATCH(request: Request) {
       .single()
     if (cand) {
       const name = (cand.profiles as unknown as { full_name: string | null } | null)?.full_name ?? ''
-      void notifyMatchingInstitutions(service, cand.id, name, cand.specialization, cand.district, cand.city)
+      void notifyMatchingInstitutions(service, cand.id, user.id, name, cand.specialization, cand.district, cand.city)
     }
   }
 
@@ -90,6 +90,7 @@ export async function PATCH(request: Request) {
 async function notifyMatchingInstitutions(
   service: ReturnType<typeof createServiceClient>,
   candidateId: string,
+  candidateProfileId: string,
   candidateName: string,
   specialization: string | null,
   district: string | null,
@@ -104,14 +105,17 @@ async function notifyMatchingInstitutions(
 
   const { data: jobs } = await service
     .from('jobs')
-    .select('institution_id, institutions(profile_id, institution_name, whatsapp_preference, profiles(phone))')
+    .select('id, title, institution_id, institutions(profile_id, institution_name, whatsapp_preference, profiles(phone))')
     .eq('status', 'פעילה')
     .or(filters.join(','))
     .limit(50)
 
   if (!jobs?.length) return
 
-  const seen = new Set<string>()
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'giuus.vercel.app'
+
+  // Notify institutions (one per institution, deduped)
+  const seenInst = new Set<string>()
   for (const job of jobs) {
     const inst = job.institutions as unknown as {
       profile_id: string
@@ -119,8 +123,8 @@ async function notifyMatchingInstitutions(
       whatsapp_preference: boolean | null
       profiles: { phone: string | null } | null
     } | null
-    if (!inst || seen.has(inst.profile_id)) continue
-    seen.add(inst.profile_id)
+    if (!inst || seenInst.has(inst.profile_id)) continue
+    seenInst.add(inst.profile_id)
 
     const desc = [candidateName, specialization, city].filter(Boolean).join(' · ')
 
@@ -133,12 +137,58 @@ async function notifyMatchingInstitutions(
     })
 
     const phone = inst.profiles?.phone
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'giuus.vercel.app'
     void sendExternal({
       phone,
       whatsapp_preference: inst.whatsapp_preference,
       waMessage:  `✨ מועמדת חדשה שעשויה להתאים למשרה שלכם:\n${desc}\nלצפייה: ${appUrl}/candidates/${candidateId}`,
       smsMessage: `✨ מועמדת חדשה מתאימה: ${desc}. לצפייה: ${appUrl}/candidates/${candidateId}`,
+    })
+  }
+
+  // Notify candidate — group all matching jobs into one message
+  const matchingJobs = jobs.map(j => {
+    const inst = j.institutions as unknown as { institution_name: string } | null
+    return { id: j.id, title: j.title as string, institutionName: inst?.institution_name ?? '' }
+  })
+  if (!matchingJobs.length) return
+
+  const { data: candProfile } = await service
+    .from('candidates')
+    .select('profiles(phone, whatsapp_preference)')
+    .eq('id', candidateId)
+    .single()
+  const cp = (candProfile?.profiles as unknown as { phone: string | null; whatsapp_preference: boolean | null } | null)
+
+  if (matchingJobs.length === 1) {
+    const m = matchingJobs[0]
+    void notify({
+      profile_id: candidateProfileId,
+      type: 'new_match',
+      title: '✨ נמצאה משרה מתאימה לפרופיל שלך',
+      body: `${m.title} ב${m.institutionName}`,
+      url: `/jobs/${m.id}`,
+    })
+    void sendExternal({
+      phone: cp?.phone ?? null,
+      whatsapp_preference: cp?.whatsapp_preference ?? null,
+      waMessage:  `✨ נמצאה משרה מתאימה לפרופיל שלך:\n${m.title} ב${m.institutionName}\nלצפייה: ${appUrl}/jobs/${m.id}`,
+      smsMessage: `✨ נמצאה משרה מתאימה: ${m.title} ב${m.institutionName}. ${appUrl}/jobs/${m.id}`,
+    })
+  } else {
+    const titles = matchingJobs.slice(0, 3).map(m => `• ${m.title} ב${m.institutionName}`).join('\n')
+    const extra = matchingJobs.length > 3 ? `\nועוד ${matchingJobs.length - 3} משרות נוספות` : ''
+    void notify({
+      profile_id: candidateProfileId,
+      type: 'new_match',
+      title: `✨ נמצאו ${matchingJobs.length} משרות מתאימות לפרופיל שלך`,
+      body: matchingJobs.slice(0, 2).map(m => `${m.title} ב${m.institutionName}`).join(' | '),
+      url: `/jobs`,
+    })
+    void sendExternal({
+      phone: cp?.phone ?? null,
+      whatsapp_preference: cp?.whatsapp_preference ?? null,
+      waMessage:  `✨ נמצאו ${matchingJobs.length} משרות מתאימות לפרופיל שלך:\n${titles}${extra}\nלצפייה: ${appUrl}/jobs`,
+      smsMessage: `✨ נמצאו ${matchingJobs.length} משרות מתאימות לפרופיל שלך. לצפייה: ${appUrl}/jobs`,
     })
   }
 }

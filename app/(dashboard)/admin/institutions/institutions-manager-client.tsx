@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { formatDate } from '@/lib/utils'
-import { Download, Search, X, Send, FileDown } from 'lucide-react'
+import { Download, Search, X, Send, FileDown, Link2, Copy, CheckCheck, UserPlus } from 'lucide-react'
 import ApproveButton from './approve-button'
 import AddInstitutionModal from './add-institution-modal'
 import ImpersonateButton from '@/components/admin/impersonate-button'
@@ -20,9 +20,241 @@ type InstRow = {
   owner: { full_name: string | null; phone: string | null } | null
 }
 
-interface Props { institutions: InstRow[] }
+type LeadRow = {
+  id: string
+  institution_name: string
+  city: string | null
+  phone: string | null
+  institution_type: string | null
+}
 
-export default function InstitutionsManagerClient({ institutions }: Props) {
+interface Props { institutions: InstRow[]; leads: LeadRow[] }
+
+function LinkResult({ link }: { link: string }) {
+  const [copied, setCopied] = useState(false)
+  function copy() {
+    navigator.clipboard.writeText(link)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+  return (
+    <div className="rounded-[10px] border p-3 space-y-2" style={{ background: '#F0FDF4', borderColor: '#86EFAC' }}>
+      <p className="text-[12px] font-bold" style={{ color: '#15803D' }}>✓ נשלח! הקישור לכניסה:</p>
+      <div className="flex items-center gap-2">
+        <a href={link} target="_blank" rel="noreferrer" dir="ltr"
+          className="flex-1 text-[11.5px] truncate font-medium no-underline"
+          style={{ color: 'var(--purple)' }}>
+          {link}
+        </a>
+        <button onClick={copy}
+          className="shrink-0 h-7 px-2.5 rounded-[7px] flex items-center gap-1 text-[11.5px] font-semibold border transition-all"
+          style={{ borderColor: 'var(--line)', color: copied ? '#15803D' : 'var(--ink-3)', background: '#fff' }}>
+          {copied ? <CheckCheck size={12} /> : <Copy size={12} />}{copied ? 'הועתק' : 'העתק'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function SendLoginLinkButton({ institutionId, defaultPhone, defaultName }: {
+  institutionId: string
+  defaultPhone: string | null
+  defaultName: string | null
+}) {
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [phone, setPhone] = useState(defaultPhone ?? '')
+  const [name, setName] = useState(defaultName ?? '')
+  const [link, setLink] = useState<string | null>(null)
+  const [errMsg, setErrMsg] = useState('')
+
+  async function send() {
+    setLoading(true)
+    setErrMsg('')
+    const res = await fetch(`/api/admin/institutions/${institutionId}/resend-invite`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: phone.trim() || null, name: name.trim() || null }),
+    })
+    const d = await res.json().catch(() => ({}))
+    setLoading(false)
+    if (res.ok) setLink(d.link)
+    else setErrMsg(d.error ?? 'שגיאה')
+  }
+
+  if (!open) {
+    return (
+      <button onClick={() => setOpen(true)}
+        className="h-8 px-3 rounded-[8px] flex items-center gap-1.5 text-[12px] font-semibold border transition-all"
+        style={{ borderColor: '#C4B5FD', color: 'var(--purple)', background: '#F5F3FF' }}>
+        <Link2 size={13} />שלח קישור כניסה
+      </button>
+    )
+  }
+
+  return (
+    <div className="rounded-[10px] border p-3 space-y-2 min-w-[260px]" style={{ background: '#F5F3FF', borderColor: '#C4B5FD' }}>
+      {link ? <LinkResult link={link} /> : (
+        <>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-[11px] font-semibold block mb-0.5" style={{ color: 'var(--ink-3)' }}>וואטסאפ</label>
+              <input value={phone} onChange={e => setPhone(e.target.value)} dir="ltr" placeholder="050-0000000"
+                className="w-full h-8 rounded-[7px] border px-2 text-[12.5px] outline-none"
+                style={{ borderColor: 'var(--line)', background: '#fff' }} />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold block mb-0.5" style={{ color: 'var(--ink-3)' }}>שם</label>
+              <input value={name} onChange={e => setName(e.target.value)}
+                className="w-full h-8 rounded-[7px] border px-2 text-[12.5px] outline-none"
+                style={{ borderColor: 'var(--line)', background: '#fff' }} />
+            </div>
+          </div>
+          {errMsg && <p className="text-[11.5px] font-semibold" style={{ color: '#DC2626' }}>{errMsg}</p>}
+          <div className="flex gap-1.5">
+            <button onClick={send} disabled={loading}
+              className="h-7 px-3 rounded-[7px] text-[12px] font-bold text-white transition-all"
+              style={{ background: 'var(--purple)', opacity: loading ? 0.6 : 1 }}>
+              {loading ? 'שולח...' : 'שלח'}
+            </button>
+            <button onClick={() => setOpen(false)} className="h-7 px-2 text-[12px]" style={{ color: 'var(--ink-4)' }}>ביטול</button>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+function SendRegistrationLinkPanel({ leads }: { leads: LeadRow[] }) {
+  const [show, setShow] = useState(false)
+  const [type, setType] = useState<'institution' | 'candidate'>('institution')
+  const [selectedLeadId, setSelectedLeadId] = useState('')
+  const [phone, setPhone] = useState('')
+  const [name, setName] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [link, setLink] = useState<string | null>(null)
+  const [errMsg, setErrMsg] = useState('')
+
+  function selectLead(id: string) {
+    setSelectedLeadId(id)
+    const lead = leads.find(l => l.id === id)
+    if (lead) {
+      if (lead.phone) setPhone(lead.phone)
+      setName(lead.institution_name)
+    } else {
+      setName('')
+    }
+  }
+
+  function reset() {
+    setSelectedLeadId('')
+    setPhone('')
+    setName('')
+    setLink(null)
+    setErrMsg('')
+  }
+
+  async function send() {
+    if (!phone.trim()) return
+    setLoading(true)
+    setErrMsg('')
+    const res = await fetch('/api/admin/send-registration-link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: phone.trim(), name: name.trim(), type, lead_id: selectedLeadId || undefined }),
+    })
+    const d = await res.json().catch(() => ({}))
+    setLoading(false)
+    if (res.ok) setLink(d.link)
+    else setErrMsg(d.error ?? 'שגיאה בשליחה')
+  }
+
+  return (
+    <div>
+      <button
+        onClick={() => setShow(v => !v)}
+        className="flex items-center gap-1.5 px-3.5 py-2 rounded-[10px] text-[13px] font-bold border transition-all"
+        style={{ borderColor: 'var(--purple)', color: 'var(--purple)', background: show ? 'var(--purple-050)' : '#fff' }}
+      >
+        <UserPlus size={14} />שלח קישור הרשמה
+      </button>
+
+      {show && (
+        <div className="rounded-[14px] border p-4 mb-6 mt-2" style={{ background: '#FAF5FF', borderColor: '#DDD6FE' }}>
+          {/* type tabs */}
+          <div className="flex gap-2 mb-4">
+            {(['institution', 'candidate'] as const).map(t => (
+              <button key={t} onClick={() => { setType(t); reset() }}
+                className="h-8 px-3.5 rounded-[8px] text-[12.5px] font-bold transition-all border"
+                style={{
+                  background: type === t ? 'var(--purple)' : '#fff',
+                  color: type === t ? '#fff' : 'var(--ink-3)',
+                  borderColor: type === t ? 'var(--purple)' : 'var(--line)',
+                }}>
+                {t === 'institution' ? '🏫 מוסד חינוכי' : '👩‍🏫 מועמדת'}
+              </button>
+            ))}
+          </div>
+
+          {link ? <LinkResult link={link} /> : (
+            <div className="space-y-3">
+              {/* leads picker — only for institution type */}
+              {type === 'institution' && leads.length > 0 && (
+                <div>
+                  <label className="text-[12px] font-semibold mb-1 block" style={{ color: 'var(--ink-2)' }}>
+                    בחרי מוסד מהרשימה ({leads.length} ממתינים להרשמה)
+                  </label>
+                  <select value={selectedLeadId} onChange={e => selectLead(e.target.value)}
+                    className="w-full h-9 rounded-[8px] border px-3 text-[13px] outline-none"
+                    style={{ borderColor: 'var(--line)', background: '#fff' }}>
+                    <option value="">— או הזיני ידנית —</option>
+                    {leads.map(l => (
+                      <option key={l.id} value={l.id}>
+                        {l.institution_name}{l.city ? ` · ${l.city}` : ''}{l.phone ? ` · ${l.phone}` : ' · ללא טלפון'}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[12px] font-semibold mb-1 block" style={{ color: 'var(--ink-2)' }}>
+                    <span style={{ color: '#DC2626' }}>*</span> מספר וואטסאפ
+                  </label>
+                  <input value={phone} onChange={e => setPhone(e.target.value)}
+                    placeholder="050-0000000" dir="ltr"
+                    className="w-full h-9 rounded-[8px] border px-3 text-[13px] outline-none"
+                    style={{ borderColor: 'var(--line)', background: '#fff' }} />
+                </div>
+                <div>
+                  <label className="text-[12px] font-semibold mb-1 block" style={{ color: 'var(--ink-2)' }}>שם</label>
+                  <input value={name} onChange={e => setName(e.target.value)}
+                    placeholder={type === 'institution' ? 'שם המנהלת' : 'שם המועמדת'}
+                    className="w-full h-9 rounded-[8px] border px-3 text-[13px] outline-none"
+                    style={{ borderColor: 'var(--line)', background: '#fff' }} />
+                </div>
+              </div>
+
+              {errMsg && <p className="text-[12px] font-semibold" style={{ color: '#DC2626' }}>{errMsg}</p>}
+
+              <div className="flex items-center gap-2">
+                <button onClick={send} disabled={loading || !phone.trim()}
+                  className="h-9 px-4 rounded-[9px] text-[13px] font-bold text-white transition-all"
+                  style={{ background: 'var(--purple)', opacity: loading || !phone.trim() ? 0.6 : 1 }}>
+                  {loading ? 'שולח...' : 'שלח קישור וואטסאפ'}
+                </button>
+                <button onClick={() => setShow(false)} className="text-[13px]" style={{ color: 'var(--ink-4)' }}>סגור</button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default function InstitutionsManagerClient({ institutions, leads }: Props) {
   const [search, setSearch] = useState('')
   const [showBulk, setShowBulk] = useState(false)
   const [bulkMsg, setBulkMsg] = useState('')
@@ -127,6 +359,8 @@ export default function InstitutionsManagerClient({ institutions }: Props) {
         </div>
       </div>
 
+      <SendRegistrationLinkPanel leads={leads} />
+
       {/* Bulk message panel */}
       {showBulk && (
         <div className="rounded-[14px] border p-4 mb-6" style={{ background: '#F0FDFB', borderColor: '#99F6E4' }}>
@@ -225,7 +459,8 @@ export default function InstitutionsManagerClient({ institutions }: Props) {
                   </div>
                   <div className="text-[11.5px] mt-0.5" style={{ color: 'var(--ink-4)' }}>{formatDate(inst.created_at)}</div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap justify-end">
+                  <SendLoginLinkButton institutionId={inst.id} defaultPhone={inst.owner?.phone ?? null} defaultName={inst.owner?.full_name ?? null} />
                   <span className="status-badge" style={{ background: '#EDE9FE', color: 'var(--purple)' }}>הוזמן</span>
                   <ImpersonateButton profileId={inst.profile_id} label={inst.institution_name} />
                 </div>
@@ -260,7 +495,8 @@ export default function InstitutionsManagerClient({ institutions }: Props) {
                     </a>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap justify-end">
+                  <SendLoginLinkButton institutionId={inst.id} defaultPhone={inst.owner?.phone ?? null} defaultName={inst.owner?.full_name ?? null} />
                   <span className="status-badge" style={{ background: 'var(--green-bg)', color: 'var(--green)' }}>מאושר</span>
                   <ImpersonateButton profileId={inst.profile_id} label={inst.institution_name} />
                 </div>

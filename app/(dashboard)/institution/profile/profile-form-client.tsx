@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { DISTRICTS, SCHOOL_TYPES, SCHOOL_TYPE_COLORS } from '@/lib/constants'
 
 interface Props {
@@ -22,6 +23,9 @@ interface Props {
 }
 
 export default function InstitutionProfileFormClient({ institution, profile }: Props) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const isSetup = searchParams.get('setup') === '1' || !institution.district || !institution.school_type
   const [form, setForm] = useState({
     institution_name: institution.institution_name,
     city: institution.city ?? '',
@@ -41,15 +45,20 @@ export default function InstitutionProfileFormClient({ institution, profile }: P
 
   async function handleSave() {
     if (!form.institution_name.trim()) { setError('שם המוסד חובה'); return }
+    if (!form.district) { setError('מחוז חובה — יש לבחור מחוז'); return }
     setSaving(true)
     setError('')
     const res = await fetch(`/api/institutions/${institution.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...form, whatsapp_preference: true }),
     })
     setSaving(false)
     if (res.ok) {
+      if (isSetup) {
+        router.push('/institution/jobs')
+        return
+      }
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)
     } else {
@@ -106,10 +115,10 @@ export default function InstitutionProfileFormClient({ institution, profile }: P
         <h2 className="text-[13px] font-bold uppercase tracking-[.08em] mb-4" style={{ color: 'var(--ink-3)' }}>פרטים נוספים</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>מחוז</label>
+            <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>מחוז <span style={{ color: '#DC2626' }}>*</span></label>
             <select value={form.district} onChange={e => set('district', e.target.value)}
-              className={inputCls} style={inputStyle}>
-              <option value="">— בחרי —</option>
+              className={inputCls} style={{ ...inputStyle, borderColor: !form.district ? '#FCA5A5' : 'var(--line)' }}>
+              <option value="">— בחרי מחוז —</option>
               {DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
             </select>
           </div>
@@ -124,9 +133,23 @@ export default function InstitutionProfileFormClient({ institution, profile }: P
               className={inputCls} style={inputStyle} />
           </div>
           <div className="space-y-1">
-            <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>טלפון איש קשר</label>
-            <input value={form.principal_phone} onChange={e => set('principal_phone', e.target.value)}
-              className={inputCls} style={inputStyle} dir="ltr" />
+            <label className="text-[13px] font-semibold flex items-center gap-1.5" style={{ color: 'var(--ink-2)' }}>
+              <span style={{ color: '#25D366', fontSize: 15 }}>●</span> מספר וואטסאפ של המנהלת
+            </label>
+            <div className="flex items-center gap-2">
+              <input value={form.principal_phone} onChange={e => set('principal_phone', e.target.value)}
+                className={inputCls} style={{ ...inputStyle, flex: 1 }} dir="ltr" placeholder="050-0000000" />
+              {form.principal_phone && (
+                <a
+                  href={`https://wa.me/972${form.principal_phone.replace(/\D/g, '').replace(/^972/, '').replace(/^0/, '')}?text=${encodeURIComponent('שלום!')}`}
+                  target="_blank" rel="noreferrer"
+                  className="shrink-0 flex items-center gap-1.5 h-10 px-3 rounded-[10px] text-[12.5px] font-bold no-underline transition-all"
+                  style={{ background: '#E7F9EF', color: '#1A7A4A', border: '1px solid #BBF7D0' }}>
+                  💬 פתחי וואטסאפ
+                </a>
+              )}
+            </div>
+            <p className="text-[11.5px]" style={{ color: 'var(--ink-4)' }}>לכאן תישלחנה הודעות המערכת</p>
           </div>
         </div>
       </section>
@@ -139,7 +162,7 @@ export default function InstitutionProfileFormClient({ institution, profile }: P
         disabled={saving}
         className="h-11 px-6 rounded-[10px] text-[14px] font-bold text-white transition-all"
         style={{ background: saved ? '#1A7A4A' : 'var(--purple)', opacity: saving ? 0.7 : 1 }}>
-        {saved ? '✓ נשמר' : saving ? 'שומר...' : 'שמירת שינויים'}
+        {saved ? '✓ נשמר' : saving ? 'שומר...' : isSetup ? 'שמור והמשך למשרות ←' : 'שמירת שינויים'}
       </button>
     </div>
   )

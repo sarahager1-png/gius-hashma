@@ -529,11 +529,18 @@ async function handleJobCreationFlow(
     if (data.role === 'מוסד') {
       const { data: inst } = await service
         .from('institutions')
-        .select('id, institution_name')
+        .select('id, institution_name, district')
         .eq('profile_id', data.profile_id)
-        .eq('is_approved', true)
         .single()
       if (inst) {
+        if (!inst.district) {
+          await service.from('wa_sessions').delete().eq('id', session.id)
+          await sendWA(phone,
+            `לפני פרסום משרות יש להשלים את פרטי המוסד (מחוז וסוג).\n` +
+            `👉 giuus.vercel.app/institution/profile`
+          )
+          return
+        }
         await updateSession('awaiting_city', { title: text, institution_id: inst.id, institution_name: inst.institution_name })
         await sendWA(phone, `✓ שם המשרה: *${text}*\nמוסד: *${inst.institution_name}*\n\n*באיזו עיר?*`)
         return

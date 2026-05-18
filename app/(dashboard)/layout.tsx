@@ -23,6 +23,7 @@ function canAccess(role: string, pathname: string): boolean {
     return allowed.some(p => pathname === p || pathname.startsWith(p + '/'))
   }
 
+
   // institution: only recruitment core + account
   if (role === 'מוסד') {
     const allowed = [
@@ -62,6 +63,31 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const pathname = hdrs.get('x-pathname') ?? ''
   if (pathname && !canAccess(profile.role, pathname)) {
     redirect(roleHome(profile.role))
+  }
+
+  // candidate onboarding gate: redirect to setup if key fields missing
+  if (profile.role === 'מועמדת' && pathname && pathname !== '/profile/setup') {
+    const { data: candRow } = await service
+      .from('candidates')
+      .select('district, specialization')
+      .eq('profile_id', user.id)
+      .single()
+    if (candRow && (!candRow.district || !candRow.specialization)) {
+      redirect('/profile/setup')
+    }
+  }
+
+  // institution onboarding gate: must fill profile (district) before posting jobs
+  const INST_ALLOWED_INCOMPLETE = ['/institution/profile', '/settings', '/help']
+  if (profile.role === 'מוסד' && pathname && !INST_ALLOWED_INCOMPLETE.some(p => pathname === p || pathname.startsWith(p + '/'))) {
+    const { data: instRow } = await service
+      .from('institutions')
+      .select('district, school_type')
+      .eq('profile_id', user.id)
+      .single()
+    if (instRow && (!instRow.district || !instRow.school_type)) {
+      redirect('/institution/profile?setup=1')
+    }
   }
 
   const { data: waRow } = await service

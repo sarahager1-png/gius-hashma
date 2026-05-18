@@ -102,7 +102,7 @@ export default function AddInstitutionModal() {
                 <p className="text-[17px] font-bold mb-1" style={{ color: 'var(--ink)' }}>המוסד נוסף בהצלחה!</p>
                 <p className="text-[13px] mb-6" style={{ color: 'var(--ink-3)' }}>
                   הזמנה נשלחה לאימייל <strong>{form.email}</strong>
-                  {form.phone && <> ו-SMS לטלפון <strong>{form.phone}</strong></>}
+                  {form.phone && <> והודעת וואטסאפ ל-<strong>{form.phone}</strong></>}
                 </p>
                 <div className="flex gap-2 justify-center">
                   <button
@@ -143,15 +143,27 @@ export default function AddInstitutionModal() {
                     <input className="field-input" value={form.city} onChange={e => set('city', e.target.value)} placeholder="ירושלים" />
                   </div>
 
-                  {/* מנהל + טלפון */}
+                  {/* מנהל + וואטסאפ */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="field-label">שם מנהל/ת</label>
                       <input className="field-input" value={form.principal} onChange={e => set('principal', e.target.value)} placeholder="שרה לוי" />
                     </div>
                     <div>
-                      <label className="field-label">טלפון</label>
-                      <input className="field-input" type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="050-0000000" dir="ltr" />
+                      <label className="field-label flex items-center gap-1">
+                        <span style={{ color: '#25D366' }}>●</span> מספר וואטסאפ
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <input className="field-input flex-1" type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="050-0000000" dir="ltr" />
+                        {form.phone && (
+                          <a href={`https://wa.me/972${form.phone.replace(/\D/g,'').replace(/^972/,'').replace(/^0/,'')}?text=${encodeURIComponent('שלום!')}`}
+                            target="_blank" rel="noreferrer"
+                            className="shrink-0 h-9 px-2 rounded-[8px] text-[12px] font-bold no-underline flex items-center"
+                            style={{ background: '#E7F9EF', color: '#1A7A4A' }}>
+                            💬
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
 

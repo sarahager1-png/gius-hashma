@@ -117,6 +117,10 @@ export default function JobFormClient({ institutionId, school, job, templates = 
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!school.district) {
+      setError('יש למלא מחוז בפרופיל המוסד לפני פרסום משרה')
+      return
+    }
     setSaving(true); setError('')
     const body = {
       institution_id: institutionId,
@@ -162,6 +166,14 @@ export default function JobFormClient({ institutionId, school, job, templates = 
           </div>
         </div>
       </div>
+
+      {!school.district && (
+        <div className="rounded-[12px] px-4 py-3 text-[13px] font-semibold flex items-center gap-2"
+          style={{ background: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A' }}>
+          ⚠️ לא הוגדר מחוז לפרופיל המוסד — יש למלא מחוז לפני פרסום משרה.{' '}
+          <a href="/institution/profile" className="underline">עדכון פרופיל</a>
+        </div>
+      )}
 
       {/* Templates */}
       {templates.length > 0 && (

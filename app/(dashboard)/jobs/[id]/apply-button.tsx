@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default function ApplyButton({ jobId, alreadyApplied }: Props) {
-  const [state, setState] = useState<'idle' | 'expanded' | 'loading' | 'done'>(alreadyApplied ? 'done' : 'idle')
+  const [state, setState] = useState<'idle' | 'expanded' | 'confirming' | 'loading' | 'done'>(alreadyApplied ? 'done' : 'idle')
   const [coverLetter, setCoverLetter] = useState('')
   const router = useRouter()
 
@@ -61,13 +61,42 @@ export default function ApplyButton({ jobId, alreadyApplied }: Props) {
         </div>
         <div className="flex gap-3">
           <button
-            onClick={apply}
+            onClick={() => setState('confirming')}
             className="flex-1 flex items-center justify-center gap-2 h-11 rounded-[11px] text-[14px] font-bold text-white transition-all"
             style={{ background: 'linear-gradient(135deg, var(--purple) 0%, #7C3AED 100%)', boxShadow: '0 4px 14px rgba(91,58,171,.35)' }}>
             <Send size={16} />הגישי מועמדות
           </button>
           <button
             onClick={() => setState('idle')}
+            className="h-11 px-4 rounded-[11px] border text-[13px] font-semibold"
+            style={{ borderColor: 'var(--line)', color: 'var(--ink-3)', background: '#fff' }}>
+            ביטול
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (state === 'confirming') {
+    return (
+      <div className="rounded-[14px] border p-5 space-y-4"
+        style={{ background: '#FFF7ED', borderColor: '#FED7AA' }}>
+        <div className="flex items-start gap-3">
+          <span className="text-[22px] leading-none mt-0.5">📤</span>
+          <div>
+            <p className="text-[15px] font-bold mb-1" style={{ color: '#92400E' }}>האם תרצי לשלוח את הפרופיל שלך?</p>
+            <p className="text-[13px]" style={{ color: '#B45309' }}>הבקשה תישלח למוסד לעיון ותהיי מיודעת על ההתקדמות.</p>
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={apply}
+            className="flex-1 flex items-center justify-center gap-2 h-11 rounded-[11px] text-[14px] font-bold text-white transition-all"
+            style={{ background: 'linear-gradient(135deg, #D97706 0%, #B45309 100%)', boxShadow: '0 4px 14px rgba(180,83,9,.3)' }}>
+            <Send size={16} />כן, שלחי
+          </button>
+          <button
+            onClick={() => setState(coverLetter ? 'expanded' : 'idle')}
             className="h-11 px-4 rounded-[11px] border text-[13px] font-semibold"
             style={{ borderColor: 'var(--line)', color: 'var(--ink-3)', background: '#fff' }}>
             ביטול
@@ -89,7 +118,7 @@ export default function ApplyButton({ jobId, alreadyApplied }: Props) {
   return (
     <div className="flex gap-2">
       <button
-        onClick={apply}
+        onClick={() => setState('confirming')}
         className="flex-1 flex items-center justify-center gap-2.5 h-12 px-6 rounded-[12px] text-white transition-all"
         style={{
           background: 'linear-gradient(135deg, var(--purple) 0%, #7C3AED 100%)',

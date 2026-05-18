@@ -16,6 +16,12 @@ export default async function AdminInstitutionsPage() {
     .select('id, profile_id, institution_name, city, district, school_type, is_approved, approved_by, created_at, owner:profiles!profile_id(full_name, phone)')
     .order('created_at', { ascending: false })
 
+  const { data: leads } = await service
+    .from('institution_leads')
+    .select('id, institution_name, city, phone, institution_type')
+    .is('registered_profile_id', null)
+    .order('institution_name')
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <InstitutionsManagerClient institutions={(institutions ?? []) as any} />
+  return <InstitutionsManagerClient institutions={(institutions ?? []) as any} leads={leads ?? []} />
 }
