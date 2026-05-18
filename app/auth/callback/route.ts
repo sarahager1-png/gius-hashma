@@ -55,14 +55,20 @@ export async function GET(request: Request) {
       id:        userId,
       role:      'מוסד',
       full_name: preReg.full_name ?? preReg.institution_name,
+      phone:     preReg.phone ?? null,
     })
     await service.from('institutions').insert({
       profile_id:       userId,
       institution_name: preReg.institution_name,
       city:             preReg.city,
+      district:         preReg.district ?? null,
+      school_type:      preReg.school_type ?? null,
       institution_type: preReg.institution_type,
+      phone:            preReg.phone ?? null,
+      principal_name:   preReg.principal_name ?? preReg.full_name ?? null,
       is_approved:      true,
       approved_at:      new Date().toISOString(),
+      whatsapp_preference: true,
     })
     await service.from('pre_registered_institutions').delete().eq('email', email)
     return NextResponse.redirect(`${origin}/institution/jobs`)

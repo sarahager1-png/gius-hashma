@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendExternal } from '@/lib/notify-external'
-import { Resend } from 'resend'
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}))
@@ -17,86 +16,45 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'מחוז חובה' }, { status: 400 })
 
   const service = createServiceClient()
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app'
   const cleanEmail = email.trim().toLowerCase()
-  const phone = principal_phone?.trim() || null
   const name = full_name.trim()
+  const phone = principal_phone?.trim() || null
 
-  // Create auth user without sending Supabase's built-in invite email
-  // (Supabase's invite email often goes to spam — we send the login link ourselves)
-  const { data: created, error: createErr } = await service.auth.admin.createUser({
-    email: cleanEmail,
-    email_confirm: true,
-    user_metadata: { full_name: name },
-  })
-  if (createErr) {
-    const msg = createErr.message.includes('already been registered') || createErr.message.includes('already exists')
-      ? 'כתובת המייל כבר רשומה במערכת'
-      : createErr.message
-    return NextResponse.json({ error: msg }, { status: 400 })
+  // בדיקה אם המייל כבר רשום כמשתמש פעיל (לא רק pre_registered)
+  const { data: existingUser } = await service.auth.admin.getUserByEmail(cleanEmail)
+  if (existingUser?.user) {
+    return NextResponse.json({ error: 'כתובת המייל כבר רשומה במערכת' }, { status: 400 })
   }
 
-  const userId = created.user.id
-
-  // Create profile
-  await service.from('profiles').upsert(
-    { id: userId, full_name: name, phone: phone || null, role: 'מוסד' },
-    { onConflict: 'id' }
-  )
-
-  // institution_type derived from school_type
+  // שמירה ב-pre_registered_institutions — הכניסה תהיה דרך Google
   const institutionType = school_type === 'גן ילדים' ? 'גן ילדים' : 'בית ספר יסודי'
+
   const finalSchoolType = school_type === 'גן ילדים' ? null : (school_type || null)
 
-  await service.from('institutions').insert({
-    profile_id: userId,
-    institution_name: institution_name.trim(),
-    city: city?.trim() || null,
-    district,
-    school_type: finalSchoolType,
-    institution_type: institutionType,
-    phone: phone || null,
-    principal_name: name,
-    whatsapp_preference: true,
-    is_approved: true,
-  })
+  const { error: preRegErr } = await service
+    .from('pre_registered_institutions')
+    .upsert({
+      email: cleanEmail,
+      full_name: name,
+      institution_name: institution_name.trim(),
+      city: city?.trim() || null,
+      institution_type: institutionType,
+      district: district || null,
+      school_type: finalSchoolType,
+      phone: phone,
+      principal_name: name,
+    }, { onConflict: 'email' })
 
-  // Mark lead as registered
-  if (lead_id) {
-    await service
-      .from('institution_leads')
-      .update({ registered_profile_id: userId })
-      .eq('id', lead_id)
-  }
+  if (preRegErr)
+    return NextResponse.json({ error: preRegErr.message }, { status: 500 })
 
-  // Generate a magic link and send it ourselves (WhatsApp primary, email fallback)
-  const { data: linkData } = await service.auth.admin.generateLink({
-    type: 'magiclink',
-    email: cleanEmail,
-    options: { redirectTo: `${appUrl}/auth/callback?next=/institution/jobs` },
-  })
-  const loginLink = linkData?.properties?.action_link
-
-  if (loginLink) {
-    const waMsg = `שלום ${name}!\nפרטי המוסד "${institution_name.trim()}" נקלטו בהצלחה.\nלכניסה למערכת לחצי כאן:\n${loginLink}`
-    const smsMsg = `שלום ${name}! הרשמת למערכת השביל. לכניסה: ${loginLink}`
-
-    if (phone) {
-      // Primary: WhatsApp / SMS
-      await sendExternal({ phone, whatsapp_preference: true, waMessage: waMsg, smsMessage: smsMsg })
-    } else {
-      // Fallback: send via Resend email
-      const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
-      if (resend) {
-        const from = process.env.EMAIL_FROM ?? 'השביל <noreply@giuus.vercel.app>'
-        void resend.emails.send({
-          from,
-          to: cleanEmail,
-          subject: 'קישור כניסה למערכת השביל',
-          html: `<div dir="rtl"><p>שלום ${name},</p><p>פרטי המוסד "${institution_name.trim()}" נקלטו בהצלחה.</p><p><a href="${loginLink}" style="background:#5B3AAB;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block">כניסה למערכת</a></p><p style="color:#888;font-size:12px">הקישור תקף ל-24 שעות.</p></div>`,
-        })
-      }
-    }
+  // שליחת וואטסאפ עם קישור לכניסה עם Google
+  if (phone) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app'
+    const mosadLink = `${appUrl}/mosad`
+    const waMsg = `שלום ${name}!\nפרטי המוסד "${institution_name.trim()}" נקלטו בהצלחה.\n\nלכניסה למערכת — לחצי כאן:\n${mosadLink}\n\nהיכנסי עם Google עם המייל: ${cleanEmail}`
+    const smsMsg = `שלום ${name}! פרטי המוסד נקלטו. לכניסה עם Google: ${mosadLink}`
+    await sendExternal({ phone, whatsapp_preference: true, waMessage: waMsg, smsMessage: smsMsg })
   }
 
   return NextResponse.json({ ok: true })
