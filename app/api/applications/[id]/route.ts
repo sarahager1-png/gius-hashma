@@ -156,7 +156,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   return NextResponse.json({ ok: true })
 }
 
-// Candidate withdraws their own application (only when status is ממתינה or נצפתה)
+// Delete an application — admins/institutions can delete any; candidates can withdraw when pending
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
@@ -165,17 +165,36 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: cand } = await service.from('candidates').select('id').eq('profile_id', user.id).single()
-  if (!cand) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const { data: profile } = await service.from('profiles').select('role').eq('id', user.id).single()
+  if (!profile) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const ADMIN_ROLES = ['מנהל רשת', 'מנהלת מערכת', 'אדמין מערכת']
+  const isAdmin = ADMIN_ROLES.includes(profile.role)
 
   const { data: app } = await service
-    .from('applications').select('id, status, candidate_id').eq('id', id).single()
+    .from('applications')
+    .select('id, status, candidate_id, job_id, jobs(institution_id, institutions(profile_id))')
+    .eq('id', id)
+    .single()
 
-  if (!app || app.candidate_id !== cand.id)
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (!app) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  if (!['ממתינה', 'נצפתה'].includes(app.status))
-    return NextResponse.json({ error: 'לא ניתן לבטל הגשה בשלב זה' }, { status: 400 })
+  if (!isAdmin) {
+    // Institution manager — can delete applications on their own jobs
+    if (profile.role === 'מוסד') {
+      const instProfileId = (app.jobs as unknown as { institutions: { profile_id: string } | null } | null)
+        ?.institutions?.profile_id
+      if (instProfileId !== user.id)
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    } else {
+      // Candidate — can only withdraw pending/viewed applications
+      const { data: cand } = await service.from('candidates').select('id').eq('profile_id', user.id).single()
+      if (!cand || app.candidate_id !== cand.id)
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      if (!['ממתינה', 'נצפתה'].includes(app.status))
+        return NextResponse.json({ error: 'לא ניתן לבטל הגשה בשלב זה' }, { status: 400 })
+    }
+  }
 
   const { error } = await service.from('applications').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

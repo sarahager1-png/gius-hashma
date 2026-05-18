@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {
   CheckCircle2, XCircle, Calendar, MessageCircle, Clock,
   Eye, ChevronDown, MapPin, GraduationCap, Briefcase,
-  X, Phone, FileText, Search, Sparkles, StickyNote, Check, Star, History,
+  X, Phone, FileText, Search, Sparkles, StickyNote, Check, Star, History, Trash2,
 } from 'lucide-react'
 
 type AppStatus = 'ממתינה' | 'נצפתה' | 'התקבלה' | 'נדחתה' | 'בוטלה'
@@ -93,6 +93,8 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
   const [historyOpen, setHistoryOpen] = useState<Set<string>>(new Set())
   const [historyData, setHistoryData] = useState<Record<string, LogEntry[]>>({})
   const [historyLoading, setHistoryLoading] = useState<string | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState<string | null>(null)
 
   async function toggleHistory(appId: string) {
     if (historyOpen.has(appId)) {
@@ -147,6 +149,14 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
       const orig = initial.find(a => a.id === appId)
       if (orig) setApps(prev => prev.map(a => a.id === appId ? { ...a, status: orig.status } : a))
     }
+  }
+
+  async function deleteApp(appId: string) {
+    setDeleting(appId)
+    const res = await fetch(`/api/applications/${appId}`, { method: 'DELETE' })
+    setDeleting(null)
+    setDeleteConfirm(null)
+    if (res.ok) setApps(prev => prev.filter(a => a.id !== appId))
   }
 
   async function scheduleInterview() {
@@ -513,6 +523,37 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
                           )}
                         </div>
                       )}
+
+                      {/* Delete */}
+                      <div className="mt-3 flex justify-end">
+                        {deleteConfirm === app.id ? (
+                          <div className="flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5"
+                            style={{ background: '#FEF2F2', border: '1px solid #FECACA' }}>
+                            <span className="text-[12px] font-semibold" style={{ color: '#DC2626' }}>למחוק הגשה זו?</span>
+                            <button
+                              onClick={() => deleteApp(app.id)}
+                              disabled={deleting === app.id}
+                              className="h-6 px-2.5 rounded-[6px] text-[11.5px] font-bold text-white"
+                              style={{ background: '#DC2626', opacity: deleting === app.id ? 0.6 : 1 }}>
+                              {deleting === app.id ? '...' : 'כן, מחקי'}
+                            </button>
+                            <button onClick={() => setDeleteConfirm(null)}
+                              className="h-6 px-2 rounded-[6px] text-[11.5px] font-semibold"
+                              style={{ color: 'var(--ink-3)', background: '#fff', border: '1px solid var(--line)' }}>
+                              ביטול
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setDeleteConfirm(app.id)}
+                            className="flex items-center gap-1 h-7 px-2.5 rounded-[7px] text-[11.5px] font-semibold transition-all"
+                            style={{ color: 'var(--ink-4)', background: 'transparent', border: '1px solid transparent' }}
+                            onMouseEnter={e => { e.currentTarget.style.color = '#DC2626'; e.currentTarget.style.background = '#FEF2F2'; e.currentTarget.style.borderColor = '#FECACA' }}
+                            onMouseLeave={e => { e.currentTarget.style.color = 'var(--ink-4)'; e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent' }}>
+                            <Trash2 size={12} />מחקי הגשה
+                          </button>
+                        )}
+                      </div>
 
                       {/* Notes + History */}
                       <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--line)' }}>
