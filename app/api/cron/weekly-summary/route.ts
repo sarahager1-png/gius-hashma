@@ -68,13 +68,16 @@ export async function GET(request: Request) {
 
   // WhatsApp summary to network admin
   const dateLabel = now.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' })
-  const waMsg = `📊 סיכום שבועי — השביל (${dateLabel})
+  const waMsg = `שבוע טוב חנה! 🌟
+מצורף סיכום פעילות השביל לשבוע האחרון (${dateLabel}):
 
-👩‍🏫 מועמדות חדשות השבוע: ${stats.newCandidates}
-🏫 מוסדות חדשים השבוע: ${stats.newInstitutions}
+👩‍🏫 מועמדות חדשות: ${stats.newCandidates}
+🏫 מוסדות חדשים: ${stats.newInstitutions}
 📋 הגשות חדשות: ${stats.newApplications}
-⏳ הגשות ממתינות לטיפול: ${stats.pendingApplications}
-📅 ראיונות מתוכננים בשבוע הבא: ${stats.upcomingInterviews}`
+⏳ ממתינות לטיפול: ${stats.pendingApplications}
+📅 ראיונות מתוכננים השבוע: ${stats.upcomingInterviews}
+
+תמשיכי את העשייה המבורכת! 💜`
 
   void sendWA(ADMIN_SUMMARY_PHONE, waMsg)
 
