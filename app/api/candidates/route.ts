@@ -112,7 +112,7 @@ async function notifyMatchingInstitutions(
 
   if (!jobs?.length) return
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'giuus.vercel.app'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app'
 
   // Notify institutions (one per institution, deduped)
   const seenInst = new Set<string>()

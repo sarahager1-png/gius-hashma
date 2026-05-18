@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import {
   Search, Filter, Download, UserPlus, ChevronLeft, X, CheckCircle,
   GraduationCap, MapPin, Phone, Building2, MessageCircle, Send,
-  Briefcase, Calendar, ChevronDown, Loader2, BookOpen, Users,
+  Briefcase, Calendar, ChevronDown, Loader2, BookOpen, Users, Trash2,
 } from 'lucide-react'
 import type { Candidate } from '@/lib/types'
 
@@ -34,6 +34,7 @@ interface Job { id: string; title: string; city: string; institution_id: string;
 interface Props { candidates: Candidate[]; initialSearch?: string }
 
 /* ── Invite Modal ── */
+
 function InviteModal({ candidate, onClose, onSent }: {
   candidate: Candidate
   onClose: () => void
@@ -253,7 +254,8 @@ function InviteModal({ candidate, onClose, onSent }: {
 }
 
 /* ── Main component ── */
-export default function CandidatesClient({ candidates, initialSearch = '' }: Props) {
+export default function CandidatesClient({ candidates: initial, initialSearch = '' }: Props) {
+  const [candidates, setCandidates] = useState(initial)
   const [search, setSearch]       = useState(initialSearch)
   const [statusFilter, setFilter] = useState('הכל')
   const [showAdd, setShowAdd]     = useState(false)
@@ -265,7 +267,21 @@ export default function CandidatesClient({ candidates, initialSearch = '' }: Pro
   const [saved, setSaved]         = useState(false)
   const [inviteTarget, setInviteTarget] = useState<Candidate | null>(null)
   const [sentKeys, setSentKeys]   = useState<Set<string>>(new Set())
+  const [deleting, setDeleting]   = useState<string | null>(null)
   const router = useRouter()
+
+  async function deleteCandidate(id: string, name: string) {
+    if (!confirm(`למחוק את ${name} לצמיתות? לא ניתן לשחזר.`)) return
+    setDeleting(id)
+    const res = await fetch(`/api/candidates/${id}`, { method: 'DELETE' })
+    setDeleting(null)
+    if (res.ok) {
+      setCandidates(prev => prev.filter(c => c.id !== id))
+    } else {
+      const d = await res.json().catch(() => ({}))
+      alert(d.error ?? 'שגיאה במחיקה')
+    }
+  }
 
   async function handleSave() {
     const res = await fetch('/api/candidates', {
@@ -583,12 +599,24 @@ export default function CandidatesClient({ candidates, initialSearch = '' }: Pro
                       </button>
                     </div>
 
-                    <button
-                      className="flex items-center gap-1 text-[12.5px] font-bold px-3 py-1.5 rounded-[8px] transition-all"
-                      style={{ color: 'var(--ink-3)', background: 'var(--bg-2)' }}
-                      onClick={() => router.push(`/candidates/${c.id}`)}>
-                      פרופיל מלא <ChevronLeft size={13} />
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        className="flex items-center gap-1 text-[12.5px] font-bold px-3 py-1.5 rounded-[8px] transition-all"
+                        style={{ color: 'var(--ink-3)', background: 'var(--bg-2)' }}
+                        onClick={() => router.push(`/candidates/${c.id}`)}>
+                        פרופיל מלא <ChevronLeft size={13} />
+                      </button>
+                      <button
+                        onClick={() => deleteCandidate(c.id, c.profiles?.full_name ?? 'מועמדת')}
+                        disabled={deleting === c.id}
+                        title="מחיקת מועמדת"
+                        className="w-8 h-8 rounded-[8px] flex items-center justify-center border transition-all"
+                        style={{ borderColor: '#FECACA', color: '#DC2626', background: '#FEF2F2', opacity: deleting === c.id ? 0.5 : 1 }}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#FEE2E2' }}
+                        onMouseLeave={e => { e.currentTarget.style.background = '#FEF2F2' }}>
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               )

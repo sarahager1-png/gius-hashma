@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Search, MessageCircle, Phone, MapPin, Users, Send, X, Copy, Check, Download } from 'lucide-react'
+import { Search, MessageCircle, Phone, MapPin, Users, Send, X, Copy, Check, Download, Trash2 } from 'lucide-react'
 import { DISTRICTS } from '@/lib/constants'
 import ImpersonateButton from '@/components/admin/impersonate-button'
 
@@ -36,13 +36,28 @@ function waLink(phone: string, msg: string) {
 
 interface Props { candidates: Candidate[] }
 
-export default function CandidateManagerClient({ candidates }: Props) {
+export default function CandidateManagerClient({ candidates: initial }: Props) {
+  const [candidates, setCandidates] = useState(initial)
   const [search, setSearch]         = useState('')
   const [statusFilter, setStatus]   = useState('הכל')
   const [distFilter, setDist]       = useState('הכל')
   const [message, setMessage]       = useState('')
   const [showGroup, setShowGroup]   = useState(false)
   const [copied, setCopied]         = useState(false)
+  const [deleting, setDeleting]     = useState<string | null>(null)
+
+  async function deleteCandidate(id: string, name: string) {
+    if (!confirm(`למחוק את ${name} לצמיתות? לא ניתן לשחזר.`)) return
+    setDeleting(id)
+    const res = await fetch(`/api/candidates/${id}`, { method: 'DELETE' })
+    setDeleting(null)
+    if (res.ok) {
+      setCandidates(prev => prev.filter(c => c.id !== id))
+    } else {
+      const d = await res.json().catch(() => ({}))
+      alert(d.error ?? 'שגיאה במחיקה')
+    }
+  }
 
   const filtered = useMemo(() => candidates.filter(c => {
     if (statusFilter !== 'הכל' && c.availability_status !== statusFilter) return false
@@ -274,7 +289,19 @@ export default function CandidateManagerClient({ candidates }: Props) {
                         </span>
                       </td>
                       <td className="px-4 py-3" style={{ borderBottom: '1px solid var(--line-soft)' }}>
-                        <ImpersonateButton profileId={c.profile_id} label={c.profiles?.full_name ?? 'מועמדת'} />
+                        <div className="flex items-center gap-2">
+                          <ImpersonateButton profileId={c.profile_id} label={c.profiles?.full_name ?? 'מועמדת'} />
+                          <button
+                            onClick={() => deleteCandidate(c.id, c.profiles?.full_name ?? 'מועמדת')}
+                            disabled={deleting === c.id}
+                            title="מחיקת מועמדת"
+                            className="w-7 h-7 rounded-[7px] flex items-center justify-center border transition-all"
+                            style={{ borderColor: '#FECACA', color: '#DC2626', background: '#FEF2F2', opacity: deleting === c.id ? 0.5 : 1 }}
+                            onMouseEnter={e => { e.currentTarget.style.background = '#FEE2E2' }}
+                            onMouseLeave={e => { e.currentTarget.style.background = '#FEF2F2' }}>
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )

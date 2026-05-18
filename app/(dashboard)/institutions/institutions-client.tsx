@@ -22,12 +22,13 @@ export default function InstitutionsClient({ institutions }: Props) {
   const [, startTransition]           = useTransition()
 
   async function handleSave() {
+    if (!addForm.phone.trim()) { setSaveError('מספר וואטסאפ חובה לשליחת קישור הרשמה'); return }
     setSaving(true)
     setSaveError('')
-    const res = await fetch('/api/institutions', {
+    const res = await fetch('/api/admin/institutions/create-lead', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(addForm),
+      body: JSON.stringify({ name: addForm.name, city: addForm.city, principal: addForm.principal, phone: addForm.phone }),
     })
     setSaving(false)
     if (!res.ok) {
@@ -161,7 +162,8 @@ export default function InstitutionsClient({ institutions }: Props) {
                 <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3" style={{ background: '#E4F6ED' }}>
                   <CheckCircle size={28} color="#1A7A4A" />
                 </div>
-                <p className="text-[16px] font-bold" style={{ color: '#1A7A4A' }}>המוסד נוסף בהצלחה</p>
+                <p className="text-[16px] font-bold" style={{ color: '#1A7A4A' }}>קישור הרשמה נשלח בוואטסאפ!</p>
+                <p className="text-[13px] mt-1" style={{ color: '#6B7280' }}>לאחר מילוי הפרטים יישלח קישור כניסה לוואטסאפ</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -181,10 +183,10 @@ export default function InstitutionsClient({ institutions }: Props) {
                       className="w-full h-9 rounded-[8px] border px-3 text-[13px] font-medium outline-none"
                       style={{ borderColor: 'var(--line)', color: 'var(--ink)', background: '#fff' }} />
                   </FRow>
-                  <FRow label="טלפון">
+                  <FRow label="וואטסאפ *">
                     <input value={addForm.phone} onChange={e => setAddForm(f => ({ ...f, phone: e.target.value }))}
                       className="w-full h-9 rounded-[8px] border px-3 text-[13px] font-medium outline-none"
-                      style={{ borderColor: 'var(--line)', color: 'var(--ink)', background: '#fff' }} dir="ltr" />
+                      style={{ borderColor: 'var(--line)', color: 'var(--ink)', background: '#fff' }} dir="ltr" placeholder="050-0000000" />
                   </FRow>
                 </div>
                 <FRow label="כתובת">
@@ -203,7 +205,7 @@ export default function InstitutionsClient({ institutions }: Props) {
                   <button onClick={handleSave} disabled={!addForm.name || saving}
                     className="h-10 px-6 rounded-[10px] text-[14px] font-semibold text-white"
                     style={{ background: addForm.name && !saving ? 'var(--purple)' : 'var(--bg-2)', color: addForm.name && !saving ? '#fff' : 'var(--ink-4)' }}>
-                    {saving ? 'שומר...' : 'שמור'}
+                    {saving ? 'שולח...' : 'שלח קישור הרשמה'}
                   </button>
                 </div>
               </div>

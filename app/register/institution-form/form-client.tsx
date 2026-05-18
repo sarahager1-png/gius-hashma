@@ -70,9 +70,10 @@ export default function InstitutionFormClient({ lead }: { lead: Lead }) {
           ההרשמה הושלמה!
         </h2>
         <p className="text-[14px] leading-relaxed" style={{ color: '#6D28D9' }}>
-          שלחנו קישור כניסה לכתובת <strong>{form.email}</strong>.
-          <br />
-          {form.principal_phone && 'הקישור נשלח גם לוואטסאפ שלך.'}
+          {form.principal_phone
+            ? <>קישור כניסה נשלח לוואטסאפ שלך — <strong>{form.principal_phone}</strong>.</>
+            : <>קישור כניסה נשלח לכתובת <strong>{form.email}</strong>.</>
+          }
         </p>
         <p className="text-[13px] mt-4" style={{ color: '#9CA3AF' }}>
           לחצי על הקישור כדי להכנס למערכת ולהתחיל לפרסם משרות.
