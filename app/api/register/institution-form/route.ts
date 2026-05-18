@@ -21,8 +21,9 @@ export async function POST(req: Request) {
   const phone = principal_phone?.trim() || null
 
   // בדיקה אם המייל כבר רשום כמשתמש פעיל (לא רק pre_registered)
-  const { data: existingUser } = await service.auth.admin.getUserByEmail(cleanEmail)
-  if (existingUser?.user) {
+  const { data: { users } } = await service.auth.admin.listUsers({ perPage: 1000 })
+  const alreadyExists = users?.some(u => u.email?.toLowerCase() === cleanEmail)
+  if (alreadyExists) {
     return NextResponse.json({ error: 'כתובת המייל כבר רשומה במערכת' }, { status: 400 })
   }
 
@@ -42,7 +43,6 @@ export async function POST(req: Request) {
       district: district || null,
       school_type: finalSchoolType,
       phone: phone,
-      principal_name: name,
     }, { onConflict: 'email' })
 
   if (preRegErr)

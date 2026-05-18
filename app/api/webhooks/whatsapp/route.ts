@@ -537,7 +537,7 @@ async function handleJobCreationFlow(
           await service.from('wa_sessions').delete().eq('id', session.id)
           await sendWA(phone,
             `לפני פרסום משרות יש להשלים את פרטי המוסד (מחוז וסוג).\n` +
-            `👉 giuus.vercel.app/institution/profile`
+            `👉 ${process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app'}/institution/profile`
           )
           return
         }
@@ -587,20 +587,27 @@ async function handleJobCreationFlow(
   }
 
   if (state === 'awaiting_city') {
-    await updateSession('awaiting_type', { city: text })
-    await sendWA(phone, `✓ עיר: *${text}*\n\n*סוג משרה:*\n1️⃣ סטאג׳\n2️⃣ חלקי\n3️⃣ מלא`)
+    await updateSession('awaiting_hours', { city: text })
+    await sendWA(phone, `✓ עיר: *${text}*\n\n*כמה שעות פרונטליות?* (לדוגמה: 20)`)
     return
   }
 
-  if (state === 'awaiting_type') {
-    const types: Record<string, string> = { '1': "סטאג'", '2': 'חלקי', '3': 'מלא', "סטאג'": "סטאג'", 'חלקי': 'חלקי', 'מלא': 'מלא' }
-    const jobType = types[text] ?? types[text.trim()]
-    if (!jobType) {
-      await sendWA(phone, 'נא לשלוח 1, 2 או 3:')
+  if (state === 'awaiting_hours') {
+    const hours = text.trim()
+    const num = parseInt(hours)
+    if (isNaN(num) || num <= 0 || num > 40) {
+      await sendWA(phone, 'נא לשלוח מספר שעות בין 1 ל-40:')
       return
     }
-    await updateSession('awaiting_specialization', { job_type: jobType })
-    await sendWA(phone, `✓ סוג: *${jobType}*\n\n*תחום:*\n1️⃣ יסודי\n2️⃣ חט"ב\n3️⃣ מתמטיקה\n4️⃣ אנגלית\n5️⃣ חינוך מיוחד\n6️⃣ אחר`)
+    await updateSession('awaiting_classes', { hours })
+    await sendWA(phone, `✓ שעות פרונטליות: *${hours}*\n\n*אילו כיתות?* (לדוגמה: א׳-ג׳)`)
+    return
+  }
+
+  if (state === 'awaiting_classes') {
+    const classes = text.trim()
+    await updateSession('awaiting_specialization', { classes })
+    await sendWA(phone, `✓ כיתות: *${classes}*\n\n*תחום:*\n1️⃣ יסודי\n2️⃣ חט"ב\n3️⃣ מתמטיקה\n4️⃣ אנגלית\n5️⃣ חינוך מיוחד\n6️⃣ אחר`)
     return
   }
 
@@ -611,16 +618,31 @@ async function handleJobCreationFlow(
       await sendWA(phone, 'נא לשלוח מספר בין 1 ל-6:')
       return
     }
-    await updateSession('confirm', { specialization: spec })
-    const d: Record<string, string> = { ...data, specialization: spec }
+    await updateSession('awaiting_constraints', { specialization: spec })
+    await sendWA(phone,
+      `✓ תחום: *${spec}*\n\n` +
+      `*אילוצים / דרישות מיוחדות?*\n` +
+      `(לדוגמה: ימי לימודים א׳-ה׳, נוכחות מלאה)\n\n` +
+      `לדילוג שלחי *דלג*`
+    )
+    return
+  }
+
+  if (state === 'awaiting_constraints') {
+    const skip = ['דלג', 'skip', '-'].includes(text.trim().toLowerCase())
+    const description = skip ? null : text.trim()
+    await updateSession('confirm', { description: description ?? '' })
+    const d: Record<string, string> = { ...data, description: description ?? '' }
     await sendWA(phone,
       `📋 *סיכום המשרה:*\n` +
       `• שם: ${d.title}\n` +
       `• מוסד: ${d.institution_name}\n` +
       `• עיר: ${d.city}\n` +
-      `• סוג: ${d.job_type}\n` +
-      `• תחום: ${spec}\n\n` +
-      `לאישור שלחי *כן*, לביטול שלחי *ביטול*`
+      `• שעות פרונטליות: ${d.hours}\n` +
+      `• כיתות: ${d.classes}\n` +
+      `• תחום: ${d.specialization}\n` +
+      (description ? `• אילוצים: ${description}\n` : '') +
+      `\nלאישור שלחי *כן*, לביטול שלחי *ביטול*`
     )
     return
   }
@@ -633,8 +655,10 @@ async function handleJobCreationFlow(
           institution_id: data.institution_id,
           title: data.title,
           city: data.city,
-          job_type: data.job_type,
+          hours: data.hours,
+          classes: data.classes,
           specialization: data.specialization,
+          description: data.description || null,
           status: 'פעילה',
         })
         .select('id')

@@ -65,7 +65,7 @@ export async function GET(request: Request) {
       school_type:      preReg.school_type ?? null,
       institution_type: preReg.institution_type,
       phone:            preReg.phone ?? null,
-      principal_name:   preReg.principal_name ?? preReg.full_name ?? null,
+      principal_name:   preReg.full_name ?? null,
       is_approved:      true,
       approved_at:      new Date().toISOString(),
       whatsapp_preference: true,
