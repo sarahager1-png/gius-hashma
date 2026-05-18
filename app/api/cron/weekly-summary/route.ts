@@ -1,9 +1,12 @@
 ﻿import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendWeeklySummaryEmail } from '@/lib/email'
+import { sendWA } from '@/lib/whatsapp'
+
+const ADMIN_SUMMARY_PHONE = '0507594931' // חנה אברומויץ
 
 // Vercel Cron Job — runs every Monday at 07:00 Israel time (04:00 UTC)
-// Sends a weekly activity summary email to all admins
+// Sends a weekly activity summary email to all admins + WhatsApp to network admin
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
@@ -24,6 +27,7 @@ export async function GET(request: Request) {
     { count: pendingApplications },
     { count: newJobs },
     { count: newCandidates },
+    { count: newInstitutions },
   ] = await Promise.all([
     service.from('applications').select('id', { count: 'exact', head: true })
       .gte('applied_at', weekAgoStr),
@@ -37,6 +41,8 @@ export async function GET(request: Request) {
     service.from('jobs').select('id', { count: 'exact', head: true })
       .gte('created_at', weekAgoStr),
     service.from('candidates').select('id', { count: 'exact', head: true })
+      .gte('created_at', weekAgoStr),
+    service.from('institutions').select('id', { count: 'exact', head: true })
       .gte('created_at', weekAgoStr),
   ])
 
@@ -57,7 +63,20 @@ export async function GET(request: Request) {
     pendingApplications: pendingApplications ?? 0,
     newJobs: newJobs ?? 0,
     newCandidates: newCandidates ?? 0,
+    newInstitutions: newInstitutions ?? 0,
   }
+
+  // WhatsApp summary to network admin
+  const dateLabel = now.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' })
+  const waMsg = `📊 סיכום שבועי — השביל (${dateLabel})
+
+👩‍🏫 מועמדות חדשות השבוע: ${stats.newCandidates}
+🏫 מוסדות חדשים השבוע: ${stats.newInstitutions}
+📋 הגשות חדשות: ${stats.newApplications}
+⏳ הגשות ממתינות לטיפול: ${stats.pendingApplications}
+📅 ראיונות מתוכננים בשבוע הבא: ${stats.upcomingInterviews}`
+
+  void sendWA(ADMIN_SUMMARY_PHONE, waMsg)
 
   let sent = 0
   for (const profile of adminProfiles) {
