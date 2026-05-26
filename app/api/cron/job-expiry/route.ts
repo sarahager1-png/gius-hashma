@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
-import { sendSms } from '@/lib/sms'
+import { sendExternal } from '@/lib/notify-external'
 
 // Vercel Cron Job — runs daily at 08:00 Israel time (05:00 UTC)
 // 1. Marks jobs past their expires_at as 'פג תוקפה' and notifies institution
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
   // ── 1. Actually expire jobs that are past their expiry date ─────────────
   const { data: toExpire, error: expireErr } = await service
     .from('jobs')
-    .select('id, title, institutions(profile_id, institution_name, phone)')
+    .select('id, title, institutions(profile_id, institution_name, phone, whatsapp_preference)')
     .eq('status', 'פעילה')
     .not('expires_at', 'is', null)
     .lt('expires_at', now.toISOString())
@@ -34,6 +34,7 @@ export async function GET(request: Request) {
       profile_id: string | null
       institution_name: string
       phone: string | null
+      whatsapp_preference: boolean | null
     } | null
 
     const { error: updateErr } = await service
@@ -57,22 +58,19 @@ export async function GET(request: Request) {
     }
 
     if (inst?.phone) {
-      try {
-        await sendSms(inst.phone, `המשרה "${job.title}" פג תוקפה ונסגרה אוטומטית. לפרסום משרה חדשה: giuus.vercel.app/institution/jobs`)
-      } catch (err) {
-        console.error('[CRON] job-expiry SMS failed:', inst.phone, err)
-      }
+      const waMsg  = `המשרה "${job.title}" פג תוקפה ונסגרה אוטומטית. לפרסום משרה חדשה: giuus.vercel.app/institution/jobs`
+      void sendExternal({ phone: inst.phone, whatsapp_preference: inst.whatsapp_preference, waMessage: waMsg, smsMessage: waMsg })
     }
 
     // notify candidates with pending applications to this job
     const { data: pendingApps } = await service
       .from('applications')
-      .select('id, candidates(profile_id, profiles(full_name, phone))')
+      .select('id, candidates(profile_id, whatsapp_preference, profiles(full_name, phone))')
       .eq('job_id', job.id)
       .in('status', ['ממתינה', 'נצפתה'])
 
     for (const app of pendingApps ?? []) {
-      type CandFields = { profile_id: string | null; profiles: { full_name: string | null; phone: string | null } | null }
+      type CandFields = { profile_id: string | null; whatsapp_preference: boolean | null; profiles: { full_name: string | null; phone: string | null } | null }
       const cand = app.candidates as unknown as CandFields | null
       if (!cand?.profile_id) continue
 
@@ -85,7 +83,8 @@ export async function GET(request: Request) {
       })
 
       if (cand.profiles?.phone) {
-        void sendSms(cand.profiles.phone, `שלום ${cand.profiles.full_name ?? ''}! המשרה "${job.title}"${inst?.institution_name ? ' ב' + inst.institution_name : ''} נסגרה. לחיפוש משרות נוספות: giuus.vercel.app/jobs`).catch(() => null)
+        const candMsg = `שלום ${cand.profiles.full_name ?? ''}! המשרה "${job.title}"${inst?.institution_name ? ' ב' + inst.institution_name : ''} נסגרה. לחיפוש משרות נוספות: giuus.vercel.app/jobs`
+        void sendExternal({ phone: cand.profiles.phone, whatsapp_preference: cand.whatsapp_preference, waMessage: candMsg, smsMessage: candMsg })
       }
     }
 
@@ -98,7 +97,7 @@ export async function GET(request: Request) {
 
   const { data: toWarn } = await service
     .from('jobs')
-    .select('id, title, institutions(profile_id, institution_name, phone)')
+    .select('id, title, institutions(profile_id, institution_name, phone, whatsapp_preference)')
     .eq('status', 'פעילה')
     .not('expires_at', 'is', null)
     .gt('expires_at', in3Days.toISOString())
@@ -110,6 +109,7 @@ export async function GET(request: Request) {
       profile_id: string | null
       institution_name: string
       phone: string | null
+      whatsapp_preference: boolean | null
     } | null
 
     if (inst?.profile_id) {
@@ -134,11 +134,8 @@ export async function GET(request: Request) {
     }
 
     if (inst?.phone) {
-      try {
-        await sendSms(inst.phone, `המשרה "${job.title}" תפוג בעוד 3 ימים. לחידוש: giuus.vercel.app/institution/jobs`)
-      } catch (err) {
-        console.error('[CRON] job-expiry warning SMS failed:', inst.phone, err)
-      }
+      const warnMsg = `המשרה "${job.title}" תפוג בעוד 3 ימים. לחידוש: giuus.vercel.app/institution/jobs`
+      void sendExternal({ phone: inst.phone, whatsapp_preference: inst.whatsapp_preference, waMessage: warnMsg, smsMessage: warnMsg })
     }
 
     warned++

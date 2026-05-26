@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   if (!name?.trim()) return NextResponse.json({ error: 'שם מוסד חובה' }, { status: 400 })
   if (!email?.trim()) return NextResponse.json({ error: 'אימייל חובה לשליחת הזמנה' }, { status: 400 })
 
-  const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app'
+  const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
 
   // Send invite via Supabase — generates a magic link + email automatically
   const { data: authData, error: authError } = await service.auth.admin.inviteUserByEmail(

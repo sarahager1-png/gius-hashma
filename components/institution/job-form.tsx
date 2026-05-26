@@ -79,6 +79,76 @@ function Chips({ value, onChange, options }: { value: string; onChange: (v: stri
   )
 }
 
+function ClassesPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [rangeFrom, setRangeFrom] = useState('')
+  const [rangeTo, setRangeTo]   = useState('')
+
+  const selected = value.split(',').map(s => s.trim()).filter(Boolean)
+
+  function toggleGrade(g: string) {
+    const next = selected.includes(g) ? selected.filter(x => x !== g) : [...selected, g]
+    onChange(next.join(', '))
+  }
+
+  function applyRange() {
+    if (!rangeFrom || !rangeTo) return
+    const fi = GRADES.indexOf(rangeFrom)
+    const ti = GRADES.indexOf(rangeTo)
+    if (fi === -1 || ti === -1) return
+    const [lo, hi] = fi <= ti ? [fi, ti] : [ti, fi]
+    const range = GRADES.slice(lo, hi + 1)
+    const merged = Array.from(new Set([...selected, ...range]))
+    onChange(merged.join(', '))
+    setRangeFrom(''); setRangeTo('')
+  }
+
+  const selStyle = { background: 'var(--purple-050)', borderColor: 'var(--purple)', color: 'var(--purple)' }
+  const defStyle = { background: '#fff', borderColor: 'var(--line)', color: 'var(--ink-3)' }
+  const selCls = 'w-10 h-9 rounded-[8px] text-[13px] font-bold border transition-all'
+
+  return (
+    <div className="space-y-2 pt-1">
+      {/* Range selector */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-[12px] font-semibold" style={{ color: 'var(--ink-3)' }}>טווח:</span>
+        <select value={rangeFrom} onChange={e => setRangeFrom(e.target.value)}
+          className="h-8 px-2 rounded-[8px] border text-[13px] font-bold outline-none"
+          style={{ borderColor: 'var(--line)', color: 'var(--ink-2)', background: '#fff' }}>
+          <option value="">מ-</option>
+          {GRADES.map(g => <option key={g} value={g}>כיתה {g}</option>)}
+        </select>
+        <select value={rangeTo} onChange={e => setRangeTo(e.target.value)}
+          className="h-8 px-2 rounded-[8px] border text-[13px] font-bold outline-none"
+          style={{ borderColor: 'var(--line)', color: 'var(--ink-2)', background: '#fff' }}>
+          <option value="">עד-</option>
+          {GRADES.map(g => <option key={g} value={g}>כיתה {g}</option>)}
+        </select>
+        <button type="button" onClick={applyRange} disabled={!rangeFrom || !rangeTo}
+          className="h-8 px-3 rounded-[8px] text-[12.5px] font-bold border transition-all"
+          style={{ background: rangeFrom && rangeTo ? 'var(--purple-050)' : '#f5f5f5', borderColor: rangeFrom && rangeTo ? 'var(--purple)' : 'var(--line)', color: rangeFrom && rangeTo ? 'var(--purple)' : 'var(--ink-4)' }}>
+          הוסף טווח
+        </button>
+        {selected.length > 0 && (
+          <button type="button" onClick={() => onChange('')}
+            className="h-8 px-3 rounded-[8px] text-[12px] font-semibold border transition-all"
+            style={{ background: '#fff', borderColor: 'var(--line)', color: 'var(--ink-4)' }}>
+            נקה הכל
+          </button>
+        )}
+      </div>
+      {/* Individual grade chips */}
+      <div className="flex flex-wrap gap-1.5">
+        {GRADES.map(g => (
+          <button key={g} type="button" onClick={() => toggleGrade(g)}
+            className={selCls} style={selected.includes(g) ? selStyle : defStyle}>
+            {g}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function JobFormClient({ institutionId, school, job, templates = [] }: Props) {
   const router = useRouter()
   const [form, setForm] = useState({
@@ -132,7 +202,6 @@ export default function JobFormClient({ institutionId, school, job, templates = 
       district: school.district || null,
       city: school.city || null,
       specialization: form.specialization || null,
-      job_type: form.placement_type || null,
       job_types: form.placement_type ? [form.placement_type] : null,
       placement_type: form.placement_type || null,
       expires_at: form.expires_at ? new Date(form.expires_at).toISOString() : null,
@@ -204,23 +273,7 @@ export default function JobFormClient({ institutionId, school, job, templates = 
         </Field>
 
         <Field label="כיתות (ניתן לבחור מספר)">
-          <div className="flex flex-wrap gap-1.5 pt-1">
-            {GRADES.map(g => {
-              const sel = form.classes.split(',').map(s => s.trim()).includes(g)
-              return (
-                <button key={g} type="button"
-                  onClick={() => {
-                    const cur = form.classes.split(',').map(s => s.trim()).filter(Boolean)
-                    const next = sel ? cur.filter(x => x !== g) : [...cur, g]
-                    set('classes', next.join(', '))
-                  }}
-                  className="w-10 h-9 rounded-[8px] text-[13px] font-bold border transition-all"
-                  style={{ background: sel ? 'var(--purple-050)' : '#fff', borderColor: sel ? 'var(--purple)' : 'var(--line)', color: sel ? 'var(--purple)' : 'var(--ink-3)' }}>
-                  {g}
-                </button>
-              )
-            })}
-          </div>
+          <ClassesPicker value={form.classes} onChange={v => set('classes', v)} />
         </Field>
 
         <Field label="שעות פרונטליות">

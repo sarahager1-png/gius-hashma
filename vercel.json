@@ -29,6 +29,10 @@
       "schedule": "30 6 * * *"
     },
     {
+      "path": "/api/cron/post-interview-reminder",
+      "schedule": "30 5 * * *"
+    },
+    {
       "path": "/api/cron/weekly-summary",
       "schedule": "0 6 * * 1"
     },
@@ -37,8 +41,20 @@
       "schedule": "0 6 * * 0"
     },
     {
+      "path": "/api/cron/candidate-alerts",
+      "schedule": "40 6 * * 0"
+    },
+    {
+      "path": "/api/cron/filled-jobs",
+      "schedule": "20 7 * * 0"
+    },
+    {
       "path": "/api/cron/send-reminders",
       "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/institution-registration-reminder",
+      "schedule": "0 5 * * 0,2,4"
     }
   ]
 }

@@ -27,14 +27,15 @@ const STEPS = [
 ]
 
 /* ─── Shared input styles ─── */
-const inp = 'w-full h-11 px-3 rounded-[10px] border text-[14px] font-medium outline-none transition-all focus:border-purple focus:shadow-[0_0_0_3px_var(--purple-050)]'
+const inp = 'w-full h-11 px-3 rounded-[10px] border text-[16px] font-medium outline-none transition-all focus:border-purple focus:shadow-[0_0_0_3px_var(--purple-050)]'
 const inpStyle = { borderColor: 'var(--line)', background: '#fff', color: 'var(--ink)' }
 
 /* ─── Sub-components ─── */
-function Label({ children, optional }: { children: React.ReactNode; optional?: boolean }) {
+function Label({ children, optional, required }: { children: React.ReactNode; optional?: boolean; required?: boolean }) {
   return (
     <label className="block text-[12.5px] font-bold mb-1.5" style={{ color: 'var(--ink-2)' }}>
       {children}
+      {required && <span className="ms-1 text-[13px] font-bold" style={{ color: 'var(--purple)' }}>*</span>}
       {optional && <span className="ms-1.5 text-[11px] font-medium" style={{ color: 'var(--ink-4)' }}>(אופציונלי)</span>}
     </label>
   )
@@ -69,10 +70,10 @@ function SpecChip({ label, checked, onChange }: { label: string; checked: boolea
   )
 }
 
-function Field({ label, optional, children }: { label: string; optional?: boolean; children: React.ReactNode }) {
+function Field({ label, optional, required, children }: { label: string; optional?: boolean; required?: boolean; children: React.ReactNode }) {
   return (
     <div>
-      <Label optional={optional}>{label}</Label>
+      <Label optional={optional} required={required}>{label}</Label>
       {children}
     </div>
   )
@@ -88,30 +89,44 @@ const EMPTY_PW:  PracticalWork = { year: '', school_name: '', supervisor_name: '
    Step components
 ══════════════════════════════════════════════════ */
 
-function StepPersonal({ form, set }: { form: Record<string, string>; set: (k: string, v: string) => void }) {
+function StepPersonal({ form, set, workCities, setWorkCities, cityInput, setCityInput }: {
+  form: Record<string, string>; set: (k: string, v: string) => void
+  workCities: string[]; setWorkCities: (v: string[]) => void
+  cityInput: string; setCityInput: (v: string) => void
+}) {
+  function addCity() {
+    const c = cityInput.trim()
+    if (c && !workCities.includes(c)) setWorkCities([...workCities, c])
+    setCityInput('')
+  }
   return (
     <div className="space-y-4">
+      <div className="rounded-[12px] p-3.5" style={{ background: 'var(--teal-050)', border: '1px solid var(--teal-100)' }}>
+        <p className="text-[12.5px] font-semibold" style={{ color: 'var(--teal-700)' }}>
+          💡 ככל שתמלאי יותר פרטים — כך המערכת תוכל למצוא לך התאמה מהירה וטובה יותר
+        </p>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Field label="שם מלא">
+        <Field label="שם מלא" required>
           <input className={inp} style={inpStyle} value={form.full_name}
-            onChange={e => set('full_name', e.target.value)} placeholder="שם פרטי ושם משפחה" required />
+            onChange={e => set('full_name', e.target.value)} placeholder="שם פרטי ושם משפחה" dir="rtl" required />
         </Field>
-        <Field label="טלפון">
+        <Field label="טלפון" required>
           <input className={inp} style={inpStyle} dir="ltr" value={form.phone}
             onChange={e => set('phone', e.target.value)} placeholder="05X-XXXXXXX" required />
         </Field>
       </div>
-      <Field label="אימייל" optional>
+      <Field label="אימייל" required>
         <input className={inp} style={inpStyle} dir="ltr" type="email" value={form.email}
-          onChange={e => set('email', e.target.value)} placeholder="your@email.com" />
+          onChange={e => set('email', e.target.value)} placeholder="your@email.com" required />
       </Field>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Field label="שנת לידה">
+        <Field label="שנת לידה" required>
           <input className={inp} style={inpStyle} type="number" min={1950} max={2010}
             value={form.birth_year} onChange={e => set('birth_year', e.target.value)}
             placeholder="1998" required />
         </Field>
-        <Field label="מצב משפחתי">
+        <Field label="מצב משפחתי" required>
           <NativeSelect value={form.marital_status} onChange={v => set('marital_status', v)}
             placeholder="בחרי" options={MARITAL_STATUSES} />
         </Field>
@@ -123,11 +138,11 @@ function StepPersonal({ form, set }: { form: Record<string, string>; set: (k: st
         </Field>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Field label="מחוז">
+        <Field label="מחוז" required>
           <NativeSelect value={form.district} onChange={v => set('district', v)}
             placeholder="בחרי מחוז" options={DISTRICTS} />
         </Field>
-        <Field label="עיר">
+        <Field label="עיר" required>
           <input className={inp} style={inpStyle} value={form.city}
             onChange={e => set('city', e.target.value)} required />
         </Field>
@@ -135,6 +150,34 @@ function StepPersonal({ form, set }: { form: Record<string, string>; set: (k: st
       <Field label="כתובת" optional>
         <input className={inp} style={inpStyle} value={form.address}
           onChange={e => set('address', e.target.value)} placeholder="רחוב ומספר בית" />
+      </Field>
+      <Field label="ערים שאני יכולה לעבוד בהן" optional>
+        <div className="flex gap-2">
+          <input className={inp} style={inpStyle} value={cityInput}
+            onChange={e => setCityInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCity() } }}
+            placeholder="הקלידי עיר ולחצי הוספה..." />
+          <button type="button" onClick={addCity}
+            className="h-11 px-4 rounded-[10px] text-[13px] font-bold shrink-0"
+            style={{ background: 'var(--purple-050)', color: 'var(--purple)', border: '1px solid var(--purple-200)' }}>
+            + הוספה
+          </button>
+        </div>
+        {workCities.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {workCities.map(c => (
+              <span key={c} className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[13px] font-semibold"
+                style={{ background: 'var(--purple-050)', color: 'var(--purple)', border: '1px solid var(--purple-200)' }}>
+                {c}
+                <button type="button" onClick={() => setWorkCities(workCities.filter(x => x !== c))}
+                  className="text-[15px] leading-none opacity-60 hover:opacity-100">×</button>
+              </span>
+            ))}
+          </div>
+        )}
+        <p className="text-[11.5px] mt-1" style={{ color: 'var(--ink-4)' }}>
+          עוזר למערכת למצוא משרות גם בערים קרובות אליך
+        </p>
       </Field>
     </div>
   )
@@ -215,7 +258,7 @@ function StepExperience({
                   </button>
                 </div>
               )}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Field label="שנה">
                   <NativeSelect value={pw.year} onChange={v => setPractical(idx, 'year', v)}
                     placeholder="בחרי" options={PRACTICAL_YEARS} />
@@ -267,7 +310,7 @@ function StepExperience({
                   </button>
                 </div>
               )}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Field label="תפקיד">
                   <input className={inp} style={inpStyle} value={exp.role}
                     onChange={e => setExp(idx, 'role', e.target.value)} placeholder="מחנכת כיתה" />
@@ -300,7 +343,7 @@ function StepExperience({
           <span className="text-[11px] font-medium px-2 py-0.5 rounded-full"
             style={{ background: 'var(--bg-2)', color: 'var(--ink-4)' }}>אופציונלי</span>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="מקום שליחות">
             <input className={inp} style={inpStyle} value={form.shlichut_location}
               onChange={e => set('shlichut_location', e.target.value)} placeholder="עיר / מדינה..." />
@@ -444,6 +487,8 @@ function RegisterCandidateForm() {
     past_projects: '', personal_note: '', handwriting_font: '',
   })
   const [whatsappPref, setWhatsappPref] = useState(true)
+  const [workCities, setWorkCities]   = useState<string[]>([])
+  const [cityInput, setCityInput]     = useState('')
   const [specs, setSpecs]         = useState<string[]>([])
   const [customSpec, setCustomSpec] = useState('')
   const [experiences, setExperiences] = useState<Experience[]>([{ ...EMPTY_EXP }])
@@ -521,6 +566,7 @@ function RegisterCandidateForm() {
       marital_status:       form.marital_status || null,
       maiden_name:          form.maiden_name.trim() || null,
       whatsapp_preference:  whatsappPref,
+      work_cities:          workCities.length > 0 ? workCities : null,
     }
 
     let res: Response
@@ -603,13 +649,11 @@ function RegisterCandidateForm() {
 
         {/* Logo + title */}
         <div className="flex flex-col items-center mb-6">
-          <div className="w-14 h-14 rounded-[16px] mb-3 flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg,var(--purple),var(--teal))', boxShadow: '0 8px 24px rgba(94,61,174,.3)' }}>
-            <Image src="/logo-chabad.png" alt="לוגו" width={34} height={34}
-              className="object-contain" style={{ filter: 'brightness(10) saturate(0)' }} />
+          <div className="rounded-2xl bg-white p-2.5 shadow-sm border border-purple-100 mb-3">
+            <Image src="/logo-chabad.png" alt="לוגו הרשת" width={130} height={40} className="object-contain" priority />
           </div>
           <h1 className="text-[20px] font-extrabold text-center" style={{ color: 'var(--ink)', letterSpacing: '-.02em' }}>
-            הרשמה כמועמדת
+            ברוכה הבאה למערכת השביל!
           </h1>
           <p className="text-[13px] mt-1 text-center" style={{ color: 'var(--ink-4)' }}>
             מלאי את הפרטים לשליחת בקשת הצטרפות
@@ -658,7 +702,7 @@ function RegisterCandidateForm() {
           {/* Card header */}
           <div className="h-[3px] w-full"
             style={{ background: 'linear-gradient(90deg,var(--purple),var(--teal))' }} />
-          <div className="px-6 pt-5 pb-3 flex items-center gap-3"
+          <div className="px-4 sm:px-6 pt-5 pb-3 flex items-center gap-3"
             style={{ borderBottom: '1px solid var(--line-soft)' }}>
             <div className="w-9 h-9 rounded-[10px] flex items-center justify-center shrink-0"
               style={{ background: 'var(--purple-050)' }}>
@@ -675,7 +719,7 @@ function RegisterCandidateForm() {
           </div>
 
           {/* Step content */}
-          <div className="px-6 py-5">
+          <div className="px-4 sm:px-6 py-5">
             {step === 0 && (
               <div className="rounded-[12px] p-3.5 mb-5"
                 style={{ background: 'var(--purple-050)', border: '1px solid var(--purple-200)' }}>
@@ -706,7 +750,7 @@ function RegisterCandidateForm() {
                 )}
               </div>
             )}
-            {step === 0 && <StepPersonal form={form} set={set} />}
+            {step === 0 && <StepPersonal form={form} set={set} workCities={workCities} setWorkCities={setWorkCities} cityInput={cityInput} setCityInput={setCityInput} />}
             {step === 1 && <StepEducation form={form} set={set}
               specs={specs} toggleSpec={toggleSpec}
               customSpec={customSpec} setCustomSpec={setCustomSpec} />}
@@ -728,7 +772,7 @@ function RegisterCandidateForm() {
           </div>
 
           {/* Navigation */}
-          <div className="px-6 pb-6 flex items-center justify-between gap-3">
+          <div className="px-4 sm:px-6 pb-5 sm:pb-6 flex items-center justify-between gap-3">
             <button type="button"
               onClick={() => setStep(s => s - 1)}
               disabled={step === 0}

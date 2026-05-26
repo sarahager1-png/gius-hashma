@@ -1,6 +1,6 @@
 ﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { sendSms } from '@/lib/sms'
+import { sendExternal } from '@/lib/notify-external'
 import { logAction } from '@/lib/audit'
 
 const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -10,7 +10,28 @@ function genCode() {
   return Array.from(arr, b => CHARS[b % CHARS.length]).join('')
 }
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app'
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
+
+function buildApprovalWA(name: string, email: string | null, appUrl: string): string {
+  const firstName = name.split(' ')[0]
+  const loginLine = email
+    ? `🔗 להיכנס עם Google:\n${appUrl}/profile\n\n⚠️ יש להיכנס עם המייל: ${email}`
+    : `🔗 להיכנס למערכת:\n${appUrl}/profile`
+  return (
+    `✅ ברוכה הבאה ${firstName}! בקשתך אושרה 🎉\n\n` +
+    `אנחנו כאן איתך — בשבילך 💜\n\n` +
+    `*איך המערכת עובדת?*\n` +
+    `🔍 הפרופיל שלך שמור במאגר — מוסדות יוכלו לראות אותך\n` +
+    `📩 כשתפורסם משרה שמתאימה לך — *תקבלי הודעה כאן בוואטסאפ*\n` +
+    `🏫 אם מוסד בחר בך — תגיע אלייך *הזמנה לראיון* עם תאריך ושעה מוצעים\n` +
+    `✍️ תאשרי את ההזמנה — וייקבע ביניכן קשר ישיר\n` +
+    `📊 את כל הגשותיך ותהליכי הראיון תוכלי לעקוב בדשבורד\n\n` +
+    `*כל עדכון יגיע אלייך ישירות לוואטסאפ* 📱\n\n` +
+    `כל פרטי הרישום שלך כבר שמורים — אפשר להתחיל מיד!\n\n` +
+    `${loginLine}\n\n` +
+    `בהצלחה! 🌟\n*רשת חינוך חב"ד*`
+  )
+}
 
 // PATCH — admin approves or rejects a candidate request
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -89,12 +110,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       availability_from: req.availability_from || null,
       availability_to: req.availability_to || null,
       study_day: req.study_day || null,
+      work_cities: req.work_cities || null,
     })
 
     await service.from('candidate_requests').update({ status: 'אושרה' }).eq('id', id)
     void logAction(user.id, 'approve_candidate_request', 'candidate_request', id)
 
-    // In-app notification + SMS
+    // In-app notification
     await service.from('notifications').insert({
       profile_id: req.profile_id,
       type: 'request_approved',
@@ -102,36 +124,42 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       body: `שלום ${req.full_name}, ברוכה הבאה לפלטפורמת הגיוס של רשת חב"ד. תוכלי כעת להיכנס עם Google.`,
     })
 
-    const smsSent = await sendSms(
-      req.phone,
-      `שלום ${req.full_name}, בקשתך אושרה!\nתוכלי כעת להיכנס למערכת עם Google:\n${APP_URL}/mumedet`
-    )
+    // Welcome message (WhatsApp if preferred, otherwise SMS)
+    const waMsg = buildApprovalWA(req.full_name, null, APP_URL)
+    const smsMsg = `ברוכה הבאה למערכת השביל! הבקשה אושרה — כניסה עם Google: ${APP_URL}/profile`
+    void sendExternal({ phone: req.phone, whatsapp_preference: req.whatsapp_preference ?? true, waMessage: waMsg, smsMessage: smsMsg })
 
-    return NextResponse.json({ ok: true, directApproval: true, smsSent })
+    return NextResponse.json({ ok: true, directApproval: true })
   }
 
-  // ── Legacy flow: no profile_id → generate access code ──
+  await service.from('candidate_requests').update({ status: 'אושרה' }).eq('id', id)
+  void logAction(user.id, 'approve_candidate_request', 'candidate_request', id)
+
+  if (req.email?.trim()) {
+    const waMsg = buildApprovalWA(req.full_name, req.email.trim(), APP_URL)
+    const smsMsg = `ברוכה הבאה למערכת השביל! הבקשה אושרה — כניסי עם Google (${req.email.trim()}): ${APP_URL}/profile`
+    void sendExternal({ phone: req.phone, whatsapp_preference: req.whatsapp_preference ?? true, waMessage: waMsg, smsMessage: smsMsg })
+    return NextResponse.json({ ok: true, directApproval: true })
+  }
+
+  // No email → access code
   let code = genCode()
   for (let i = 0; i < 5; i++) {
     const { data: existing } = await service.from('access_codes').select('id').eq('code', code).single()
     if (!existing) break
     code = genCode()
   }
-
   await service.from('access_codes').insert({ code, label: req.full_name })
-  await service.from('candidate_requests').update({ status: 'אושרה', access_code: code }).eq('id', id)
+  await service.from('candidate_requests').update({ access_code: code }).eq('id', id)
 
-  // Send SMS to candidate
-  const smsMessage = `שלום ${req.full_name}, בקשתך אושרה!\nקוד הגישה: ${code}\nלהרשמה: ${APP_URL}/register/candidate/activate`
-  const smsSent = await sendSms(req.phone, smsMessage)
+  const waCode =
+    `✅ שלום ${req.full_name}! בקשתך אושרה 🎉\n\n` +
+    `כל פרטי הרישום שלך שמורים במערכת.\n\n` +
+    `🔑 קוד הגישה שלך: *${code}*\n` +
+    `🔗 כניסה: ${APP_URL}/register/candidate/activate\n\n` +
+    `תמיד ניתן לעדכן את הפרופיל לאחר הכניסה 😊`
+  const smsCode = `שלום ${req.full_name}, הבקשה אושרה! קוד הגישה: ${code} | ${APP_URL}/register/candidate/activate`
+  void sendExternal({ phone: req.phone, whatsapp_preference: req.whatsapp_preference ?? true, waMessage: waCode, smsMessage: smsCode })
 
-  // WA fallback link (shown to admin in case SMS fails)
-  const digits = req.phone.replace(/\D/g, '').replace(/^972/, '').replace(/^0/, '')
-  const phone = `972${digits}`
-  const waText = encodeURIComponent(
-    `שלום ${req.full_name},\nבקשתך למערכת גיוס והשמה אושרה!\n\nקוד הגישה האישי שלך: *${code}*\n\nלהרשמה: ${APP_URL}/register/candidate/activate\n\nבהצלחה!`
-  )
-  const waLink = `https://wa.me/${phone}?text=${waText}`
-
-  return NextResponse.json({ ok: true, code, smsSent, waLink })
+  return NextResponse.json({ ok: true })
 }

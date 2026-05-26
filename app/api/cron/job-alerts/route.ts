@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendNewJobMatchEmail } from '@/lib/email'
-import { sendSms } from '@/lib/sms'
-import { sendWA } from '@/lib/whatsapp'
+import { sendExternal } from '@/lib/notify-external'
 
 // Vercel Cron Job — runs every Sunday at 08:00 Israel time (05:00 UTC)
 // Sends weekly job alerts to matching candidates for jobs posted in the last 7 days
@@ -29,6 +28,9 @@ export async function GET(request: Request) {
   }
 
   let totalSent = 0
+  // Track phones that already received the relevance question this run
+  const askedRelevance = new Set<string>()
+  const sessionExpiry = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
 
   for (const job of jobs ?? []) {
     const institutionName = (job.institutions as unknown as { institution_name: string } | null)?.institution_name ?? ''
@@ -76,17 +78,35 @@ export async function GET(request: Request) {
       }
 
       if (phone) {
-        try {
-          await sendSms(phone, `✨ משרה מתאימה לך! "${job.title}" ב-${institutionName}${city ? `, ${city}` : ''}. לצפייה: giuus.vercel.app/jobs`)
-        } catch (err) {
-          console.error('[CRON] job-alerts SMS failed:', phone, err)
-        }
-        if (candidate.whatsapp_preference !== false) {
-          try {
-            await sendWA(phone, `✨ משרה חדשה מתאימה לך!\n*${job.title}* — ${institutionName}${city ? ` · ${city}` : ''}\nלצפייה: giuus.vercel.app/jobs/${job.id}`)
-          } catch (err) {
-            console.error('[CRON] job-alerts WA failed:', phone, err)
+        const jobLine = `✨ משרה חדשה מתאימה לך!\n*${job.title}* — ${institutionName}${city ? ` · ${city}` : ''}\nלצפייה: giuus.vercel.app/jobs/${job.id}`
+        const jobSms  = `✨ משרה מתאימה לך! "${job.title}" ב-${institutionName}${city ? `, ${city}` : ''}. לצפייה: giuus.vercel.app/jobs`
+
+        // First contact this week → prepend relevance question + create session
+        if (!askedRelevance.has(phone)) {
+          askedRelevance.add(phone)
+          const { data: existingSession } = await service
+            .from('wa_sessions')
+            .select('id')
+            .eq('phone', phone)
+            .eq('session_type', 'relevance_check')
+            .gt('expires_at', new Date().toISOString())
+            .maybeSingle()
+
+          if (!existingSession) {
+            const relevanceQ = `שלום ${name.split(' ')[0]} 👋\nעדיין מחפשת עבודה?\nענו *כן* להמשך קבלת עדכונים, או *לא* להשהיה זמנית.\n\n`
+            void sendExternal({ phone, whatsapp_preference: candidate.whatsapp_preference, waMessage: relevanceQ + jobLine, smsMessage: `עדיין מחפשת עבודה? ענו כן/לא. ${jobSms}` })
+            await service.from('wa_sessions').insert({
+              phone,
+              session_type: 'relevance_check',
+              state: 'awaiting_reply',
+              data: { profile_id: candidate.profile_id, user_type: 'candidate' },
+              expires_at: sessionExpiry,
+            })
+          } else {
+            void sendExternal({ phone, whatsapp_preference: candidate.whatsapp_preference, waMessage: jobLine, smsMessage: jobSms })
           }
+        } else {
+          void sendExternal({ phone, whatsapp_preference: candidate.whatsapp_preference, waMessage: jobLine, smsMessage: jobSms })
         }
       }
 

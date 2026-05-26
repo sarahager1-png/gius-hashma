@@ -5,6 +5,7 @@ import AppHeader from '@/components/layout/app-header'
 import AppSidebar from '@/components/layout/app-sidebar'
 import WaFloatButton from '@/components/layout/wa-float-button'
 import HelpFloatButton from '@/components/layout/help-float-button'
+import RealtimeRefresh from '@/components/layout/realtime-refresh'
 import type { UserRole } from '@/lib/types'
 
 function roleHome(role: string): string {
@@ -82,10 +83,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (profile.role === 'מוסד' && pathname && !INST_ALLOWED_INCOMPLETE.some(p => pathname === p || pathname.startsWith(p + '/'))) {
     const { data: instRow } = await service
       .from('institutions')
-      .select('district, school_type')
+      .select('district, school_type, institution_type')
       .eq('profile_id', user.id)
       .single()
-    if (instRow && (!instRow.district || !instRow.school_type)) {
+    // גנים ילדים: school_type הוא null בכוונה — institution_type מספיק
+    const hasType = !!instRow?.school_type || instRow?.institution_type === 'גן ילדים'
+    if (instRow && (!instRow.district || !hasType)) {
       redirect('/institution/profile?setup=1')
     }
   }
@@ -154,6 +157,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         pendingCandidateReqs={pendingCandidateReqs}
       />
       <main style={{ minWidth: 0, minHeight: 0, overflowX: 'hidden', overflowY: 'auto' }}>{children}</main>
+      <RealtimeRefresh role={profile.role} profileId={user.id} />
       {waPhone && <WaFloatButton phone={waPhone} />}
       <HelpFloatButton hasWa={!!waPhone} />
     </div>

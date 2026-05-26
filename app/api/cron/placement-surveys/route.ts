@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendSurveyEmail } from '@/lib/email'
-import { sendWA } from '@/lib/whatsapp'
-import { smsSurveyInvitation } from '@/lib/sms'
+import { sendExternal } from '@/lib/notify-external'
 
 // Vercel Cron Job — runs daily
 // Sends placement satisfaction survey reminders 30 days after placement.
@@ -26,8 +25,8 @@ export async function GET(request: Request) {
     .from('applications')
     .select(`
       id,
-      candidates(profile_id, profiles(full_name, phone)),
-      jobs(title, institutions(profile_id, institution_name, profiles(full_name, phone)))
+      candidates(profile_id, whatsapp_preference, profiles(full_name, phone)),
+      jobs(title, institutions(profile_id, institution_name, whatsapp_preference, profiles(full_name, phone)))
     `)
     .eq('status', 'התקבלה')
     .gte('placement_date', thirtyOneDaysAgo)
@@ -71,6 +70,7 @@ export async function GET(request: Request) {
 
     const candidate = placement.candidates as unknown as {
       profile_id: string
+      whatsapp_preference: boolean | null
       profiles: { full_name: string | null; phone: string | null }
     } | null
 
@@ -79,6 +79,7 @@ export async function GET(request: Request) {
       institutions: {
         profile_id: string
         institution_name: string
+        whatsapp_preference: boolean | null
         profiles: { full_name: string | null; phone: string | null }
       } | null
     } | null
@@ -86,10 +87,12 @@ export async function GET(request: Request) {
     if (!candidate || !job?.institutions) continue
 
     const candidateProfileId   = candidate.profile_id
+    const candidateWaPref      = candidate.whatsapp_preference
     const candidateName        = candidate.profiles?.full_name ?? 'מועמדת'
     const candidatePhone       = candidate.profiles?.phone ?? null
     const institutionProfileId = job.institutions.profile_id
     const institutionName      = job.institutions.institution_name
+    const institutionWaPref    = job.institutions.whatsapp_preference
     const principalName        = job.institutions.profiles?.full_name ?? institutionName
     const institutionPhone     = job.institutions.profiles?.phone ?? null
 
@@ -119,14 +122,13 @@ export async function GET(request: Request) {
       }
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app'
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
 
     if (candidateSurveyToken) {
       const surveyUrl = `${appUrl}/survey?t=${candidateSurveyToken}`
-      const waMsg = `שלום ${candidateName.split(' ')[0]} 👋\nמילאת תפקיד ב${institutionName} לפני כחודש.\nנשמח לשמוע את חוות דעתך — שאלון קצר (2 דקות):\n${surveyUrl}`
-      if (candidatePhone) {
-        try { await sendWA(candidatePhone, waMsg) } catch { /* fallback */ }
-      }
+      const waMsg  = `שלום ${candidateName.split(' ')[0]} 👋\nמילאת תפקיד ב${institutionName} לפני כחודש.\nנשמח לשמוע את חוות דעתך — שאלון קצר (2 דקות):\n${surveyUrl}`
+      const smsMsg = `שאלון שביעות רצון על ${institutionName} — 2 דקות בלבד: ${surveyUrl}`
+      void sendExternal({ phone: candidatePhone, whatsapp_preference: candidateWaPref, waMessage: waMsg, smsMessage: smsMsg })
       try {
         await sendSurveyEmail({
           profileId: candidateProfileId,
@@ -138,17 +140,13 @@ export async function GET(request: Request) {
       } catch (err) {
         console.error('[CRON] placement-surveys email to candidate failed:', candidateProfileId, err)
       }
-      if (candidatePhone) {
-        try { smsSurveyInvitation(candidatePhone, candidateSurveyToken, institutionName) } catch { /* ignore */ }
-      }
     }
 
     if (institutionSurveyToken) {
       const surveyUrl = `${appUrl}/survey?t=${institutionSurveyToken}`
-      const waMsg = `שלום ${principalName.split(' ')[0]} 👋\n${candidateName} שובצה אצלכם לפני כחודש.\nנשמח לשמוע את חוות דעתכם — שאלון קצר (2 דקות):\n${surveyUrl}`
-      if (institutionPhone) {
-        try { await sendWA(institutionPhone, waMsg) } catch { /* fallback */ }
-      }
+      const waMsg  = `שלום ${principalName.split(' ')[0]} 👋\n${candidateName} שובצה אצלכם לפני כחודש.\nנשמח לשמוע את חוות דעתכם — שאלון קצר (2 דקות):\n${surveyUrl}`
+      const smsMsg = `שאלון שביעות רצון על ${candidateName} — 2 דקות בלבד: ${surveyUrl}`
+      void sendExternal({ phone: institutionPhone, whatsapp_preference: institutionWaPref, waMessage: waMsg, smsMessage: smsMsg })
       try {
         await sendSurveyEmail({
           profileId: institutionProfileId,
@@ -159,9 +157,6 @@ export async function GET(request: Request) {
         })
       } catch (err) {
         console.error('[CRON] placement-surveys email to institution failed:', institutionProfileId, err)
-      }
-      if (institutionPhone) {
-        try { smsSurveyInvitation(institutionPhone, institutionSurveyToken, candidateName) } catch { /* ignore */ }
       }
     }
 

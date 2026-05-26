@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
-import { sendSms } from '@/lib/sms'
+import { sendExternal } from '@/lib/notify-external'
 
 // Vercel Cron Job — runs daily at 09:00 Israel time (06:00 UTC)
 // Reminds institutions that have applications waiting > 2 days
@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
   const { data: applications, error } = await service
     .from('applications')
-    .select('id, job_id, jobs(institution_id, title, institutions(institution_name, phone, profile_id))')
+    .select('id, job_id, jobs(institution_id, title, institutions(institution_name, phone, whatsapp_preference, profile_id))')
     .eq('status', 'ממתינה')
     .lt('applied_at', twoDaysAgo)
 
@@ -31,6 +31,7 @@ export async function GET(request: Request) {
     institutionId: string
     institutionName: string
     phone: string | null
+    whatsappPreference: boolean | null
     profileId: string | null
     count: number
   }>()
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
   for (const app of applications ?? []) {
     const job = app.jobs as unknown as {
       institution_id: string
-      institutions: { institution_name: string; phone: string | null; profile_id: string | null }
+      institutions: { institution_name: string; phone: string | null; whatsapp_preference: boolean | null; profile_id: string | null }
     } | null
     if (!job) continue
     const instId = job.institution_id
@@ -47,6 +48,7 @@ export async function GET(request: Request) {
         institutionId: instId,
         institutionName: job.institutions?.institution_name ?? '',
         phone: job.institutions?.phone ?? null,
+        whatsappPreference: job.institutions?.whatsapp_preference ?? null,
         profileId: job.institutions?.profile_id ?? null,
         count: 0,
       })
@@ -66,7 +68,8 @@ export async function GET(request: Request) {
       })
     }
     if (inst.phone) {
-      await sendSms(inst.phone, `תזכורת: ${inst.count} הגשות ממתינות לטיפולך. giuus.vercel.app/institution/applications`)
+      const msg = `תזכורת: ${inst.count} הגשות ממתינות לטיפולך. giuus.vercel.app/institution/applications`
+      await sendExternal({ phone: inst.phone, whatsapp_preference: inst.whatsappPreference, waMessage: msg, smsMessage: msg })
     }
     notified++
   }

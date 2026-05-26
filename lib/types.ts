@@ -10,7 +10,7 @@ export type AvailabilityStatus =
 export type JobStatus = 'פעילה' | 'מושהית' | 'אוישה' | 'בוטלה' | 'פג תוקפה'
 export type JobType = "סטאג'" | 'חלקי' | 'מלא'
 export type ApplicationStatus = 'ממתינה' | 'נצפתה' | 'התקבלה' | 'נדחתה' | 'בוטלה'
-export type Specialization = 'יסודי' | 'חט"ב' | 'מתמטיקה' | 'אנגלית' | 'חינוך מיוחד' | 'אחר'
+export type Specialization = 'יסודי' | 'חט"ב' | 'מתמטיקה' | 'אנגלית' | 'חינוך מיוחד' | 'תושב"ע' | 'יעוץ' | 'אחר'
 export type AcademicLevel =
   | "שנה ב' - סטאג'"
   | "שנה ג' - סטאג'"
@@ -131,6 +131,7 @@ export interface Notification {
   body: string | null
   read: boolean
   related_id: string | null
+  url: string | null
   created_at: string
 }
 
@@ -139,7 +140,7 @@ export interface Invitation {
   institution_id: string
   candidate_id: string
   job_id: string
-  status: 'ממתינה' | 'התקבלה' | 'נדחתה'
+  status: 'ממתינה' | 'התקבלה' | 'נדחתה' | 'פגה תוקף'
   message: string | null
   scheduled_at: string | null
   created_at: string

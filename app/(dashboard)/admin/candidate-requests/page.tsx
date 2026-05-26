@@ -48,6 +48,7 @@ export default function CandidateRequestsPage() {
   const [filter, setFilter] = useState<'ממתינה' | 'אושרה' | 'נדחתה' | 'הכל'>('ממתינה')
 
   async function load() {
+    setLoading(true)
     const res = await fetch('/api/candidate-requests')
     if (res.ok) setRequests(await res.json())
     setLoading(false)
@@ -55,6 +56,12 @@ export default function CandidateRequestsPage() {
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load() }, [])
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const t = setInterval(load, 30_000)
+    return () => clearInterval(t)
+  }, [])
 
   async function approve(req: CandidateRequest) {
     setProcessing(req.id)

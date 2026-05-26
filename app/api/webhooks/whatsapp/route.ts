@@ -79,6 +79,8 @@ async function processMessage(
       case 'register_candidate': return handleRegistrationFlow(service, session, phone, text, intent)
       case 'browse_jobs':        return handleBrowseJobsFlow(service, session, phone, text, intent)
       case 'apply_job':          return handleApplyFlow(service, session, phone, intent)
+      case 'relevance_check':    return handleRelevanceCheck(service, session, phone, text, intent)
+      case 'admin_approve':      return handleAdminApprove(service, session, phone, intent)
     }
   }
 
@@ -537,7 +539,7 @@ async function handleJobCreationFlow(
           await service.from('wa_sessions').delete().eq('id', session.id)
           await sendWA(phone,
             `לפני פרסום משרות יש להשלים את פרטי המוסד (מחוז וסוג).\n` +
-            `👉 ${process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app'}/institution/profile`
+            `👉 ${(process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()}/institution/profile`
           )
           return
         }
@@ -720,4 +722,203 @@ async function handleInvitationConfirmation(
   } else {
     await sendWA(phone, 'שלחי *1* או *כן* לאישור ההזמנה, *2* או *לא* לדחייה:')
   }
+}
+
+// ── Relevance check (weekly) ──────────────────────────────────────────
+async function handleRelevanceCheck(
+  service: ReturnType<typeof createServiceClient>,
+  session: WaSession,
+  phone: string,
+  text: string,
+  intent: ReturnType<typeof parseIntent>,
+) {
+  const data = session.data as { profile_id: string; user_type: 'candidate' | 'institution'; jobs?: string }
+  const state = session.state as string
+
+  // ── State: awaiting which jobs to close (institution with multiple jobs) ──
+  if (state === 'awaiting_job_selection') {
+    const jobs: { id: string; title: string }[] = JSON.parse(data.jobs ?? '[]')
+    const trimmed = text.trim()
+
+    let toClose: string[] = []
+    if (['הכל', 'כולם', 'כל', 'all'].includes(trimmed.toLowerCase())) {
+      toClose = jobs.map(j => j.id)
+    } else {
+      const nums = trimmed.split(/[,، ]+/).map(n => parseInt(n.trim())).filter(n => !isNaN(n))
+      toClose = nums.filter(n => n >= 1 && n <= jobs.length).map(n => jobs[n - 1].id)
+    }
+
+    if (!toClose.length) {
+      await sendWA(phone, `ענו עם מספרי המשרות לסגירה (למשל *1* או *1,2*) או *הכל* לסגירת כולן.`)
+      return
+    }
+
+    await service.from('jobs').update({ status: 'מושהית' }).in('id', toClose)
+    await service.from('wa_sessions').delete().eq('id', session.id)
+    const closedTitles = toClose.map(id => jobs.find(j => j.id === id)?.title).filter(Boolean).join(', ')
+    await sendWA(phone, `✅ המשרות הבאות הושהו: ${closedTitles}.\nכשתרצו לחזור — כנסו לפנל המוסד: giuus.vercel.app/institution/jobs`)
+    return
+  }
+
+  // ── State: awaiting initial yes/no reply ──
+  if (intent === 'confirm') {
+    await service.from('wa_sessions').delete().eq('id', session.id)
+    await sendWA(phone, '✅ מעולה! נמשיך לעדכן אותך במשרות ומועמדות מתאימות.')
+    return
+  }
+
+  if (intent === 'decline') {
+    if (data.user_type === 'candidate') {
+      await service.from('wa_sessions').delete().eq('id', session.id)
+      await service.from('candidates').update({ availability_status: 'לא פעילה' }).eq('profile_id', data.profile_id)
+      await sendWA(phone, 'הבנו! הסרנו אותך זמנית מהרשימה הפעילה. כשתרצי לחזור — כנסי לפרופיל ועדכני את הסטטוס: giuus.vercel.app/profile')
+      return
+    }
+
+    // Institution — fetch active jobs
+    const { data: inst } = await service.from('institutions').select('id').eq('profile_id', data.profile_id).single()
+    if (!inst) { await service.from('wa_sessions').delete().eq('id', session.id); return }
+
+    const { data: activeJobs } = await service
+      .from('jobs').select('id, title').eq('institution_id', inst.id).eq('status', 'פעילה')
+
+    if (!activeJobs?.length) {
+      await service.from('wa_sessions').delete().eq('id', session.id)
+      await sendWA(phone, 'לא נמצאו משרות פעילות לסגירה.')
+      return
+    }
+
+    if (activeJobs.length === 1) {
+      await service.from('jobs').update({ status: 'מושהית' }).eq('id', activeJobs[0].id)
+      await service.from('wa_sessions').delete().eq('id', session.id)
+      await sendWA(phone, `✅ המשרה "${activeJobs[0].title}" הושהתה. כשתרצו לחזור: giuus.vercel.app/institution/jobs`)
+      return
+    }
+
+    // Multiple jobs — ask which to close
+    const list = activeJobs.map((j, i) => `${i + 1}. ${j.title}`).join('\n')
+    await service.from('wa_sessions').update({
+      state: 'awaiting_job_selection',
+      data: { ...data, jobs: JSON.stringify(activeJobs.map(j => ({ id: j.id, title: j.title }))) },
+    }).eq('id', session.id)
+    await sendWA(phone, `אילו משרות לסגור?\n\n${list}\n\nענו עם המספרים (למשל *1* או *1,2*) או *הכל* לסגירת כולן.`)
+    return
+  }
+
+  await sendWA(phone, 'ענו *כן* להמשך קבלת עדכונים, או *לא* להשהיה זמנית.')
+}
+
+// ── Admin approval via WhatsApp ───────────────────────────────────────
+async function handleAdminApprove(
+  service: ReturnType<typeof createServiceClient>,
+  session: WaSession,
+  phone: string,
+  intent: ReturnType<typeof parseIntent>,
+) {
+  const data = session.data as { entity_type: string; entity_id: string; entity_name: string }
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
+
+  if (intent !== 'confirm' && intent !== 'decline') {
+    await sendWA(phone, `*${data.entity_name}* — ענו *כן* לאישור, *לא* לדחייה:`)
+    return
+  }
+
+  await service.from('wa_sessions').delete().eq('id', session.id)
+
+  if (data.entity_type === 'candidate_request') {
+    const { data: req } = await service.from('candidate_requests').select('phone, full_name, email, whatsapp_preference, status').eq('id', data.entity_id).single()
+
+    if (intent === 'confirm') {
+      if (req?.status === 'אושרה') {
+        await sendWA(phone, `ℹ️ ${data.entity_name} כבר אושרה קודם.`)
+        return
+      }
+      await service.from('candidate_requests').update({ status: 'אושרה' }).eq('id', data.entity_id)
+
+      if (req?.phone) {
+        if (req.email?.trim()) {
+          const firstName = req.full_name.split(' ')[0]
+          const waMsg =
+            `✅ ברוכה הבאה ${firstName}! בקשתך אושרה 🎉\n\n` +
+            `אנחנו כאן איתך — בשבילך 💜\n\n` +
+            `*מה זה השביל?*\n` +
+            `השביל היא מערכת הגיוס וההשמה של רשת חינוך חב"ד.\n` +
+            `כאן תוכלי למצוא משרות הוראה מתאימות, להגיש מועמדות, ולעקוב אחרי התהליך — הכל במקום אחד.\n\n` +
+            `✨ *מה תמצאי כאן?*\n` +
+            `📋 משרות הוראה פתוחות ברחבי הארץ\n` +
+            `🔔 התראות אוטומטיות על משרות מתאימות לפרופיל שלך\n` +
+            `📩 הגשת מועמדות בקלות ישירות מהטלפון\n` +
+            `📊 מעקב בזמן אמת אחרי הגשות וראיונות\n\n` +
+            `כל פרטי הרישום שלך כבר שמורים — אפשר להתחיל מיד!\n\n` +
+            `🔗 להיכנס עם Google:\n${appUrl}/profile\n\n` +
+            `⚠️ יש להיכנס עם המייל: ${req.email.trim()}\n\n` +
+            `💡 תמיד ניתן לעדכן את הפרופיל לאחר הכניסה.\n\n` +
+            `בהצלחה! 🌟\n*רשת חינוך חב"ד*`
+          await sendWA(req.phone, waMsg)
+        } else {
+          const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+          const arr = new Uint8Array(6)
+          crypto.getRandomValues(arr)
+          const code = Array.from(arr, b => CHARS[b % CHARS.length]).join('')
+          await service.from('candidate_requests').update({ access_code: code }).eq('id', data.entity_id)
+          const firstName = req.full_name.split(' ')[0]
+          const waMsg =
+            `✅ ברוכה הבאה ${firstName}! בקשתך אושרה 🎉\n\n` +
+            `אנחנו כאן איתך — בשבילך 💜\n\n` +
+            `🔑 קוד הגישה שלך: *${code}*\n` +
+            `🔗 כניסה: ${appUrl}/register/candidate/activate\n\n` +
+            `💡 תמיד ניתן לעדכן את הפרופיל לאחר הכניסה.\n\nבהצלחה! 🌟\n*רשת חינוך חב"ד*`
+          await sendWA(req.phone, waMsg)
+        }
+      }
+      await sendWA(phone, `✅ אושר — ${data.entity_name}`)
+    } else {
+      await service.from('candidate_requests').update({ status: 'נדחתה' }).eq('id', data.entity_id)
+      if (req?.phone) {
+        await sendWA(req.phone, `שלום ${req.full_name}, תודה על פנייתך. לצערנו הבקשה לא אושרה הפעם. לפרטים נוספים ניתן לפנות למנהלת הרשת.`)
+      }
+      await sendWA(phone, `❌ נדחה — ${data.entity_name}`)
+    }
+    return
+  }
+
+  // institution pending in pre_registered_institutions (not yet logged in)
+  if (data.entity_type === 'institution_preregistered') {
+    if (intent === 'confirm') {
+      const mosadLink = `${appUrl}/mosad`
+      const instPhone = (data as Record<string, string>).institution_phone || null
+      if (instPhone) {
+        void sendWA(instPhone, `✅ שלום! המוסד "${data.entity_name}" אושר ברשת השביל! 🎉\n\nכעת ניתן להיכנס למערכת:\n${mosadLink}`)
+      }
+      await sendWA(phone, `✅ אושר — ${data.entity_name}`)
+    } else {
+      await service.from('pre_registered_institutions').update({ status: 'rejected' }).eq('email', data.entity_id)
+      const instPhone = (data as Record<string, string>).institution_phone || null
+      if (instPhone) {
+        void sendWA(instPhone, `שלום, תודה על פנייתך. לצערנו הבקשה לרישום המוסד "${data.entity_name}" לא אושרה הפעם. לפרטים ניתן לפנות למנהלת הרשת.`)
+      }
+      await sendWA(phone, `❌ נדחה — ${data.entity_name}`)
+    }
+    return
+  }
+
+  // institution already in DB (approved via admin panel)
+  if (data.entity_type === 'institution') {
+    if (intent === 'confirm') {
+      const { data: inst } = await service.from('institutions').select('institution_name, phone, whatsapp_preference, profile_id').eq('id', data.entity_id).single()
+      await service.from('institutions').update({ is_approved: true, approved_at: new Date().toISOString() }).eq('id', data.entity_id)
+      const instPhone = inst?.phone ?? null
+      if (instPhone) {
+        const approveMsg = `✅ ברכות! המוסד "${inst?.institution_name ?? data.entity_name}" אושר במערכת. כעת ניתן לפרסם משרות: ${appUrl}/institution/jobs`
+        void sendWA(instPhone, approveMsg)
+      }
+      await sendWA(phone, `✅ אושר — ${data.entity_name}`)
+    } else {
+      await service.from('institutions').update({ is_approved: false }).eq('id', data.entity_id)
+      await sendWA(phone, `❌ נדחה — ${data.entity_name}`)
+    }
+    return
+  }
+
+  await sendWA(phone, 'הפעולה בוצעה.')
 }

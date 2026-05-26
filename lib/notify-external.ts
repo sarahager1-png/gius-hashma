@@ -9,16 +9,16 @@ interface ExternalNotifyOpts {
   emailFallback?: () => Promise<void>
 }
 
-// Sends through exactly one channel based on user preference.
-// WhatsApp if preferred, SMS if not, email if no phone.
+// WhatsApp is the default channel. SMS is used only when whatsapp_preference === false.
+// If no phone — email fallback.
 export async function sendExternal(opts: ExternalNotifyOpts): Promise<void> {
   const { phone, whatsapp_preference, waMessage, smsMessage, emailFallback } = opts
 
   if (phone) {
-    if (whatsapp_preference !== false) {
-      await sendWA(phone, waMessage)
-    } else {
+    if (whatsapp_preference === false) {
       await sendSms(phone, smsMessage)
+    } else {
+      await sendWA(phone, waMessage)
     }
   } else if (emailFallback) {
     await emailFallback()

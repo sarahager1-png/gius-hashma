@@ -1,7 +1,7 @@
 ﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendInterviewScheduledEmail } from '@/lib/email'
-import { sendSms } from '@/lib/sms'
+import { sendExternal } from '@/lib/notify-external'
 
 // POST — admin/institution creates an interview for an application
 export async function POST(request: Request) {
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   // fetch application to verify ownership + notification data
   const { data: app } = await service
     .from('applications')
-    .select('id, candidate_id, job_id, jobs(title, institution_id, institutions(institution_name, profile_id)), candidates(profile_id, profiles(full_name, phone))')
+    .select('id, candidate_id, job_id, jobs(title, institution_id, institutions(institution_name, profile_id)), candidates(profile_id, whatsapp_preference, profiles(full_name, phone))')
     .eq('id', application_id)
     .single()
 
@@ -46,7 +46,8 @@ export async function POST(request: Request) {
   // notify candidate (in-app + email + SMS)
   const candidateProfileId = (app.candidates as unknown as { profile_id: string } | null)?.profile_id
   const candidateName = (app.candidates as unknown as { profiles: { full_name: string | null } } | null)?.profiles?.full_name ?? 'מועמדת'
-  const candidatePhone = (app.candidates as unknown as { profiles: { phone: string | null } } | null)?.profiles?.phone
+  const candidatePhone = (app.candidates as unknown as { whatsapp_preference: boolean | null; profiles: { phone: string | null } } | null)?.profiles?.phone
+  const candidateWaPref = (app.candidates as unknown as { whatsapp_preference: boolean | null } | null)?.whatsapp_preference
   const institutionName = (app.jobs as unknown as { institutions: { institution_name: string } } | null)?.institutions?.institution_name ?? ''
   const jobTitle = (app.jobs as unknown as { title: string } | null)?.title ?? ''
 
@@ -65,10 +66,11 @@ export async function POST(request: Request) {
     void sendInterviewScheduledEmail({ candidateProfileId, candidateName, jobTitle, institutionName, scheduledAt: scheduled_at, location })
   }
   if (candidatePhone) {
-    const dtSms = new Date(scheduled_at).toLocaleString('he-IL', {
+    const dtStr = new Date(scheduled_at).toLocaleString('he-IL', {
       day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
     })
-    void sendSms(candidatePhone, `שלום ${candidateName}! ראיון נקבע — ${institutionName} · "${jobTitle}". תאריך: ${dtSms}${location ? '. מיקום: ' + location : ''}. בהצלחה! 🌟`)
+    const msg = `שלום ${candidateName}! ראיון נקבע — ${institutionName} · "${jobTitle}". תאריך: ${dtStr}${location ? '. מיקום: ' + location : ''}. בהצלחה! 🌟`
+    void sendExternal({ phone: candidatePhone, whatsapp_preference: candidateWaPref, waMessage: msg, smsMessage: msg })
   }
 
   return NextResponse.json(interview, { status: 201 })

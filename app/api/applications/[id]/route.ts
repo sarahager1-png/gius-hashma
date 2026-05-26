@@ -1,8 +1,7 @@
 ﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendApplicationAccepted, sendApplicationRejected, sendApplicationViewedEmail } from '@/lib/email'
-import { sendSms } from '@/lib/sms'
-import { sendWA } from '@/lib/whatsapp'
+import { sendExternal } from '@/lib/notify-external'
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -64,7 +63,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     // fetch application details for automation + notification
     const { data: app } = await service
       .from('applications')
-      .select('job_id, candidate_id, jobs(title, institutions(institution_name, profile_id)), candidates(profile_id, profiles(full_name, phone, whatsapp_preference))')
+      .select('job_id, candidate_id, jobs(title, institutions(institution_name, profile_id)), candidates(profile_id, whatsapp_preference, profiles(full_name, phone))')
       .eq('id', id)
       .single()
 
@@ -100,11 +99,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
           const adminMsg = `✅ שיבוץ בוצע\n${candidateName} שובצה למשרת "${jobTitle}" ב${institutionName}`
           for (const admin of admins) {
             const p = (admin as unknown as { phone?: string | null; whatsapp_preference?: boolean | null })
-            if (!p.phone) continue
-            void Promise.allSettled([
-              p.whatsapp_preference !== false ? sendWA(p.phone, adminMsg) : Promise.resolve(),
-              sendSms(p.phone, adminMsg),
-            ])
+            void sendExternal({ phone: p.phone, whatsapp_preference: p.whatsapp_preference, waMessage: adminMsg, smsMessage: adminMsg })
           }
         }
 
@@ -120,8 +115,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
           void sendApplicationAccepted({ candidateProfileId, candidateName, jobTitle, institutionName })
         }
         const candidatePhone = (app.candidates as unknown as { profiles: { phone: string | null } } | null)?.profiles?.phone
+        const candWaPrefAccept = (app.candidates as unknown as { whatsapp_preference?: boolean | null } | null)?.whatsapp_preference
         if (candidatePhone) {
-          void sendSms(candidatePhone, `ברכות ${candidateName}! התקבלת למשרת "${jobTitle}" ב${institutionName}. נציג מהמוסד יצור איתך קשר בקרוב 🎉`)
+          const acceptMsg = `ברכות ${candidateName}! התקבלת למשרת "${jobTitle}" ב${institutionName}. נציג מהמוסד יצור איתך קשר בקרוב 🎉`
+          void sendExternal({ phone: candidatePhone, whatsapp_preference: candWaPrefAccept, waMessage: acceptMsg, smsMessage: acceptMsg })
         }
         // create satisfaction surveys immediately so both parties can fill them in-app
         if (candidateProfileId && institutionProfileId) {
@@ -142,12 +139,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
           })
           void sendApplicationRejected({ candidateProfileId, candidateName, jobTitle, institutionName })
         }
-        const candidatePhone = (app.candidates as unknown as { profiles: { phone: string | null; whatsapp_preference?: boolean | null } } | null)?.profiles?.phone
-        const candWaPref = (app.candidates as unknown as { profiles: { whatsapp_preference?: boolean | null } } | null)?.profiles?.whatsapp_preference
-        if (candidatePhone) {
-          const rejMsg = `שלום ${candidateName}, תודה על עניינך במשרת "${jobTitle}" ב${institutionName}. לצערנו לא נמצאה התאמה הפעם. בהצלחה!`
-          void sendSms(candidatePhone, rejMsg)
-          if (candWaPref !== false) void sendWA(candidatePhone, rejMsg)
+        const candidatePhoneRej = (app.candidates as unknown as { profiles: { phone: string | null } } | null)?.profiles?.phone
+        const candWaPref = (app.candidates as unknown as { whatsapp_preference?: boolean | null } | null)?.whatsapp_preference
+        if (candidatePhoneRej) {
+          const rejMsg = `שלום ${candidateName}, תודה על פנייתך למשרת "${jobTitle}" ב${institutionName}. לצערנו לא נמצאה התאמה הפעם. בהצלחה! 🙏`
+          void sendExternal({ phone: candidatePhoneRej, whatsapp_preference: candWaPref, waMessage: rejMsg, smsMessage: rejMsg })
         }
       }
     }

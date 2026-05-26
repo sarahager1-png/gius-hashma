@@ -67,6 +67,23 @@ export async function POST(request: Request) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
+  // notify admins about new job — in-app notification
+  {
+    const { data: inst } = await service.from('institutions').select('institution_name, city').eq('id', institution_id).single()
+    const { data: admins } = await service.from('profiles').select('id').in('role', ['מנהלת מערכת', 'אדמין מערכת'])
+    if (admins?.length) {
+      void service.from('notifications').insert(
+        admins.map(admin => ({
+          profile_id: admin.id,
+          type: 'new_job',
+          title: `משרה חדשה — ${data.title}`,
+          body: `${inst?.institution_name ?? ''}${inst?.city ? ' · ' + inst.city : ''}${data.specialization ? ' · ' + data.specialization : ''}`,
+          related_id: data.id,
+        }))
+      )
+    }
+  }
+
   // notify matching candidates asynchronously (don't await — don't block response)
   notifyMatchingCandidates(service, data).catch(e =>
     console.error('[JOBS] notifyMatchingCandidates error:', e)
@@ -126,7 +143,7 @@ async function notifyMatchingCandidates(
       related_id: job.id,
     })
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'giuus.vercel.app'
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
     await sendExternal({
       phone,
       whatsapp_preference: candidate.whatsapp_preference,

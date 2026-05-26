@@ -78,7 +78,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
             profile_id: pid,
             type: 'application_rejected',
             title: 'תודה על פנייתך',
-            body: `תודה על עניינך ב"${jobTitle}". לצערנו המשרה ${update.status === 'אוישה' ? 'אוישה' : 'בוטלה'}.`,
+            body: `תודה על פנייתך ל"${jobTitle}". לצערנו המשרה ${update.status === 'אוישה' ? 'אוישה' : 'בוטלה'}.`,
             related_id: app.id,
           }
         })

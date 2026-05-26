@@ -1,6 +1,6 @@
 {
-  "name": "מערכת גיוס והשמה",
-  "short_name": "גיוס והשמה",
+  "name": "השביל — גיוס והשמה",
+  "short_name": "השביל",
   "description": "פלטפורמה דיגיטלית לגיוס והשמה ברשת החינוך של חב\"ד",
   "start_url": "https://giuus.vercel.app/dashboard",
   "scope": "https://giuus.vercel.app/",

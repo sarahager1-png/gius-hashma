@@ -15,8 +15,9 @@ function LoginPageInner() {
   const searchParams = useSearchParams()
 
   const errParam = searchParams.get('error')
-  const urlError = errParam === 'oauth'    ? 'שגיאה בהתחברות עם Google — בדקי שהחשבון מורשה'
-                 : errParam === 'exchange' ? 'שגיאה בקבלת הסשן — נסי שוב'
+  const urlError = errParam === 'oauth'               ? 'שגיאה בהתחברות עם Google — בדקי שהחשבון מורשה'
+                 : errParam === 'exchange'             ? 'שגיאה בקבלת הסשן — נסי שוב'
+                 : errParam === 'institution_rejected' ? 'בקשת הרישום של המוסד לא אושרה. לפרטים ניתן לפנות למנהלת הרשת.'
                  : ''
   const error = urlError || formError
 
@@ -477,8 +478,11 @@ function LoginPageInner() {
             <div className="lg-mobile-logo">
               <Image src="/logo-chabad.png" alt="השביל" width={44} height={44} style={{ objectFit:'contain' }} />
             </div>
-            <div style={{ fontSize:'22px', fontWeight:900, color:'#1A2E42', letterSpacing:'-.03em', marginBottom:'4px' }}>
+            <div style={{ fontSize:'22px', fontWeight:900, color:'#1A2E42', letterSpacing:'-.03em', marginBottom:'2px' }}>
               הַשְּׁבִיל
+            </div>
+            <div style={{ fontSize:'12px', fontWeight:600, color:'#2563EB', marginBottom:'2px' }}>
+              השליחות החינוכית
             </div>
             <div style={{ fontSize:'13px', color:'#5A7085' }}>
               מערכת חכמה לגיוס והשמה

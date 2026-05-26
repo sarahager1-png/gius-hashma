@@ -418,13 +418,13 @@ export default function MosadLanding() {
             </div>
 
             <h1 className="mo-hero-title mo-fadein mo-d1">
-              ברוכים הבאים<br />
-              <span className="mo-hero-em">המוסד שלכם רשום</span>
+              ברוכה הבאה<br />
+              <span className="mo-hero-em">המוסד שלך רשום</span>
             </h1>
 
             <p className="mo-hero-sub mo-fadein mo-d2">
-              הנתונים שלכם כבר קיימים במערכת —<br />
-              כנסו עם Google, עדכנו פרטים ופרסמו משרות
+              הנתונים שלך כבר קיימים במערכת —<br />
+              כנסי עם Google, עדכני פרטים ופרסמי משרות
             </p>
 
             {/* GLASS CTA CARD */}

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -96,14 +97,19 @@ export default function ActivateCandidatePage() {
   if (step === 'code') {
     return (
       <div className="min-h-screen flex items-center justify-center py-10" style={{ background: '#F2F0F8' }}>
-        <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm text-center">
-          <div className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center"
+        <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 w-full max-w-sm text-center">
+          <div className="flex justify-center mb-4">
+            <div className="rounded-2xl bg-white p-2.5 shadow-sm border border-purple-100">
+              <Image src="/logo-chabad.png" alt="לוגו הרשת" width={120} height={38} className="object-contain" priority />
+            </div>
+          </div>
+          <div className="w-12 h-12 rounded-2xl mx-auto mb-4 flex items-center justify-center"
             style={{ background: '#EDE9FE' }}>
-            <KeyRound size={26} style={{ color: '#5B3AAB' }} />
+            <KeyRound size={22} style={{ color: '#5B3AAB' }} />
           </div>
           <h1 className="text-[22px] font-extrabold mb-1" style={{ color: '#5B3AAB' }}>הפעלת חשבון</h1>
-          <p className="text-[14px] mb-6" style={{ color: '#71717A' }}>
-            הכניסי את קוד הגישה שקיבלת בוואצאפ
+          <p className="text-[13.5px] mb-6" style={{ color: '#71717A' }}>
+            ברוכה הבאה למערכת השביל!<br />הכניסי את קוד הגישה שקיבלת בוואטסאפ
           </p>
           <form onSubmit={validateCode} className="space-y-4 text-right">
             <div className="space-y-1">
@@ -132,7 +138,7 @@ export default function ActivateCandidatePage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center py-10" style={{ background: '#F2F0F8' }}>
-      <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
+      <div className="bg-white rounded-2xl shadow-lg p-5 sm:p-8 w-full max-w-md">
         <div className="flex items-center gap-2 mb-6">
           <CheckCircle size={18} style={{ color: '#1A7A4A' }} />
           <span className="text-sm font-semibold" style={{ color: '#1A7A4A' }}>קוד גישה אומת</span>
@@ -143,7 +149,7 @@ export default function ActivateCandidatePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label>שם מלא</Label>
-              <Input value={form.full_name} onChange={e => set('full_name', e.target.value)} required />
+              <Input value={form.full_name} onChange={e => set('full_name', e.target.value)} dir="rtl" required />
             </div>
             <div className="space-y-1">
               <Label>טלפון</Label>

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Clock, CheckCircle, Phone } from 'lucide-react'
 
 const WA_LINK = `https://wa.me/972503339770?text=${encodeURIComponent('שלום, שלחתי בקשת הצטרפות למערכת הגיוס ואני ממתינה לאישור')}`
@@ -12,17 +13,26 @@ export default function PendingPage() {
       <div className="bg-white rounded-[24px] p-8 w-full max-w-sm text-center"
         style={{ boxShadow: '0 20px 60px rgba(15,11,35,.12)', border: '1px solid var(--line)' }}>
 
-        {/* Icon */}
-        <div className="w-20 h-20 rounded-full mx-auto mb-5 flex items-center justify-center"
+        {/* Logo */}
+        <div className="flex justify-center mb-4">
+          <div className="rounded-2xl bg-white p-2.5 shadow-sm border border-purple-100">
+            <Image src="/logo-chabad.png" alt="לוגו הרשת" width={120} height={38} className="object-contain" priority />
+          </div>
+        </div>
+
+        <div className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center"
           style={{ background: 'var(--purple-050)' }}>
-          <Clock size={38} style={{ color: 'var(--purple)' }} />
+          <Clock size={28} style={{ color: 'var(--purple)' }} />
         </div>
 
         <h1 className="text-[22px] font-extrabold mb-2" style={{ color: 'var(--ink)', letterSpacing: '-.02em' }}>
           הבקשה ממתינה לאישור
         </h1>
-        <p className="text-[13.5px] leading-relaxed mb-6" style={{ color: 'var(--ink-3)' }}>
-          פרטייך התקבלו בהצלחה.<br />
+        <p className="text-[13.5px] leading-relaxed mb-1" style={{ color: 'var(--ink-3)' }}>
+          תודה שהצטרפת למערכת השביל! 🎉<br />
+          פרטייך התקבלו בהצלחה.
+        </p>
+        <p className="text-[13px] leading-relaxed mb-6" style={{ color: 'var(--ink-4)' }}>
           מנהלת המערכת תאשר את הצטרפותך בהקדם.<br />
           <strong style={{ color: 'var(--ink)' }}>עם האישור תישלח אליך הודעת SMS</strong> ותוכלי להיכנס עם Google.
         </p>

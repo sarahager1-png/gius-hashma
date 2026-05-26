@@ -39,7 +39,7 @@ export const SCHOOL_TYPE_COLORS: Record<string, { bg: string; color: string; bor
   'תיכון':             { bg: '#FFF1F2', color: '#BE123C', border: '#FECDD3' },
 }
 
-export const SPECIALIZATIONS: Specialization[] = ['יסודי', 'חט"ב', 'מתמטיקה', 'אנגלית', 'חינוך מיוחד', 'אחר']
+export const SPECIALIZATIONS: Specialization[] = ['יסודי', 'חט"ב', 'מתמטיקה', 'אנגלית', 'חינוך מיוחד', 'תושב"ע', 'יעוץ', 'אחר']
 
 export const PLACEMENT_TYPES = ['שיבוץ לשנה', 'שיבוץ קבוע', 'מילוי מקום לחופשת לידה']
 

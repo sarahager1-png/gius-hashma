@@ -42,6 +42,10 @@ export async function PATCH(request: Request) {
 
   const { profile, candidate } = await request.json()
 
+  // Check before update whether phone was previously null (first registration signal)
+  const { data: currentProfile } = await service.from('profiles').select('phone').eq('id', user.id).single()
+  const isFirstRegistration = !currentProfile?.phone && !!profile?.phone?.trim()
+
   if (profile) {
     const { error } = await service
       .from('profiles')
@@ -63,12 +67,24 @@ export async function PATCH(request: Request) {
       'shlichut_location', 'shlichut_years', 'past_projects', 'personal_note',
       'availability_from', 'availability_to', 'study_day',
       'years_experience', 'prev_employer', 'prev_role', 'whatsapp_preference',
+      'work_cities',
     ]
     const safe = Object.fromEntries(Object.entries(candidate).filter(([k]) => ALLOWED.includes(k)))
     if (Object.keys(safe).length > 0) {
       const { error } = await service.from('candidates').update(safe).eq('profile_id', user.id)
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     }
+  }
+
+  // Welcome message on first registration (Google OAuth flow)
+  if (isFirstRegistration) {
+    const phone = profile?.phone?.trim() ?? null
+    const name = profile?.full_name?.trim() ?? ''
+    const whatsappPref = typeof candidate?.whatsapp_preference === 'boolean' ? candidate.whatsapp_preference : true
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
+    const waMsg = `ברוכה הבאה לשביל! ✨\n_השליחות החינוכית_\n\nשלום ${name},\nאנחנו שמחים לקבל אותך אל *מערכת השביל* — מערכת הגיוס וההשמה של רשת חינוך חב"ד 💜\n\n✨ *מה תמצאי כאן?*\n📋 משרות הוראה פתוחות ברחבי הארץ\n🔔 התראות כשנמצאה משרה שמתאימה לך\n📩 הגשת מועמדות ישירות מהמכשיר שלך\n📊 מעקב נוח אחרי הגשות ותהליכי מיון\n\n🔗 להיכנס ולהתחיל:\n${appUrl}/profile\n\nבהצלחה! 🌟\n*רשת חינוך חב"ד*`
+    const smsMsg = `ברוכה הבאה למערכת השביל של רשת חינוך חב"ד! ✨ כאן תמצאי משרות הוראה, תגישי מועמדות ותקבלי התראות. לכניסה: ${appUrl}/profile`
+    void sendExternal({ phone, whatsapp_preference: whatsappPref, waMessage: waMsg, smsMessage: smsMsg })
   }
 
   // Notify matching institutions when key fields changed
@@ -112,7 +128,7 @@ async function notifyMatchingInstitutions(
 
   if (!jobs?.length) return
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app'
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
 
   // Notify institutions (one per institution, deduped)
   const seenInst = new Set<string>()

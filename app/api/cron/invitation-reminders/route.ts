@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendInvitationReminderEmail } from '@/lib/email'
-import { sendSms } from '@/lib/sms'
+import { sendExternal } from '@/lib/notify-external'
 
 // Vercel Cron Job — runs daily at 08:00 Israel time (05:00 UTC)
 // 1. Sends reminder at day 3 (3–4 day window, deduped via notifications)
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
       .select(`
         id, scheduled_at,
         jobs(title, institutions(institution_name)),
-        candidates(profile_id, profiles(full_name, phone))
+        candidates(profile_id, whatsapp_preference, profiles(full_name, phone))
       `)
       .eq('status', 'ממתינה')
       .gte('created_at', from.toISOString())
@@ -48,7 +48,7 @@ export async function GET(request: Request) {
   for (const inv of toRemind) {
     if (remindedSet.has(inv.id)) continue
 
-    const candidate = inv.candidates as unknown as { profile_id: string; profiles: { full_name: string | null; phone: string | null } } | null
+    const candidate = inv.candidates as unknown as { profile_id: string; whatsapp_preference: boolean | null; profiles: { full_name: string | null; phone: string | null } } | null
     const job = inv.jobs as unknown as { title: string; institutions: { institution_name: string } } | null
     if (!candidate || !job) continue
 
@@ -74,9 +74,10 @@ export async function GET(request: Request) {
 
     if (phone) {
       try {
-        await sendSms(phone, `תזכורת: הזמנה לראיון מ-${institutionName} למשרת "${jobTitle}" ממתינה לתגובה שלך. היכנסי לדשבורד: giuus.vercel.app`)
+        const msg = `תזכורת: הזמנה לראיון מ-${institutionName} למשרת "${jobTitle}" ממתינה לתגובה שלך. היכנסי לדשבורד: giuus.vercel.app`
+        await sendExternal({ phone, whatsapp_preference: candidate.whatsapp_preference, waMessage: msg, smsMessage: msg })
       } catch (err) {
-        console.error('[CRON] invitation-reminders day3 SMS failed:', phone, err)
+        console.error('[CRON] invitation-reminders day3 send failed:', phone, err)
       }
     }
 
@@ -98,7 +99,7 @@ export async function GET(request: Request) {
   for (const inv of toWarn) {
     if (warnedSet.has(inv.id)) continue
 
-    const candidate = inv.candidates as unknown as { profile_id: string; profiles: { full_name: string | null; phone: string | null } } | null
+    const candidate = inv.candidates as unknown as { profile_id: string; whatsapp_preference: boolean | null; profiles: { full_name: string | null; phone: string | null } } | null
     const job = inv.jobs as unknown as { title: string; institutions: { institution_name: string } } | null
     if (!candidate || !job) continue
 
@@ -117,9 +118,10 @@ export async function GET(request: Request) {
 
     if (phone) {
       try {
-        await sendSms(phone, `שימי לב: ההזמנה לראיון מ-${institutionName} למשרת "${jobTitle}" תפוג מחר. להגבת: giuus.vercel.app`)
+        const msg = `שימי לב: ההזמנה לראיון מ-${institutionName} למשרת "${jobTitle}" תפוג מחר. להגבת: giuus.vercel.app`
+        await sendExternal({ phone, whatsapp_preference: candidate.whatsapp_preference, waMessage: msg, smsMessage: msg })
       } catch (err) {
-        console.error('[CRON] invitation-reminders day6 SMS failed:', phone, err)
+        console.error('[CRON] invitation-reminders day6 send failed:', phone, err)
       }
     }
 

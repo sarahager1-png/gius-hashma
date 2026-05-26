@@ -24,7 +24,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     .single()
   if (!inst) return NextResponse.json({ error: 'Institution not found' }, { status: 404 })
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app'
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
   const mosadLink = `${appUrl}/mosad`
 
   const ownerProfile = inst.profiles as unknown as { phone: string | null; whatsapp_preference: boolean | null; full_name: string | null } | null

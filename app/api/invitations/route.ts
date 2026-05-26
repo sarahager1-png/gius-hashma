@@ -1,7 +1,7 @@
 ﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendInvitationEmail } from '@/lib/email'
-import { sendSms } from '@/lib/sms'
+import { sendExternal } from '@/lib/notify-external'
 
 // POST — institution invites a candidate to a job
 export async function POST(request: Request) {
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
   // notify candidate (in-app + email + SMS)
   const jobTitle = jobRow.title
   const { data: cand } = await service
-    .from('candidates').select('profile_id, profiles(full_name, phone)').eq('id', candidate_id).single()
+    .from('candidates').select('profile_id, whatsapp_preference, profiles(full_name, phone)').eq('id', candidate_id).single()
   if (cand?.profile_id) {
     const dt = scheduled_at ? new Date(scheduled_at).toLocaleString('he-IL', {
       day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
@@ -61,6 +61,7 @@ export async function POST(request: Request) {
       related_id: inv.id,
     })
     const candidateName = (cand.profiles as unknown as { full_name: string | null } | null)?.full_name ?? 'מועמדת'
+    const candidateWaPref = (cand as unknown as { whatsapp_preference: boolean | null }).whatsapp_preference
     void sendInvitationEmail({
       candidateProfileId: cand.profile_id,
       candidateName,
@@ -71,11 +72,12 @@ export async function POST(request: Request) {
     })
     const candidatePhone = (cand.profiles as unknown as { phone: string | null } | null)?.phone
     if (candidatePhone) {
-      const dtSms = scheduled_at ? new Date(scheduled_at).toLocaleString('he-IL', {
+      const dtStr = scheduled_at ? new Date(scheduled_at).toLocaleString('he-IL', {
         day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
       }) : ''
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app'
-      void sendSms(candidatePhone, `שלום ${candidateName}! ${inst.institution_name} מזמינה אותך לראיון למשרת "${jobTitle}"${dtSms ? ' · ' + dtSms : ''}. לפרטים ולאישור: ${appUrl}/my-invitations`)
+      const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
+      const inviteMsg = `שלום ${candidateName}! 😊 ${inst.institution_name} מזמינה אותך לראיון למשרת "${jobTitle}"${dtStr ? ' · ' + dtStr : ''}. לפרטים ולאישור: ${appUrl}/my-invitations`
+      void sendExternal({ phone: candidatePhone, whatsapp_preference: candidateWaPref, waMessage: inviteMsg, smsMessage: inviteMsg })
     }
   }
 

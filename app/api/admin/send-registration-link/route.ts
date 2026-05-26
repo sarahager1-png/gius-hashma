@@ -28,15 +28,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'סוג רישום חסר' }, { status: 400 })
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app'
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
   const link = type === 'institution'
     ? (lead_id ? `${appUrl}/register/institution-form?lead=${lead_id}` : `${appUrl}/register/institution-form`)
     : `${appUrl}/mumedet`
 
-  const greeting = name?.trim() ? `שלום ${name.trim()}! ` : 'שלום! '
+  const salutation = name?.trim() ? `שלום ${name.trim()}! 👋` : 'שלום! 👋'
   const message = type === 'institution'
-    ? `${greeting}הנך מוזמנת להצטרף למערכת "השביל".\nלמילוי פרטי המוסד ולקבלת גישה למערכת: ${link}`
-    : `${greeting}הנך מוזמנת להצטרף למערכת "השביל" כמועמדת.\nלרישום: ${link}`
+    ? `${salutation}\nאת מוזמנת להצטרף למערכת *השביל* — פלטפורמה חכמה לגיוס והשמת סגל הוראה ברשת חב"ד.\n\nלהשלמת הרשמת המוסד ולקבלת גישה מלאה:\n${link}\n\nנשמח לענות על כל שאלה 😊`
+    : `${salutation}\nאת מוזמנת להצטרף למערכת *השביל* — פלטפורמה לגיוס והשמה ברשת חב"ד.\n\nלהרשמה כמועמדת:\n${link}\n\nנשמח לענות על כל שאלה 😊`
 
   const sent = await sendWA(phone.trim(), message)
 

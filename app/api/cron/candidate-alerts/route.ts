@@ -13,7 +13,7 @@ export async function GET(request: Request) {
 
   const service = createServiceClient()
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app'
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
 
   const { data: candidates, error } = await service
     .from('candidates')
@@ -27,6 +27,8 @@ export async function GET(request: Request) {
   }
 
   let totalSent = 0
+  const askedRelevance = new Set<string>()
+  const sessionExpiry = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
 
   for (const cand of candidates ?? []) {
     const candidate = cand as unknown as {
@@ -85,12 +87,36 @@ export async function GET(request: Request) {
         related_id: candidate.id,
       })
 
-      void sendExternal({
-        phone: inst.profiles?.phone ?? null,
-        whatsapp_preference: inst.whatsapp_preference,
-        waMessage:  `✨ מועמדת חדשה שעשויה להתאים למשרה שלכם:\n${desc}\nלצפייה: ${appUrl}/candidates/${candidate.id}`,
-        smsMessage: `✨ מועמדת חדשה מתאימה: ${desc}. לצפייה: ${appUrl}/candidates/${candidate.id}`,
-      })
+      const instPhone = inst.profiles?.phone ?? null
+      const waAlert  = `✨ מועמדת חדשה שעשויה להתאים למשרה שלכם:\n${desc}\nלצפייה: ${appUrl}/candidates/${candidate.id}`
+      const smsAlert = `✨ מועמדת חדשה מתאימה: ${desc}. לצפייה: ${appUrl}/candidates/${candidate.id}`
+
+      if (instPhone && !askedRelevance.has(instPhone)) {
+        askedRelevance.add(instPhone)
+        const { data: existingSession } = await service
+          .from('wa_sessions')
+          .select('id')
+          .eq('phone', instPhone)
+          .eq('session_type', 'relevance_check')
+          .gt('expires_at', new Date().toISOString())
+          .maybeSingle()
+
+        if (!existingSession) {
+          const relevanceQ = `שלום מ${inst.institution_name} 👋\nעדיין מגייסים מועמדות?\nענו *כן* להמשך קבלת עדכונים, או *לא* להשהיה זמנית.\n\n`
+          void sendExternal({ phone: instPhone, whatsapp_preference: inst.whatsapp_preference, waMessage: relevanceQ + waAlert, smsMessage: `עדיין מגייסים? ענו כן/לא. ${smsAlert}` })
+          await service.from('wa_sessions').insert({
+            phone: instPhone,
+            session_type: 'relevance_check',
+            state: 'awaiting_reply',
+            data: { profile_id: inst.profile_id, user_type: 'institution' },
+            expires_at: sessionExpiry,
+          })
+        } else {
+          void sendExternal({ phone: instPhone, whatsapp_preference: inst.whatsapp_preference, waMessage: waAlert, smsMessage: smsAlert })
+        }
+      } else {
+        void sendExternal({ phone: instPhone, whatsapp_preference: inst.whatsapp_preference, waMessage: waAlert, smsMessage: smsAlert })
+      }
 
       totalSent++
     }

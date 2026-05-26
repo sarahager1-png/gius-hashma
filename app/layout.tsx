@@ -3,12 +3,22 @@ import './globals.css'
 import Providers from './providers'
 import InstallPwa from '@/components/layout/install-pwa'
 
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
+
 export const metadata: Metadata = {
-  title: 'גיוס והשמה — רשת אהלי יוסף יצחק',
+  title: 'השביל — גיוס והשמה',
   description: 'פלטפורמה דיגיטלית לגיוס והשמה ברשת החינוך של חב"ד',
   manifest: '/manifest.json',
+  openGraph: {
+    title: 'מערכת השביל — גיוס והשמה',
+    description: 'פלטפורמה חכמה לגיוס והשמת סגל הוראה ברשת חינוך חב"ד',
+    locale: 'he_IL',
+    type: 'website',
+    images: [{ url: `${APP_URL}/og-image.png`, width: 1200, height: 630, alt: 'מערכת השביל — גיוס והשמה' }],
+  },
   icons: {
     icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
       { url: '/icon-32.png', sizes: '32x32', type: 'image/png' },
       { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
     ],

@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 
   const reasonsText = reasons?.length > 0 ? ` · ${(reasons as string[]).join(', ')}` : ''
   const noteText = note ? ` · "${note}"` : ''
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app'
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
 
   await service.from('notifications').insert({
     profile_id: inst.profile_id,

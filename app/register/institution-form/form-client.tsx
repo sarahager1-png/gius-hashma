@@ -67,7 +67,7 @@ export default function InstitutionFormClient({ lead }: { lead: Lead }) {
         style={{ background: '#fff', boxShadow: '0 8px 40px rgba(91,58,171,.12)', border: '1px solid #DDD6FE' }}>
         <div className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center"
           style={{ background: '#DCFCE7' }}>
-          <svg viewBox="0 0 24 24" width="28" height="28"><path fill="#16A34A" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#16A34A" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#16A34A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         </div>
         <h2 className="text-[20px] font-extrabold mb-2" style={{ color: 'var(--purple)' }}>
           הפרטים נשמרו בהצלחה!
@@ -101,11 +101,11 @@ export default function InstitutionFormClient({ lead }: { lead: Lead }) {
       {/* פרטים אישיים */}
       <div>
         <h2 className="text-[12px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--ink-3)' }}>פרטים אישיים</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="space-y-1">
             <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>שם מנהלת <span style={{ color: '#DC2626' }}>*</span></label>
             <input value={form.full_name} onChange={e => set('full_name', e.target.value)}
-              className={inputCls} style={inputStyle} placeholder="שם מלא" />
+              className={inputCls} style={inputStyle} dir="rtl" placeholder="שם מלא" />
           </div>
           <div className="space-y-1">
             <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>
@@ -114,7 +114,7 @@ export default function InstitutionFormClient({ lead }: { lead: Lead }) {
             <input value={form.principal_phone} onChange={e => set('principal_phone', e.target.value)}
               className={inputCls} style={inputStyle} dir="ltr" placeholder="050-0000000" />
           </div>
-          <div className="col-span-2 space-y-1">
+          <div className="col-span-full space-y-1">
             <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>
               כתובת מייל — לכניסה למערכת <span style={{ color: '#DC2626' }}>*</span>
             </label>
@@ -133,8 +133,8 @@ export default function InstitutionFormClient({ lead }: { lead: Lead }) {
       {/* פרטי המוסד */}
       <div>
         <h2 className="text-[12px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--ink-3)' }}>פרטי המוסד</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="col-span-2 space-y-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="col-span-full space-y-1">
             <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>שם המוסד <span style={{ color: '#DC2626' }}>*</span></label>
             <input value={form.institution_name} onChange={e => set('institution_name', e.target.value)}
               className={inputCls} style={inputStyle} placeholder="שם בית הספר / הגן" />
@@ -152,7 +152,7 @@ export default function InstitutionFormClient({ lead }: { lead: Lead }) {
               {DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
             </select>
           </div>
-          <div className="col-span-2 space-y-2">
+          <div className="col-span-full space-y-2">
             <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>סוג מוסד <span style={{ color: '#DC2626' }}>*</span></label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {ALL_TYPES.map(t => {
@@ -178,7 +178,7 @@ export default function InstitutionFormClient({ lead }: { lead: Lead }) {
         disabled={loading}
         className="w-full h-12 rounded-[12px] text-[15px] font-bold text-white transition-all"
         style={{ background: 'linear-gradient(135deg, var(--purple) 0%, #7C3AED 100%)', opacity: loading ? 0.7 : 1, boxShadow: '0 4px 14px rgba(91,58,171,.35)' }}>
-        {loading ? 'שולח...' : 'סיימתי — שלחי לי קישור כניסה ←'}
+        {loading ? 'שולח...' : 'סיימתי — שלחי את הפרטים ←'}
       </button>
     </div>
   )

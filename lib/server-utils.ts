@@ -2,7 +2,7 @@
 import type { UserRole } from './types'
 import { createServiceClient } from './supabase/server'
 
-const ADMIN_ROLES: UserRole[] = ['מנהלת מערכת', 'אדמין מערכת']
+const ADMIN_ROLES: UserRole[] = ['מנהלת מערכת', 'אדמין מערכת', 'מנהל רשת']
 
 export async function getProfile(_supabase: SupabaseClient, userId: string) {
   const service = createServiceClient()

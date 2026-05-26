@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
-import { sendSms } from '@/lib/sms'
+import { sendExternal } from '@/lib/notify-external'
 
 // Vercel Cron — daily at 09:00 Israel time (06:00 UTC)
 // Notifies candidates whose applications have been pending for 5+ days with no institution response
@@ -17,7 +17,7 @@ export async function GET(request: Request) {
   // Applications pending for 5+ days — get candidate profile
   const { data: apps, error } = await service
     .from('applications')
-    .select('id, job_id, jobs(title, institutions(institution_name)), candidates(profile_id, profiles(full_name, phone, whatsapp_preference))')
+    .select('id, job_id, jobs(title, institutions(institution_name)), candidates(profile_id, whatsapp_preference, profiles(full_name, phone))')
     .eq('status', 'ממתינה')
     .lt('applied_at', cutoff)
 
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
 
   let notified = 0
   for (const app of apps ?? []) {
-    type CandFields = { profile_id: string | null; profiles: { full_name: string | null; phone: string | null; whatsapp_preference?: boolean | null } | null }
+    type CandFields = { profile_id: string | null; whatsapp_preference: boolean | null; profiles: { full_name: string | null; phone: string | null } | null }
     const cand = app.candidates as unknown as CandFields | null
     const candidateProfileId = cand?.profile_id
     if (!candidateProfileId) continue
@@ -56,7 +56,8 @@ export async function GET(request: Request) {
 
     const phone = cand?.profiles?.phone
     if (phone) {
-      void sendSms(phone, `שלום ${cand?.profiles?.full_name ?? ''}! הגשתך למשרת "${jobTitle}"${institutionName ? ' ב' + institutionName : ''} עדיין בטיפול. נעדכן אותך ברגע שיהיה עדכון 🙏`).catch(() => null)
+      const msg = `שלום ${cand?.profiles?.full_name ?? ''}! הגשתך למשרת "${jobTitle}"${institutionName ? ' ב' + institutionName : ''} עדיין בטיפול. נעדכן אותך ברגע שיהיה עדכון 🙏`
+      void sendExternal({ phone, whatsapp_preference: cand?.whatsapp_preference, waMessage: msg, smsMessage: msg }).catch(() => null)
     }
 
     notified++

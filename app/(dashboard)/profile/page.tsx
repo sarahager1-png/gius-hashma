@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { Briefcase, CheckCircle, Eye, XCircle, Clock } from 'lucide-react'
+import { Briefcase, CheckCircle, Eye, XCircle, Clock, Sparkles, Bell, ClipboardList, Search, CalendarCheck, Trophy, MessageCircle } from 'lucide-react'
 import ProfileFormClient from './profile-form-client'
 import StatusWidget from './status-widget'
 
@@ -64,6 +64,113 @@ export default async function ProfilePage() {
 
       <h1 className="page-title mb-1">הפרופיל שלי</h1>
       <span className="brand-line mb-6 block" />
+
+      {/* Welcome guide — shown only to new candidates with no applications */}
+      {!isAdmin && apps.length === 0 && (!candidate?.city || !candidate?.specialization) && (
+        <div className="mb-6 rounded-[16px] overflow-hidden"
+          style={{ background: 'linear-gradient(135deg, #F5F0FF 0%, #EFF8FF 100%)', border: '1.5px solid #DDD6FE' }}>
+          <div className="px-5 pt-5 pb-2">
+            <div className="flex items-center gap-2 mb-1">
+              <Sparkles size={16} style={{ color: 'var(--purple)' }} />
+              <span className="text-[15px] font-extrabold" style={{ color: 'var(--purple)' }}>ברוכה הבאה למערכת השביל!</span>
+            </div>
+            <p className="text-[13px] mb-4" style={{ color: 'var(--ink-3)' }}>
+              מערכת השביל מחברת בין מועמדות מצוינות לבין בתי ספר ברשת חינוך חב&quot;ד ברחבי הארץ.
+              כך נראה התהליך מתחילתו ועד סופו:
+            </p>
+
+            {/* Step-by-step process */}
+            <div className="relative">
+              {/* Vertical connector line */}
+              <div className="absolute right-[13px] top-7 bottom-7 w-px" style={{ background: '#DDD6FE' }} />
+
+              <div className="space-y-4 mb-4">
+                {/* Step 1 */}
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 z-10"
+                    style={{ background: 'var(--purple)', color: '#fff', fontSize: '11px', fontWeight: 800 }}>1</div>
+                  <div className="pb-1">
+                    <p className="text-[13px] font-bold" style={{ color: 'var(--ink)' }}>מלאי את הפרופיל שלך</p>
+                    <p className="text-[12px]" style={{ color: 'var(--ink-3)' }}>ככל שתוסיפי יותר פרטים — עיר, התמחות, ניסיון — כך המערכת תמצא לך התאמות טובות יותר</p>
+                  </div>
+                </div>
+
+                {/* Step 2 */}
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 z-10"
+                    style={{ background: '#7C3AED', color: '#fff', fontSize: '11px', fontWeight: 800 }}>2</div>
+                  <div className="pb-1">
+                    <p className="text-[13px] font-bold" style={{ color: 'var(--ink)' }}>קבלי התראות על משרות מתאימות</p>
+                    <p className="text-[12px]" style={{ color: 'var(--ink-3)' }}>תקבלי הודעה בוואטסאפ כשתיפתח משרה שמתאימה לפרופיל שלך. תוכלי גם לחפש משרות בעצמך</p>
+                  </div>
+                </div>
+
+                {/* Step 3 */}
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 z-10"
+                    style={{ background: '#0369A1', color: '#fff', fontSize: '11px', fontWeight: 800 }}>3</div>
+                  <div className="pb-1">
+                    <p className="text-[13px] font-bold" style={{ color: 'var(--ink)' }}>הגישי מועמדות או פתחי פנייה</p>
+                    <p className="text-[12px]" style={{ color: 'var(--ink-3)' }}>הגישי מועמדות למשרה פתוחה, או צרי קשר ישירות עם בית הספר שמעניין אותך</p>
+                  </div>
+                </div>
+
+                {/* Step 4 */}
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 z-10"
+                    style={{ background: '#0891B2', color: '#fff', fontSize: '11px', fontWeight: 800 }}>4</div>
+                  <div className="pb-1">
+                    <p className="text-[13px] font-bold" style={{ color: 'var(--ink)' }}>ראיון עם בית הספר</p>
+                    <p className="text-[12px]" style={{ color: 'var(--ink-3)' }}>כשבית ספר מתעניין בך, תקבלי הזמנה לראיון. תוכלי לתאם מועד ישירות דרך המערכת</p>
+                  </div>
+                </div>
+
+                {/* Step 5 */}
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 z-10"
+                    style={{ background: '#166534', color: '#fff', fontSize: '11px', fontWeight: 800 }}>5</div>
+                  <div className="pb-1">
+                    <p className="text-[13px] font-bold" style={{ color: 'var(--ink)' }}>קבלה ותחילת עבודה 🎉</p>
+                    <p className="text-[12px]" style={{ color: 'var(--ink-3)' }}>לאחר אישור הקבלה, המערכת תעדכן את הסטטוס שלך ותהיי בקשר עם צוות הרשת לכל שאלה</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Ongoing note */}
+            <div className="flex items-start gap-2 px-3 py-2.5 rounded-[10px] mb-2"
+              style={{ background: 'rgba(124,58,237,0.07)', border: '1px solid #DDD6FE' }}>
+              <span className="text-[14px] shrink-0 mt-0.5">🔄</span>
+              <p className="text-[12px]" style={{ color: 'var(--ink-3)' }}>
+                <span className="font-bold" style={{ color: 'var(--purple)' }}>המערכת תמיד פתוחה עבורך — </span>
+                גם לאחר סיום תקופת עבודה, שנת לימודים או סטאג׳, תוכלי לעדכן את הפרופיל ולהגיש מועמדות מחדש למשרות חדשות
+              </p>
+            </div>
+            <div className="flex items-start gap-2 px-3 py-2.5 rounded-[10px] mb-3"
+              style={{ background: 'rgba(3,105,161,0.06)', border: '1px solid #BAE6FD' }}>
+              <span className="text-[14px] shrink-0 mt-0.5">💬</span>
+              <p className="text-[12px]" style={{ color: 'var(--ink-3)' }}>
+                <span className="font-bold" style={{ color: '#0369A1' }}>עדכון שבועי — </span>
+                אחת לשבוע נשלח לך הודעה בוואטסאפ עם משרות מתאימות ונשאל אם את עדיין מחפשת. ענו <strong>כן</strong> או <strong>לא</strong> — ואנחנו נעדכן את הסטטוס שלך בהתאם
+              </p>
+            </div>
+          </div>
+          <div className="px-5 pb-5 flex gap-2 flex-wrap">
+            <Link href="/jobs"
+              className="inline-flex items-center gap-1.5 text-[13px] font-bold px-4 py-2 rounded-[10px] no-underline"
+              style={{ background: 'var(--purple)', color: '#fff' }}>
+              <Search size={13} />
+              גלי משרות פתוחות
+            </Link>
+            <Link href="/institutions"
+              className="inline-flex items-center gap-1.5 text-[13px] font-bold px-4 py-2 rounded-[10px] no-underline"
+              style={{ background: '#EDE9FE', color: 'var(--purple)' }}>
+              <MessageCircle size={13} />
+              פנייה למוסד
+            </Link>
+          </div>
+        </div>
+      )}
 
       <ProfileFormClient profile={profile} candidate={candidate} />
 

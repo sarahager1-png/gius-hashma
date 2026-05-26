@@ -31,8 +31,9 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   const { error: candErr } = await service.from('candidates').delete().eq('id', id)
   if (candErr) return NextResponse.json({ error: candErr.message }, { status: 500 })
 
-  // Delete the profile (works for admin-created candidates; for auth users this is best-effort)
   await service.from('profiles').delete().eq('id', candidate.profile_id)
+  // Delete the auth user so they cannot log in again and trigger recreation of profile+candidate
+  await service.auth.admin.deleteUser(candidate.profile_id)
 
   return NextResponse.json({ ok: true })
 }

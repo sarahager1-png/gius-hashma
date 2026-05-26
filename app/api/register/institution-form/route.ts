@@ -27,10 +27,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'כתובת המייל כבר רשומה במערכת' }, { status: 400 })
   }
 
-  // שמירה ב-pre_registered_institutions — הכניסה תהיה דרך Google
-  const institutionType = school_type === 'גן ילדים' ? 'גן ילדים' : 'בית ספר יסודי'
+  // Map school_type → institution_type (broader category)
+  function toInstitutionType(st: string | null): string {
+    if (!st || st === 'גן ילדים') return st ?? 'בית חינוך'
+    if (st.includes('קהילתי')) return 'קהילתי'
+    if (st.includes('שלהבות')) return 'שלהבות חב"ד'
+    return 'בית חינוך'
+  }
 
-  const finalSchoolType = school_type === 'גן ילדים' ? null : (school_type || null)
+  const institutionType = toInstitutionType(school_type || null)
+  const finalSchoolType = (school_type === 'גן ילדים' ? null : school_type) || null
 
   const { error: preRegErr } = await service
     .from('pre_registered_institutions')
@@ -48,13 +54,38 @@ export async function POST(req: Request) {
   if (preRegErr)
     return NextResponse.json({ error: preRegErr.message }, { status: 500 })
 
-  // שליחת וואטסאפ עם קישור לכניסה עם Google
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
+  const mosadLink = `${appUrl}/mosad`
+
+  // שליחת וואטסאפ עם קישור כניסה והסבר על המערכת
   if (phone) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app'
-    const mosadLink = `${appUrl}/mosad`
-    const waMsg = `שלום ${name}!\nפרטי המוסד "${institution_name.trim()}" נקלטו בהצלחה.\n\nלכניסה למערכת — לחצי כאן:\n${mosadLink}\n\nהיכנסי עם Google עם המייל: ${cleanEmail}`
-    const smsMsg = `שלום ${name}! פרטי המוסד נקלטו. לכניסה עם Google: ${mosadLink}`
+    const waMsg =
+      `שלום ${name}! 🎉 ברוכה הבאה למערכת *השביל* של רשת חינוך חב"ד!\n\n` +
+      `*איך המערכת עובדת?*\n` +
+      `📋 תפרסמי משרות פתוחות מהדשבורד שלך\n` +
+      `🔍 המערכת תציג לך מועמדות מתאימות לפי תפקיד, התמחות ומחוז\n` +
+      `📩 תשלחי הזמנה לראיון — *המועמדת תקבל הודעה בוואטסאפ*\n` +
+      `✅ לאחר שהמועמדת תאשר — תיצרו קשר ישיר ביניכן\n` +
+      `🎯 לאחר השיבוץ המשרה נסגרת אוטומטית\n\n` +
+      `*כל עדכון יגיע אלייך ישירות לוואטסאפ* 📱\n\n` +
+      `לכניסה למערכת:\n${mosadLink}\n` +
+      `היכנסי עם Google עם המייל: ${cleanEmail}\n\n` +
+      `נשמח לעזור! 😊\n*רשת חינוך חב"ד*`
+    const smsMsg = `שלום ${name}! ברוכה הבאה למערכת השביל. לכניסה עם Google: ${mosadLink}`
     await sendExternal({ phone, whatsapp_preference: true, waMessage: waMsg, smsMessage: smsMsg })
+  }
+
+  // התראה לאדמין — in-app notification
+  const { data: admins } = await service.from('profiles').select('id').in('role', ['מנהלת מערכת', 'אדמין מערכת'])
+  if (admins?.length) {
+    void service.from('notifications').insert(
+      admins.map(admin => ({
+        profile_id: admin.id,
+        type: 'institution_registered',
+        title: `מוסד חדש נרשם — ${institution_name.trim()}`,
+        body: `${name}${phone ? ' · ' + phone : ''} · ${cleanEmail}${city ? ' · ' + city : ''}${district ? ' · ' + district : ''}${school_type ? ' · ' + school_type : ''}`,
+      }))
+    )
   }
 
   return NextResponse.json({ ok: true })

@@ -57,3 +57,38 @@ NEXT_PUBLIC_APP_URL=
 - `מנהל רשת` / `אדמין מערכת` — approves institutions, sees all data, reports
 
 **Database schema** is in `supabase/schema.sql`. Run migrations manually via Supabase SQL Editor.
+
+---
+
+## 🔍 בדיקת עצמית — חובה לפני כל עבודה
+
+1. **DB sync** — בדוק עם Supabase MCP שהשדות שאני כותב אליהם קיימים. לא להניח.
+2. **wa_sessions constraint** — כל `session_type` חדש חייב להתווסף ל-CHECK constraint.
+3. **TypeScript types** — `lib/types.ts` חייב לשקף את עמודות ה-DB בפועל.
+4. **הודעות** — כל הודעה יוצאת דרך `sendExternal` מ-`lib/notify-external.ts` בלבד.
+
+## ❌ אסור בפרויקט זה
+
+- **אסור לשלוח `sendWA` / `sendSms` ישירות** — רק דרך `sendExternal`.
+- **אסור double-send** — לא WA + SMS ביחד ללא `whatsapp_preference === false`.
+- **אסור לשלוף `whatsapp_preference` מ-`profiles`** — הוא ב-`candidates` וב-`institutions`.
+- **אסור לסגור סשן בלי** `npm run typecheck` ו-`vercel deploy --prod --yes`.
+
+## 📐 כלל הודעות
+
+```
+whatsapp_preference === false  →  SMS
+whatsapp_preference === true   →  WhatsApp
+whatsapp_preference === null   →  WhatsApp (ברירת מחדל)
+```
+
+## 🗂️ שדות קריטיים לפי טבלה
+
+| טבלה | הערה |
+|------|------|
+| `candidates` | `whatsapp_preference` נמצא כאן |
+| `institutions` | `whatsapp_preference` נמצא כאן |
+| `notifications` | יש: `related_id`, `url` |
+| `wa_sessions` | `session_type` חייב להיות ב-CHECK constraint |
+| `candidate_requests` | status: ממתינה/אושרה/נדחתה + `access_code` |
+| `pre_registered_institutions` | status: pending/rejected |

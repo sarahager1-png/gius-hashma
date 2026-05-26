@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { sendSms } from '@/lib/sms'
-import { sendWA } from '@/lib/whatsapp'
+import { sendExternal } from '@/lib/notify-external'
 
 // PATCH — candidate confirms/declines OR institution rates a past interview
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -83,13 +82,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       body: `${confirmed ? 'אישור הגעה' : 'ביטול'} לראיון למשרת "${jobTitle}"`,
       related_id: fullIv?.application_id ?? null,
     })
-    // on cancellation also send SMS/WA to institution
-    if (!confirmed && instPhone) {
-      const msg = `${candidateName} ביטלה את הראיון למשרת "${jobTitle}". giuus.vercel.app/institution/candidates`
-      void Promise.allSettled([
-        instWaPref !== false ? sendWA(instPhone, msg) : Promise.resolve(),
-        sendSms(instPhone, msg),
-      ])
+    if (instPhone) {
+      const msg = confirmed
+        ? `✅ ${candidateName} אישרה הגעה לראיון למשרת "${jobTitle}". giuus.vercel.app/institution/applications`
+        : `${candidateName} ביטלה את הראיון למשרת "${jobTitle}". giuus.vercel.app/institution/candidates`
+      void sendExternal({ phone: instPhone, whatsapp_preference: instWaPref, waMessage: msg, smsMessage: msg })
     }
   }
 

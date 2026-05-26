@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { sendSms } from '@/lib/sms'
-import { sendWA } from '@/lib/whatsapp'
+import { sendExternal } from '@/lib/notify-external'
 
 // DELETE — institution cancels a pending invitation
 export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -85,11 +84,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     // notify institution
     const [instRes, candRes, jobRes] = await Promise.all([
-      service.from('institutions').select('profile_id').eq('id', inv.institution_id).single(),
+      service.from('institutions').select('profile_id, phone, whatsapp_preference').eq('id', inv.institution_id).single(),
       service.from('candidates').select('profiles(full_name)').eq('id', cand.id).single(),
       service.from('jobs').select('title').eq('id', inv.job_id).single(),
     ])
     const instProfileId = instRes.data?.profile_id
+    const instPhone = instRes.data?.phone ?? null
+    const instWaPref = instRes.data?.whatsapp_preference
     const candidateName = (candRes.data?.profiles as unknown as { full_name: string | null } | null)?.full_name ?? 'מועמדת'
     const jobTitle = jobRes.data?.title ?? ''
     if (instProfileId) {
@@ -100,6 +101,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         body: `המועמדת אישרה את ההזמנה לראיון למשרת "${jobTitle}"`,
         related_id: app?.id ?? null,
       })
+    }
+    if (instPhone) {
+      const msg = `✅ ${candidateName} קיבלה את ההזמנה לראיון למשרת "${jobTitle}". לפרטים: giuus.vercel.app/institution/applications`
+      void sendExternal({ phone: instPhone, whatsapp_preference: instWaPref, waMessage: msg, smsMessage: msg })
     }
   }
 
@@ -126,10 +131,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
     if (instPhone) {
       const msg = `${candidateName} דחתה את ההזמנה לראיון למשרת "${jobTitle}". ניתן להזמין מועמדת אחרת: giuus.vercel.app/institution/candidates`
-      void Promise.allSettled([
-        instWaPref !== false ? sendWA(instPhone, msg) : Promise.resolve(),
-        sendSms(instPhone, msg),
-      ])
+      void sendExternal({ phone: instPhone, whatsapp_preference: instWaPref, waMessage: msg, smsMessage: msg })
     }
   }
 

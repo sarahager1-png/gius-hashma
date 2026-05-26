@@ -1,61 +1,50 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="0.25" y1="0" x2="0.75" y2="1">
-      <stop offset="0%" stop-color="#5E3FAE"/>
-      <stop offset="55%" stop-color="#3D2578"/>
-      <stop offset="100%" stop-color="#1A0B35"/>
+    <linearGradient id="bgGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6B4FB0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4A2F87;stop-opacity:1" />
     </linearGradient>
-    <radialGradient id="glow" cx="50%" cy="30%" r="60%">
-      <stop offset="0%" stop-color="rgba(255,255,255,0.08)"/>
-      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-    </radialGradient>
+    <linearGradient id="turqGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3EE0E0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1FB5B5;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
 
-  <!-- Background -->
-  <rect width="1024" height="1024" rx="230" fill="url(#bg)"/>
-  <rect width="1024" height="1024" rx="230" fill="url(#glow)"/>
+  <!-- רקע מעוגל -->
+  <rect x="32" y="32" width="448" height="448" rx="96" ry="96" fill="url(#bgGrad2)"/>
 
-  <!-- ── BOOK ── -->
-  <!-- Left page — trapezoid with rounded outer corners -->
-  <path d="M 512 820
-           L 260 800 Q 236 798 236 774
-           L 236 652 Q 236 628 260 630
-           L 512 644 Z"
-        fill="rgba(255,255,255,0.97)"/>
+  <!-- עיגולים דקורטיביים -->
+  <circle cx="256" cy="224" r="155" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.08"/>
+  <circle cx="256" cy="224" r="118" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.12"/>
 
-  <!-- Right page — mirror -->
-  <path d="M 512 820
-           L 764 800 Q 788 798 788 774
-           L 788 652 Q 788 628 764 630
-           L 512 644 Z"
-        fill="rgba(255,255,255,0.97)"/>
+  <!-- סמל ההתאמה -->
+  <g transform="translate(256, 218)">
+    <path d="M 0,-82 A 82,82 0 0 0 0,82 L 0,36 A 36,36 0 0 1 0,-36 Z"
+          fill="#FFFFFF" opacity="0.95"/>
+    <path d="M 0,-82 A 82,82 0 0 1 0,82 L 0,36 A 36,36 0 0 0 0,-36 Z"
+          fill="url(#turqGrad)" filter="url(#glow)"/>
+    <circle cx="0" cy="0" r="13" fill="#FFFFFF"/>
+    <circle cx="0" cy="0" r="20" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.4"/>
+    <circle cx="0" cy="0" r="29" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.2"/>
+  </g>
 
-  <!-- Spine crease -->
-  <line x1="512" y1="644" x2="512" y2="820"
-        stroke="#2D1B5C" stroke-width="3" stroke-opacity="0.25"/>
+  <!-- ניצוצות -->
+  <circle cx="140" cy="148" r="4" fill="#3EE0E0" opacity="0.7"/>
+  <circle cx="380" cy="165" r="3" fill="#FFFFFF" opacity="0.6"/>
+  <circle cx="375" cy="310" r="4" fill="#3EE0E0" opacity="0.5"/>
+  <circle cx="128" cy="308" r="3" fill="#FFFFFF" opacity="0.6"/>
+  <circle cx="415" cy="248" r="3" fill="#FFFFFF" opacity="0.4"/>
+  <circle cx="88" cy="244" r="3" fill="#3EE0E0" opacity="0.5"/>
 
-  <!-- ── NETWORK LINES ── -->
-  <!-- Single stem rising from spine -->
-  <line x1="512" y1="644" x2="512" y2="486"
-        stroke="white" stroke-width="7.5" stroke-linecap="round"/>
+  <!-- קו מפריד -->
+  <line x1="96" y1="358" x2="416" y2="358" stroke="#FFFFFF" stroke-width="1" opacity="0.15"/>
 
-  <!-- Branch left -->
-  <line x1="512" y1="486" x2="382" y2="356"
-        stroke="white" stroke-width="6.5" stroke-linecap="round"/>
-
-  <!-- Branch right -->
-  <line x1="512" y1="486" x2="642" y2="356"
-        stroke="white" stroke-width="6.5" stroke-linecap="round"/>
-
-  <!-- Triangle sides to apex dot -->
-  <line x1="382" y1="356" x2="512" y2="226"
-        stroke="rgba(255,255,255,0.82)" stroke-width="5.5" stroke-linecap="round"/>
-  <line x1="642" y1="356" x2="512" y2="226"
-        stroke="rgba(255,255,255,0.82)" stroke-width="5.5" stroke-linecap="round"/>
-
-  <!-- ── TURQUOISE DOTS ── -->
-  <circle cx="382" cy="356" r="24" fill="#00A7B5"/>
-  <circle cx="642" cy="356" r="24" fill="#00A7B5"/>
-  <circle cx="512" cy="226" r="24" fill="#00A7B5"/>
-
+  <!-- מקום ריק לפלייסהולדר של הלוגו (יוחלף ע"י sharp) -->
 </svg>

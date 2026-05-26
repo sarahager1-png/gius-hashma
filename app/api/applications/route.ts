@@ -1,8 +1,7 @@
 ﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendNewApplicationEmail } from '@/lib/email'
-import { smsNewApplication, smsCandidateApplicationConfirmed } from '@/lib/sms'
-import { sendWA } from '@/lib/whatsapp'
+import { sendExternal } from '@/lib/notify-external'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -16,7 +15,7 @@ export async function POST(request: Request) {
   // derive candidate from authenticated user
   const { data: candidate } = await service
     .from('candidates')
-    .select('id, profiles(full_name, phone)')
+    .select('id, whatsapp_preference, profiles(full_name, phone)')
     .eq('profile_id', user.id)
     .single()
 
@@ -43,6 +42,7 @@ export async function POST(request: Request) {
 
   const candidateName = (candidate.profiles as unknown as { full_name: string | null } | null)?.full_name ?? 'מועמדת'
   const candidatePhone = (candidate.profiles as unknown as { phone: string | null } | null)?.phone ?? ''
+  const candidateWaPref = (candidate as unknown as { whatsapp_preference: boolean | null }).whatsapp_preference
   const jobTitle = (job as unknown as { title: string } | null)?.title ?? ''
   const institutionName = (job as unknown as { institutions: { institution_name: string } } | null)?.institutions?.institution_name ?? ''
 
@@ -85,16 +85,18 @@ export async function POST(request: Request) {
   })
 
   if (candidatePhone) {
-    void smsCandidateApplicationConfirmed(candidatePhone, candidateName, jobTitle, institutionName).catch(() => null)
+    const inst = institutionName ? ` ב${institutionName}` : ''
+    const candMsg = `שלום ${candidateName}! תודה שפנית אלינו 💙 הגשתך למשרת "${jobTitle}"${inst} התקבלה. נעדכן אותך בכל התפתחות.`
+    void sendExternal({ phone: candidatePhone, whatsapp_preference: candidateWaPref, waMessage: candMsg, smsMessage: candMsg })
   }
 
-  // fire-and-forget: email + SMS + WA to institution
+  // fire-and-forget: email + WA/SMS to institution
   if (instProfileId) {
-    void Promise.allSettled([
-      sendNewApplicationEmail({ institutionProfileId: instProfileId, candidateName, jobTitle }),
-      instPhone ? smsNewApplication(instPhone, candidateName, jobTitle) : Promise.resolve(),
-      instPhone && instWaPref !== false ? sendWA(instPhone, `📋 הגשה חדשה! ${candidateName} הגישה מועמדות למשרת "${jobTitle}". לצפייה: giuus.vercel.app/institution/applications`) : Promise.resolve(),
-    ])
+    void sendNewApplicationEmail({ institutionProfileId: instProfileId, candidateName, jobTitle })
+    if (instPhone) {
+      const instMsg = `📋 הגשה חדשה! ${candidateName} הגישה מועמדות למשרת "${jobTitle}". לצפייה: giuus.vercel.app/institution/applications`
+      void sendExternal({ phone: instPhone, whatsapp_preference: instWaPref, waMessage: instMsg, smsMessage: instMsg })
+    }
   }
 
   return NextResponse.json(data, { status: 201 })

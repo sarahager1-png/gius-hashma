@@ -77,8 +77,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
       {/* Back */}
       <Link href="/jobs"
         className="inline-flex items-center gap-1.5 text-[13px] font-semibold mb-6 transition-colors"
-        style={{ color: 'var(--ink-3)' }}
-        onMouseOver={() => {}} >
+        style={{ color: 'var(--ink-3)' }}>
         <ArrowRight size={14} />חזרה למשרות
       </Link>
 
@@ -165,6 +164,8 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
           {inst?.institution_name && <DetailRow icon={<Building2 size={15} />} label="מוסד" value={inst.institution_name} />}
           {job.specialization && <DetailRow icon={<GraduationCap size={15} />} label="התמחות" value={job.specialization} />}
           {job.placement_type && <DetailRow icon={null} label="אופי המשרה" value={job.placement_type} />}
+          {(job as { classes?: string | null }).classes && <DetailRow icon={null} label="כיתות" value={(job as { classes?: string | null }).classes!} />}
+          {(job as { hours?: string | null }).hours && <DetailRow icon={null} label="שעות שבועיות" value={(job as { hours?: string | null }).hours!} />}
           <DetailRow
             icon={<Clock size={15} />}
             label="פורסם"

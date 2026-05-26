@@ -2,7 +2,7 @@ import { Resend } from 'resend'
 import { createServiceClient } from './supabase/server'
 
 const FROM = process.env.EMAIL_FROM ?? 'גיוס חב"ד <noreply@giuus.vercel.app>'
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app'
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
 
 function getResend(): Resend | null {
   if (!process.env.RESEND_API_KEY) return null
@@ -428,12 +428,12 @@ export async function sendInstitutionApprovedEmail(opts: {
     </p>
     <p>כעת ניתן להיכנס למערכת ולפרסם משרות, לגלוש בין המועמדות ולהתחיל בתהליכי גיוס.</p>
     ${btn('כניסה לדשבורד', `${APP_URL}/dashboard`)}
-    <p style="font-size:13px;color:#888">ברוכים הבאים! לשאלות ניתן לפנות לצוות המערכת.</p>`
+    <p style="font-size:13px;color:#888">ברוכה הבאה! לשאלות ניתן לפנות לצוות המערכת.</p>`
 
   await getResend()?.emails.send({
     from: FROM,
     to: email,
-    subject: `✅ מוסדכם אושר — ברוכים הבאים למערכת גיוס חב"ד`,
+    subject: `✅ המוסד שלך אושר — ברוכה הבאה למערכת השביל`,
     html: baseHtml('המוסד אושר', body),
   }).catch(e => console.error('[EMAIL] institution-approved:', e))
 }
@@ -543,13 +543,13 @@ export async function sendInstitutionPendingEmail(opts: {
       📬 קיבלנו את בקשת ההצטרפות של <strong>${opts.institutionName}</strong> למערכת גיוס חב&quot;ד.
     </p>
     <p>הבקשה נמצאת כעת בבדיקה. נציג יבחן את הפרטים ויאשר את המוסד בהקדם.</p>
-    <p>לאחר האישור תקבלו הודעה במייל ותוכלו להתחיל לפרסם משרות ולגלוש בין המועמדות.</p>
+    <p>לאחר האישור תקבלי הודעה במייל ותוכלי להתחיל לפרסם משרות ולגלוש בין המועמדות.</p>
     <p style="font-size:13px;color:#888">לשאלות ניתן לפנות לצוות המערכת. תודה על הסבלנות!</p>`
 
   await getResend()?.emails.send({
     from: FROM,
     to: email,
-    subject: `📬 בקשת ההצטרפות שלכם התקבלה — ${opts.institutionName}`,
+    subject: `📬 בקשת ההצטרפות שלך התקבלה — ${opts.institutionName}`,
     html: baseHtml('בקשת הצטרפות התקבלה', body),
   }).catch(e => console.error('[EMAIL] institution-pending:', e))
 }

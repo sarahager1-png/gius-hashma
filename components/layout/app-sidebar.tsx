@@ -10,7 +10,7 @@ import {
   Settings, LogOut, ClipboardList, UserPlus, Sparkles,
   ShieldCheck, Mail, History, HelpCircle, MessageCircle, Send, UserCog, Inbox,
   FileStack, CalendarDays, BellRing, Upload, ScrollText, MailOpen, Star,
-  Radio, CalendarCheck,
+  Radio, CalendarCheck, GraduationCap,
 } from 'lucide-react'
 
 interface NavItem {
@@ -96,6 +96,7 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
         { href: '/admin/matches',            label: 'שלבי המיון',      icon: Sparkles        },
         { href: '/admin/interview-slots',    label: 'ראיונות',         icon: CalendarCheck   },
         { href: '/admin/reports',            label: 'המלצות ושיבוצים', icon: BarChart3       },
+        { href: '/admin/staffing-needs',     label: 'צרכי הכשרה',      icon: GraduationCap   },
       ],
     },
     {
@@ -139,6 +140,7 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
         { href: '/admin/matches',            label: 'שלבי המיון',      icon: Sparkles        },
         { href: '/admin/interview-slots',    label: 'ראיונות',         icon: CalendarCheck   },
         { href: '/admin/reports',            label: 'המלצות ושיבוצים', icon: BarChart3       },
+        { href: '/admin/staffing-needs',     label: 'צרכי הכשרה',      icon: GraduationCap   },
       ],
     },
     {
@@ -176,6 +178,7 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
         { href: '/admin/matches',            label: 'שלבי המיון',      icon: Sparkles        },
         { href: '/admin/interview-slots',    label: 'ראיונות',         icon: CalendarCheck   },
         { href: '/admin/reports',            label: 'המלצות ושיבוצים', icon: BarChart3       },
+        { href: '/admin/staffing-needs',     label: 'צרכי הכשרה',      icon: GraduationCap   },
       ],
     },
     {

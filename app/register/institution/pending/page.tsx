@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Clock, CheckCircle, Phone } from 'lucide-react'
 
 const WA_LINK = `https://wa.me/972503339770?text=${encodeURIComponent('שלום, המוסד שלנו נרשם למערכת הגיוס ואנחנו ממתינים לאישור')}`
@@ -12,18 +13,27 @@ export default function InstitutionPendingPage() {
       <div className="bg-white rounded-[24px] p-8 w-full max-w-sm text-center"
         style={{ boxShadow: '0 20px 60px rgba(15,11,35,.12)', border: '1px solid var(--line)' }}>
 
-        <div className="w-20 h-20 rounded-full mx-auto mb-5 flex items-center justify-center"
+        {/* Logo */}
+        <div className="flex justify-center mb-4">
+          <div className="rounded-2xl bg-white p-2.5 shadow-sm border border-purple-100">
+            <Image src="/logo-chabad.png" alt="לוגו הרשת" width={120} height={38} className="object-contain" priority />
+          </div>
+        </div>
+
+        <div className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center"
           style={{ background: 'var(--teal-050)' }}>
-          <Clock size={38} style={{ color: 'var(--teal-600)' }} />
+          <Clock size={28} style={{ color: 'var(--teal-600)' }} />
         </div>
 
         <h1 className="text-[22px] font-extrabold mb-2" style={{ color: 'var(--ink)', letterSpacing: '-.02em' }}>
-          המוסד ממתין לאישור
+          ברוכה הבאה למערכת השביל! 🎉
         </h1>
-        <p className="text-[13.5px] leading-relaxed mb-6" style={{ color: 'var(--ink-3)' }}>
-          פרטי המוסד התקבלו בהצלחה.<br />
-          מנהלת המערכת תאשר את הצטרפותכם בהקדם.<br />
-          <strong style={{ color: 'var(--ink)' }}>עם האישור תישלח הודעה</strong> ותוכלו להיכנס למערכת.
+        <p className="text-[13.5px] leading-relaxed mb-1" style={{ color: 'var(--ink-3)' }}>
+          פרטי המוסד התקבלו בהצלחה.
+        </p>
+        <p className="text-[13px] leading-relaxed mb-6" style={{ color: 'var(--ink-4)' }}>
+          מנהלת המערכת תאשר את הצטרפותך בהקדם.<br />
+          <strong style={{ color: 'var(--ink)' }}>עם האישור תישלח הודעה</strong> ותוכלי להיכנס למערכת.
         </p>
 
         <div className="rounded-[14px] p-4 mb-5 text-start"

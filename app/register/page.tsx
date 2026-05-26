@@ -48,15 +48,17 @@ export default function RegisterPage() {
 
           {/* Logo */}
           <div className="flex flex-col items-center pt-7 pb-5 px-8">
-            <div className="w-14 h-14 rounded-[16px] mb-3 flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, var(--purple) 0%, var(--teal) 100%)', boxShadow: '0 4px 16px rgba(91,58,171,.25)' }}>
-              <Image src="/logo-chabad.png" alt="רשת אהלי יוסף יצחק" width={36} height={36} className="object-contain brightness-[10]" />
+            <div className="rounded-2xl bg-white p-2.5 shadow-sm border border-purple-100 mb-4">
+              <Image src="/logo-chabad.png" alt="רשת אהלי יוסף יצחק" width={130} height={40} className="object-contain" priority />
             </div>
-            <div className="text-[11px] font-semibold tracking-wide text-center mb-0.5" style={{ color: 'var(--ink-4)', letterSpacing: '.04em' }}>
-              רשת אהלי יוסף יצחק לובאוויטש
+            <div className="text-[18px] font-extrabold text-center" style={{ color: 'var(--purple)', letterSpacing: '-.01em' }}>
+              ברוכה הבאה למערכת השביל!
             </div>
-            <div className="text-[17px] font-extrabold text-center" style={{ color: 'var(--purple)', letterSpacing: '-.01em' }}>
-              הרשמה למערכת
+            <div className="text-[12px] mt-0.5 text-center font-medium" style={{ color: 'var(--teal-600)' }}>
+              השליחות החינוכית
+            </div>
+            <div className="text-[12px] mt-1.5 text-center" style={{ color: 'var(--ink-4)' }}>
+              מערכת חכמה לגיוס והשמה — בחרי את סוג ההרשמה
             </div>
           </div>
 

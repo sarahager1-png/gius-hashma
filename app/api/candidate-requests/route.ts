@@ -1,7 +1,7 @@
 ﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { rateLimit } from '@/lib/rate-limit'
-import { sendSms } from '@/lib/sms'
+import { sendExternal } from '@/lib/notify-external'
 
 // POST — public, submit a request (auth optional — if authenticated via Google, profile_id is linked)
 export async function POST(request: Request) {
@@ -22,11 +22,13 @@ export async function POST(request: Request) {
     study_day,
     past_projects, personal_note,
     availability_from, availability_to,
-    whatsapp_preference,
+    whatsapp_preference, work_cities,
   } = body
 
   if (!full_name?.trim() || !phone?.trim())
     return NextResponse.json({ error: 'שם וטלפון הם שדות חובה' }, { status: 400 })
+  if (!email?.trim() || !email.includes('@'))
+    return NextResponse.json({ error: 'כתובת מייל תקינה חובה' }, { status: 400 })
 
   // length guards
   if (full_name.trim().length > 120 || phone.trim().length > 30)
@@ -66,6 +68,7 @@ export async function POST(request: Request) {
       availability_from: availability_from || null,
       availability_to: availability_to || null,
       whatsapp_preference: typeof whatsapp_preference === 'boolean' ? whatsapp_preference : true,
+      work_cities: Array.isArray(work_cities) && work_cities.length > 0 ? work_cities : null,
       profile_id: user?.id ?? null,
     })
     .select()
@@ -91,8 +94,16 @@ export async function POST(request: Request) {
     )
   }
 
-  // confirm receipt to candidate via SMS
-  void sendSms(phone.trim(), `שלום ${full_name.trim()}! קיבלנו את בקשת הצטרפותך למערכת הגיוס של רשת חב"ד. נבדוק ונחזור אליך בהקדם 🙏`).catch(() => null)
+  // confirm receipt to candidate via WhatsApp / SMS
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
+  const waConfirm = `שלום ${full_name.trim()}! 🙏\n\nקיבלנו את בקשת הצטרפותך למערכת השביל של רשת חינוך חב"ד.\n\nנבדוק את הפרטים ונחזור אליך בהקדם עם אישור.\n\n*רשת חינוך חב"ד*`
+  const smsConfirm = `שלום ${full_name.trim()}! קיבלנו את בקשת הצטרפותך למערכת הגיוס של רשת חב"ד. נבדוק ונחזור אליך בהקדם 🙏`
+  void sendExternal({
+    phone: phone.trim(),
+    whatsapp_preference: typeof whatsapp_preference === 'boolean' ? whatsapp_preference : true,
+    waMessage: waConfirm,
+    smsMessage: smsConfirm,
+  }).catch(() => null)
 
   return NextResponse.json({ ok: true }, { status: 201 })
 }

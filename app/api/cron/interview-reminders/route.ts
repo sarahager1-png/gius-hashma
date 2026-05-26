@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendInterviewReminderEmail } from '@/lib/email'
-import { sendSms } from '@/lib/sms'
-import { sendWA } from '@/lib/whatsapp'
+import { sendExternal } from '@/lib/notify-external'
 
 // Vercel Cron Job — runs daily at 08:05 Israel time (06:05 UTC)
 // Sends reminders to both candidate and institution for interviews in the next 24 hours
@@ -31,7 +30,7 @@ export async function GET(request: Request) {
           title,
           institutions(institution_name, phone, whatsapp_preference, profile_id)
         ),
-        candidates(profile_id, profiles(full_name, phone))
+        candidates(profile_id, whatsapp_preference, profiles(full_name, phone))
       )
     `)
     .gte('scheduled_at', in24h.toISOString())
@@ -59,7 +58,7 @@ export async function GET(request: Request) {
     if (remindedSet.has(interview.id)) continue
 
     const app = interview.applications as unknown as {
-      candidates: { profile_id: string; profiles: { full_name: string | null; phone: string | null } }
+      candidates: { profile_id: string; whatsapp_preference: boolean | null; profiles: { full_name: string | null; phone: string | null } }
       jobs: {
         title: string
         institutions: {
@@ -76,6 +75,7 @@ export async function GET(request: Request) {
     const candidateProfileId = app.candidates?.profile_id
     const candidateName      = app.candidates?.profiles?.full_name ?? 'מועמדת'
     const candidatePhone     = app.candidates?.profiles?.phone
+    const candidateWaPref    = app.candidates?.whatsapp_preference
     const jobTitle           = app.jobs?.title ?? ''
     const institutionName    = app.jobs?.institutions?.institution_name ?? ''
     const instPhone          = app.jobs?.institutions?.phone ?? null
@@ -111,12 +111,10 @@ export async function GET(request: Request) {
 
       if (candidatePhone) {
         try {
-          await sendSms(
-            candidatePhone,
-            `תזכורת: ראיון מחר! ${institutionName} · "${jobTitle}". תאריך: ${dt}${interview.location ? '. מיקום: ' + interview.location : ''}. בהצלחה! 🌟`
-          )
+          const candMsg = `תזכורת: ראיון מחר! ${institutionName} · "${jobTitle}". תאריך: ${dt}${interview.location ? '. מיקום: ' + interview.location : ''}. בהצלחה! 🌟`
+          await sendExternal({ phone: candidatePhone, whatsapp_preference: candidateWaPref, waMessage: candMsg, smsMessage: candMsg })
         } catch (err) {
-          console.error('[CRON] interview-reminders candidate SMS failed:', err)
+          console.error('[CRON] interview-reminders candidate send failed:', err)
         }
       }
     }
@@ -135,8 +133,7 @@ export async function GET(request: Request) {
     if (instPhone) {
       const msg = `תזכורת לראיון מחר 📅\nמועמדת: ${candidateName}\nמשרה: "${jobTitle}"\nתאריך: ${dt}${interview.location ? '\nמיקום: ' + interview.location : ''}`
       try {
-        if (instWaPref !== false) await sendWA(instPhone, msg)
-        else await sendSms(instPhone, msg)
+        await sendExternal({ phone: instPhone, whatsapp_preference: instWaPref, waMessage: msg, smsMessage: msg })
       } catch (err) {
         console.error('[CRON] interview-reminders institution msg failed:', err)
       }

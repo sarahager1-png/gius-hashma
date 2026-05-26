@@ -1,9 +1,6 @@
 ﻿import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendWeeklySummaryEmail } from '@/lib/email'
-import { sendWA } from '@/lib/whatsapp'
-
-const ADMIN_SUMMARY_PHONE = '0507594931' // חנה אברומויץ
 
 // Vercel Cron Job — runs every Monday at 07:00 Israel time (04:00 UTC)
 // Sends a weekly activity summary email to all admins + WhatsApp to network admin
@@ -65,21 +62,6 @@ export async function GET(request: Request) {
     newCandidates: newCandidates ?? 0,
     newInstitutions: newInstitutions ?? 0,
   }
-
-  // WhatsApp summary to network admin
-  const dateLabel = now.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' })
-  const waMsg = `שבוע טוב חנה! 🌟
-מצורף סיכום פעילות השביל לשבוע האחרון (${dateLabel}):
-
-👩‍🏫 מועמדות חדשות: ${stats.newCandidates}
-🏫 מוסדות חדשים: ${stats.newInstitutions}
-📋 הגשות חדשות: ${stats.newApplications}
-⏳ ממתינות לטיפול: ${stats.pendingApplications}
-📅 ראיונות מתוכננים השבוע: ${stats.upcomingInterviews}
-
-תמשיכי את העשייה המבורכת! 💜`
-
-  void sendWA(ADMIN_SUMMARY_PHONE, waMsg)
 
   let sent = 0
   for (const profile of adminProfiles) {
