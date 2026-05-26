@@ -144,6 +144,17 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/profile`)
   }
 
+  // Pre-approved admin emails — assigned admin role on first login
+  const ADMIN_EMAILS = ['ca@reshetch.org.il', 'ch@reshetch.org.il']
+  if (ADMIN_EMAILS.includes(email)) {
+    await service.from('profiles').insert({
+      id:        userId,
+      role:      'מנהלת מערכת',
+      full_name: session.user.user_metadata?.full_name ?? email,
+    })
+    return NextResponse.redirect(`${origin}/dashboard`)
+  }
+
   // Unknown Google user — create a minimal 'מועמדת' profile + blank candidates row
   // so they can access the dashboard immediately after completing the form
   await service.from('profiles').insert({
