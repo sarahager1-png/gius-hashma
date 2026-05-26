@@ -60,7 +60,7 @@ export default function InstitutionsClient({ institutions }: Props) {
 
   function buildWaLink(name: string, phone: string) {
     const normalized = phone.replace(/\D/g, '').replace(/^0/, '972')
-    const text = encodeURIComponent(`שלום,\nמוסדכם "${name}" אושר במערכת גיוס והשמה חב"ד.\nכעת תוכלו להיכנס למערכת ולפרסם משרות.\nבברכה, צוות המערכת`)
+    const text = encodeURIComponent(`שלום,\nמוסדך "${name}" אושר במערכת השביל.\nכעת תוכלי להיכנס למערכת ולפרסם משרות.\nבברכה, צוות המערכת`)
     return `https://wa.me/${normalized}?text=${text}`
   }
 
@@ -163,7 +163,7 @@ export default function InstitutionsClient({ institutions }: Props) {
                   <CheckCircle size={28} color="#1A7A4A" />
                 </div>
                 <p className="text-[16px] font-bold" style={{ color: '#1A7A4A' }}>קישור הרשמה נשלח בוואטסאפ!</p>
-                <p className="text-[13px] mt-1" style={{ color: '#6B7280' }}>לאחר מילוי הפרטים יישלח קישור כניסה לוואטסאפ</p>
+                <p className="text-[13px] mt-1" style={{ color: '#6B7280' }}>לאחר מילוי הפרטים תוכל להיכנס למערכת עם כתובת המייל שלה</p>
               </div>
             ) : (
               <div className="space-y-3">
