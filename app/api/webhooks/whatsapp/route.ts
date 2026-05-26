@@ -81,6 +81,7 @@ async function processMessage(
       case 'apply_job':          return handleApplyFlow(service, session, phone, intent)
       case 'relevance_check':    return handleRelevanceCheck(service, session, phone, text, intent)
       case 'admin_approve':      return handleAdminApprove(service, session, phone, intent)
+      case 'lead_info_request':  return handleLeadInfoRequest(service, session, phone, intent)
     }
   }
 
@@ -806,6 +807,38 @@ async function handleRelevanceCheck(
   }
 
   await sendWA(phone, 'ענו *כן* להמשך קבלת עדכונים, או *לא* להשהיה זמנית.')
+}
+
+// ── Lead info request (institution lead replied "כן" to reminder) ────
+async function handleLeadInfoRequest(
+  service: ReturnType<typeof createServiceClient>,
+  session: WaSession,
+  phone: string,
+  intent: ReturnType<typeof parseIntent>,
+) {
+  const data = session.data as { lead_id: string; institution_name: string; registration_link: string }
+
+  await service.from('wa_sessions').delete().eq('id', session.id)
+
+  if (intent !== 'confirm') {
+    // Any non-"כן" reply — just acknowledge and let normal flow handle it
+    return
+  }
+
+  const msg =
+    `שלום *${data.institution_name}*! 👋\n\n` +
+    `מערכת *השביל* היא פלטפורמת הגיוס וההשמה הרשמית של רשת חינוך חב"ד.\n\n` +
+    `✨ *מה תקבלו כמוסד רשום?*\n` +
+    `👩‍🏫 גישה לבסיס נתונים מאומת של מורות ומחנכות\n` +
+    `📋 פרסום משרות בקלות ובמהירות\n` +
+    `🔔 התאמות אוטומטיות — הפרופילים המתאימים מגיעים אליכם\n` +
+    `📞 ניהול ראיונות ומעקב ישירות מהמערכת\n` +
+    `💬 תקשורת מלאה עם המועמדות במקום אחד\n\n` +
+    `הכל בחינם לחלוטין לבתי ספר ברשת 🎁\n\n` +
+    `להרשמה (5 דקות בלבד):\n${data.registration_link}\n\n` +
+    `נשמח לעזור בכל שאלה! 🙏`
+
+  await sendWA(phone, msg)
 }
 
 // ── Admin approval via WhatsApp ───────────────────────────────────────

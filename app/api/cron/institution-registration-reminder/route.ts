@@ -32,10 +32,25 @@ export async function GET(request: Request) {
     if (!lead.phone) continue
 
     const link = `${appUrl}/register/institution-form?lead=${lead.id}`
-    const msg = `שלום 👋\nתזכורת — הרשמת המוסד *${lead.institution_name}* למערכת *השביל* עדיין לא הושלמה.\n\nלחצי על הקישור להשלמת ההרשמה:\n${link}\n\nיש שאלות? נשמח לעזור 😊`
+    const msg =
+      `שלום 👋\nתזכורת — הרשמת המוסד *${lead.institution_name}* למערכת *השביל* עדיין לא הושלמה.\n\n` +
+      `לחצי על הקישור להשלמת ההרשמה:\n${link}\n\n` +
+      `רוצה לשמוע יותר על המערכת? ענו *כן* 😊`
 
     const ok = await sendWA(lead.phone, msg)
     if (ok) {
+      // Create a short-lived session so a "כן" reply triggers the info message
+      await service.from('wa_sessions').upsert({
+        phone: lead.phone,
+        session_type: 'lead_info_request',
+        state: 'awaiting_reply',
+        data: {
+          lead_id: lead.id,
+          institution_name: lead.institution_name,
+          registration_link: link,
+        },
+        expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+      }, { onConflict: 'phone' })
       sent++
     } else {
       failed++
