@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { ACADEMIC_LEVELS, DISTRICTS } from '@/lib/constants'
 import {
   CheckCircle, ChevronDown, ChevronLeft, ChevronRight,
-  Plus, Trash2, Check, User, GraduationCap, Briefcase, Sparkles, FileText,
+  Plus, Trash2, Check, User, GraduationCap, Briefcase, Sparkles, FileText, Camera,
 } from 'lucide-react'
 
 /* ─── Constants ─── */
@@ -89,11 +89,28 @@ const EMPTY_PW:  PracticalWork = { year: '', school_name: '', supervisor_name: '
    Step components
 ══════════════════════════════════════════════════ */
 
-function StepPersonal({ form, set, workCities, setWorkCities, cityInput, setCityInput }: {
+function StepPersonal({ form, set, workCities, setWorkCities, cityInput, setCityInput, photoUrl, setPhotoUrl }: {
   form: Record<string, string>; set: (k: string, v: string) => void
   workCities: string[]; setWorkCities: (v: string[]) => void
   cityInput: string; setCityInput: (v: string) => void
+  photoUrl: string; setPhotoUrl: (v: string) => void
 }) {
+  const [photoLoading, setPhotoLoading] = useState(false)
+
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setPhotoLoading(true)
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await fetch('/api/upload/photo', { method: 'POST', body: fd })
+    setPhotoLoading(false)
+    if (res.ok) {
+      const d = await res.json()
+      setPhotoUrl(d.url)
+    }
+  }
+
   function addCity() {
     const c = cityInput.trim()
     if (c && !workCities.includes(c)) setWorkCities([...workCities, c])
@@ -101,6 +118,32 @@ function StepPersonal({ form, set, workCities, setWorkCities, cityInput, setCity
   }
   return (
     <div className="space-y-4">
+      {/* Photo upload */}
+      <div className="flex justify-center mb-2">
+        <label className="relative cursor-pointer group">
+          <div className="w-24 h-24 rounded-full overflow-hidden flex items-center justify-center transition-all"
+            style={{ background: photoUrl ? 'transparent' : 'var(--purple-050)', border: '2px dashed var(--purple-200)' }}>
+            {photoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={photoUrl} alt="תמונת פרופיל" className="w-full h-full object-cover" />
+            ) : photoLoading ? (
+              <span className="text-[12px] font-semibold" style={{ color: 'var(--purple)' }}>טוענת...</span>
+            ) : (
+              <div className="flex flex-col items-center gap-1">
+                <Camera size={22} style={{ color: 'var(--purple)' }} />
+                <span className="text-[10px] font-bold" style={{ color: 'var(--purple)' }}>תמונה</span>
+              </div>
+            )}
+            <div className="absolute inset-0 rounded-full bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <Camera size={20} color="#fff" />
+            </div>
+          </div>
+          <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} disabled={photoLoading} />
+        </label>
+      </div>
+      <p className="text-center text-[11.5px] -mt-2 mb-1" style={{ color: 'var(--ink-4)' }}>
+        תמונת פרופיל <span className="font-medium">(אופציונלי)</span>
+      </p>
       <div className="rounded-[12px] p-3.5" style={{ background: 'var(--teal-050)', border: '1px solid var(--teal-100)' }}>
         <p className="text-[12.5px] font-semibold" style={{ color: 'var(--teal-700)' }}>
           💡 ככל שתמלאי יותר פרטים — כך המערכת תוכל למצוא לך התאמה מהירה וטובה יותר
@@ -493,6 +536,7 @@ function RegisterCandidateForm() {
   const [customSpec, setCustomSpec] = useState('')
   const [experiences, setExperiences] = useState<Experience[]>([{ ...EMPTY_EXP }])
   const [practicalWork, setPracticalWork] = useState<PracticalWork[]>([{ ...EMPTY_PW }])
+  const [photoUrl, setPhotoUrl]   = useState('')
   const [loading, setLoading]     = useState(false)
   const [error, setError]         = useState('')
   const [done, setDone]           = useState(false)
@@ -567,6 +611,7 @@ function RegisterCandidateForm() {
       maiden_name:          form.maiden_name.trim() || null,
       whatsapp_preference:  whatsappPref,
       work_cities:          workCities.length > 0 ? workCities : null,
+      photo_url:            photoUrl || null,
     }
 
     let res: Response
@@ -750,7 +795,7 @@ function RegisterCandidateForm() {
                 )}
               </div>
             )}
-            {step === 0 && <StepPersonal form={form} set={set} workCities={workCities} setWorkCities={setWorkCities} cityInput={cityInput} setCityInput={setCityInput} />}
+            {step === 0 && <StepPersonal form={form} set={set} workCities={workCities} setWorkCities={setWorkCities} cityInput={cityInput} setCityInput={setCityInput} photoUrl={photoUrl} setPhotoUrl={setPhotoUrl} />}
             {step === 1 && <StepEducation form={form} set={set}
               specs={specs} toggleSpec={toggleSpec}
               customSpec={customSpec} setCustomSpec={setCustomSpec} />}

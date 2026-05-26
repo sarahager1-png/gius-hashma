@@ -67,7 +67,7 @@ export async function PATCH(request: Request) {
       'shlichut_location', 'shlichut_years', 'past_projects', 'personal_note',
       'availability_from', 'availability_to', 'study_day',
       'years_experience', 'prev_employer', 'prev_role', 'whatsapp_preference',
-      'work_cities',
+      'work_cities', 'photo_url',
     ]
     const safe = Object.fromEntries(Object.entries(candidate).filter(([k]) => ALLOWED.includes(k)))
     if (Object.keys(safe).length > 0) {
