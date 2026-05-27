@@ -22,6 +22,14 @@ export default async function AdminInstitutionsPage() {
     .is('registered_profile_id', null)
     .order('institution_name')
 
+  // exclude leads whose name matches an already-registered institution
+  const registeredNames = new Set(
+    (institutions ?? []).map(i => i.institution_name.trim().toLowerCase())
+  )
+  const unregisteredLeads = (leads ?? []).filter(
+    l => !registeredNames.has(l.institution_name.trim().toLowerCase())
+  )
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <InstitutionsManagerClient institutions={(institutions ?? []) as any} leads={leads ?? []} />
+  return <InstitutionsManagerClient institutions={(institutions ?? []) as any} leads={unregisteredLeads} />
 }
