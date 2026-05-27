@@ -27,7 +27,7 @@ interface AppListing {
 
 // ── POST: Receive incoming messages from Green API ───────────────────
 export async function POST(request: Request) {
-  const secret = process.env.GREENAPI_WEBHOOK_SECRET
+  const secret = process.env.GREENAPI_WEBHOOK_SECRET?.trim().replace(/^﻿/, '')
   if (secret) {
     const { searchParams } = new URL(request.url)
     const token = searchParams.get('token') ?? request.headers.get('x-webhook-token')
