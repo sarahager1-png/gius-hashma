@@ -86,7 +86,7 @@ export default function InstitutionsManagerClient({ institutions, leads }: Props
   const [sent, setSent]                 = useState<number | null>(null)
   const [bulkRegSending, setBulkRegSending] = useState(false)
   const [bulkRegResult, setBulkRegResult]   = useState<{ sent: number; skipped: number } | null>(null)
-  const [showLeads, setShowLeads]       = useState(false)
+  const [showLeads, setShowLeads]       = useState(true)
   const [leadSearch, setLeadSearch]     = useState('')
 
   const [editTarget, setEditTarget]     = useState<EditInstTarget>(null)
