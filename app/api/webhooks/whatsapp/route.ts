@@ -96,6 +96,16 @@ async function processMessage(
   // ── Unknown user → only respond to explicit registration/greeting ────
   if (!profile) {
     if (intent === 'register' || intent === 'help') {
+      // Don't re-send if already sent recently (active session exists)
+      const { data: existingSession } = await service
+        .from('wa_sessions')
+        .select('id')
+        .eq('phone', phone)
+        .eq('session_type', 'register_candidate')
+        .gt('expires_at', new Date().toISOString())
+        .maybeSingle()
+      if (existingSession) return
+
       await service.from('wa_sessions').insert({
         phone,
         session_type: 'register_candidate',
