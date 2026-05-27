@@ -93,8 +93,13 @@ async function processMessage(
     .or(`phone.eq.${localPhone},phone.eq.${phone}`)
     .maybeSingle()
 
-  // ── Unknown user → ignore completely ────────────────────────────────
-  if (!profile) return
+  // ── Unknown user → ignore, and clean up any stale session ───────────
+  if (!profile) {
+    if (session && session.session_type !== 'lead_info_request') {
+      await service.from('wa_sessions').delete().eq('id', session.id)
+    }
+    return
+  }
 
   const firstName = profile.full_name?.split(' ')[0] ?? ''
 
