@@ -1,6 +1,32 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const service = createServiceClient()
+  const { data: adminProfile } = await service.from('profiles').select('role').eq('id', user.id).single()
+  if (!adminProfile || !['מנהלת מערכת', 'אדמין מערכת'].includes(adminProfile.role))
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const body = await request.json()
+  const { institution_name, city, address, phone, principal_name } = body
+
+  const { error } = await service
+    .from('institutions')
+    .update({ institution_name, city, address, phone, principal_name })
+    .eq('id', id)
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ ok: true })
+}
+
 export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }

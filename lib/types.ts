@@ -86,6 +86,16 @@ export interface Institution {
   profiles?: Profile
 }
 
+export interface InstitutionLead {
+  id: string
+  institution_name: string
+  city: string | null
+  phone: string | null
+  institution_type: string | null
+  created_at: string
+  registered_profile_id: string | null
+}
+
 export interface Job {
   id: string
   institution_id: string
