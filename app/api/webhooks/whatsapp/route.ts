@@ -93,9 +93,9 @@ async function processMessage(
     .or(`phone.eq.${localPhone},phone.eq.${phone}`)
     .maybeSingle()
 
-  // ── Unknown user → only respond if they explicitly asked to register ─
+  // ── Unknown user → only respond to explicit registration/greeting ────
   if (!profile) {
-    if (intent === 'register') {
+    if (intent === 'register' || intent === 'help') {
       await service.from('wa_sessions').insert({
         phone,
         session_type: 'register_candidate',
