@@ -93,7 +93,7 @@ async function processMessage(
     .or(`phone.eq.${localPhone},phone.eq.${phone}`)
     .maybeSingle()
 
-  // ── Unknown user → ignore, and clean up any stale session ───────────
+  // ── No active session and no profile → ignore + clean stale session ──
   if (!profile) {
     if (session && session.session_type !== 'lead_info_request') {
       await service.from('wa_sessions').delete().eq('id', session.id)
@@ -101,29 +101,9 @@ async function processMessage(
     return
   }
 
-  const firstName = profile.full_name?.split(' ')[0] ?? ''
-
-  // ── Candidate flows ───────────────────────────────────────────────
-  if (profile.role === 'מועמדת') {
-    if (intent === 'jobs') {
-      return startBrowseJobs(service, phone, profile.id)
-    }
-    if (intent === 'my_applications') {
-      return showMyApplications(service, phone, profile.id, firstName)
-    }
-    if (intent === 'help' || intent === 'unknown') {
-      await sendWA(phone,
-        `שלום ${firstName}! 👋\n\n` +
-        `📋 *מה אפשר לעשות:*\n\n` +
-        `• *משרות* — צפייה במשרות פעילות\n` +
-        `• *הגשות* — סטטוס ההגשות שלי\n` +
-        `• *כן / לא* — אישור או דחיית הזמנה/ראיון\n` +
-        `• *עזרה* — תפריט זה\n\n` +
-        `לכניסה מלאה: giuus.vercel.app`
-      )
-      return
-    }
-  }
+  // ── Known user but no active session → ignore completely ─────────────
+  // Only respond to users mid-flow (session exists). No unsolicited replies.
+  return
 
   // ── Institution / Admin flows ─────────────────────────────────────
   if (['מנהלת מערכת', 'אדמין מערכת', 'מוסד'].includes(profile.role)) {
