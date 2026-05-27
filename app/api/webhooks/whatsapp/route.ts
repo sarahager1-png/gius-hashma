@@ -93,9 +93,9 @@ async function processMessage(
     .or(`phone.eq.${localPhone},phone.eq.${phone}`)
     .maybeSingle()
 
-  // ── Unknown user → registration ───────────────────────────────────
+  // ── Unknown user → only respond if they explicitly asked to register ─
   if (!profile) {
-    if (intent === 'confirm' || intent === 'register' || intent === 'help' || intent === 'unknown') {
+    if (intent === 'register') {
       await service.from('wa_sessions').insert({
         phone,
         session_type: 'register_candidate',
@@ -109,12 +109,8 @@ async function processMessage(
         `לא מצאתי אותך במערכת. בואי נרשום אותך תוך דקה 🙂\n\n` +
         `*מה שמך המלא?*`
       )
-    } else {
-      await sendWA(phone,
-        `שלום! 👋\nאת לא רשומה במערכת עדיין.\n` +
-        `שלחי *שלום* כדי להתחיל בתהליך הרשמה קצר, או כנסי ל: giuus.vercel.app`
-      )
     }
+    // כל שאר ההודעות מאנשים לא מוכרים — מתעלמים
     return
   }
 
