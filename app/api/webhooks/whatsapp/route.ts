@@ -103,38 +103,6 @@ async function processMessage(
 
   // ── Known user but no active session → ignore completely ─────────────
   // Only respond to users mid-flow (session exists). No unsolicited replies.
-  return
-
-  // ── Institution / Admin flows ─────────────────────────────────────
-  if (['מנהלת מערכת', 'אדמין מערכת', 'מוסד'].includes(profile.role)) {
-    if (intent === 'new_job') {
-      await service.from('wa_sessions').insert({
-        phone,
-        session_type: 'create_job',
-        state: 'awaiting_title',
-        data: { profile_id: profile.id, role: profile.role },
-        expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
-      })
-      await sendWA(phone, `שלום ${firstName}! 👋\nניצור משרה חדשה יחד.\n\n*מה שם המשרה?*`)
-      return
-    }
-    if (intent === 'help' || intent === 'unknown') {
-      await sendWA(phone,
-        `שלום ${firstName}! 👋\n\n` +
-        `📋 *מה אפשר לעשות:*\n\n` +
-        `• *משרה חדשה* — פרסום משרה חדשה\n` +
-        `• *כן / לא* — אישור או דחיית ראיון\n` +
-        `• *עזרה* — תפריט זה\n\n` +
-        `לכניסה מלאה: giuus.vercel.app`
-      )
-      return
-    }
-  }
-
-  // Fallback
-  await sendWA(phone,
-    `קיבלתי 🙏\nשלחי *עזרה* לתפריט, או כנסי ל: giuus.vercel.app`
-  )
 }
 
 // ── Registration flow (new candidate) ────────────────────────────────
