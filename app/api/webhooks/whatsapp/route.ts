@@ -93,36 +93,8 @@ async function processMessage(
     .or(`phone.eq.${localPhone},phone.eq.${phone}`)
     .maybeSingle()
 
-  // ── Unknown user → only respond to explicit registration/greeting ────
-  if (!profile) {
-    if (intent === 'register' || intent === 'help') {
-      // Don't re-send if already sent recently (active session exists)
-      const { data: existingSession } = await service
-        .from('wa_sessions')
-        .select('id')
-        .eq('phone', phone)
-        .eq('session_type', 'register_candidate')
-        .gt('expires_at', new Date().toISOString())
-        .maybeSingle()
-      if (existingSession) return
-
-      await service.from('wa_sessions').insert({
-        phone,
-        session_type: 'register_candidate',
-        state: 'awaiting_name',
-        data: { wa_name: name },
-        expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
-      })
-      await sendWA(phone,
-        `שלום${name ? ` ${name.split(' ')[0]}` : ''}! 👋\n` +
-        `ברוכה הבאה למערכת גיוס והשמה של רשת אהלי יוסף יצחק.\n\n` +
-        `לא מצאתי אותך במערכת. בואי נרשום אותך תוך דקה 🙂\n\n` +
-        `*מה שמך המלא?*`
-      )
-    }
-    // כל שאר ההודעות מאנשים לא מוכרים — מתעלמים
-    return
-  }
+  // ── Unknown user → ignore completely ────────────────────────────────
+  if (!profile) return
 
   const firstName = profile.full_name?.split(' ')[0] ?? ''
 
