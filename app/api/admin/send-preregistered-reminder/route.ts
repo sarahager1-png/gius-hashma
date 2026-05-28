@@ -1,16 +1,23 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendWA, normalizePhone } from '@/lib/whatsapp'
+import { sendSms } from '@/lib/sms'
 
-export async function POST() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function POST(request: Request) {
+  const cronSecret = process.env.CRON_SECRET
+  const authHeader = request.headers.get('authorization')
+  const isCron = cronSecret && authHeader === `Bearer ${cronSecret}`
 
-  const service = createServiceClient()
-  const { data: profile } = await service.from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role))
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (!isCron) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const service = createServiceClient()
+    const { data: profile } = await service.from('profiles').select('role').eq('id', user.id).single()
+    if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role))
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
 
   // Get all pending pre_registered + fill in phone from institution_leads where missing
   const { data: pending } = await service
@@ -51,9 +58,12 @@ export async function POST() {
       `🔗 ${appUrl}/mosad\n\n` +
       `נשמח לעזור בכל שאלה! 😊\n*רשת חינוך חב"ד*`
 
-    const ok = await sendWA(cleanPhone, msg)
-    if (ok) sent++
-    else skipped++
+    const waOk = await sendWA(cleanPhone, msg)
+    if (waOk) { sent++ }
+    else {
+      const smsOk = await sendSms(phone, msg)
+      if (smsOk) sent++ else skipped++
+    }
 
     await new Promise(r => setTimeout(r, 2000))
   }
