@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendWA } from '@/lib/whatsapp'
+import { sendSms } from '@/lib/sms'
 
 // Vercel Cron — runs Sun/Tue/Thu at 08:00 Israel time (05:00 UTC)
 // Sends WhatsApp reminder to institution leads that haven't registered yet
@@ -37,8 +38,8 @@ export async function GET(request: Request) {
       `לחצי על הקישור להשלמת ההרשמה:\n${link}\n\n` +
       `רוצה לשמוע יותר על המערכת? ענו *כן* 😊`
 
-    const ok = await sendWA(lead.phone, msg)
-    if (ok) {
+    const waOk = await sendWA(lead.phone, msg)
+    if (waOk) {
       // Create a short-lived session so a "כן" reply triggers the info message
       await service.from('wa_sessions').upsert({
         phone: lead.phone,
@@ -53,8 +54,14 @@ export async function GET(request: Request) {
       }, { onConflict: 'phone' })
       sent++
     } else {
-      failed++
-      console.error('[CRON] institution-registration-reminder send failed:', lead.phone)
+      // fallback to SMS
+      const smsOk = await sendSms(lead.phone, msg)
+      if (smsOk) {
+        sent++
+      } else {
+        failed++
+        console.error('[CRON] institution-registration-reminder send failed (WA+SMS):', lead.phone)
+      }
     }
 
     await new Promise(r => setTimeout(r, 3000))
