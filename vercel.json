@@ -55,6 +55,14 @@
     {
       "path": "/api/cron/institution-registration-reminder",
       "schedule": "0 5 * * 0,2,4"
+    },
+    {
+      "path": "/api/admin/send-preregistered-reminder",
+      "schedule": "30 5 29 5 *"
+    },
+    {
+      "path": "/api/cron/job-openings-reminder",
+      "schedule": "30 5 29 5 *"
     }
   ]
 }

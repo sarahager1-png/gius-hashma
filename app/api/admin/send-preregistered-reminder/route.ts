@@ -3,7 +3,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendWA, normalizePhone } from '@/lib/whatsapp'
 import { sendSms } from '@/lib/sms'
 
-export async function POST(request: Request) {
+async function handler(request: Request) {
   const cronSecret = process.env.CRON_SECRET
   const authHeader = request.headers.get('authorization')
   const isCron = cronSecret && authHeader === `Bearer ${cronSecret}`
@@ -13,13 +13,14 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const service = createServiceClient()
-    const { data: profile } = await service.from('profiles').select('role').eq('id', user.id).single()
+    const svc = createServiceClient()
+    const { data: profile } = await svc.from('profiles').select('role').eq('id', user.id).single()
     if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role))
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  // Get all pending pre_registered + fill in phone from institution_leads where missing
+  const service = createServiceClient()
+
   const { data: pending } = await service
     .from('pre_registered_institutions')
     .select('institution_name, email, phone, full_name, city')
@@ -27,7 +28,6 @@ export async function POST(request: Request) {
 
   if (!pending?.length) return NextResponse.json({ sent: 0, skipped: 0 })
 
-  // Get leads phones for cross-reference
   const { data: leads } = await service
     .from('institution_leads')
     .select('institution_name, phone')
@@ -51,12 +51,22 @@ export async function POST(request: Request) {
 
     const msg =
       `שלום ${firstName}! 👋\n\n` +
-      `מילאת את טופס ההרשמה למערכת *השביל* — תודה רבה! 🙏\n\n` +
-      `כדי להיכנס למערכת ולהתחיל לפרסם משרות, יש לבצע שלב אחד נוסף:\n\n` +
-      `*לחצי על הקישור והתחברי עם Google עם המייל:*\n` +
-      `📧 ${p.email}\n\n` +
-      `🔗 ${appUrl}/mosad\n\n` +
-      `נשמח לעזור בכל שאלה! 😊\n*רשת חינוך חב"ד*`
+      `את יודעת את הרגע הזה —\n` +
+      `מחפשת מורה, שולחת הודעות לכל הכיוונים, מקבלת המלצות שלא מתאימות, ובסוף את עצמך מכסה שעות.\n\n` +
+      `גיוס כח אדם לחינוך חב"ד זה לא עוד משרה — זה למצוא מישהי שמבינה את הנשמה של המוסד.\n\n` +
+      `בדיוק בשביל זה בנינו את *השביל* 🌿\n\n` +
+      `מאגר בוגרות מוסדות חב"ד — נשים שגדלו על אותם ערכים שאת מחנכת אליהם.\n` +
+      `מאושרות במערכת, זמינות לשיבוץ, מחפשות בדיוק מה שאת מציעה.\n\n` +
+      `את מפרסמת משרה — אנחנו מביאות לך את המתאימות.\n` +
+      `פחות טלפונים. פחות הפתעות. יותר זמן לך.\n\n` +
+      `וכבר עכשיו — *הגיע הזמן להתחיל לאייש את השנה הבאה.* 📅\n` +
+      `כל משרה שתעלי היום — מועמדות כבר מחכות.\n\n` +
+      `את כבר מילאת את הטופס — צעד אחד קטן נשאר 👇\n` +
+      `*התחברי עם המייל שלך, קבלי גישה מיידית והתחילי להעלות משרות:*\n` +
+      `📧 ${p.email}\n` +
+      `🔗 https://giuus.vercel.app/mosad\n\n` +
+      `נשמח ללוות אותך 💙\n` +
+      `*רשת חינוך חב"ד — מערכת השביל*`
 
     const waOk = await sendWA(cleanPhone, msg)
     if (waOk) { sent++ }
@@ -70,3 +80,5 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ sent, skipped })
 }
+
+export { handler as GET, handler as POST }
