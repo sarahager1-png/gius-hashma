@@ -15,11 +15,17 @@ export async function GET(request: Request) {
   const service = createServiceClient()
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
 
-  const { data: leads, error } = await service
+  const leadId = new URL(request.url).searchParams.get('lead_id')
+
+  let query = service
     .from('institution_leads')
     .select('id, institution_name, phone')
     .is('registered_profile_id', null)
     .not('phone', 'is', null)
+
+  if (leadId) query = query.eq('id', leadId) as typeof query
+
+  const { data: leads, error } = await query
 
   if (error) {
     console.error('[CRON] institution-registration-reminder query error:', error)
