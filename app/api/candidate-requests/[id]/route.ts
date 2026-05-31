@@ -25,9 +25,9 @@ function buildApprovalWA(name: string, loginLink: string): string {
     `📊 את כל הגשותיך ותהליכי הראיון תוכלי לעקוב בדשבורד\n\n` +
     `*כל עדכון יגיע אלייך ישירות לוואטסאפ* 📱\n\n` +
     `⚠️ *שלב חשוב — כניסה ראשונה*\n` +
-    `כדי שהמועמדות שלך תהיה פעילה במערכת, יש להיכנס לפחות פעם אחת.\n` +
+    `כדי שהמועמדות שלך תהיה פעילה, יש להיכנס למערכת עם *Google* לפחות פעם אחת.\n` +
     `ללא כניסה ראשונה — המועמדות אינה תקפה.\n\n` +
-    `🔗 לכניסה:\n${loginLink}\n\n` +
+    `🔗 לכניסה עם Google:\n${loginLink}\n\n` +
     `בהצלחה! 🌟\n*רשת חינוך חב"ד*`
   )
 }
@@ -124,8 +124,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     })
 
     // Send welcome message
-    const waMsg = buildApprovalWA(req.full_name, `${APP_URL}/profile`)
-    const smsMsg = `ברוכה הבאה למערכת השביל! הבקשה אושרה. חשוב: יש להיכנס לפחות פעם אחת כדי שהמועמדות תהיה פעילה — ${APP_URL}/profile`
+    const waMsg = buildApprovalWA(req.full_name, `${APP_URL}/login`)
+    const smsMsg = `ברוכה הבאה למערכת השביל! הבקשה אושרה. חשוב: יש להיכנס עם Google כדי שהמועמדות תהיה פעילה — ${APP_URL}/login`
     void sendExternal({ phone: req.phone, whatsapp_preference: req.whatsapp_preference ?? true, waMessage: waMsg, smsMessage: smsMsg })
 
     return NextResponse.json({ ok: true, directApproval: true })
@@ -205,15 +205,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       body: `שלום ${req.full_name}, ברוכה הבאה לפלטפורמת הגיוס של רשת חב"ד. תוכלי כעת להיכנס למערכת.`,
     })
 
-    // 5. Generate magic link for direct sign-in (no password needed)
-    const { data: linkData } = await service.auth.admin.generateLink({
-      type: 'magiclink',
-      email: req.email.trim(),
-      options: { redirectTo: `${APP_URL}/auth/callback` },
-    })
-    const loginLink = (linkData as { properties?: { action_link?: string } } | null)?.properties?.action_link ?? `${APP_URL}/profile`
+    // 5. Send approval message — direct to Google sign-in
+    const loginLink = `${APP_URL}/login`
     const waMsg = buildApprovalWA(req.full_name, loginLink)
-    const smsMsg = `ברוכה הבאה למערכת השביל! הבקשה אושרה. חשוב: יש להיכנס לפחות פעם אחת כדי שהמועמדות תהיה פעילה — ${loginLink}`
+    const smsMsg = `ברוכה הבאה למערכת השביל! הבקשה אושרה. חשוב: יש להיכנס עם Google לפחות פעם אחת כדי שהמועמדות תהיה פעילה — ${loginLink}`
     void sendExternal({ phone: req.phone, whatsapp_preference: req.whatsapp_preference ?? true, waMessage: waMsg, smsMessage: smsMsg })
 
     return NextResponse.json({ ok: true, directApproval: true })
