@@ -103,7 +103,8 @@ export async function GET(request: Request) {
     .select('*')
     .eq('email', email)
     .eq('status', 'אושרה')
-    .is('profile_id', null)
+    .order('created_at', { ascending: false })
+    .limit(1)
     .single()
 
   if (approvedReq) {
