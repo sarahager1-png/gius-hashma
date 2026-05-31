@@ -83,7 +83,7 @@ export async function POST(request: Request) {
 
     const { error } = await service
       .from('candidates')
-      .insert({
+      .upsert({
         profile_id: user.id,
         // basic fields from activate form
         city: city || reqData?.city || null,
@@ -112,7 +112,7 @@ export async function POST(request: Request) {
         availability_to: reqData?.availability_to || null,
         study_day: reqData?.study_day || null,
         whatsapp_preference: typeof reqData?.whatsapp_preference === 'boolean' ? reqData.whatsapp_preference : true,
-      })
+      }, { onConflict: 'profile_id' })
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }

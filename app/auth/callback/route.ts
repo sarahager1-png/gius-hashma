@@ -108,13 +108,16 @@ export async function GET(request: Request) {
     .single()
 
   if (approvedReq) {
-    await service.from('profiles').insert({
+    // Always upsert profile + candidates for the current Google userId,
+    // regardless of whether a different auth user was created during approval.
+    await service.from('profiles').upsert({
       id:        userId,
       role:      'מועמדת',
       full_name: approvedReq.full_name,
       phone:     approvedReq.phone ?? null,
-    })
-    await service.from('candidates').insert({
+    }, { onConflict: 'id', ignoreDuplicates: false })
+
+    await service.from('candidates').upsert({
       profile_id:           userId,
       city:                 approvedReq.city || null,
       district:             approvedReq.district || null,
@@ -139,8 +142,8 @@ export async function GET(request: Request) {
       availability_to:      approvedReq.availability_to || null,
       study_day:            approvedReq.study_day || null,
       work_cities:          approvedReq.work_cities || null,
-    })
-    // Link the profile so this request isn't reused
+    }, { onConflict: 'profile_id' })
+
     await service.from('candidate_requests').update({ profile_id: userId }).eq('id', approvedReq.id)
     return NextResponse.redirect(`${origin}/profile`)
   }
