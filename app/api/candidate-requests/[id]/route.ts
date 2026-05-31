@@ -24,8 +24,10 @@ function buildApprovalWA(name: string, loginLink: string): string {
     `✍️ תאשרי את ההזמנה — וייקבע ביניכן קשר ישיר\n` +
     `📊 את כל הגשותיך ותהליכי הראיון תוכלי לעקוב בדשבורד\n\n` +
     `*כל עדכון יגיע אלייך ישירות לוואטסאפ* 📱\n\n` +
-    `כל פרטי הרישום שלך כבר שמורים — אפשר להתחיל מיד!\n\n` +
-    `🔗 לכניסה ישירה לפרופיל שלך:\n${loginLink}\n\n` +
+    `⚠️ *שלב חשוב — כניסה ראשונה*\n` +
+    `כדי שהמועמדות שלך תהיה פעילה במערכת, יש להיכנס לפחות פעם אחת.\n` +
+    `ללא כניסה ראשונה — המועמדות אינה תקפה.\n\n` +
+    `🔗 לכניסה:\n${loginLink}\n\n` +
     `בהצלחה! 🌟\n*רשת חינוך חב"ד*`
   )
 }
@@ -123,7 +125,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     // Send welcome message
     const waMsg = buildApprovalWA(req.full_name, `${APP_URL}/profile`)
-    const smsMsg = `ברוכה הבאה למערכת השביל! הבקשה אושרה — כניסה: ${APP_URL}/profile`
+    const smsMsg = `ברוכה הבאה למערכת השביל! הבקשה אושרה. חשוב: יש להיכנס לפחות פעם אחת כדי שהמועמדות תהיה פעילה — ${APP_URL}/profile`
     void sendExternal({ phone: req.phone, whatsapp_preference: req.whatsapp_preference ?? true, waMessage: waMsg, smsMessage: smsMsg })
 
     return NextResponse.json({ ok: true, directApproval: true })
@@ -211,7 +213,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     })
     const loginLink = (linkData as { properties?: { action_link?: string } } | null)?.properties?.action_link ?? `${APP_URL}/profile`
     const waMsg = buildApprovalWA(req.full_name, loginLink)
-    const smsMsg = `ברוכה הבאה למערכת השביל! הבקשה אושרה — לכניסה ישירה: ${loginLink}`
+    const smsMsg = `ברוכה הבאה למערכת השביל! הבקשה אושרה. חשוב: יש להיכנס לפחות פעם אחת כדי שהמועמדות תהיה פעילה — ${loginLink}`
     void sendExternal({ phone: req.phone, whatsapp_preference: req.whatsapp_preference ?? true, waMessage: waMsg, smsMessage: smsMsg })
 
     return NextResponse.json({ ok: true, directApproval: true })
@@ -232,8 +234,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     `כל פרטי הרישום שלך שמורים במערכת.\n\n` +
     `🔑 קוד הגישה שלך: *${code}*\n` +
     `🔗 כניסה: ${APP_URL}/register/candidate/activate\n\n` +
+    `⚠️ *שלב חשוב!*\n` +
+    `כדי שהמועמדות שלך תהיה פעילה — יש להיכנס עם הקוד ולהשלים את הרישום.\n` +
+    `ללא כניסה ראשונה, המועמדות אינה תקפה.\n\n` +
     `תמיד ניתן לעדכן את הפרופיל לאחר הכניסה 😊`
-  const smsCode = `שלום ${req.full_name}, הבקשה אושרה! קוד הגישה: ${code} | ${APP_URL}/register/candidate/activate`
+  const smsCode = `שלום ${req.full_name}, הבקשה אושרה! קוד גישה: ${code} | חשוב: יש להיכנס כדי שהמועמדות תהיה פעילה: ${APP_URL}/register/candidate/activate`
   void sendExternal({ phone: req.phone, whatsapp_preference: req.whatsapp_preference ?? true, waMessage: waCode, smsMessage: smsCode })
 
   return NextResponse.json({ ok: true })
