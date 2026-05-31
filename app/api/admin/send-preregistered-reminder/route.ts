@@ -28,6 +28,12 @@ async function handler(request: Request) {
 
   if (!pending?.length) return NextResponse.json({ sent: 0, skipped: 0 })
 
+  // exclude those who already have an account (registered)
+  const { data: usersPage } = await service.auth.admin.listUsers({ perPage: 1000 })
+  const registeredEmails = new Set((usersPage?.users ?? []).map(u => u.email?.toLowerCase()).filter(Boolean))
+  const unregistered = pending.filter(p => !registeredEmails.has((p.email ?? '').toLowerCase()))
+  if (!unregistered.length) return NextResponse.json({ sent: 0, skipped: pending.length })
+
   const { data: leads } = await service
     .from('institution_leads')
     .select('institution_name, phone')
@@ -42,7 +48,7 @@ async function handler(request: Request) {
   let sent = 0
   let skipped = 0
 
-  for (const p of pending) {
+  for (const p of unregistered) {
     const phone = p.phone ?? leadsMap.get(p.institution_name.trim().toLowerCase()) ?? null
     if (!phone) { skipped++; continue }
 
@@ -72,13 +78,13 @@ async function handler(request: Request) {
     if (waOk) { sent++ }
     else {
       const smsOk = await sendSms(phone, msg)
-      if (smsOk) sent++ else skipped++
+      if (smsOk) { sent++ } else { skipped++ }
     }
 
     await new Promise(r => setTimeout(r, 2000))
   }
 
-  return NextResponse.json({ sent, skipped })
+  return NextResponse.json({ sent, skipped, already_registered: pending.length - unregistered.length })
 }
 
 export { handler as GET, handler as POST }
