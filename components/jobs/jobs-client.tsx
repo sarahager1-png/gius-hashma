@@ -7,29 +7,47 @@ import JobCard from './job-card'
 import { SPECIALIZATIONS, JOB_TYPES } from '@/lib/constants'
 import type { Job } from '@/lib/types'
 
+type JobWithInst = Job & { institutions?: { institution_name: string; city: string | null } }
+
 interface Props {
-  jobs: (Job & { institutions?: { institution_name: string; city: string | null } })[]
+  jobs: JobWithInst[]
   appliedJobIds: Set<string>
   candidateId: string | null
+  candidateDistrict?: string | null
+  candidateWorkCities?: string[] | null
   initialSearch?: string
 }
 
-export default function JobsClient({ jobs, appliedJobIds, candidateId, initialSearch = '' }: Props) {
+function matchScore(job: JobWithInst, district?: string | null, workCities?: string[] | null): number {
+  let s = 0
+  if (district && job.district === district) s += 2
+  if (workCities?.length && job.city && workCities.includes(job.city)) s += 2
+  return s
+}
+
+export default function JobsClient({ jobs, appliedJobIds, candidateId, candidateDistrict, candidateWorkCities, initialSearch = '' }: Props) {
   const [search, setSearch] = useState(initialSearch)
   const [specialization, setSpecialization] = useState('הכל')
   const [jobType, setJobType] = useState('הכל')
 
-  const filtered = jobs.filter(job => {
-    const text = search.toLowerCase()
-    const matchSearch =
-      !text ||
-      job.title.toLowerCase().includes(text) ||
-      job.city?.toLowerCase().includes(text) ||
-      job.institutions?.institution_name.toLowerCase().includes(text)
-    const matchSpec = specialization === 'הכל' || job.specialization === specialization
-    const matchType = jobType === 'הכל' || job.job_type === jobType
-    return matchSearch && matchSpec && matchType
-  })
+  const hasLocationData = !!(candidateDistrict || candidateWorkCities?.length)
+
+  const filtered = jobs
+    .filter(job => {
+      const text = search.toLowerCase()
+      const matchSearch =
+        !text ||
+        job.title.toLowerCase().includes(text) ||
+        job.city?.toLowerCase().includes(text) ||
+        job.institutions?.institution_name.toLowerCase().includes(text)
+      const matchSpec = specialization === 'הכל' || job.specialization === specialization
+      const matchType = jobType === 'הכל' || job.job_type === jobType
+      return matchSearch && matchSpec && matchType
+    })
+    .sort((a, b) =>
+      matchScore(b, candidateDistrict, candidateWorkCities) -
+      matchScore(a, candidateDistrict, candidateWorkCities)
+    )
 
   return (
     <div>
@@ -66,6 +84,7 @@ export default function JobsClient({ jobs, appliedJobIds, candidateId, initialSe
               job={job}
               applied={appliedJobIds.has(job.id)}
               candidateId={candidateId}
+              isMatched={hasLocationData && matchScore(job, candidateDistrict, candidateWorkCities) > 0}
             />
           ))}
         </div>

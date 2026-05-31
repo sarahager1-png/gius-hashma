@@ -12,11 +12,8 @@ function genCode() {
 
 const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
 
-function buildApprovalWA(name: string, email: string | null, appUrl: string): string {
+function buildApprovalWA(name: string, loginLink: string): string {
   const firstName = name.split(' ')[0]
-  const loginLine = email
-    ? `🔗 להיכנס עם Google:\n${appUrl}/profile\n\n⚠️ יש להיכנס עם המייל: ${email}`
-    : `🔗 להיכנס למערכת:\n${appUrl}/profile`
   return (
     `✅ ברוכה הבאה ${firstName}! בקשתך אושרה 🎉\n\n` +
     `אנחנו כאן איתך — בשבילך 💜\n\n` +
@@ -28,7 +25,7 @@ function buildApprovalWA(name: string, email: string | null, appUrl: string): st
     `📊 את כל הגשותיך ותהליכי הראיון תוכלי לעקוב בדשבורד\n\n` +
     `*כל עדכון יגיע אלייך ישירות לוואטסאפ* 📱\n\n` +
     `כל פרטי הרישום שלך כבר שמורים — אפשר להתחיל מיד!\n\n` +
-    `${loginLine}\n\n` +
+    `🔗 לכניסה ישירה לפרופיל שלך:\n${loginLink}\n\n` +
     `בהצלחה! 🌟\n*רשת חינוך חב"ד*`
   )
 }
@@ -84,8 +81,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       phone: req.phone,
     })
 
-    // Create the candidates row with all rich data
-    await service.from('candidates').insert({
+    // Upsert the candidates row — handles the case where auth callback already created a blank row
+    await service.from('candidates').upsert({
       profile_id: req.profile_id,
       city: req.city || null,
       college: req.college || null,
@@ -111,7 +108,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       availability_to: req.availability_to || null,
       study_day: req.study_day || null,
       work_cities: req.work_cities || null,
-    })
+    }, { onConflict: 'profile_id' })
 
     await service.from('candidate_requests').update({ status: 'אושרה' }).eq('id', id)
     void logAction(user.id, 'approve_candidate_request', 'candidate_request', id)
@@ -124,21 +121,99 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       body: `שלום ${req.full_name}, ברוכה הבאה לפלטפורמת הגיוס של רשת חב"ד. תוכלי כעת להיכנס עם Google.`,
     })
 
-    // Welcome message (WhatsApp if preferred, otherwise SMS)
-    const waMsg = buildApprovalWA(req.full_name, null, APP_URL)
-    const smsMsg = `ברוכה הבאה למערכת השביל! הבקשה אושרה — כניסה עם Google: ${APP_URL}/profile`
+    // Send welcome message
+    const waMsg = buildApprovalWA(req.full_name, `${APP_URL}/profile`)
+    const smsMsg = `ברוכה הבאה למערכת השביל! הבקשה אושרה — כניסה: ${APP_URL}/profile`
     void sendExternal({ phone: req.phone, whatsapp_preference: req.whatsapp_preference ?? true, waMessage: waMsg, smsMessage: smsMsg })
 
     return NextResponse.json({ ok: true, directApproval: true })
   }
 
-  await service.from('candidate_requests').update({ status: 'אושרה' }).eq('id', id)
-  void logAction(user.id, 'approve_candidate_request', 'candidate_request', id)
+  // ── No profile_id yet ──
+  // Create auth user + profile + candidates immediately so the candidate is active right away.
 
   if (req.email?.trim()) {
-    const waMsg = buildApprovalWA(req.full_name, req.email.trim(), APP_URL)
-    const smsMsg = `ברוכה הבאה למערכת השביל! הבקשה אושרה — כניסי עם Google (${req.email.trim()}): ${APP_URL}/profile`
+    // 1. Create auth user (or find existing)
+    let authUserId: string
+    const { data: authData } = await service.auth.admin.createUser({
+      email: req.email.trim(),
+      email_confirm: true,
+    })
+    if (authData?.user) {
+      authUserId = authData.user.id
+    } else {
+      // User already exists — find by email
+      const { data: listData } = await service.auth.admin.listUsers({ perPage: 1000 })
+      const found = listData?.users?.find((u: { email?: string }) => u.email?.toLowerCase() === req.email!.trim().toLowerCase())
+      if (!found) return NextResponse.json({ error: 'שגיאה ביצירת חשבון' }, { status: 500 })
+      authUserId = found.id
+    }
+
+    // 2. Create or update profile
+    const { data: existingProfile } = await service.from('profiles').select('id').eq('id', authUserId).single()
+    if (!existingProfile) {
+      await service.from('profiles').insert({
+        id: authUserId,
+        role: 'מועמדת',
+        full_name: req.full_name,
+        phone: req.phone,
+      })
+    }
+
+    // 3. Upsert candidates row — always populate data from the request,
+    //    even if a blank row already exists (e.g. from a prior Google sign-in)
+    await service.from('candidates').upsert({
+      profile_id: authUserId,
+      city: req.city || null,
+      college: req.college || null,
+      graduation_year: req.graduation_year || null,
+      specialization: req.specialization || null,
+      academic_level: req.academic_level || null,
+      district: req.district || null,
+      address: req.address || null,
+      birth_year: req.birth_year || null,
+      marital_status: req.marital_status || null,
+      maiden_name: req.maiden_name || null,
+      seniority_years: req.seniority_years || null,
+      handwriting_font: req.handwriting_font || null,
+      technical_skills: req.technical_skills || null,
+      interpersonal_skills: req.interpersonal_skills || null,
+      experiences: req.experiences || null,
+      practical_work: req.practical_work || null,
+      shlichut_location: req.shlichut_location || null,
+      shlichut_years: req.shlichut_years || null,
+      past_projects: req.past_projects || null,
+      personal_note: req.personal_note || null,
+      availability_from: req.availability_from || null,
+      availability_to: req.availability_to || null,
+      study_day: req.study_day || null,
+      work_cities: req.work_cities || null,
+      whatsapp_preference: typeof req.whatsapp_preference === 'boolean' ? req.whatsapp_preference : true,
+    }, { onConflict: 'profile_id' })
+
+    // 3. Mark request as approved and link to profile
+    await service.from('candidate_requests').update({ status: 'אושרה', profile_id: authUserId }).eq('id', id)
+    void logAction(user.id, 'approve_candidate_request', 'candidate_request', id)
+
+    // 4. In-app notification
+    void service.from('notifications').insert({
+      profile_id: authUserId,
+      type: 'request_approved',
+      title: 'בקשתך אושרה! 🎉',
+      body: `שלום ${req.full_name}, ברוכה הבאה לפלטפורמת הגיוס של רשת חב"ד. תוכלי כעת להיכנס למערכת.`,
+    })
+
+    // 5. Generate magic link for direct sign-in (no password needed)
+    const { data: linkData } = await service.auth.admin.generateLink({
+      type: 'magiclink',
+      email: req.email.trim(),
+      options: { redirectTo: `${APP_URL}/auth/callback` },
+    })
+    const loginLink = (linkData as { properties?: { action_link?: string } } | null)?.properties?.action_link ?? `${APP_URL}/profile`
+    const waMsg = buildApprovalWA(req.full_name, loginLink)
+    const smsMsg = `ברוכה הבאה למערכת השביל! הבקשה אושרה — לכניסה ישירה: ${loginLink}`
     void sendExternal({ phone: req.phone, whatsapp_preference: req.whatsapp_preference ?? true, waMessage: waMsg, smsMessage: smsMsg })
+
     return NextResponse.json({ ok: true, directApproval: true })
   }
 

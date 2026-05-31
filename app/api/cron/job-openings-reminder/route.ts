@@ -5,8 +5,17 @@ import { sendSms } from '@/lib/sms'
 
 export async function GET(req: Request) {
   const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret || req.headers.get('authorization') !== `Bearer ${cronSecret}`)
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const isCron = cronSecret && req.headers.get('authorization') === `Bearer ${cronSecret}`
+
+  if (!isCron) {
+    const { createClient } = await import('@/lib/supabase/server')
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { data: profile } = await createServiceClient().from('profiles').select('role').eq('id', user.id).single()
+    if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role))
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
 
   const service = createServiceClient()
 
@@ -20,7 +29,7 @@ export async function GET(req: Request) {
   let skipped = 0
 
   for (const inst of institutions) {
-    const owner = inst.owner as { full_name: string | null; phone: string | null } | null
+    const owner = inst.owner as unknown as { full_name: string | null; phone: string | null } | null
     const phone = owner?.phone ?? null
     if (!phone) { skipped++; continue }
 
@@ -41,7 +50,7 @@ export async function GET(req: Request) {
     if (waOk) { sent++ }
     else {
       const smsOk = await sendSms(phone, msg)
-      if (smsOk) sent++ else skipped++
+      if (smsOk) { sent++ } else { skipped++ }
     }
 
     await new Promise(r => setTimeout(r, 2000))

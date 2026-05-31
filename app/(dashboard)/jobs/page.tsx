@@ -33,7 +33,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
     .order('created_at', { ascending: false })
 
   const { data: candidate } = await service
-    .from('candidates').select('id').eq('profile_id', user.id).maybeSingle()
+    .from('candidates').select('id, district, work_cities').eq('profile_id', user.id).maybeSingle()
 
   const { data: myApps } = candidate
     ? await service.from('applications').select('job_id').eq('candidate_id', candidate.id)
@@ -44,7 +44,14 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
   return (
     <div className="p-4 md:p-8">
       <h1 className="text-2xl font-bold mb-6" style={{ color: 'var(--purple)' }}>משרות פעילות</h1>
-      <JobsClient jobs={jobs ?? []} appliedJobIds={appliedJobIds} candidateId={candidate?.id ?? null} initialSearch={q ?? ''} />
+      <JobsClient
+        jobs={jobs ?? []}
+        appliedJobIds={appliedJobIds}
+        candidateId={candidate?.id ?? null}
+        candidateDistrict={candidate?.district ?? null}
+        candidateWorkCities={(candidate?.work_cities as string[] | null) ?? null}
+        initialSearch={q ?? ''}
+      />
     </div>
   )
 }

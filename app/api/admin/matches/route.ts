@@ -33,17 +33,17 @@ export async function GET() {
 
   const service = createServiceClient()
 
-  // Fetch active jobs with institution data
+  // Fetch active jobs with institution data (include job-level district too)
   const { data: jobs } = await service
     .from('jobs')
-    .select('id, title, specialization, city, institution_id, institutions!inner(id, institution_name, city, district, is_approved)')
+    .select('id, title, specialization, city, district, job_type, institution_id, institutions!inner(id, institution_name, city, district, is_approved)')
     .eq('status', 'פעילה')
     .limit(50)
 
   // Fetch available candidates
   const { data: candidates } = await service
     .from('candidates')
-    .select('id, district, city, college, specialization, academic_level, availability_status, cv_url, profiles(full_name, phone)')
+    .select('id, district, city, work_cities, college, specialization, academic_level, availability_status, cv_url, profiles(full_name, phone)')
     .neq('availability_status', 'משובצת')
     .neq('availability_status', 'לא פעילה')
     .limit(100)
@@ -65,65 +65,86 @@ export async function GET() {
     }
     if (!inst?.is_approved) continue
 
+    // Effective location of the job: prefer institution fields as ground truth
+    const jobDistrict = inst.district ?? (job as unknown as Record<string, unknown>).district as string | null
+    const jobCity    = inst.city ?? job.city
+
     for (const cand of candidates ?? []) {
       if (appliedPairs.has(`${job.id}:${cand.id}`)) continue
 
-      const prof = cand.profiles as unknown as { full_name: string | null; phone: string | null } | null
+      const prof      = cand.profiles as unknown as { full_name: string | null; phone: string | null } | null
+      const workCities = (cand.work_cities as string[] | null) ?? []
       let score = 0
       const reasons: string[] = []
+      let locationHit = false
+      let roleHit     = false
 
-      // District match (highest priority)
-      if (cand.district && inst.district && cand.district === inst.district) {
-        score += 5
-        reasons.push(`מחוז: ${cand.district}`)
-      }
-
-      // Specialization match
-      if (cand.specialization && job.specialization && cand.specialization === job.specialization) {
+      // ── Location signals ─────────────────────────────────────────────
+      if (cand.district && jobDistrict && cand.district === jobDistrict) {
         score += 4
-        reasons.push(`התמחות: ${cand.specialization}`)
-      } else if (job.specialization === null || cand.specialization === 'שניהם') {
-        score += 2
+        reasons.push(`מחוז: ${cand.district}`)
+        locationHit = true
+      }
+      if (jobCity) {
+        if (cand.city && cand.city === jobCity) {
+          score += 3
+          if (!reasons.find(r => r.startsWith('עיר'))) reasons.push(`עיר: ${cand.city}`)
+          locationHit = true
+        } else if (workCities.includes(jobCity)) {
+          score += 3
+          reasons.push(`עיר מועדפת: ${jobCity}`)
+          locationHit = true
+        }
       }
 
-      // City match
-      if (cand.city && inst.city && cand.city === inst.city) {
+      // ── Role / specialization signals ────────────────────────────────
+      if (cand.specialization && job.specialization && cand.specialization === job.specialization) {
+        score += 5
+        reasons.push(`התמחות: ${cand.specialization}`)
+        roleHit = true
+      }
+      // Academic level ↔ job type: סטאג' candidate → סטאג' job
+      const jobType = (job as unknown as Record<string, unknown>).job_type as string | null
+      if (jobType === "סטאג'" && cand.academic_level?.includes("סטאג'")) {
         score += 2
-        reasons.push(`עיר: ${cand.city}`)
-      } else if (cand.city && job.city && cand.city === job.city) {
-        score += 2
-        reasons.push(`עיר: ${cand.city}`)
+        reasons.push(`רמה: ${cand.academic_level}`)
+        roleHit = true
+      } else if (jobType && jobType !== "סטאג'" && cand.academic_level && !cand.academic_level.includes("סטאג'")) {
+        score += 1
+        roleHit = true
       }
 
       // Availability bonus
       if (cand.availability_status === "מחפשת סטאג'") score += 1
 
-      if (score >= 4) {
-        matches.push({
-          candidateId: cand.id,
-          candidateName: prof?.full_name ?? '—',
-          candidatePhone: prof?.phone ?? null,
-          candidateCity: cand.city,
-          candidateDistrict: cand.district,
-          college: cand.college,
-          academicLevel: cand.academic_level,
-          specialization: cand.specialization,
-          availabilityStatus: cand.availability_status,
-          cvUrl: cand.cv_url,
-          jobId: job.id,
-          jobTitle: job.title,
-          institutionId: inst.id,
-          institutionName: inst.institution_name,
-          institutionDistrict: inst.district,
-          institutionCity: inst.city,
-          score,
-          reasons,
-        })
-      }
+      // Require a meaningful signal on BOTH dimensions to avoid generic matches
+      if (!locationHit || !roleHit) continue
+      if (score < 7) continue
+
+      matches.push({
+        candidateId: cand.id,
+        candidateName: prof?.full_name ?? '—',
+        candidatePhone: prof?.phone ?? null,
+        candidateCity: cand.city,
+        candidateDistrict: cand.district,
+        college: cand.college,
+        academicLevel: cand.academic_level,
+        specialization: cand.specialization,
+        availabilityStatus: cand.availability_status,
+        cvUrl: cand.cv_url,
+        jobId: job.id,
+        jobTitle: job.title,
+        institutionId: inst.id,
+        institutionName: inst.institution_name,
+        institutionDistrict: jobDistrict,
+        institutionCity: jobCity,
+        score,
+        reasons,
+      })
     }
   }
 
-  // Sort by score desc, limit to top 50
+  // Sort by score desc, limit to top 60
   matches.sort((a, b) => b.score - a.score)
   return NextResponse.json(matches.slice(0, 60))
 }

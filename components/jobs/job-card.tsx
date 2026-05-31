@@ -9,6 +9,7 @@ interface Props {
   job: Job & { institutions?: { institution_name: string; city: string | null } }
   applied: boolean
   candidateId: string | null
+  isMatched?: boolean
 }
 
 const TYPE_CFG: Record<string, { bg: string; color: string }> = {
@@ -17,7 +18,7 @@ const TYPE_CFG: Record<string, { bg: string; color: string }> = {
   'מלא':   { bg: 'var(--green-bg)',   color: 'var(--green)'     },
 }
 
-export default function JobCard({ job, applied: initialApplied, candidateId }: Props) {
+export default function JobCard({ job, applied: initialApplied, candidateId, isMatched }: Props) {
   const [applied, setApplied] = useState(initialApplied)
   const [applying, setApplying] = useState(false)
 
@@ -61,6 +62,14 @@ export default function JobCard({ job, applied: initialApplied, candidateId }: P
     >
       {/* Signature brand bar — always purple→teal */}
       <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #4B2E83 0%, #00A7B5 100%)' }} />
+      {isMatched && (
+        <div className="px-5 pt-3 pb-0">
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full"
+            style={{ background: 'rgba(0,167,181,.12)', color: 'var(--teal-600)', border: '1px solid rgba(0,167,181,.25)' }}>
+            ✦ מתאימה לאזורך
+          </span>
+        </div>
+      )}
       {/* Card body */}
       <div style={{ padding: '22px 22px 18px' }}>
         {/* Header row */}
