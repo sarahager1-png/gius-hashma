@@ -20,8 +20,8 @@ interface Props {
 
 function matchScore(job: JobWithInst, district?: string | null, workCities?: string[] | null): number {
   let s = 0
+  if (workCities?.length && job.city && workCities.includes(job.city)) s += 3
   if (district && job.district === district) s += 2
-  if (workCities?.length && job.city && workCities.includes(job.city)) s += 2
   return s
 }
 

@@ -80,21 +80,21 @@ export async function GET() {
       let roleHit     = false
 
       // ── Location signals ─────────────────────────────────────────────
-      if (cand.district && jobDistrict && cand.district === jobDistrict) {
-        score += 4
-        reasons.push(`מחוז: ${cand.district}`)
-        locationHit = true
-      }
       if (jobCity) {
         if (cand.city && cand.city === jobCity) {
-          score += 3
-          if (!reasons.find(r => r.startsWith('עיר'))) reasons.push(`עיר: ${cand.city}`)
+          score += 5
+          reasons.push(`עיר: ${cand.city}`)
           locationHit = true
         } else if (workCities.includes(jobCity)) {
-          score += 3
+          score += 5
           reasons.push(`עיר מועדפת: ${jobCity}`)
           locationHit = true
         }
+      }
+      if (cand.district && jobDistrict && cand.district === jobDistrict) {
+        score += 3
+        reasons.push(`מחוז: ${cand.district}`)
+        locationHit = true
       }
 
       // ── Role / specialization signals ────────────────────────────────
