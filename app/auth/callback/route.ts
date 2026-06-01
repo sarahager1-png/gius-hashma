@@ -151,7 +151,7 @@ export async function GET(request: Request) {
     if (approvedReq.profile_id && approvedReq.profile_id !== userId) {
       await service.from('candidates').delete().eq('profile_id', approvedReq.profile_id)
       await service.from('profiles').delete().eq('id', approvedReq.profile_id)
-      void service.auth.admin.deleteUser(approvedReq.profile_id)
+      await service.auth.admin.deleteUser(approvedReq.profile_id)
     }
 
     return NextResponse.redirect(`${origin}/profile`)
