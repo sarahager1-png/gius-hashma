@@ -41,9 +41,13 @@ export async function GET(request: Request) {
     }
 
     const filters: string[] = []
-    if (candidate.specialization) filters.push(`specialization.eq.${candidate.specialization}`)
-    if (candidate.district)       filters.push(`district.eq.${candidate.district}`)
-    if (candidate.city)           filters.push(`city.eq.${candidate.city}`)
+    // Split compound specialization (e.g. "אנגלית, חט"ב") into separate OR filters
+    if (candidate.specialization) {
+      const specs = candidate.specialization.split(',').map((s: string) => s.trim())
+      specs.forEach(spec => filters.push(`specialization.eq.${spec}`))
+    }
+    if (candidate.district) filters.push(`district.eq.${candidate.district}`)
+    if (candidate.city)     filters.push(`city.eq.${candidate.city}`)
     if (!filters.length) continue
 
     const { data: jobs } = await service

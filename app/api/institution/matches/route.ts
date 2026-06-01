@@ -52,8 +52,10 @@ export async function GET() {
       if (cand.district && institution.district && cand.district === institution.district) {
         score += 5; reasons.push(`מחוז: ${cand.district}`)
       }
-      if (cand.specialization && job.specialization && cand.specialization === job.specialization) {
-        score += 4; reasons.push(`התמחות: ${cand.specialization}`)
+      const candSpecs = cand.specialization?.split(',').map((s: string) => s.trim()) ?? []
+      if (cand.specialization && job.specialization &&
+          (cand.specialization === job.specialization || candSpecs.includes(job.specialization))) {
+        score += 4; reasons.push(`התמחות: ${job.specialization}`)
       } else if (!job.specialization || cand.specialization === 'שניהם') {
         score += 2
       }

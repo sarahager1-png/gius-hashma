@@ -36,17 +36,19 @@ export async function GET(request: Request) {
     const institutionName = (job.institutions as unknown as { institution_name: string } | null)?.institution_name ?? ''
     const city = job.city ?? ''
 
-    let query = service
+    const { data: allCandidates } = await service
       .from('candidates')
-      .select('profile_id, whatsapp_preference, profiles(full_name, phone)')
+      .select('profile_id, whatsapp_preference, specialization, profiles(full_name, phone)')
       .not('availability_status', 'in', '("משובצת","לא פעילה")')
+      .limit(200)
 
-    if (job.specialization && job.specialization !== 'שניהם') {
-      query = query.in('specialization', [job.specialization, 'שניהם'])
-    }
-
-    const { data: candidates } = await query.limit(30)
-    if (!candidates?.length) continue
+    // Filter by specialization — candidates may store multiple values as comma-separated string
+    const candidates = (allCandidates ?? []).filter(c => {
+      if (!job.specialization || job.specialization === 'שניהם') return true
+      const specs = (c.specialization as string | null)?.split(',').map((s: string) => s.trim()) ?? []
+      return specs.includes(job.specialization) || specs.includes('שניהם')
+    })
+    if (!candidates.length) continue
 
     // skip candidates already notified about this job
     const { data: existingNotifs } = await service

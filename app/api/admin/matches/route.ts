@@ -80,6 +80,7 @@ export async function GET() {
       let roleHit     = false
 
       // ── Location signals ─────────────────────────────────────────────
+      const hasWorkCities = workCities.length > 0
       if (jobCity) {
         if (cand.city && cand.city === jobCity) {
           score += 5
@@ -94,13 +95,18 @@ export async function GET() {
       if (cand.district && jobDistrict && cand.district === jobDistrict) {
         score += 3
         reasons.push(`מחוז: ${cand.district}`)
-        locationHit = true
+        // District alone counts as location hit only when the candidate has no preferred-city list.
+        // If work_cities is set, the job city must appear in it for a real location hit.
+        if (!hasWorkCities) locationHit = true
       }
 
       // ── Role / specialization signals ────────────────────────────────
-      if (cand.specialization && job.specialization && cand.specialization === job.specialization) {
+      // Candidates may store multiple specializations as a comma-separated string
+      const candSpecs = cand.specialization?.split(',').map((s: string) => s.trim()) ?? []
+      if (cand.specialization && job.specialization &&
+          (cand.specialization === job.specialization || candSpecs.includes(job.specialization))) {
         score += 5
-        reasons.push(`התמחות: ${cand.specialization}`)
+        reasons.push(`התמחות: ${job.specialization}`)
         roleHit = true
       }
       // Academic level ↔ job type: סטאג' candidate → סטאג' job
