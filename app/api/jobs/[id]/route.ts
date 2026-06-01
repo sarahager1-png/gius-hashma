@@ -33,7 +33,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   // non-admin must own the institution
   if (!isAdmin) {
-    const { data: job } = await supabase
+    const { data: job } = await service
       .from('jobs')
       .select('institution_id, institutions!inner(profile_id)')
       .eq('id', id)

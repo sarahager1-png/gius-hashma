@@ -227,8 +227,11 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
 
   const initWork = (): WorkEntry[] => {
     const raw = candidate?.experiences
-    if (Array.isArray(raw) && raw.length > 0) return raw as WorkEntry[]
-    return [{ workplace: '', manager: '' }]
+    if (!Array.isArray(raw) || raw.length === 0) return [{ workplace: '', manager: '' }]
+    return raw.map((e: unknown) => {
+      const entry = e as Record<string, string>
+      return { workplace: entry.workplace ?? entry.employer ?? '', manager: entry.manager ?? '' }
+    })
   }
   const [workHistory, setWorkHistory] = useState<WorkEntry[]>(initWork)
   function setWork(i: number, key: 'workplace' | 'manager', val: string) { setWorkHistory(prev => prev.map((e, idx) => idx === i ? { ...e, [key]: val } : e)) }
@@ -242,7 +245,7 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
   function setC(k: string, v: string | boolean) { setCandForm(f => ({ ...f, [k]: v })) }
 
   const showExperience = ACADEMIC_LEVELS_WITH_EXPERIENCE.includes(candForm.academic_level as never)
-  const filledWork = workHistory.filter(e => e.workplace.trim())
+  const filledWork = workHistory.filter(e => e.workplace?.trim())
 
   async function handleSave() {
     setSaving(true)
@@ -255,7 +258,7 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
           birth_year: candForm.birth_year ? parseInt(candForm.birth_year) : null,
           graduation_year: candForm.graduation_year ? parseInt(candForm.graduation_year) : null,
           years_experience: candForm.years_experience ? parseInt(candForm.years_experience) : null,
-          experiences: workHistory.filter(e => e.workplace.trim()),
+          experiences: workHistory.filter(e => e.workplace?.trim()),
         },
       }),
     })
