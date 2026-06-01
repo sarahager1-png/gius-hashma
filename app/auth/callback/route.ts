@@ -145,6 +145,15 @@ export async function GET(request: Request) {
     }, { onConflict: 'profile_id' })
 
     await service.from('candidate_requests').update({ profile_id: userId }).eq('id', approvedReq.id)
+
+    // Clean up the email-auth user that was pre-created during approval
+    // (its profile_id differs from the Google userId that just signed in)
+    if (approvedReq.profile_id && approvedReq.profile_id !== userId) {
+      await service.from('candidates').delete().eq('profile_id', approvedReq.profile_id)
+      await service.from('profiles').delete().eq('id', approvedReq.profile_id)
+      void service.auth.admin.deleteUser(approvedReq.profile_id)
+    }
+
     return NextResponse.redirect(`${origin}/profile`)
   }
 

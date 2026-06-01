@@ -144,11 +144,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (authData?.user) {
       authUserId = authData.user.id
     } else {
-      // User already exists — find by email
-      const { data: listData } = await service.auth.admin.listUsers({ perPage: 1000 })
-      const found = listData?.users?.find((u: { email?: string }) => u.email?.toLowerCase() === req.email!.trim().toLowerCase())
-      if (!found) return NextResponse.json({ error: 'שגיאה ביצירת חשבון' }, { status: 500 })
-      authUserId = found.id
+      // User already exists — get their ID via generateLink (works regardless of total user count)
+      const { data: linkData } = await service.auth.admin.generateLink({
+        type: 'magiclink',
+        email: req.email.trim(),
+        options: { redirectTo: `${APP_URL}/auth/callback` },
+      })
+      const existingId = (linkData as { user?: { id?: string } } | null)?.user?.id
+      if (!existingId) return NextResponse.json({ error: 'שגיאה ביצירת חשבון' }, { status: 500 })
+      authUserId = existingId
     }
 
     // 2. Create or update profile

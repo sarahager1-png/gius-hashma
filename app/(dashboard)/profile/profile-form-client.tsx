@@ -42,7 +42,7 @@ const SPECIAL_SKILLS_OPTIONS = [
 ]
 
 interface Props { profile: Profile; candidate: Candidate | null }
-type WorkEntry = { workplace: string; manager: string }
+type WorkEntry = { workplace: string; manager: string; [k: string]: string | undefined }
 
 const inputCls = 'w-full h-10 rounded-[10px] border px-3 text-[14px] outline-none'
 const inputStyle = { borderColor: 'var(--line)', background: '#fff', color: 'var(--ink)' }
@@ -229,8 +229,8 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
     const raw = candidate?.experiences
     if (!Array.isArray(raw) || raw.length === 0) return [{ workplace: '', manager: '' }]
     return raw.map((e: unknown) => {
-      const entry = e as Record<string, string>
-      return { workplace: entry.workplace ?? entry.employer ?? '', manager: entry.manager ?? '' }
+      const entry = e as Record<string, string | undefined>
+      return { ...entry, workplace: entry.workplace ?? entry.employer ?? '', manager: entry.manager ?? '' }
     })
   }
   const [workHistory, setWorkHistory] = useState<WorkEntry[]>(initWork)
