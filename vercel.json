@@ -38,11 +38,11 @@
     },
     {
       "path": "/api/cron/job-alerts",
-      "schedule": "0 6 * * 0"
+      "schedule": "30 5 * * *"
     },
     {
       "path": "/api/cron/candidate-alerts",
-      "schedule": "40 6 * * 0"
+      "schedule": "30 5 * * *"
     },
     {
       "path": "/api/cron/filled-jobs",
