@@ -37,57 +37,9 @@ export async function GET(request: Request) {
       whatsapp_preference: boolean | null
     } | null
 
-    const { error: updateErr } = await service
-      .from('jobs')
-      .update({ status: 'פג תוקפה' })
-      .eq('id', job.id)
-
-    if (updateErr) {
-      console.error('[CRON] job-expiry update failed:', job.id, updateErr)
-      continue
-    }
-
-    if (inst?.profile_id) {
-      await service.from('notifications').insert({
-        profile_id: inst.profile_id,
-        type: 'job_expired',
-        title: `המשרה "${job.title}" פג תוקפה`,
-        body: 'המשרה נסגרה אוטומטית. ניתן לפרסם משרה חדשה בניהול המשרות.',
-        related_id: job.id,
-      })
-    }
-
-    if (inst?.phone) {
-      const waMsg  = `המשרה "${job.title}" פג תוקפה ונסגרה אוטומטית. לפרסום משרה חדשה: giuus.vercel.app/institution/jobs`
-      void sendExternal({ phone: inst.phone, whatsapp_preference: inst.whatsapp_preference, waMessage: waMsg, smsMessage: waMsg })
-    }
-
-    // notify candidates with pending applications to this job
-    const { data: pendingApps } = await service
-      .from('applications')
-      .select('id, candidates(profile_id, whatsapp_preference, profiles(full_name, phone))')
-      .eq('job_id', job.id)
-      .in('status', ['ממתינה', 'נצפתה'])
-
-    for (const app of pendingApps ?? []) {
-      type CandFields = { profile_id: string | null; whatsapp_preference: boolean | null; profiles: { full_name: string | null; phone: string | null } | null }
-      const cand = app.candidates as unknown as CandFields | null
-      if (!cand?.profile_id) continue
-
-      await service.from('notifications').insert({
-        profile_id: cand.profile_id,
-        type: 'job_expired_candidate',
-        title: `המשרה "${job.title}" נסגרה`,
-        body: `המשרה${inst?.institution_name ? ' ב' + inst.institution_name : ''} נסגרה. ניתן לחפש משרות נוספות.`,
-        related_id: job.id,
-      })
-
-      if (cand.profiles?.phone) {
-        const candMsg = `שלום ${cand.profiles.full_name ?? ''}! המשרה "${job.title}"${inst?.institution_name ? ' ב' + inst.institution_name : ''} נסגרה. לחיפוש משרות נוספות: giuus.vercel.app/jobs`
-        void sendExternal({ phone: cand.profiles.phone, whatsapp_preference: cand.whatsapp_preference, waMessage: candMsg, smsMessage: candMsg })
-      }
-    }
-
+    // Auto-renew instead of closing — jobs stay active until manually filled
+    const newExpiry = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+    await service.from('jobs').update({ expires_at: newExpiry.toISOString() }).eq('id', job.id)
     expired++
   }
 
