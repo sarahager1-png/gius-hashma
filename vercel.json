@@ -13,6 +13,10 @@
       "schedule": "10 6 * * *"
     },
     {
+      "path": "/api/cron/pending-applications",
+      "schedule": "15 6 * * *"
+    },
+    {
       "path": "/api/cron/candidate-pending-applications",
       "schedule": "20 6 * * *"
     },
