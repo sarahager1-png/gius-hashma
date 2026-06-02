@@ -18,7 +18,7 @@ export async function GET(request: Request) {
 
   const { data: jobs, error } = await service
     .from('jobs')
-    .select('id, title, city, specialization, institution_id, institutions(institution_name)')
+    .select('id, title, city, district, specialization, institution_id, institutions(institution_name)')
     .eq('status', 'פעילה')
     .gte('created_at', sevenDaysAgo)
 
@@ -38,15 +38,28 @@ export async function GET(request: Request) {
 
     const { data: allCandidates } = await service
       .from('candidates')
-      .select('profile_id, whatsapp_preference, specialization, profiles(full_name, phone)')
+      .select('profile_id, whatsapp_preference, specialization, district, city, work_cities, profiles(full_name, phone)')
       .not('availability_status', 'in', '("משובצת","לא פעילה")')
       .limit(200)
 
-    // Filter by specialization — candidates may store multiple values as comma-separated string
+    // Filter by specialization AND location
+    const jobDistrict = (job as unknown as { district?: string | null }).district ?? null
     const candidates = (allCandidates ?? []).filter(c => {
-      if (!job.specialization || job.specialization === 'שניהם') return true
-      const specs = (c.specialization as string | null)?.split(',').map((s: string) => s.trim()) ?? []
-      return specs.includes(job.specialization) || specs.includes('שניהם')
+      const cand = c as unknown as { specialization: string | null; district: string | null; city: string | null; work_cities: string[] | null }
+
+      // specialization match
+      if (job.specialization && job.specialization !== 'שניהם' && job.specialization !== 'אחר') {
+        const specs = (cand.specialization ?? '').split(',').map((s: string) => s.trim())
+        if (!specs.some(s => s === job.specialization || s === 'שניהם')) return false
+      }
+
+      // location match — candidate's district, city, or work_cities must overlap with job's district/city
+      const workCities: string[] = cand.work_cities ?? []
+      const matchesCity     = city && (cand.city === city || workCities.includes(city))
+      const matchesDistrict = jobDistrict && (cand.district === jobDistrict)
+      if (city || jobDistrict) return !!(matchesCity || matchesDistrict)
+
+      return true
     })
     if (!candidates.length) continue
 
