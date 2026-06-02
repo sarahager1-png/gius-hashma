@@ -40,33 +40,56 @@ export async function GET(request: Request) {
       profiles: { full_name: string | null; phone: string | null }
     }
 
-    const filters: string[] = []
-    // Split compound specialization (e.g. "אנגלית, חט"ב") into separate OR filters
-    if (candidate.specialization) {
-      const specs = candidate.specialization.split(',').map((s: string) => s.trim())
-      specs.forEach(spec => filters.push(`specialization.eq.${spec}`))
-    }
-    if (candidate.district) filters.push(`district.eq.${candidate.district}`)
-    if (candidate.city)     filters.push(`city.eq.${candidate.city}`)
-    if (!filters.length) continue
+    // Fetch jobs by district or city (safe — no special chars), then filter specialization in code
+    const locationFilters: string[] = []
+    if (candidate.district) locationFilters.push(`district.eq.${candidate.district}`)
+    if (candidate.city)     locationFilters.push(`city.eq.${candidate.city}`)
 
-    const { data: jobs } = await service
+    let jobQuery = service
       .from('jobs')
-      .select('institution_id, institutions(profile_id, institution_name, whatsapp_preference, profiles(phone))')
+      .select('institution_id, specialization, institutions(profile_id, institution_name, whatsapp_preference, profiles(phone))')
       .eq('status', 'פעילה')
-      .or(filters.join(','))
-      .limit(50)
 
-    if (!jobs?.length) continue
+    if (locationFilters.length) jobQuery = jobQuery.or(locationFilters.join(',')) as typeof jobQuery
 
-    // fetch institutions already notified about this candidate
+    const { data: allJobs } = await jobQuery.limit(100)
+
+    // filter by specialization in code — avoids issues with " in Hebrew abbreviations
+    const candidateSpecs = (candidate.specialization ?? '')
+      .split(',').map((s: string) => s.trim().toLowerCase()).filter(Boolean)
+
+    const jobs = (allJobs ?? []).filter(j => {
+      const jobSpec = (j.specialization as string | null)?.trim().toLowerCase() ?? ''
+      if (!jobSpec || jobSpec === 'שניהם') return true
+      return !candidate.specialization ||
+        candidateSpecs.some(s => jobSpec.includes(s) || s.includes(jobSpec))
+    })
+
+    if (!jobs.length) continue
+
+    // institutions that already responded — sent interview or have an application for this candidate
+    const { data: respondedInvites } = await service
+      .from('invitations')
+      .select('institution_id')
+      .eq('candidate_profile_id', candidate.profile_id)
+
+    const respondedInstitutions = new Set(
+      (respondedInvites ?? []).map((r: { institution_id: string }) => r.institution_id)
+    )
+
+    // fetch institutions already notified about this candidate (skip only if they responded)
     const { data: existingNotifs } = await service
       .from('notifications')
       .select('profile_id')
       .eq('related_id', candidate.id)
       .eq('type', 'new_match')
 
-    const alreadyNotified = new Set((existingNotifs ?? []).map(n => n.profile_id))
+    // only skip if notified AND already responded — otherwise allow re-notification
+    const alreadyHandled = new Set(
+      (existingNotifs ?? [])
+        .filter((n: { profile_id: string }) => respondedInstitutions.has(n.profile_id))
+        .map((n: { profile_id: string }) => n.profile_id)
+    )
 
     const seenInst = new Set<string>()
     const candidateName = candidate.profiles?.full_name ?? 'מועמדת חדשה'
@@ -80,7 +103,7 @@ export async function GET(request: Request) {
         profiles: { phone: string | null } | null
       } | null
       if (!inst || seenInst.has(inst.profile_id)) continue
-      if (alreadyNotified.has(inst.profile_id)) continue
+      if (alreadyHandled.has(inst.profile_id)) continue
       seenInst.add(inst.profile_id)
 
       void service.from('notifications').insert({
