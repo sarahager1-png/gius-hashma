@@ -16,7 +16,7 @@ export interface GardenCoordinatorCardProps {
   variant?: 'admin' | 'institution'
 }
 
-const AGE_GROUPS = ['שנה ג (3)', 'קדם חובה', 'חובה']
+const AGE_GROUPS = ['גיל 3', 'קדם חובה', 'חובה']
 const GARDEN_TYPES = ['ממ"ד', 'ממ', 'שיבוץ']
 const ROLES = [
   { value: 'גננת אם',     days: false },
@@ -166,8 +166,8 @@ export default function InstitutionGardenCoordinatorCard({
           </Field>
         </div>
 
-        {/* גיל */}
-        <Field label="גיל הגן *">
+        {/* שכבת גיל */}
+        <Field label="שכבת גיל *">
           <Chips options={AGE_GROUPS} value={ageGroup} onChange={setAgeGroup} />
         </Field>
 
