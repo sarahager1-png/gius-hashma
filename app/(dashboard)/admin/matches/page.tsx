@@ -217,26 +217,17 @@ export default function MatchesPage() {
               }}>
 
               {/* Job group header */}
-              <div className="px-5 py-3.5 flex items-center justify-between gap-4"
+              <div className="px-4 py-3 flex flex-wrap items-start justify-between gap-2"
                 style={{ background: 'var(--bg-2)', borderBottom: '1px solid var(--line-soft)' }}>
-                <div>
-                  <span className="font-bold text-[15px]" style={{ color: 'var(--ink)' }}>{group.job}</span>
-                  <span className="text-[13px] mx-2" style={{ color: 'var(--ink-4)' }}>·</span>
-                  <span className="text-[13px] font-medium" style={{ color: 'var(--ink-3)' }}>{group.inst}</span>
+                <div className="min-w-0">
+                  <span className="font-bold text-[14px]" style={{ color: 'var(--ink)' }}>{group.job}</span>
+                  <span className="text-[12px] mx-1.5" style={{ color: 'var(--ink-4)' }}>·</span>
+                  <span className="text-[12px] font-medium" style={{ color: 'var(--ink-3)' }}>{group.inst}</span>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-[12px] font-semibold px-2.5 py-1 rounded-full"
-                    style={{ background: 'var(--purple-050)', color: 'var(--purple)' }}>
-                    {group.items.length} מתאימות
-                  </span>
-                  <Link href="/admin/institutions"
-                    className="flex items-center gap-1 text-[11.5px] font-medium px-2.5 py-1 rounded-[7px] border no-underline transition-all"
-                    style={{ borderColor: 'var(--line)', color: 'var(--ink-4)', background: '#fff' }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--purple)'; (e.currentTarget as HTMLElement).style.borderColor = 'var(--purple-200)' }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--ink-4)'; (e.currentTarget as HTMLElement).style.borderColor = 'var(--line)' }}>
-                    <Building2 size={11} />{group.inst}
-                  </Link>
-                </div>
+                <span className="text-[11.5px] font-semibold px-2.5 py-1 rounded-full shrink-0"
+                  style={{ background: 'var(--purple-050)', color: 'var(--purple)' }}>
+                  {group.items.length} מתאימות
+                </span>
               </div>
 
               {/* Candidate rows */}
@@ -248,91 +239,85 @@ export default function MatchesPage() {
 
                   return (
                     <div key={key}
-                      className="px-5 py-3.5 flex items-center gap-4 transition-colors"
+                      className="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 transition-colors"
                       onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-2)')}
                       onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
 
-                      {/* Score */}
-                      <div className="w-9 h-9 rounded-[10px] flex items-center justify-center font-black text-[15px] shrink-0"
-                        style={{ background: sc.bg, color: sc.color }}>
-                        {m.score}
-                      </div>
+                      {/* Score + Info row */}
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        {/* Score */}
+                        <div className="w-9 h-9 rounded-[10px] flex items-center justify-center font-black text-[15px] shrink-0"
+                          style={{ background: sc.bg, color: sc.color }}>
+                          {m.score}
+                        </div>
 
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                          <Link href={`/candidates/${m.candidateId}`}
-                            className="font-bold text-[14px] no-underline hover:underline"
-                            style={{ color: 'var(--ink)' }}>
-                            {m.candidateName}
-                          </Link>
-                          {m.specialization && (
-                            <span className="text-[10.5px] font-bold px-1.5 py-0.5 rounded-full"
-                              style={{ background: 'var(--purple-050)', color: 'var(--purple)' }}>
-                              {m.specialization}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[12px]" style={{ color: 'var(--ink-4)' }}>
-                          {m.candidateCity && (
-                            <span className="flex items-center gap-1"><MapPin size={10} />{m.candidateCity}</span>
-                          )}
-                          {m.candidateDistrict && <span>{m.candidateDistrict}</span>}
-                          {m.college && <span className="flex items-center gap-1"><GraduationCap size={10} />{m.college}</span>}
-                          {m.academicLevel && <span>{m.academicLevel}</span>}
-                        </div>
-                        {m.reasons.length > 0 && (
-                          <div className="flex gap-1.5 mt-1.5 flex-wrap">
-                            {m.reasons.map(r => (
-                              <span key={r} className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full"
-                                style={{ background: 'var(--teal-050)', color: 'var(--teal-600)' }}>
-                                <Check size={9} strokeWidth={3} />{r}
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                            <Link href={`/candidates/${m.candidateId}`}
+                              className="font-bold text-[14px] no-underline hover:underline"
+                              style={{ color: 'var(--ink)' }}>
+                              {m.candidateName}
+                            </Link>
+                            {m.specialization && (
+                              <span className="text-[10.5px] font-bold px-1.5 py-0.5 rounded-full"
+                                style={{ background: 'var(--purple-050)', color: 'var(--purple)' }}>
+                                {m.specialization}
                               </span>
-                            ))}
+                            )}
                           </div>
-                        )}
+                          <div className="flex flex-wrap gap-x-3 gap-y-1 text-[12px]" style={{ color: 'var(--ink-4)' }}>
+                            {m.candidateCity && (
+                              <span className="flex items-center gap-1"><MapPin size={10} />{m.candidateCity}</span>
+                            )}
+                            {m.college && <span className="flex items-center gap-1"><GraduationCap size={10} />{m.college}</span>}
+                            {m.academicLevel && <span>{m.academicLevel}</span>}
+                          </div>
+                          {m.reasons.length > 0 && (
+                            <div className="flex gap-1.5 mt-1.5 flex-wrap">
+                              {m.reasons.map(r => (
+                                <span key={r} className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full"
+                                  style={{ background: 'var(--teal-050)', color: 'var(--teal-600)' }}>
+                                  <Check size={9} strokeWidth={3} />{r}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
                         {m.cvUrl && (
                           <a href={m.cvUrl} target="_blank" rel="noreferrer"
-                            className="flex items-center gap-1 h-8 px-2.5 rounded-[8px] border text-[11.5px] font-medium transition-all"
-                            style={{ borderColor: 'var(--line)', color: 'var(--ink-3)', background: '#fff' }}
-                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--purple)'; (e.currentTarget as HTMLElement).style.borderColor = 'var(--purple-200)' }}
-                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--ink-3)'; (e.currentTarget as HTMLElement).style.borderColor = 'var(--line)' }}>
+                            className="flex items-center gap-1 h-8 px-2.5 rounded-[8px] border text-[11.5px] font-medium"
+                            style={{ borderColor: 'var(--line)', color: 'var(--ink-3)', background: '#fff' }}>
                             <FileText size={12} />קו״ח
                           </a>
                         )}
                         {m.candidatePhone && (
                           <a href={`tel:${m.candidatePhone}`}
-                            className="w-8 h-8 rounded-[8px] border flex items-center justify-center transition-all"
-                            style={{ borderColor: 'var(--line)', color: 'var(--ink-4)', background: '#fff' }}
-                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--purple)'; (e.currentTarget as HTMLElement).style.borderColor = 'var(--purple-200)' }}
-                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--ink-4)'; (e.currentTarget as HTMLElement).style.borderColor = 'var(--line)' }}>
+                            className="w-8 h-8 rounded-[8px] border flex items-center justify-center"
+                            style={{ borderColor: 'var(--line)', color: 'var(--ink-4)', background: '#fff' }}>
                             <Phone size={13} />
                           </a>
                         )}
                         <a href={waLink(m.candidatePhone, m.candidateName, m.jobTitle, m.institutionName)}
                           target="_blank" rel="noreferrer"
-                          className="flex items-center gap-1 h-8 px-2.5 rounded-[8px] border text-[11.5px] font-medium transition-all"
-                          style={{ borderColor: '#BBF7D0', color: '#16A34A', background: '#F0FDF4' }}
-                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#DCFCE7' }}
-                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#F0FDF4' }}>
+                          className="flex items-center gap-1 h-8 px-2.5 rounded-[8px] border text-[11.5px] font-medium"
+                          style={{ borderColor: '#BBF7D0', color: '#16A34A', background: '#F0FDF4' }}>
                           <MessageCircle size={12} />WA
                         </a>
                         <button
                           onClick={() => !alreadySuggested && setSuggestModal(m)}
                           disabled={alreadySuggested}
-                          className="flex items-center gap-1 h-8 px-3 rounded-[8px] border text-[12px] font-bold transition-all"
+                          className="flex items-center gap-1 h-8 px-3 rounded-[8px] border text-[12px] font-bold"
                           style={alreadySuggested
                             ? { borderColor: '#BBF7D0', color: 'var(--green)', background: 'var(--green-bg)' }
-                            : { borderColor: 'var(--purple-200)', color: 'var(--purple)', background: 'var(--purple-050)' }}
-                          onMouseEnter={e => { if (!alreadySuggested) e.currentTarget.style.background = 'var(--purple-100)' }}
-                          onMouseLeave={e => { if (!alreadySuggested) e.currentTarget.style.background = 'var(--purple-050)' }}>
+                            : { borderColor: 'var(--purple-200)', color: 'var(--purple)', background: 'var(--purple-050)' }}>
                           {alreadySuggested
                             ? <><Check size={12} />הוצע</>
-                            : <><Lightbulb size={12} />הצע למוסד</>}
+                            : <><Lightbulb size={12} />הצע</>}
                         </button>
                       </div>
                     </div>
