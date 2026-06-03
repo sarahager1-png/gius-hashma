@@ -46,6 +46,8 @@ export default function CandidateRequestsPage() {
   const [approvalResults, setApprovalResults] = useState<Record<string, ApprovalResult>>({})
   const [copied, setCopied] = useState<string | null>(null)
   const [filter, setFilter] = useState<'ממתינה' | 'אושרה' | 'נדחתה' | 'הכל'>('ממתינה')
+  const [rejectTarget, setRejectTarget] = useState<string | null>(null)
+  const [rejectReason, setRejectReason] = useState('')
 
   async function load() {
     setLoading(true)
@@ -78,15 +80,17 @@ export default function CandidateRequestsPage() {
     setProcessing(null)
   }
 
-  async function reject(id: string) {
+  async function reject(id: string, reason: string) {
     setProcessing(id)
     const res = await fetch(`/api/candidate-requests/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'reject' }),
+      body: JSON.stringify({ action: 'reject', reason: reason.trim() || undefined }),
     })
     if (res.ok) setRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'נדחתה' } : r))
     setProcessing(null)
+    setRejectTarget(null)
+    setRejectReason('')
   }
 
   function copyCode(code: string) {
@@ -278,13 +282,56 @@ export default function CandidateRequestsPage() {
                       {isProcessing ? 'מאשרת...' : 'אשרי מועמדת'}
                     </button>
                     <button
-                      onClick={() => reject(req.id)}
+                      onClick={() => { setRejectTarget(req.id); setRejectReason('') }}
                       disabled={isProcessing}
                       className="btn btn-ghost"
                       style={{ height: '36px', fontSize: '13px', opacity: isProcessing ? 0.6 : 1 }}>
                       <X size={15} />
                       דחייה
                     </button>
+                  </div>
+                )}
+
+                {/* Reject modal */}
+                {rejectTarget === req.id && (
+                  <div className="mt-3 rounded-[12px] border p-3 space-y-2"
+                    style={{ borderColor: 'var(--red-border, #FECACA)', background: '#FFF5F5' }}>
+                    <p className="text-[12.5px] font-bold" style={{ color: 'var(--red)' }}>סיבת הדחייה (תישלח למועמדת):</p>
+                    <div className="flex flex-wrap gap-1.5 mb-1">
+                      {['פרטים חסרים', 'אין התאמה לדרישות', 'אין מקום פנוי', 'בקשה כפולה'].map(r => (
+                        <button key={r} type="button"
+                          onClick={() => setRejectReason(r)}
+                          className="px-2.5 py-1 rounded-full text-[11.5px] font-semibold transition-all"
+                          style={{
+                            border: `1.5px solid ${rejectReason === r ? 'var(--red)' : '#FECACA'}`,
+                            background: rejectReason === r ? '#FEE2E2' : '#fff',
+                            color: rejectReason === r ? 'var(--red)' : '#EF4444',
+                          }}>
+                          {r}
+                        </button>
+                      ))}
+                    </div>
+                    <input
+                      value={rejectReason}
+                      onChange={e => setRejectReason(e.target.value)}
+                      placeholder="או כתבי סיבה חופשית..."
+                      className="w-full h-8 rounded-[8px] border px-3 text-[12.5px] outline-none"
+                      style={{ borderColor: '#FECACA', background: '#fff' }}
+                    />
+                    <div className="flex gap-2 pt-1">
+                      <button
+                        onClick={() => reject(req.id, rejectReason)}
+                        disabled={isProcessing}
+                        className="h-8 px-4 rounded-[8px] text-[12.5px] font-bold text-white"
+                        style={{ background: 'var(--red)', opacity: isProcessing ? 0.6 : 1 }}>
+                        {isProcessing ? '...' : 'אשרי דחייה'}
+                      </button>
+                      <button
+                        onClick={() => { setRejectTarget(null); setRejectReason('') }}
+                        className="h-8 px-3 text-[12.5px]" style={{ color: 'var(--ink-4)' }}>
+                        ביטול
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

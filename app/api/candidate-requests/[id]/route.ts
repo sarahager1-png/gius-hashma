@@ -43,7 +43,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role))
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { action } = await request.json() // 'approve' | 'reject'
+  const { action, reason } = await request.json() // action: 'approve' | 'reject', reason?: string
   if (!['approve', 'reject'].includes(action))
     return NextResponse.json({ error: 'action must be approve or reject' }, { status: 400 })
 
@@ -59,15 +59,27 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (action === 'reject') {
     await service.from('candidate_requests').update({ status: 'נדחתה' }).eq('id', id)
     void logAction(user.id, 'reject_candidate_request', 'candidate_request', id)
-    // Notify candidate if they have a linked profile
+
+    const rejectBody = reason?.trim()
+      ? `לצערנו בקשת ההצטרפות שלך לא אושרה. סיבה: ${reason.trim()}`
+      : 'לצערנו בקשת ההצטרפות שלך לא אושרה. לפרטים נוספים ניתן לפנות למנהלת הרשת.'
+
     if (req.profile_id) {
       await service.from('notifications').insert({
         profile_id: req.profile_id,
         type: 'request_rejected',
         title: 'בקשתך לא אושרה',
-        body: 'לצערנו בקשת ההצטרפות שלך לא אושרה. לפרטים נוספים ניתן לפנות למנהלת הרשת.',
+        body: rejectBody,
       })
     }
+
+    // Send WhatsApp/SMS to candidate with reason
+    if (req.phone) {
+      const firstName = (req.full_name ?? '').split(' ')[0]
+      const waMsg = `שלום ${firstName},\nלצערנו בקשת ההצטרפות שלך למערכת השביל לא אושרה בשלב זה.${reason?.trim() ? `\n\nסיבה: ${reason.trim()}` : ''}\n\nלשאלות ניתן לפנות למנהלת הרשת.\n*רשת חינוך חב"ד*`
+      void sendExternal({ phone: req.phone, whatsapp_preference: req.whatsapp_preference ?? true, waMessage: waMsg, smsMessage: waMsg })
+    }
+
     return NextResponse.json({ ok: true })
   }
 

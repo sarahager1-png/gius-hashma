@@ -125,6 +125,15 @@ export async function GET(request: Request) {
         }
       }
 
+      // record notification so this job is never resent to this candidate
+      void service.from('notifications').insert({
+        profile_id: candidate.profile_id,
+        type: 'match_suggestion',
+        title: `✨ משרה מתאימה: ${job.title}`,
+        body: `${institutionName}${city ? ` · ${city}` : ''}`,
+        related_id: job.id,
+      })
+
       totalSent++
     }
   }
