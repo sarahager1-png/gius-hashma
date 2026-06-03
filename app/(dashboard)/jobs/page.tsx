@@ -33,7 +33,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
     .order('created_at', { ascending: false })
 
   const { data: candidate } = await service
-    .from('candidates').select('id, district, work_cities').eq('profile_id', user.id).maybeSingle()
+    .from('candidates').select('id, district, work_cities, profiles(phone)').eq('profile_id', user.id).maybeSingle()
 
   const { data: myApps } = candidate
     ? await service.from('applications').select('job_id').eq('candidate_id', candidate.id)
@@ -48,6 +48,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
         jobs={jobs ?? []}
         appliedJobIds={appliedJobIds}
         candidateId={candidate?.id ?? null}
+        candidateHasPhone={!!(candidate as unknown as { profiles?: { phone: string | null } } | null)?.profiles?.phone}
         candidateDistrict={candidate?.district ?? null}
         candidateWorkCities={(candidate?.work_cities as string[] | null) ?? null}
         initialSearch={q ?? ''}

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { DISTRICTS, SPECIALIZATIONS, AVAILABILITY_STATUSES } from '@/lib/constants'
+import { DISTRICTS, INSTITUTION_LEVELS, AVAILABILITY_STATUSES } from '@/lib/constants'
 
 interface Props {
   candidateName: string
@@ -24,13 +24,18 @@ export default function SetupFormClient({ candidateName, current }: Props) {
   const router = useRouter()
   const [district, setDistrict] = useState(current.district ?? '')
   const [city, setCity] = useState(current.city ?? '')
-  const [specialization, setSpecialization] = useState(current.specialization ?? '')
+  const initLevels = (current.specialization ?? '').split(',').map(s => s.trim()).filter(s => (INSTITUTION_LEVELS as readonly string[]).includes(s))
+  const [levels, setLevels] = useState<string[]>(initLevels)
   const [availability, setAvailability] = useState(current.availability_status ?? '')
   const [whatsapp, setWhatsapp] = useState(current.whatsapp_preference ?? true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
-  const canSubmit = district && city.trim() && specialization && availability
+  function toggleLevel(l: string) {
+    setLevels(prev => prev.includes(l) ? prev.filter(x => x !== l) : [...prev, l])
+  }
+
+  const canSubmit = district && city.trim() && levels.length > 0 && availability
 
   async function handleSubmit() {
     if (!canSubmit) { setError('יש למלא את כל השדות המסומנים'); return }
@@ -40,7 +45,7 @@ export default function SetupFormClient({ candidateName, current }: Props) {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        candidate: { district, city: city.trim(), specialization, availability_status: availability, whatsapp_preference: whatsapp },
+        candidate: { district, city: city.trim(), specialization: levels.join(', '), availability_status: availability, whatsapp_preference: whatsapp },
       }),
     })
     setSaving(false)
@@ -96,19 +101,20 @@ export default function SetupFormClient({ candidateName, current }: Props) {
               onBlur={e => Object.assign(e.currentTarget.style, { ...SS, ...SB })} />
           </div>
 
-          {/* Specialization */}
+          {/* Institution level — multi-select */}
           <div className="space-y-1.5">
             <label className="text-[13px] font-bold flex items-center gap-1" style={{ color: 'var(--ink-2)' }}>
-              התמחות <span style={{ color: '#DC2626' }}>*</span>
+              רמת חינוך <span style={{ color: '#DC2626' }}>*</span>
+              <span className="text-[11px] font-normal ms-1" style={{ color: 'var(--ink-4)' }}>(ניתן לבחור יותר מאחת)</span>
             </label>
             <div className="flex flex-wrap gap-2">
-              {SPECIALIZATIONS.map(s => {
-                const sel = specialization === s
+              {INSTITUTION_LEVELS.map(l => {
+                const sel = levels.includes(l)
                 return (
-                  <button key={s} type="button" onClick={() => setSpecialization(sel ? '' : s)}
+                  <button key={l} type="button" onClick={() => toggleLevel(l)}
                     className="px-3.5 py-2 rounded-[10px] text-[13px] font-semibold border-2 transition-all"
                     style={{ background: sel ? 'var(--purple-050)' : '#fff', borderColor: sel ? 'var(--purple)' : 'var(--line)', color: sel ? 'var(--purple)' : 'var(--ink-3)' }}>
-                    {sel ? '✓ ' : ''}{s}
+                    {sel ? '✓ ' : ''}{l}
                   </button>
                 )
               })}

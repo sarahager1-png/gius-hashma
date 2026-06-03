@@ -10,7 +10,7 @@ export type AvailabilityStatus =
 export type JobStatus = 'פעילה' | 'מושהית' | 'אוישה' | 'בוטלה' | 'פג תוקפה'
 export type JobType = "סטאג'" | 'חלקי' | 'מלא'
 export type ApplicationStatus = 'ממתינה' | 'נצפתה' | 'התקבלה' | 'נדחתה' | 'בוטלה'
-export type Specialization = 'יסודי' | 'חט"ב' | 'מתמטיקה' | 'אנגלית' | 'חינוך מיוחד' | 'תושב"ע' | 'יעוץ' | 'אחר'
+export type Specialization = 'גן ילדים' | 'יסודי' | 'חט"ב' | 'תיכון' | 'מתמטיקה' | 'אנגלית' | 'חינוך מיוחד' | 'תושב"ע' | 'יעוץ' | 'אחר'
 export type AcademicLevel =
   | "שנה ב' - סטאג'"
   | "שנה ג' - סטאג'"

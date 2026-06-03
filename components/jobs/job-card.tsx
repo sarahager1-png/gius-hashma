@@ -9,6 +9,7 @@ interface Props {
   job: Job & { institutions?: { institution_name: string; city: string | null } }
   applied: boolean
   candidateId: string | null
+  candidateHasPhone?: boolean
   isMatched?: boolean
 }
 
@@ -18,7 +19,7 @@ const TYPE_CFG: Record<string, { bg: string; color: string }> = {
   'מלא':   { bg: 'var(--green-bg)',   color: 'var(--green)'     },
 }
 
-export default function JobCard({ job, applied: initialApplied, candidateId, isMatched }: Props) {
+export default function JobCard({ job, applied: initialApplied, candidateId, candidateHasPhone = true, isMatched }: Props) {
   const [applied, setApplied] = useState(initialApplied)
   const [applying, setApplying] = useState(false)
 
@@ -158,6 +159,12 @@ export default function JobCard({ job, applied: initialApplied, candidateId, isM
       {/* CTA footer */}
       <div style={{ padding: '14px 22px 20px', borderTop: '1px solid var(--line-soft)' }}>
         {candidateId ? (
+          !candidateHasPhone ? (
+            <div className="w-full py-3 rounded-[12px] text-center text-[13px] font-semibold"
+              style={{ background: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A' }}>
+              להגשה יש להוסיף טלפון בפרופיל
+            </div>
+          ) : (
           <button
             disabled={applied || applying}
             onClick={apply}
@@ -177,9 +184,9 @@ export default function JobCard({ job, applied: initialApplied, candidateId, isM
               '...'
             ) : (
               <><Send size={15} />הגישי פרופיל</>
-
             )}
           </button>
+          )
         ) : (
           <a
             href="/register/candidate"

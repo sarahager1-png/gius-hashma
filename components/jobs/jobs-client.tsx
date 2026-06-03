@@ -13,6 +13,7 @@ interface Props {
   jobs: JobWithInst[]
   appliedJobIds: Set<string>
   candidateId: string | null
+  candidateHasPhone?: boolean
   candidateDistrict?: string | null
   candidateWorkCities?: string[] | null
   initialSearch?: string
@@ -25,7 +26,7 @@ function matchScore(job: JobWithInst, district?: string | null, workCities?: str
   return s
 }
 
-export default function JobsClient({ jobs, appliedJobIds, candidateId, candidateDistrict, candidateWorkCities, initialSearch = '' }: Props) {
+export default function JobsClient({ jobs, appliedJobIds, candidateId, candidateHasPhone = true, candidateDistrict, candidateWorkCities, initialSearch = '' }: Props) {
   const [search, setSearch] = useState(initialSearch)
   const [specialization, setSpecialization] = useState('הכל')
   const [jobType, setJobType] = useState('הכל')
@@ -84,6 +85,7 @@ export default function JobsClient({ jobs, appliedJobIds, candidateId, candidate
               job={job}
               applied={appliedJobIds.has(job.id)}
               candidateId={candidateId}
+              candidateHasPhone={candidateHasPhone}
               isMatched={hasLocationData && matchScore(job, candidateDistrict, candidateWorkCities) > 0}
             />
           ))}
