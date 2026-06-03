@@ -53,13 +53,26 @@ export async function GET(request: Request) {
         if (!specs.some(s => s === job.specialization || s === 'שניהם')) return false
       }
 
-      // location match — candidate's district, city, or work_cities must overlap with job's district/city
-      const workCities: string[] = cand.work_cities ?? []
-      const matchesCity     = city && (cand.city === city || workCities.includes(city))
-      const matchesDistrict = jobDistrict && (cand.district === jobDistrict)
-      if (city || jobDistrict) return !!(matchesCity || matchesDistrict)
+      // ── Location match (CRITICAL) ─────────────────────────────────────
+      // Rule: if the candidate specified work_cities, the job city MUST be in that list.
+      // If no work_cities → fall back to district match.
+      // If the job has no location at all → skip (never send blind geographically).
+      const workCities: string[] = (cand.work_cities ?? []).filter(Boolean)
+      const hasWorkCities = workCities.length > 0
 
-      return true
+      if (!city && !jobDistrict) return false // job has no location — skip
+
+      if (hasWorkCities) {
+        // candidate was explicit about where they want to work — respect it strictly
+        if (city && workCities.includes(city)) return true
+        // allow district match only if candidate has NO explicit city list beyond their home area
+        if (jobDistrict && cand.district === jobDistrict) return true
+        return false
+      }
+
+      // no work_cities specified — use district only
+      if (jobDistrict && cand.district && cand.district === jobDistrict) return true
+      return false
     })
     if (!candidates.length) continue
 
