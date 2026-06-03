@@ -19,18 +19,19 @@ export default async function ProfileSetupPage() {
 
   const { data: candidate } = await service
     .from('candidates')
-    .select('district, specialization, availability_status, whatsapp_preference')
+    .select('district, city, specialization, availability_status, whatsapp_preference')
     .eq('profile_id', user.id)
     .single()
 
   // already set up — send to jobs
-  if (candidate?.district && candidate?.specialization) redirect('/jobs')
+  if (candidate?.district && candidate?.city && candidate?.specialization) redirect('/jobs')
 
   return (
     <SetupFormClient
       candidateName={profile.full_name ?? ''}
       current={{
         district: candidate?.district ?? null,
+        city: candidate?.city ?? null,
         specialization: candidate?.specialization ?? null,
         availability_status: candidate?.availability_status ?? null,
         whatsapp_preference: candidate?.whatsapp_preference ?? null,

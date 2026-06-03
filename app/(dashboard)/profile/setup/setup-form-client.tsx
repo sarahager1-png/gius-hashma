@@ -8,6 +8,7 @@ interface Props {
   candidateName: string
   current: {
     district: string | null
+    city: string | null
     specialization: string | null
     availability_status: string | null
     whatsapp_preference: boolean | null
@@ -22,13 +23,14 @@ const SB = { borderColor: 'var(--line)', boxShadow: 'none' }
 export default function SetupFormClient({ candidateName, current }: Props) {
   const router = useRouter()
   const [district, setDistrict] = useState(current.district ?? '')
+  const [city, setCity] = useState(current.city ?? '')
   const [specialization, setSpecialization] = useState(current.specialization ?? '')
   const [availability, setAvailability] = useState(current.availability_status ?? '')
   const [whatsapp, setWhatsapp] = useState(current.whatsapp_preference ?? true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
-  const canSubmit = district && specialization && availability
+  const canSubmit = district && city.trim() && specialization && availability
 
   async function handleSubmit() {
     if (!canSubmit) { setError('יש למלא את כל השדות המסומנים'); return }
@@ -38,7 +40,7 @@ export default function SetupFormClient({ candidateName, current }: Props) {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        candidate: { district, specialization, availability_status: availability, whatsapp_preference: whatsapp },
+        candidate: { district, city: city.trim(), specialization, availability_status: availability, whatsapp_preference: whatsapp },
       }),
     })
     setSaving(false)
@@ -80,6 +82,18 @@ export default function SetupFormClient({ candidateName, current }: Props) {
               <option value="">— בחרי מחוז —</option>
               {DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
             </select>
+          </div>
+
+          {/* City */}
+          <div className="space-y-1.5">
+            <label className="text-[13px] font-bold flex items-center gap-1" style={{ color: 'var(--ink-2)' }}>
+              עיר מגורים <span style={{ color: '#DC2626' }}>*</span>
+            </label>
+            <input value={city} onChange={e => setCity(e.target.value)}
+              placeholder="לדוגמה: חיפה"
+              className={SEL} style={{ ...SS, padding: '0 14px' }}
+              onFocus={e => Object.assign(e.currentTarget.style, { ...SS, ...SF })}
+              onBlur={e => Object.assign(e.currentTarget.style, { ...SS, ...SB })} />
           </div>
 
           {/* Specialization */}

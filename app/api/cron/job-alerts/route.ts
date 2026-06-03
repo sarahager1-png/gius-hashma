@@ -54,24 +54,18 @@ export async function GET(request: Request) {
       }
 
       // ── Location match (CRITICAL) ─────────────────────────────────────
-      // Rule: if the candidate specified work_cities, the job city MUST be in that list.
-      // If no work_cities → fall back to district match.
-      // If the job has no location at all → skip (never send blind geographically).
-      const workCities: string[] = (cand.work_cities ?? []).filter(Boolean)
-      const hasWorkCities = workCities.length > 0
+      // Primary: district match (candidate district === job district)
+      // Secondary: job city in candidate work_cities
+      // If job has no location → skip
+      if (!city && !jobDistrict) return false
 
-      if (!city && !jobDistrict) return false // job has no location — skip
-
-      if (hasWorkCities) {
-        // candidate was explicit about where they want to work — respect it strictly
-        if (city && workCities.includes(city)) return true
-        // allow district match only if candidate has NO explicit city list beyond their home area
-        if (jobDistrict && cand.district === jobDistrict) return true
-        return false
-      }
-
-      // no work_cities specified — use district only
+      // district match — primary criterion
       if (jobDistrict && cand.district && cand.district === jobDistrict) return true
+
+      // work_cities fallback — if candidate explicitly listed cities that include the job city
+      const workCities: string[] = (cand.work_cities ?? []).filter(Boolean)
+      if (city && workCities.includes(city)) return true
+
       return false
     })
     if (!candidates.length) continue
