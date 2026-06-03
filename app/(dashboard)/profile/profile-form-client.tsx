@@ -444,15 +444,18 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
 
   /* ══ EDIT MODE ══ */
   const isDone = (id: string) => {
-    if (id === 'personal') return !!(profileForm.full_name && candForm.city && candForm.district)
+    if (id === 'personal')     return !!(profileForm.full_name && profileForm.phone && candForm.city && candForm.district && candForm.birth_year && candForm.marital_status)
     if (id === 'availability') return !!(candForm.specialization && candForm.availability_status)
-    if (id === 'shlichut') return !!(candForm.shlichut_location)
-    if (id === 'education') return !!(candForm.college && candForm.academic_level)
-    if (id === 'experience') return filledWork.length > 0
-    if (id === 'skills') return !!(candForm.technical_skills || candForm.interpersonal_skills)
-    if (id === 'expression') return !!(candForm.bio)
+    if (id === 'shlichut')     return !!(candForm.shlichut_location && candForm.shlichut_years)
+    if (id === 'education')    return !!(candForm.college && candForm.academic_level)
+    if (id === 'experience')   return filledWork.length > 0
+    if (id === 'skills')       return !!(candForm.technical_skills && candForm.interpersonal_skills)
+    if (id === 'expression')   return true // not required
     return false
   }
+
+  const REQUIRED_SECTIONS = ['personal', 'availability', 'shlichut', 'education', 'experience', 'skills']
+  const allRequiredDone = REQUIRED_SECTIONS.every(isDone)
 
   return (
     <div className="space-y-3">
@@ -575,9 +578,21 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
         </div>
       </AccSection>
 
-      <button onClick={handleSave} disabled={saving}
+      {!allRequiredDone && (
+        <div className="rounded-[12px] px-4 py-3 text-[13px] font-semibold text-center"
+          style={{ background: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A' }}>
+          יש למלא את כל הסעיפים המסומנים לפני השמירה (למעט כתיבה אישית)
+        </div>
+      )}
+      <button onClick={handleSave} disabled={saving || !allRequiredDone}
         className="w-full h-12 rounded-[14px] text-[15px] font-bold text-white transition-all"
-        style={{ background: saved ? '#1A7A4A' : 'var(--brand-gradient)', opacity: saving ? 0.7 : 1, boxShadow: saved ? 'none' : 'var(--shadow-purple)' }}>
+        style={{
+          background: !allRequiredDone ? '#E5E7EB' : saved ? '#1A7A4A' : 'var(--brand-gradient)',
+          color: !allRequiredDone ? '#9CA3AF' : '#fff',
+          opacity: saving ? 0.7 : 1,
+          boxShadow: !allRequiredDone || saved ? 'none' : 'var(--shadow-purple)',
+          cursor: !allRequiredDone ? 'not-allowed' : 'pointer',
+        }}>
         {saved ? '✓ נשמר בהצלחה' : saving ? 'שומר...' : 'שמירת שינויים'}
       </button>
 
