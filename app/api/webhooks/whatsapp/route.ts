@@ -81,6 +81,7 @@ async function processMessage(
       case 'apply_job':          return handleApplyFlow(service, session, phone, intent)
       case 'relevance_check':    return handleRelevanceCheck(service, session, phone, text, intent)
       case 'admin_approve':      return handleAdminApprove(service, session, phone, intent)
+      case 'admin_approvals':    return handleAdminApprovals(service, session, phone, text)
       case 'lead_info_request':  return handleLeadInfoRequest(service, session, phone, intent)
     }
   }
@@ -890,4 +891,75 @@ async function handleAdminApprove(
   }
 
   await sendWA(phone, 'הפעולה בוצעה.')
+}
+
+// ── Admin morning approval list ────────────────────────────────────────
+async function handleAdminApprovals(
+  service: ReturnType<typeof createServiceClient>,
+  session: WaSession,
+  phone: string,
+  text: string,
+) {
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
+  type CandEntry = { index: number; id: string; name: string }
+  const candidates: CandEntry[] = (session.data as unknown as { candidates: CandEntry[] }).candidates ?? []
+
+  const normalized = text.trim()
+
+  // parse "אשר 2" or "דחה 3" or "דחה 3 פרטים חסרים"
+  const approveMatch = normalized.match(/^אשר\s+(\d+)$/i)
+  const rejectMatch  = normalized.match(/^דחה\s+(\d+)(?:\s+(.+))?$/i)
+
+  if (!approveMatch && !rejectMatch) {
+    await sendWA(phone, `לאישור: *אשר [מספר]*\nלדחייה: *דחה [מספר]* או *דחה [מספר] סיבה*`)
+    return
+  }
+
+  const num    = parseInt((approveMatch ?? rejectMatch)![1])
+  const reason = rejectMatch?.[2]?.trim() ?? undefined
+  const entry  = candidates.find(c => c.index === num)
+
+  if (!entry) {
+    await sendWA(phone, `לא נמצאה מועמדת מספר ${num}. שלחי שוב.`)
+    return
+  }
+
+  const { data: req } = await service
+    .from('candidate_requests')
+    .select('phone, full_name, email, whatsapp_preference, status')
+    .eq('id', entry.id).single()
+
+  if (!req || req.status !== 'ממתינה') {
+    await sendWA(phone, `${entry.name} — הבקשה כבר טופלה.`)
+    return
+  }
+
+  if (approveMatch) {
+    await service.from('candidate_requests').update({ status: 'אושרה' }).eq('id', entry.id)
+
+    if (req.phone && req.email?.trim()) {
+      const firstName = req.full_name.split(' ')[0]
+      const waMsg =
+        `✅ ברוכה הבאה ${firstName}! בקשתך אושרה 🎉\n\nלכניסה עם Google:\n${appUrl}/profile\n⚠️ יש להיכנס עם המייל: ${req.email.trim()}\n\n*רשת חינוך חב"ד*`
+      await sendWA(req.phone, waMsg)
+    }
+    await sendWA(phone, `✅ *${entry.name}* אושרה והודעה נשלחה אליה.`)
+  } else {
+    const rejectBody = reason ? `לצערנו בקשתך לא אושרה. סיבה: ${reason}` : 'לצערנו בקשתך לא אושרה.'
+    await service.from('candidate_requests').update({ status: 'נדחתה' }).eq('id', entry.id)
+    if (req.phone) await sendWA(req.phone, `שלום ${req.full_name.split(' ')[0]},\n${rejectBody}\n*רשת חינוך חב"ד*`)
+    await sendWA(phone, `❌ *${entry.name}* נדחתה.`)
+  }
+
+  // update session — remove handled candidate
+  const remaining = candidates.filter(c => c.index !== num)
+  if (remaining.length === 0) {
+    await service.from('wa_sessions').delete().eq('id', session.id)
+    await sendWA(phone, '✓ כל המועמדות טופלו.')
+  } else {
+    const updatedData = { ...(session.data as object), candidates: remaining }
+    await service.from('wa_sessions').update({ data: updatedData }).eq('id', session.id)
+    const lines = remaining.map(c => `${c.index}. ${c.name}`).join('\n')
+    await sendWA(phone, `נותרו ${remaining.length} ממתינות:\n${lines}`)
+  }
 }

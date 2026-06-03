@@ -53,6 +53,10 @@
       "schedule": "*/15 * * * *"
     },
     {
+      "path": "/api/cron/pending-approvals",
+      "schedule": "30 5 * * 0-5"
+    },
+    {
       "path": "/api/cron/institution-registration-reminder",
       "schedule": "0 5 * * 0,2,4"
     },
