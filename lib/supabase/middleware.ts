@@ -23,7 +23,7 @@ export async function updateSession(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const PUBLIC_PATHS = ['/login', '/register', '/reset-password', '/mosad', '/mumedet', '/nehal', '/demo', '/enter', '/auth/callback', '/api/profile', '/api/dashboard', '/api/auto-login', '/api/check-cookie', '/api/candidate-requests', '/api/access-codes', '/survey', '/api/surveys', '/api/webhooks/whatsapp', '/guide', '/terms', '/privacy', '/landing', '/api/register/institution-form', '/api/cron/', '/api/admin/send-correction']
+  const PUBLIC_PATHS = ['/login', '/register', '/reset-password', '/mosad', '/mumedet', '/nehal', '/demo', '/enter', '/auth/callback', '/api/profile', '/api/dashboard', '/api/auto-login', '/api/check-cookie', '/api/candidate-requests', '/api/access-codes', '/survey', '/api/surveys', '/api/webhooks/whatsapp', '/guide', '/terms', '/privacy', '/landing', '/api/register/institution-form', '/api/cron/', '/api/admin/send-correction', '/api/admin/notify-incomplete-profiles']
   const isPublic = request.nextUrl.pathname === '/' ||
     PUBLIC_PATHS.some(p => request.nextUrl.pathname.startsWith(p))
 

@@ -54,17 +54,16 @@ export async function GET(request: Request) {
       }
 
       // ── Location match (CRITICAL) ─────────────────────────────────────
-      // Primary: district match (candidate district === job district)
-      // Secondary: job city in candidate work_cities
       // If job has no location → skip
       if (!city && !jobDistrict) return false
 
-      // district match — primary criterion
-      if (jobDistrict && cand.district && cand.district === jobDistrict) return true
-
-      // work_cities fallback — if candidate explicitly listed cities that include the job city
       const workCities: string[] = (cand.work_cities ?? []).filter(Boolean)
+
+      // 1. work_cities: candidate explicitly said they'll work in this city (may cross districts)
       if (city && workCities.includes(city)) return true
+
+      // 2. district match: job district matches candidate's home district
+      if (jobDistrict && cand.district && cand.district === jobDistrict) return true
 
       return false
     })
