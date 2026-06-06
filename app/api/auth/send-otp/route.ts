@@ -71,7 +71,7 @@ export async function POST() {
 
   const ok = await sendSms(
     profile.phone,
-    `קוד האימות שלך למערכת גיוס חב\"ד: ${code}\nתקף ל-10 דקות. אל תשתפי קוד זה.`
+    `קוד האימות שלך למערכת גיוס חב"ד: ${code}\nתקף ל-10 דקות. אל תשתפי קוד זה.`
   )
 
   if (!ok) {
