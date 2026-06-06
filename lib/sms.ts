@@ -1,37 +1,42 @@
 // SMS via Inforu (inforu.co.il) — Israeli SMS provider
 // Set env vars: INFORU_USERNAME, INFORU_API_KEY, INFORU_SENDER_NAME
 // Without credentials, logs code to console (dev mode)
+import { isShabbatOrChag } from '@/lib/shabbat'
 
-// ── Named SMS helpers ─────────────────────────────────────────────────
-
+// ── Named SMS helpers ─────────────────────────────────────────────
 export function smsNewApplication(phone: string, candidateName: string, jobTitle: string) {
-  return sendSms(phone, `הגשה חדשה! ${candidateName} הגישה מועמדות למשרת "${jobTitle}". לצפייה: giuus.vercel.app/institution/applications`)
+  return sendSms(phone, `הגשה חדשה! ${candidateName} הגישה מועמדות למשרת \"${jobTitle}\". לצפייה: giuus.vercel.app/institution/applications`)
 }
 
 export function smsCandidateApplicationConfirmed(phone: string, candidateName: string, jobTitle: string, institutionName: string) {
   const inst = institutionName ? ` ב${institutionName}` : ''
-  return sendSms(phone, `שלום ${candidateName}! תודה שפנית אלינו 💙 הגשתך למשרת "${jobTitle}"${inst} התקבלה. נעדכן אותך בכל התפתחות.`)
+  return sendSms(phone, `שלום ${candidateName}! תודה שפנית אלינו 💙 הגשתך למשרת \"${jobTitle}\"${inst} התקבלה. נעדכן אותך בכל התפתחות.`)
 }
 
 export function smsApplicationViewed(phone: string, institutionName: string, jobTitle: string) {
-  return sendSms(phone, `עדכון: ${institutionName} עיינה בהגשתך למשרת "${jobTitle}". בברכה, מערכת גיוס חב"ד`)
+  return sendSms(phone, `עדכון: ${institutionName} עיינה בהגשתך למשרת \"${jobTitle}\". בברכה, מערכת גיוס חב\"ד`)
 }
 
 export function smsInstitutionApproved(phone: string, institutionName: string) {
-  return sendSms(phone, `ברכות! "${institutionName}" אושר במערכת גיוס חב"ד. כניסה: giuus.vercel.app`)
+  return sendSms(phone, `ברכות! \"${institutionName}\" אושר במערכת גיוס חב\"ד. כניסה: giuus.vercel.app`)
 }
 
 export function smsCandidateWelcome(phone: string, candidateName: string) {
-  return sendSms(phone, `ברוכה הבאה ${candidateName}! הפרופיל שלך נוצר במערכת גיוס חב"ד. השלימי את הפרופיל: giuus.vercel.app/profile`)
+  return sendSms(phone, `ברוכה הבאה ${candidateName}! הפרופיל שלך נוצר במערכת גיוס חב\"ד. השלימי את הפרופיל: giuus.vercel.app/profile`)
 }
 
 export function smsSurveyInvitation(phone: string, token: string, otherPartyName: string) {
   return sendSms(phone, `שאלון שביעות רצון על ${otherPartyName} — 2 דקות בלבד: giuus.vercel.app/survey?t=${token}`)
 }
 
-// ── Core send function ────────────────────────────────────────────────
-
+// ── Core send function ─────────────────────────────────────────
 export async function sendSms(phone: string, message: string): Promise<boolean> {
+  // Never send on Shabbat / Yom Tov
+  if (isShabbatOrChag()) {
+    console.log(`[Shabbat] SMS send suppressed → ${phone}`)
+    return false
+  }
+
   const username = process.env.INFORU_USERNAME
   const apiKey   = process.env.INFORU_API_KEY
   const sender   = process.env.INFORU_SENDER_NAME ?? 'גיוס'

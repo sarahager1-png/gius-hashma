@@ -1,5 +1,6 @@
 // WhatsApp via Green API
 // Env vars: GREEN_API_URL, GREEN_API_INSTANCE_ID, GREEN_API_TOKEN, WHATSAPP_BUSINESS_PHONE
+import { isShabbatOrChag } from '@/lib/shabbat'
 
 const GREEN_URL      = process.env.GREEN_API_URL
 const INSTANCE_ID    = process.env.GREEN_API_INSTANCE_ID
@@ -21,6 +22,12 @@ export function fromChatId(chatId: string): string {
 }
 
 export async function sendWA(to: string, text: string): Promise<boolean> {
+  // Never send on Shabbat / Yom Tov
+  if (isShabbatOrChag()) {
+    console.log(`[Shabbat] WhatsApp send suppressed → ${to}`)
+    return false
+  }
+
   if (!GREEN_URL || !INSTANCE_ID || !GREEN_TOKEN) {
     console.log(`\n[WA DEV] ➜ ${to}\n${text}\n`)
     return true
