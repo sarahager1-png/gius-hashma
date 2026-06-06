@@ -1,10 +1,13 @@
 import { Resend } from 'resend'
 import { createServiceClient } from './supabase/server'
+import { isShabbatOrChag } from '@/lib/shabbat'
 
 const FROM = process.env.EMAIL_FROM ?? 'גיוס חב"ד <noreply@giuus.vercel.app>'
 const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
 
 function getResend(): Resend | null {
+  // No automated email on Shabbat / Yom Tov.
+  if (isShabbatOrChag()) return null
   if (!process.env.RESEND_API_KEY) return null
   return new Resend(process.env.RESEND_API_KEY)
 }

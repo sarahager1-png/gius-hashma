@@ -1,9 +1,9 @@
 // SMS via Inforu (inforu.co.il) — Israeli SMS provider
 // Set env vars: INFORU_USERNAME, INFORU_API_KEY, INFORU_SENDER_NAME
 // Without credentials, logs code to console (dev mode)
+import { isShabbatOrChag } from '@/lib/shabbat'
 
-// ── Named SMS helpers ─────────────────────────────────────────────────
-
+// ── Named SMS helpers ────────────────────────────────────────────
 export function smsNewApplication(phone: string, candidateName: string, jobTitle: string) {
   return sendSms(phone, `הגשה חדשה! ${candidateName} הגישה מועמדות למשרת "${jobTitle}". לצפייה: giuus.vercel.app/institution/applications`)
 }
@@ -29,9 +29,14 @@ export function smsSurveyInvitation(phone: string, token: string, otherPartyName
   return sendSms(phone, `שאלון שביעות רצון על ${otherPartyName} — 2 דקות בלבד: giuus.vercel.app/survey?t=${token}`)
 }
 
-// ── Core send function ────────────────────────────────────────────────
-
+// ── Core send function ───────────────────────────────────────
 export async function sendSms(phone: string, message: string): Promise<boolean> {
+  // Never send on Shabbat / Yom Tov
+  if (isShabbatOrChag()) {
+    console.log(`[Shabbat] SMS send suppressed → ${phone}`)
+    return false
+  }
+
   const username = process.env.INFORU_USERNAME
   const apiKey   = process.env.INFORU_API_KEY
   const sender   = process.env.INFORU_SENDER_NAME ?? 'גיוס'

@@ -4,11 +4,17 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { sendWA } from '@/lib/whatsapp'
 import { sendSms } from '@/lib/sms'
 import { notify } from '@/lib/notify'
+import { isShabbatOrChag } from '@/lib/shabbat'
 
 export async function GET(req: Request) {
   const cronSecret = process.env.CRON_SECRET
   if (!cronSecret || req.headers.get('authorization') !== `Bearer ${cronSecret}`)
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Don't send on Shabbat / Yom Tov. Reminders stay 'pending' and are picked up
+  // by the next run after Shabbat/Chag ends (instead of being marked failed).
+  if (isShabbatOrChag())
+    return NextResponse.json({ skipped: 'shabbat', sent: 0 })
 
   const service = createServiceClient()
 

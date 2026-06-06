@@ -1,7 +1,8 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendSms } from '@/lib/sms'
 import { rateLimit } from '@/lib/rate-limit'
+import { isShabbatOrChag } from '@/lib/shabbat'
 
 function generateCode(): string {
   return String(Math.floor(100000 + Math.random() * 900000))
@@ -29,6 +30,14 @@ export async function POST() {
 
   if (!profile.phone) {
     return NextResponse.json({ noPhone: true })
+  }
+
+  // No login codes on Shabbat / Yom Tov (the SMS would be suppressed anyway).
+  if (isShabbatOrChag()) {
+    return NextResponse.json(
+      { error: 'לא ניתן לשלוח קוד התחברות בשבת או בחג. נסי שוב במוצאי שבת/חג.' },
+      { status: 503 },
+    )
   }
 
   // Rate limit: max 5 OTPs per phone per 10 minutes
