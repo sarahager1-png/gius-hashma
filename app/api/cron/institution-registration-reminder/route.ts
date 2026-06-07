@@ -4,7 +4,9 @@ import { sendWA } from '@/lib/whatsapp'
 import { sendSms } from '@/lib/sms'
 
 // Vercel Cron — runs every Sunday at 08:00 Israel time (05:00 UTC)
-// Sends WhatsApp reminder to institution leads that haven't registered yet
+// Sends WhatsApp reminder to institution leads that haven't registered yet.
+// NOTE: only leads created on/after LEAD_REMINDER_CUTOFF are reminded — leads
+// that already existed before that point and never registered are left alone.
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
@@ -15,6 +17,11 @@ export async function GET(request: Request) {
   const service = createServiceClient()
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
 
+  // Leads that existed before this moment kept getting reminders and never
+  // completed signup — stop nagging them. Only leads created from here on get
+  // automatic reminders. A manual ?lead_id= trigger still bypasses this cutoff.
+  const LEAD_REMINDER_CUTOFF = '2026-06-07T09:00:00Z'
+
   const leadId = new URL(request.url).searchParams.get('lead_id')
 
   let query = service
@@ -23,7 +30,11 @@ export async function GET(request: Request) {
     .is('registered_profile_id', null)
     .not('phone', 'is', null)
 
-  if (leadId) query = query.eq('id', leadId) as typeof query
+  if (leadId) {
+    query = query.eq('id', leadId) as typeof query
+  } else {
+    query = query.gte('created_at', LEAD_REMINDER_CUTOFF) as typeof query
+  }
 
   const { data: leads, error } = await query
 
