@@ -14,15 +14,15 @@
     },
     {
       "path": "/api/cron/pending-applications",
-      "schedule": "15 6 * * *"
+      "schedule": "15 6 * * 0"
     },
     {
       "path": "/api/cron/candidate-pending-applications",
-      "schedule": "20 6 * * *"
+      "schedule": "20 6 * * 0"
     },
     {
       "path": "/api/cron/stale-applications",
-      "schedule": "25 6 * * *"
+      "schedule": "25 6 * * 0"
     },
     {
       "path": "/api/cron/placement-surveys",
@@ -38,11 +38,11 @@
     },
     {
       "path": "/api/cron/job-alerts",
-      "schedule": "30 5 * * 0-5"
+      "schedule": "30 5 * * 0"
     },
     {
       "path": "/api/cron/candidate-alerts",
-      "schedule": "30 5 * * 0-5"
+      "schedule": "30 5 * * 0"
     },
     {
       "path": "/api/cron/filled-jobs",
@@ -58,7 +58,7 @@
     },
     {
       "path": "/api/cron/institution-registration-reminder",
-      "schedule": "0 5 * * 0,2,4"
+      "schedule": "0 5 * * 0"
     },
     {
       "path": "/api/admin/send-preregistered-reminder",
