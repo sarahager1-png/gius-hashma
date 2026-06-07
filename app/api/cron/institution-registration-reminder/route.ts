@@ -3,7 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { sendWA } from '@/lib/whatsapp'
 import { sendSms } from '@/lib/sms'
 
-// Vercel Cron — runs Sun/Tue/Thu at 08:00 Israel time (05:00 UTC)
+// Vercel Cron — runs every Sunday at 08:00 Israel time (05:00 UTC)
 // Sends WhatsApp reminder to institution leads that haven't registered yet
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization')
@@ -41,23 +41,10 @@ export async function GET(request: Request) {
     const link = `${appUrl}/register/institution-form?lead=${lead.id}`
     const msg =
       `שלום 👋\nתזכורת — הרשמת המוסד *${lead.institution_name}* למערכת *השביל* עדיין לא הושלמה.\n\n` +
-      `לחצי על הקישור להשלמת ההרשמה:\n${link}\n\n` +
-      `רוצה לשמוע יותר על המערכת? ענו *כן* 😊`
+      `לחצי על הקישור להשלמת ההרשמה:\n${link}`
 
     const waOk = await sendWA(lead.phone, msg)
     if (waOk) {
-      // Create a short-lived session so a "כן" reply triggers the info message
-      await service.from('wa_sessions').upsert({
-        phone: lead.phone,
-        session_type: 'lead_info_request',
-        state: 'awaiting_reply',
-        data: {
-          lead_id: lead.id,
-          institution_name: lead.institution_name,
-          registration_link: link,
-        },
-        expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
-      }, { onConflict: 'phone' })
       sent++
     } else {
       // fallback to SMS
