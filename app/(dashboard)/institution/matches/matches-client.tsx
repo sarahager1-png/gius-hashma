@@ -68,7 +68,7 @@ function InviteModal({ match, institutionId, onClose, onSent }: {
             <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center"
               style={{ background: 'var(--bg-2)' }}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-3)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-2)')}>
+              onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-2)')}>           
               <X size={16} style={{ color: 'var(--ink-3)' }} />
             </button>
           </div>
@@ -126,6 +126,10 @@ export default function MatchesClient({ institutionId }: { institutionId: string
 
   const [inviteModal, setInviteModal] = useState<Match | null>(null)
   const [invitedKeys, setInvitedKeys] = useState<Set<string>>(new Set())
+  const [dismissedKeys, setDismissedKeys] = useState<Set<string>>(new Set())
+  const [minScore, setMinScore] = useState(0)
+  const [filterCity, setFilterCity] = useState('')
+  const [filterSpec, setFilterSpec] = useState('')
   const [highlightedKey, setHighlightedKey] = useState<string | null>(null)
   const rowRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const qc = useQueryClient()
@@ -135,7 +139,6 @@ export default function MatchesClient({ institutionId }: { institutionId: string
     queryFn: () => fetch('/api/institution/matches').then(r => r.json()),
   })
 
-  // Scroll to and highlight the focused pair once data loads
   useEffect(() => {
     if (!focusJobId || !focusCandId || matches.length === 0) return
     const key = `${focusJobId}:${focusCandId}`
@@ -152,13 +155,37 @@ export default function MatchesClient({ institutionId }: { institutionId: string
     qc.invalidateQueries({ queryKey: ['institution-matches'] })
   }
 
+  async function handleDismiss(jobId: string, candidateId: string) {
+    const key = `${jobId}:${candidateId}`
+    setDismissedKeys(prev => new Set(prev).add(key))
+    try {
+      await fetch('/api/institution/matches/dismiss', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ job_id: jobId, candidate_id: candidateId }),
+      })
+    } finally {
+      qc.invalidateQueries({ queryKey: ['institution-matches'] })
+    }
+  }
+
+  const uniqueCities = [...new Set(matches.map(m => m.candidateCity).filter(Boolean))] as string[]
+  const uniqueSpecs  = [...new Set(matches.map(m => m.specialization).filter(Boolean))] as string[]
+
+  const displayed = matches.filter(m => {
+    if (dismissedKeys.has(`${m.jobId}:${m.candidateId}`)) return false
+    if (minScore > 0 && m.score < minScore) return false
+    if (filterCity && m.candidateCity !== filterCity) return false
+    if (filterSpec && m.specialization !== filterSpec) return false
+    return true
+  })
+
   const byJob: Record<string, { jobId: string; jobTitle: string; items: Match[] }> = {}
-  for (const m of matches) {
+  for (const m of displayed) {
     if (!byJob[m.jobId]) byJob[m.jobId] = { jobId: m.jobId, jobTitle: m.jobTitle, items: [] }
     byJob[m.jobId].items.push(m)
   }
 
-  // Put the focused job group first so it's immediately visible
   const sortedGroups = Object.values(byJob).sort((a, b) => {
     if (focusJobId) {
       if (a.jobId === focusJobId) return -1
@@ -167,6 +194,9 @@ export default function MatchesClient({ institutionId }: { institutionId: string
     return 0
   })
 
+  const hasFilters = minScore > 0 || !!filterCity || !!filterSpec
+  const activeFilterCount = (minScore > 0 ? 1 : 0) + (filterCity ? 1 : 0) + (filterSpec ? 1 : 0)
+
   return (
     <div className="p-4 md:p-8 max-w-5xl">
       {inviteModal && (
@@ -174,7 +204,7 @@ export default function MatchesClient({ institutionId }: { institutionId: string
           onClose={() => setInviteModal(null)} onSent={markInvited} />
       )}
 
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-4 mb-4">
         <div className="w-11 h-11 rounded-[13px] flex items-center justify-center shrink-0"
           style={{ background: 'var(--purple-050)', color: 'var(--purple)' }}>
           <Sparkles size={20} />
@@ -183,10 +213,56 @@ export default function MatchesClient({ institutionId }: { institutionId: string
           <h1 className="page-title">התאמות מועמדות</h1>
           <span className="brand-line" />
           <p className="page-subtitle">
-            {isLoading ? 'מחשב...' : `${matches.length} התאמות למשרות שלכם — לפי מחוז, התמחות ועיר`}
+            {isLoading ? 'מחשב...' : `${displayed.length} התאמות למשרות שלכם — לפי מחוז, התמחות ועיר`}
           </p>
         </div>
       </div>
+
+      {/* Filter bar */}
+      {!isLoading && matches.length > 0 && (
+        <div className="mb-5 flex flex-wrap items-center gap-2 p-3 rounded-[12px]"
+          style={{ background: 'var(--bg-2)', border: '1px solid var(--line-soft)' }}>
+          <span className="text-[12px] font-semibold shrink-0" style={{ color: 'var(--ink-3)' }}>סינון:</span>
+
+          <div className="flex gap-1">
+            {[0, 6, 9].map(s => (
+              <button key={s} onClick={() => setMinScore(s)}
+                className="h-7 px-2.5 rounded-full text-[11.5px] font-bold transition-all"
+                style={minScore === s
+                  ? { background: 'var(--purple)', color: '#fff' }
+                  : { background: 'var(--bg-3)', color: 'var(--ink-3)' }}>
+                {s === 0 ? 'הכל' : `${s}+`}
+              </button>
+            ))}
+          </div>
+
+          {uniqueCities.length > 1 && (
+            <select value={filterCity} onChange={e => setFilterCity(e.target.value)}
+              className="h-7 px-2 rounded-[8px] text-[12px] border outline-none"
+              style={{ borderColor: filterCity ? 'var(--purple-200)' : 'var(--line)', color: 'var(--ink-3)', background: filterCity ? 'var(--purple-050)' : 'var(--bg-2)' }}>
+              <option value="">כל הערים</option>
+              {uniqueCities.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          )}
+
+          {uniqueSpecs.length > 1 && (
+            <select value={filterSpec} onChange={e => setFilterSpec(e.target.value)}
+              className="h-7 px-2 rounded-[8px] text-[12px] border outline-none"
+              style={{ borderColor: filterSpec ? 'var(--purple-200)' : 'var(--line)', color: 'var(--ink-3)', background: filterSpec ? 'var(--purple-050)' : 'var(--bg-2)' }}>
+              <option value="">כל ההתמחויות</option>
+              {uniqueSpecs.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          )}
+
+          {hasFilters && (
+            <button onClick={() => { setMinScore(0); setFilterCity(''); setFilterSpec('') }}
+              className="h-7 px-2.5 rounded-full text-[11.5px] font-medium flex items-center gap-1"
+              style={{ background: 'var(--amber-bg)', color: 'var(--amber)' }}>
+              <X size={10} />נקה ({activeFilterCount})
+            </button>
+          )}
+        </div>
+      )}
 
       {isLoading ? (
         <div className="card"><div className="empty-state">
@@ -198,6 +274,12 @@ export default function MatchesClient({ institutionId }: { institutionId: string
           <div className="empty-state__icon"><Sparkles size={28} /></div>
           <p className="empty-state__title">אין התאמות כרגע</p>
           <p className="empty-state__text">ודאי שיש משרות פעילות עם מחוז מוגדר, וכי מועמדות מחפשות באותו מחוז</p>
+        </div></div>
+      ) : displayed.length === 0 ? (
+        <div className="card"><div className="empty-state">
+          <div className="empty-state__icon"><Sparkles size={28} /></div>
+          <p className="empty-state__title">אין התאמות לפי הסינון</p>
+          <p className="empty-state__text">נסי לשנות את קריטריוני הסינון</p>
         </div></div>
       ) : (
         <div className="space-y-5">
@@ -266,7 +348,7 @@ export default function MatchesClient({ institutionId }: { institutionId: string
                           </div>
                         )}
                       </div>
-                      </div>{/* end left flex */}
+                      </div>
 
                       <div className="flex items-center gap-1.5 shrink-0 sm:ms-auto">
                         {m.cvUrl && (
@@ -294,6 +376,14 @@ export default function MatchesClient({ institutionId }: { institutionId: string
                           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#F0FDF4' }}>
                           <MessageCircle size={12} />WA
                         </a>
+                        <button onClick={() => handleDismiss(m.jobId, m.candidateId)}
+                          className="w-8 h-8 rounded-[8px] border flex items-center justify-center transition-all"
+                          style={{ borderColor: 'var(--line)', color: 'var(--ink-4)', background: '#fff' }}
+                          title="לא מתאים"
+                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#FECACA'; (e.currentTarget as HTMLElement).style.color = '#DC2626'; (e.currentTarget as HTMLElement).style.background = '#FEF2F2' }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--line)'; (e.currentTarget as HTMLElement).style.color = 'var(--ink-4)'; (e.currentTarget as HTMLElement).style.background = '#fff' }}>
+                          <X size={13} />
+                        </button>
                         <button onClick={() => !alreadyInvited && setInviteModal(m)} disabled={alreadyInvited}
                           className="flex items-center gap-1 h-8 px-3 rounded-[8px] border text-[12px] font-bold transition-all"
                           style={alreadyInvited

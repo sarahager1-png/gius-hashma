@@ -15,23 +15,29 @@ export async function GET() {
 
   if (!institution?.is_approved) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const [{ data: jobs }, { data: candidates }, { data: existingApps }, { data: existingInvites }] =
+  const activeJobIds = (
+    await service.from('jobs').select('id').eq('institution_id', institution.id).eq('status', 'פעילה')
+  ).data?.map(j => j.id) ?? []
+
+  const [{ data: jobs }, { data: candidates }, { data: existingApps }, { data: existingInvites }, { data: dismissed }] =
     await Promise.all([
       service.from('jobs').select('id, title, specialization, city').eq('institution_id', institution.id).eq('status', 'פעילה'),
       service.from('candidates')
-        .select('id, district, city, specialization, academic_level, availability_status, cv_url, profiles(full_name, phone)')
+        .select('id, district, city, work_cities, specialization, academic_level, availability_status, cv_url, profiles(full_name, phone)')
         .neq('availability_status', 'משובצת')
         .neq('availability_status', 'לא פעילה')
         .limit(200),
-      service.from('applications').select('job_id, candidate_id').in('job_id',
-        (await service.from('jobs').select('id').eq('institution_id', institution.id).eq('status', 'פעילה')).data?.map(j => j.id) ?? []
-      ),
+      activeJobIds.length > 0
+        ? service.from('applications').select('job_id, candidate_id').in('job_id', activeJobIds)
+        : Promise.resolve({ data: [] }),
       service.from('invitations').select('job_id, candidate_id').eq('institution_id', institution.id),
+      service.from('match_dismissals').select('candidate_id, job_id').eq('institution_id', institution.id),
     ])
 
   const usedPairs = new Set([
-    ...(existingApps ?? []).map(a => `${a.job_id}:${a.candidate_id}`),
-    ...(existingInvites ?? []).map(i => `${i.job_id}:${i.candidate_id}`),
+    ...(existingApps ?? []).map((a: { job_id: string; candidate_id: string }) => `${a.job_id}:${a.candidate_id}`),
+    ...(existingInvites ?? []).map((i: { job_id: string; candidate_id: string }) => `${i.job_id}:${i.candidate_id}`),
+    ...(dismissed ?? []).map((d: { job_id: string; candidate_id: string }) => `${d.job_id}:${d.candidate_id}`),
   ])
 
   const matches: {
@@ -63,6 +69,9 @@ export async function GET() {
         score += 2; reasons.push(`עיר: ${cand.city}`)
       } else if (cand.city && job.city && cand.city === job.city) {
         score += 2; reasons.push(`עיר: ${cand.city}`)
+      }
+      if (cand.work_cities && job.city && (cand.work_cities as string[]).includes(job.city)) {
+        score += 3; reasons.push(`עיר עבודה: ${job.city}`)
       }
       if (cand.availability_status === "מחפשת סטאג'") score += 1
 
