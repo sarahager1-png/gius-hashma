@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 interface ScoredMatch {
@@ -27,31 +27,30 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: profile } = await createServiceClient().from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role))
+  const service = createServiceClient()
+  const { data: profile } = await service.from('profiles').select('role').eq('id', user.id).single()
+  if (!profile || !['מנהלת מערכת', 'אדמין מערכת', 'מנהל רשת'].includes(profile.role))
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const service = createServiceClient()
+  // Fetch approved institutions, active jobs, and candidates in parallel
+  const [
+    { data: institutions },
+    { data: jobs },
+    { data: candidates },
+    { data: existingApps },
+  ] = await Promise.all([
+    service.from('institutions').select('id, institution_name, city, district').eq('is_approved', true),
+    service.from('jobs').select('id, title, specialization, city, district, job_type, institution_id').eq('status', 'פעילה').limit(100),
+    service.from('candidates')
+      .select('id, district, city, work_cities, college, specialization, academic_level, availability_status, cv_url, profiles(full_name, phone)')
+      .neq('availability_status', 'משובצת')
+      .neq('availability_status', 'לא פעילה')
+      .limit(200),
+    service.from('applications').select('job_id, candidate_id'),
+  ])
 
-  // Fetch active jobs with institution data (include job-level district too)
-  const { data: jobs } = await service
-    .from('jobs')
-    .select('id, title, specialization, city, district, job_type, institution_id, institutions!inner(id, institution_name, city, district, is_approved)')
-    .eq('status', 'פעילה')
-    .limit(50)
-
-  // Fetch available candidates
-  const { data: candidates } = await service
-    .from('candidates')
-    .select('id, district, city, work_cities, college, specialization, academic_level, availability_status, cv_url, profiles(full_name, phone)')
-    .neq('availability_status', 'משובצת')
-    .neq('availability_status', 'לא פעילה')
-    .limit(100)
-
-  // Fetch existing applications to exclude already-applied pairs
-  const { data: existingApps } = await service
-    .from('applications')
-    .select('job_id, candidate_id')
+  // Build institution lookup
+  const instMap = new Map((institutions ?? []).map(i => [i.id, i]))
 
   const appliedPairs = new Set(
     (existingApps ?? []).map(a => `${a.job_id}:${a.candidate_id}`)
@@ -60,70 +59,52 @@ export async function GET() {
   const matches: ScoredMatch[] = []
 
   for (const job of jobs ?? []) {
-    const inst = job.institutions as unknown as {
-      id: string; institution_name: string; city: string | null; district: string | null; is_approved: boolean
-    }
-    if (!inst?.is_approved) continue
+    const inst = instMap.get(job.institution_id)
+    if (!inst) continue
 
-    // Effective location of the job: prefer institution fields as ground truth
-    const jobDistrict = inst.district ?? (job as unknown as Record<string, unknown>).district as string | null
-    const jobCity    = inst.city ?? job.city
+    const jobCity = inst.city ?? job.city
+    const jobDistrict = inst.district ?? job.district
 
     for (const cand of candidates ?? []) {
       if (appliedPairs.has(`${job.id}:${cand.id}`)) continue
 
-      const prof      = cand.profiles as unknown as { full_name: string | null; phone: string | null } | null
+      const prof = cand.profiles as unknown as { full_name: string | null; phone: string | null } | null
       const workCities = (cand.work_cities as string[] | null) ?? []
       let score = 0
       const reasons: string[] = []
       let locationHit = false
-      let roleHit     = false
+      let roleHit = false
 
-      // ── Location signals ─────────────────────────────────────────────
-      const hasWorkCities = workCities.length > 0
+      // ── Location signals ───────────────────────────────────────────
       if (jobCity) {
         if (cand.city && cand.city === jobCity) {
-          score += 5
-          reasons.push(`עיר: ${cand.city}`)
-          locationHit = true
+          score += 5; reasons.push(`עיר: ${cand.city}`); locationHit = true
         } else if (workCities.includes(jobCity)) {
-          score += 5
-          reasons.push(`עיר מועדפת: ${jobCity}`)
-          locationHit = true
+          score += 5; reasons.push(`עיר מועדפת: ${jobCity}`); locationHit = true
         }
       }
       if (cand.district && jobDistrict && cand.district === jobDistrict) {
-        score += 3
-        reasons.push(`מחוז: ${cand.district}`)
-        // District alone counts as location hit only when the candidate has no preferred-city list.
-        // If work_cities is set, the job city must appear in it for a real location hit.
-        if (!hasWorkCities) locationHit = true
+        score += 3; reasons.push(`מחוז: ${cand.district}`)
+        // district always counts as location hit (work_cities list is aspirational, not exclusive)
+        locationHit = true
       }
 
-      // ── Role / specialization signals ────────────────────────────────
-      // Candidates may store multiple specializations as a comma-separated string
+      // ── Role / specialization signals ──────────────────────────────
       const candSpecs = cand.specialization?.split(',').map((s: string) => s.trim()) ?? []
       if (cand.specialization && job.specialization &&
           (cand.specialization === job.specialization || candSpecs.includes(job.specialization))) {
-        score += 5
-        reasons.push(`התמחות: ${job.specialization}`)
-        roleHit = true
+        score += 5; reasons.push(`התמחות: ${job.specialization}`); roleHit = true
       }
-      // Academic level ↔ job type: סטאג' candidate → סטאג' job
-      const jobType = (job as unknown as Record<string, unknown>).job_type as string | null
+      const jobType = job.job_type as string | null
       if (jobType === "סטאג'" && cand.academic_level?.includes("סטאג'")) {
-        score += 2
-        reasons.push(`רמה: ${cand.academic_level}`)
-        roleHit = true
+        score += 2; reasons.push(`רמה: ${cand.academic_level}`); roleHit = true
       } else if (jobType && jobType !== "סטאג'" && cand.academic_level && !cand.academic_level.includes("סטאג'")) {
-        score += 1
-        roleHit = true
+        score += 1; roleHit = true
       }
 
-      // Availability bonus
       if (cand.availability_status === "מחפשת סטאג'") score += 1
 
-      // Require a meaningful signal on BOTH dimensions to avoid generic matches
+      // Require a meaningful signal on both dimensions
       if (!locationHit || !roleHit) continue
       if (score < 7) continue
 
@@ -150,7 +131,6 @@ export async function GET() {
     }
   }
 
-  // Sort by score desc, limit to top 60
   matches.sort((a, b) => b.score - a.score)
-  return NextResponse.json(matches.slice(0, 60))
+  return NextResponse.json(matches.slice(0, 80))
 }
