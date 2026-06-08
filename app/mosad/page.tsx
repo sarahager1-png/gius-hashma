@@ -10,30 +10,10 @@ import {
   Building2, LogIn, Settings, GraduationCap,
 } from 'lucide-react'
 
-/* ─────────────────────────── data ─────────────────────────── */
-
 const STEPS = [
-  {
-    n: '01',
-    title: 'כניסה עם Google',
-    sub: 'כנסו עם המייל שבו המוסד שלכם רשום במערכת — הפרופיל נפתח אוטומטית',
-    color: '#00B4CC',
-    glow: 'rgba(0,180,204,.35)',
-  },
-  {
-    n: '02',
-    title: 'עדכון פרטי המוסד',
-    sub: 'שם המוסד, עיר, סוג, תיאור ופרטי קשר — הכל עדכני מהרגע הראשון',
-    color: '#C9A84C',
-    glow: 'rgba(201,168,76,.35)',
-  },
-  {
-    n: '03',
-    title: 'פרסום משרות',
-    sub: 'יצירת משרה בכמה קליקים — תתקבלנה מועמדויות מיד',
-    color: '#7B5AC4',
-    glow: 'rgba(123,90,196,.35)',
-  },
+  { n: '01', title: 'כניסה עם Google', sub: 'כנסו עם המייל שבו המוסד שלכם רשום במערכת — הפרופיל נפתח אוטומטית', color: '#00B4CC', glow: 'rgba(0,180,204,.35)' },
+  { n: '02', title: 'עדכון פרטי המוסד', sub: 'שם המוסד, עיר, סוג, תיאור ופרטי קשר — הכל עדכני מהרגע הראשון', color: '#C9A84C', glow: 'rgba(201,168,76,.35)' },
+  { n: '03', title: 'פרסום משרות', sub: 'יצירת משרה בכמה קליקים — תתקבלנה מועמדויות מיד', color: '#7B5AC4', glow: 'rgba(123,90,196,.35)' },
 ]
 
 const ACTIONS = [
@@ -47,7 +27,6 @@ const ACTIONS = [
   { icon: Bell,          title: 'עדכוני WhatsApp',      desc: 'כל מועמדות חדשה מגיעה ב-WhatsApp',            c: '#00B4CC', bg: 'rgba(0,180,204,.12)' },
 ]
 
-/* ─────────────────────────── icons ─────────────────────────── */
 const GoogleIcon = () => (
   <svg width="19" height="19" viewBox="0 0 24 24">
     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -57,11 +36,13 @@ const GoogleIcon = () => (
   </svg>
 )
 
-/* ─────────────────────────── component ─────────────────────────── */
 export default function MosadLanding() {
-  const [pending, setPending]   = useState(false)
-  const [err, setErr]           = useState('')
-  const [visible, setVisible]   = useState(false)
+  const [pending, setPending]     = useState(false)
+  const [err, setErr]             = useState('')
+  const [visible, setVisible]     = useState(false)
+  const [accessCode, setAccessCode] = useState('')
+  const [codeLoading, setCodeLoading] = useState(false)
+  const [codeError, setCodeError] = useState('')
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80)
@@ -75,6 +56,23 @@ export default function MosadLanding() {
       options: { redirectTo: `${window.location.origin}/auth/callback` },
     })
     if (error) { setErr('שגיאה בכניסה עם Google. נסו שוב.'); setPending(false) }
+  }
+
+  async function redeemCode() {
+    if (!accessCode.trim()) return
+    setCodeLoading(true); setCodeError('')
+    const res = await fetch('/api/auth/redeem-access-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: accessCode.trim() }),
+    })
+    const data = await res.json()
+    setCodeLoading(false)
+    if (data.url) {
+      window.location.href = data.url
+    } else {
+      setCodeError(data.error ?? 'קוד שגוי או שפג')
+    }
   }
 
   return (
@@ -91,306 +89,173 @@ export default function MosadLanding() {
         *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 
         .mo-root {
-          background:#0D1520;
-          color:#fff;
+          background:#0D1520; color:#fff;
           font-family:'Heebo',system-ui,sans-serif;
-          direction:rtl;
-          overflow-x:hidden;
-          width:100%;
-          max-width:100vw;
-          position:relative;
+          direction:rtl; overflow-x:hidden; width:100%; max-width:100vw; position:relative;
         }
 
-        /* ── HERO ── */
-        .mo-hero {
-          position:relative;
-          display:flex;
-          flex-direction:column;
-          overflow:hidden;
-        }
+        .mo-hero { position:relative; display:flex; flex-direction:column; overflow:hidden; }
         .mo-hero-bg {
           position:absolute; inset:0;
           background:
-            radial-gradient(ellipse 100% 65% at 50% -5%,  rgba(0,140,160,.55)  0%, transparent 58%),
-            radial-gradient(ellipse 60%  48% at 85% 88%,  rgba(201,168,76,.15) 0%, transparent 55%),
-            radial-gradient(ellipse 52%  38% at -8% 55%,  rgba(123,90,196,.1)  0%, transparent 52%),
-            linear-gradient(170deg, #0E2230 0%, #122838 40%, #0E1E2C 75%, #0D1520 100%);
+            radial-gradient(ellipse 100% 65% at 50% -5%,rgba(0,140,160,.55) 0%,transparent 58%),
+            radial-gradient(ellipse 60% 48% at 85% 88%,rgba(201,168,76,.15) 0%,transparent 55%),
+            radial-gradient(ellipse 52% 38% at -8% 55%,rgba(123,90,196,.1) 0%,transparent 52%),
+            linear-gradient(170deg,#0E2230 0%,#122838 40%,#0E1E2C 75%,#0D1520 100%);
         }
         .mo-orb { position:absolute; border-radius:50%; pointer-events:none; }
-        .mo-orb-1 { top:5%;   right:-10%; width:440px; height:440px; background:radial-gradient(circle, rgba(0,180,204,.14) 0%, transparent 65%); animation:floatA 16s ease-in-out infinite; }
-        .mo-orb-2 { bottom:8%; left:-8%;  width:360px; height:360px; background:radial-gradient(circle, rgba(123,90,196,.08) 0%, transparent 65%); animation:floatB 20s ease-in-out infinite; }
-        .mo-orb-3 { display:none; }
-        .mo-vline { display:none; }
+        .mo-orb-1 { top:5%;right:-10%;width:440px;height:440px;background:radial-gradient(circle,rgba(0,180,204,.14) 0%,transparent 65%);animation:floatA 16s ease-in-out infinite; }
+        .mo-orb-2 { bottom:8%;left:-8%;width:360px;height:360px;background:radial-gradient(circle,rgba(123,90,196,.08) 0%,transparent 65%);animation:floatB 20s ease-in-out infinite; }
 
-        /* ── NAV ── */
         .mo-nav {
-          position:relative; z-index:20;
-          display:flex; align-items:center; justify-content:space-between;
-          padding:22px 24px 0;
-          max-width:1100px; margin:0 auto; width:100%;
+          position:relative;z-index:20;
+          display:flex;align-items:center;justify-content:space-between;
+          padding:22px 24px 0;max-width:1100px;margin:0 auto;width:100%;
         }
-        .mo-logo-wrap { display:flex; align-items:center; gap:12px; text-decoration:none; }
-        .mo-logo-box {
-          width:50px; height:50px; background:#fff; border-radius:14px;
-          display:flex; align-items:center; justify-content:center;
-          box-shadow:0 4px 18px rgba(0,0,0,.28); padding:4px; flex-shrink:0;
-        }
-        .mo-logo-name { font-size:20px; font-weight:900; color:#fff; letter-spacing:-.025em; }
-        .mo-logo-sub  { font-size:10px; font-weight:500; color:rgba(255,255,255,.4); letter-spacing:.06em; }
-        .mo-nav-links { display:flex; align-items:center; gap:6px; }
-        @media(max-width:540px){
-          .mo-nav-link { display:none; }
-        }
-        .mo-nav-link {
-          padding:8px 14px; border-radius:10px; font-size:13px; font-weight:600;
-          color:rgba(255,255,255,.55); cursor:pointer; text-decoration:none;
-          border:1px solid transparent; transition:all .2s; background:transparent;
-          font-family:'Heebo',system-ui,sans-serif;
-        }
-        .mo-nav-link:hover { color:#fff; background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.1); }
-        .mo-nav-cta {
-          padding:9px 18px; border-radius:12px; font-size:13px; font-weight:700;
-          color:#fff; cursor:pointer; text-decoration:none;
-          background:linear-gradient(135deg,rgba(123,90,196,.5),rgba(123,90,196,.3));
-          border:1px solid rgba(123,90,196,.3); transition:all .2s;
-          font-family:'Heebo',system-ui,sans-serif;
-        }
-        .mo-nav-cta:hover { background:linear-gradient(135deg,rgba(123,90,196,.7),rgba(123,90,196,.5)); border-color:rgba(123,90,196,.5); }
+        .mo-logo-wrap{display:flex;align-items:center;gap:12px;text-decoration:none;}
+        .mo-logo-box{width:50px;height:50px;background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(0,0,0,.28);padding:4px;flex-shrink:0;}
+        .mo-logo-name{font-size:20px;font-weight:900;color:#fff;letter-spacing:-.025em;}
+        .mo-logo-sub{font-size:10px;font-weight:500;color:rgba(255,255,255,.4);letter-spacing:.06em;}
+        .mo-nav-links{display:flex;align-items:center;gap:6px;}
+        @media(max-width:540px){.mo-nav-link{display:none;}}
+        .mo-nav-link{padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;text-decoration:none;border:1px solid transparent;transition:all .2s;background:transparent;font-family:'Heebo',system-ui,sans-serif;}
+        .mo-nav-link:hover{color:#fff;background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1);}
+        .mo-nav-cta{padding:9px 18px;border-radius:12px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;text-decoration:none;background:linear-gradient(135deg,rgba(123,90,196,.5),rgba(123,90,196,.3));border:1px solid rgba(123,90,196,.3);transition:all .2s;font-family:'Heebo',system-ui,sans-serif;}
+        .mo-nav-cta:hover{background:linear-gradient(135deg,rgba(123,90,196,.7),rgba(123,90,196,.5));border-color:rgba(123,90,196,.5);}
 
-        /* ── HERO BODY ── */
         .mo-hero-body {
-          position:relative; z-index:10;
-          display:flex; flex-direction:column;
-          align-items:center; justify-content:center;
-          padding:20px 24px 32px;
-          text-align:center;
-          max-width:740px; margin:0 auto; width:100%;
+          position:relative;z-index:10;
+          display:flex;flex-direction:column;align-items:center;justify-content:center;
+          padding:20px 24px 32px;text-align:center;max-width:740px;margin:0 auto;width:100%;
         }
-        .mo-badge {
-          display:inline-flex; align-items:center; gap:7px;
-          background:rgba(0,180,204,.1); border:1px solid rgba(0,180,204,.25);
-          backdrop-filter:blur(12px);
-          border-radius:999px; padding:6px 16px; margin-bottom:26px;
-          font-size:11.5px; font-weight:700; color:rgba(100,220,235,.85); letter-spacing:.06em;
-        }
-        .mo-badge-dot { width:6px; height:6px; border-radius:50%; background:#00B4CC; flex-shrink:0; }
+        .mo-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(0,180,204,.1);border:1px solid rgba(0,180,204,.25);backdrop-filter:blur(12px);border-radius:999px;padding:6px 16px;margin-bottom:26px;font-size:11.5px;font-weight:700;color:rgba(100,220,235,.85);letter-spacing:.06em;}
+        .mo-badge-dot{width:6px;height:6px;border-radius:50%;background:#00B4CC;flex-shrink:0;}
+        .mo-hero-title{font-size:clamp(26px,5vw,42px);font-weight:800;line-height:1.15;letter-spacing:-.025em;margin:0 0 18px;color:#fff;}
+        .mo-hero-em{background:linear-gradient(90deg,#4ECFDB 0%,#9EF0F8 35%,#4ECFDB 65%,#8EE8F0 100%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimT 10s linear infinite;display:block;}
+        .mo-hero-sub{font-size:clamp(14px,2.2vw,17px);font-weight:400;color:rgba(255,255,255,.5);line-height:1.7;margin:0 0 36px;max-width:480px;}
 
-        .mo-hero-title {
-          font-size:clamp(26px,5vw,42px);
-          font-weight:800; line-height:1.15; letter-spacing:-.025em;
-          margin:0 0 18px; color:#fff;
+        /* ── Glass card ── */
+        .mo-card{
+          width:100%;max-width:400px;
+          background:rgba(255,255,255,.04);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);
+          border:1px solid rgba(255,255,255,.12);border-radius:28px;padding:28px 28px 24px;
+          box-shadow:0 24px 64px rgba(0,0,0,.48),0 0 0 1px rgba(0,180,204,.07),inset 0 1px 0 rgba(255,255,255,.1);
+          position:relative;overflow:hidden;
         }
-        .mo-hero-em {
-          background:linear-gradient(90deg, #4ECFDB 0%, #9EF0F8 35%, #4ECFDB 65%, #8EE8F0 100%);
-          background-size:200% auto;
-          -webkit-background-clip:text; background-clip:text;
-          -webkit-text-fill-color:transparent;
-          animation:shimT 10s linear infinite;
-          display:block;
-        }
-        .mo-hero-sub {
-          font-size:clamp(14px,2.2vw,17px); font-weight:400;
-          color:rgba(255,255,255,.5); line-height:1.7; margin:0 0 36px;
-          max-width:480px;
-        }
+        .mo-card::before{content:'';position:absolute;top:-55px;left:50%;transform:translateX(-50%);width:200px;height:110px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,140,160,.45) 0%,transparent 70%);pointer-events:none;}
+        .mo-card-bar{height:2px;width:100%;background:linear-gradient(90deg,rgba(0,180,204,.7),rgba(201,168,76,.6),rgba(123,90,196,.5));border-radius:1px;margin-bottom:22px;}
+        .mo-card-title{font-size:17px;font-weight:800;color:#fff;margin:0 0 3px;letter-spacing:-.01em;}
+        .mo-card-sub{font-size:12.5px;color:rgba(255,255,255,.42);margin:0 0 20px;}
 
-        /* ── ALREADY REGISTERED BANNER ── */
-        .mo-registered-banner {
-          width:100%; max-width:400px;
-          background:rgba(0,180,204,.08);
-          border:1px solid rgba(0,180,204,.25);
-          border-radius:16px; padding:14px 18px;
-          display:flex; align-items:flex-start; gap:12px;
-          margin-bottom:16px; text-align:right;
+        .mo-goog-btn{
+          width:100%;height:54px;border-radius:16px;
+          display:flex;align-items:center;justify-content:center;gap:12px;
+          font-family:'Heebo',system-ui,sans-serif;font-size:15px;font-weight:700;
+          cursor:pointer;outline:none;position:relative;overflow:hidden;
+          background:rgba(255,255,255,.08);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+          border:1px solid rgba(255,255,255,.22);color:#fff;
+          box-shadow:0 4px 20px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.12);
+          transition:all .25s;letter-spacing:-.01em;
         }
-        .mo-banner-icon {
-          width:36px; height:36px; border-radius:10px; flex-shrink:0;
-          background:rgba(0,180,204,.18);
-          display:flex; align-items:center; justify-content:center;
-        }
-        .mo-banner-title { font-size:13.5px; font-weight:800; color:#fff; margin-bottom:4px; }
-        .mo-banner-sub   { font-size:12px; color:rgba(255,255,255,.5); line-height:1.5; }
+        .mo-goog-btn:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.35);box-shadow:0 6px 28px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.18);transform:translateY(-1px);}
+        .mo-goog-btn:active{transform:scale(.98);}
+        .mo-goog-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+        .mo-goog-icon{background:rgba(255,255,255,.92);border-radius:8px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 
-        /* ── GLASS CTA CARD ── */
-        .mo-card {
-          width:100%; max-width:400px;
-          background:rgba(255,255,255,.04);
-          backdrop-filter:blur(28px) saturate(180%);
-          -webkit-backdrop-filter:blur(28px) saturate(180%);
-          border:1px solid rgba(255,255,255,.12);
-          border-radius:28px;
-          padding:28px 28px 24px;
-          box-shadow:
-            0 24px 64px rgba(0,0,0,.48),
-            0 0 0 1px rgba(0,180,204,.07),
-            inset 0 1px 0 rgba(255,255,255,.1);
-          position:relative; overflow:hidden;
-        }
-        .mo-card::before {
-          content:'';
-          position:absolute; top:-55px; left:50%; transform:translateX(-50%);
-          width:200px; height:110px; border-radius:50%;
-          background:radial-gradient(ellipse, rgba(0,140,160,.45) 0%, transparent 70%);
-          pointer-events:none;
-        }
-        .mo-card-bar {
-          height:2px; width:100%;
-          background:linear-gradient(90deg,rgba(0,180,204,.7),rgba(201,168,76,.6),rgba(123,90,196,.5));
-          border-radius:1px; margin-bottom:22px;
-        }
-        .mo-card-title { font-size:17px; font-weight:800; color:#fff; margin:0 0 3px; letter-spacing:-.01em; }
-        .mo-card-sub   { font-size:12.5px; color:rgba(255,255,255,.42); margin:0 0 20px; }
+        /* ── Divider ── */
+        .mo-divider{display:flex;align-items:center;gap:12px;margin:16px 0;}
+        .mo-divider-line{flex:1;height:1px;background:rgba(255,255,255,.1);}
+        .mo-divider-text{font-size:11px;font-weight:600;color:rgba(255,255,255,.3);letter-spacing:.08em;}
 
-        /* Google button */
-        .mo-goog-btn {
-          width:100%; height:54px; border-radius:16px;
-          display:flex; align-items:center; justify-content:center; gap:12px;
-          font-family:'Heebo',system-ui,sans-serif; font-size:15px; font-weight:700;
-          cursor:pointer; outline:none; position:relative; overflow:hidden;
-          background:rgba(255,255,255,.08);
-          backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
-          border:1px solid rgba(255,255,255,.22);
-          color:#fff;
-          box-shadow:0 4px 20px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.12);
-          transition:all .25s; letter-spacing:-.01em;
+        /* ── Code section ── */
+        .mo-code-section{
+          border-radius:14px;border:1.5px solid rgba(0,180,204,.25);
+          background:rgba(0,180,204,.07);padding:14px 16px;
         }
-        .mo-goog-btn:hover { background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.35); box-shadow:0 6px 28px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.18); transform:translateY(-1px); }
-        .mo-goog-btn:active { transform:scale(.98); }
-        .mo-goog-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
-        .mo-goog-icon { background:rgba(255,255,255,.92); border-radius:8px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .mo-code-header{display:flex;align-items:center;gap:10px;margin-bottom:5px;}
+        .mo-code-icon{width:30px;height:30px;border-radius:9px;flex-shrink:0;background:linear-gradient(135deg,rgba(0,122,140,.8),rgba(0,164,188,.8));display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,140,175,.35);}
+        .mo-code-title{font-size:13.5px;font-weight:800;color:rgba(150,230,240,.9);}
+        .mo-code-hint{font-size:11.5px;color:rgba(255,255,255,.38);margin-bottom:11px;line-height:1.5;padding-right:40px;}
+        .mo-code-row{display:flex;gap:8px;}
+        .mo-code-input{
+          flex:1;height:46px;border-radius:11px;
+          border:1.5px solid rgba(255,255,255,.15);padding:0 12px;
+          font-size:20px;font-weight:800;letter-spacing:.22em;text-align:center;outline:none;
+          background:rgba(255,255,255,.08);color:#fff;font-family:monospace;
+          transition:border-color .18s,background .18s;text-transform:uppercase;
+        }
+        .mo-code-input::placeholder{letter-spacing:.14em;font-size:13px;font-weight:500;color:rgba(255,255,255,.25);}
+        .mo-code-input:focus{border-color:rgba(0,180,204,.6);background:rgba(255,255,255,.12);box-shadow:0 0 0 3px rgba(0,180,204,.15);}
+        .mo-code-btn{
+          height:46px;padding:0 16px;border-radius:11px;border:none;
+          background:linear-gradient(135deg,#007A8C,#00A4BC);color:#fff;
+          font-size:13.5px;font-weight:700;cursor:pointer;transition:all .22s;
+          font-family:'Heebo',system-ui,sans-serif;box-shadow:0 3px 12px rgba(0,140,175,.3);white-space:nowrap;
+        }
+        .mo-code-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none;}
+        .mo-code-btn:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(0,140,175,.45);}
+        .mo-code-error{margin-bottom:8px;padding:7px 11px;border-radius:9px;font-size:12px;font-weight:600;color:#FCA5A5;background:rgba(200,60,60,.15);border:1px solid rgba(200,60,60,.25);text-align:center;}
 
-        /* Trust */
-        .mo-trust { display:flex; align-items:center; justify-content:center; gap:14px; margin-top:16px; flex-wrap:wrap; }
-        .mo-trust-item { display:flex; align-items:center; gap:4px; font-size:11px; font-weight:600; color:rgba(255,255,255,.32); }
-        .mo-trust-check { width:14px; height:14px; border-radius:50%; background:rgba(21,128,61,.25); border:1px solid rgba(21,128,61,.45); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-        .mo-err { background:rgba(220,38,38,.14); border:1px solid rgba(220,38,38,.28); border-radius:10px; padding:10px 14px; font-size:13px; color:#FCA5A5; margin-top:10px; text-align:center; }
+        .mo-trust{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:16px;flex-wrap:wrap;}
+        .mo-trust-item{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:rgba(255,255,255,.32);}
+        .mo-trust-check{width:14px;height:14px;border-radius:50%;background:rgba(21,128,61,.25);border:1px solid rgba(21,128,61,.45);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        .mo-err{background:rgba(220,38,38,.14);border:1px solid rgba(220,38,38,.28);border-radius:10px;padding:10px 14px;font-size:13px;color:#FCA5A5;margin-top:10px;text-align:center;}
+        .mo-mm-link{display:inline-flex;align-items:center;gap:5px;margin-top:13px;font-size:12px;font-weight:600;color:rgba(155,114,207,.65);text-decoration:none;letter-spacing:.03em;border-bottom:1px solid rgba(155,114,207,.18);padding-bottom:1px;transition:all .2s;}
+        .mo-mm-link:hover{color:rgba(155,114,207,.9);border-color:rgba(155,114,207,.45);}
 
-        /* Mumedet link */
-        .mo-mm-link {
-          display:inline-flex; align-items:center; gap:5px; margin-top:13px;
-          font-size:12px; font-weight:600; color:rgba(155,114,207,.65);
-          text-decoration:none; letter-spacing:.03em;
-          border-bottom:1px solid rgba(155,114,207,.18); padding-bottom:1px;
-          transition:all .2s;
-        }
-        .mo-mm-link:hover { color:rgba(155,114,207,.9); border-color:rgba(155,114,207,.45); }
+        .mo-section{padding:52px 24px;max-width:1100px;margin:0 auto;}
+        .mo-section-label{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(0,180,204,.7);margin-bottom:12px;text-align:center;}
+        .mo-section-title{font-size:clamp(24px,4.5vw,38px);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.15;text-align:center;margin-bottom:14px;}
+        .mo-section-sub{font-size:15px;color:rgba(255,255,255,.42);line-height:1.65;text-align:center;max-width:500px;margin:0 auto 28px;}
 
-        /* ── SECTION BASE ── */
-        .mo-section { padding:52px 24px; max-width:1100px; margin:0 auto; }
-        .mo-section-label {
-          font-size:11px; font-weight:700; letter-spacing:.14em;
-          text-transform:uppercase; color:rgba(0,180,204,.7);
-          margin-bottom:12px; text-align:center;
-        }
-        .mo-section-title {
-          font-size:clamp(24px,4.5vw,38px); font-weight:900;
-          color:#fff; letter-spacing:-.03em; line-height:1.15;
-          text-align:center; margin-bottom:14px;
-        }
-        .mo-section-sub {
-          font-size:15px; color:rgba(255,255,255,.42); line-height:1.65;
-          text-align:center; max-width:500px; margin:0 auto 28px;
-        }
+        .mo-steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:680px;margin:0 auto;}
+        @media(max-width:600px){.mo-steps-grid{grid-template-columns:1fr;}}
+        .mo-step-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:22px 20px;backdrop-filter:blur(10px);transition:all .25s;}
+        .mo-step-card:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14);transform:translateY(-2px);}
+        .mo-step-badge{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;margin-bottom:14px;}
+        .mo-step-card-title{font-size:14px;font-weight:800;color:#fff;margin-bottom:6px;letter-spacing:-.01em;}
+        .mo-step-card-desc{font-size:12px;color:rgba(255,255,255,.42);line-height:1.55;}
 
-        /* ── STEPS GRID ── */
-        .mo-steps-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:680px; margin:0 auto; }
-        @media(max-width:600px){ .mo-steps-grid { grid-template-columns:1fr; } }
-        .mo-step-card {
-          background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);
-          border-radius:18px; padding:22px 20px;
-          backdrop-filter:blur(10px); transition:all .25s;
-        }
-        .mo-step-card:hover { background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.14); transform:translateY(-2px); }
-        .mo-step-badge {
-          width:40px; height:40px; border-radius:50%; flex-shrink:0;
-          display:flex; align-items:center; justify-content:center;
-          font-size:13px; font-weight:900; margin-bottom:14px;
-        }
-        .mo-step-card-title { font-size:14px; font-weight:800; color:#fff; margin-bottom:6px; letter-spacing:-.01em; }
-        .mo-step-card-desc  { font-size:12px; color:rgba(255,255,255,.42); line-height:1.55; }
+        .mo-feat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-width:680px;margin:0 auto;}
+        @media(min-width:640px){.mo-feat-grid{grid-template-columns:repeat(4,1fr);}}
+        .mo-feat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:15px;padding:18px 15px;backdrop-filter:blur(10px);transition:all .25s;}
+        .mo-feat:hover{background:rgba(0,180,204,.06);border-color:rgba(0,180,204,.18);transform:translateY(-2px);}
+        .mo-feat-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+        .mo-feat-title{font-size:13px;font-weight:800;color:#fff;margin-bottom:4px;}
+        .mo-feat-desc{font-size:11px;color:rgba(255,255,255,.38);line-height:1.45;}
 
-        /* ── ACTIONS FEAT GRID ── */
-        .mo-feat-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; max-width:680px; margin:0 auto; }
-        @media(min-width:640px){ .mo-feat-grid { grid-template-columns:repeat(4,1fr); } }
-        .mo-feat {
-          background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07);
-          border-radius:15px; padding:18px 15px;
-          backdrop-filter:blur(10px); transition:all .25s;
-        }
-        .mo-feat:hover { background:rgba(0,180,204,.06); border-color:rgba(0,180,204,.18); transform:translateY(-2px); }
-        .mo-feat-icon { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
-        .mo-feat-title { font-size:13px; font-weight:800; color:#fff; margin-bottom:4px; }
-        .mo-feat-desc  { font-size:11px; color:rgba(255,255,255,.38); line-height:1.45; }
+        .mo-flow-wrap{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;padding:8px 0;}
+        .mo-flow-bubble{padding:8px 16px;border-radius:12px;font-size:12.5px;font-weight:800;}
+        .mo-flow-arrow{color:rgba(255,255,255,.2);font-size:14px;flex-shrink:0;}
 
-        /* ── FLOW ── */
-        .mo-flow-wrap {
-          display:flex; align-items:center; justify-content:center;
-          gap:6px; flex-wrap:wrap; padding:8px 0;
-        }
-        .mo-flow-bubble { padding:8px 16px; border-radius:12px; font-size:12.5px; font-weight:800; }
-        .mo-flow-arrow  { color:rgba(255,255,255,.2); font-size:14px; flex-shrink:0; }
+        .mo-final-cta{padding:96px 24px;background:linear-gradient(160deg,#06121A 0%,#0A1E28 40%,#060E18 100%);border-top:1px solid rgba(255,255,255,.05);text-align:center;position:relative;overflow:hidden;}
+        .mo-final-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:280px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,140,160,.26) 0%,transparent 65%);pointer-events:none;animation:glow 6s ease-in-out infinite;}
+        .mo-final-inner{position:relative;z-index:1;max-width:540px;margin:0 auto;}
+        .mo-final-title{font-size:clamp(26px,5vw,44px);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.12;margin-bottom:14px;}
+        .mo-final-sub{font-size:15px;color:rgba(255,255,255,.42);line-height:1.65;margin-bottom:36px;}
+        .mo-final-btn{display:inline-flex;align-items:center;gap:12px;padding:16px 36px;border-radius:18px;border:none;font-family:'Heebo',system-ui,sans-serif;font-size:16px;font-weight:800;cursor:pointer;color:#fff;letter-spacing:-.01em;background:linear-gradient(135deg,#006B78,#008C9C 50%,#00B4CC);box-shadow:0 8px 36px rgba(0,140,160,.52),0 0 60px rgba(0,140,160,.16);transition:all .25s;position:relative;overflow:hidden;}
+        .mo-final-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.12),transparent);border-radius:inherit;}
+        .mo-final-btn:hover{box-shadow:0 12px 44px rgba(0,140,160,.7),0 0 80px rgba(0,180,204,.2);transform:translateY(-2px);}
+        .mo-final-btn:active{transform:scale(.97);}
+        .mo-final-btn:disabled{opacity:.58;cursor:not-allowed;transform:none;}
+        .mo-final-g-icon{background:rgba(255,255,255,.14);border-radius:10px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 
-        /* ── FINAL CTA ── */
-        .mo-final-cta {
-          padding:96px 24px;
-          background:linear-gradient(160deg, #06121A 0%, #0A1E28 40%, #060E18 100%);
-          border-top:1px solid rgba(255,255,255,.05);
-          text-align:center; position:relative; overflow:hidden;
-        }
-        .mo-final-orb {
-          position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-          width:600px; height:280px; border-radius:50%;
-          background:radial-gradient(ellipse, rgba(0,140,160,.26) 0%, transparent 65%);
-          pointer-events:none; animation:glow 6s ease-in-out infinite;
-        }
-        .mo-final-inner { position:relative; z-index:1; max-width:540px; margin:0 auto; }
-        .mo-final-title { font-size:clamp(26px,5vw,44px); font-weight:900; color:#fff; letter-spacing:-.03em; line-height:1.12; margin-bottom:14px; }
-        .mo-final-sub   { font-size:15px; color:rgba(255,255,255,.42); line-height:1.65; margin-bottom:36px; }
-        .mo-final-btn {
-          display:inline-flex; align-items:center; gap:12px;
-          padding:16px 36px; border-radius:18px; border:none;
-          font-family:'Heebo',system-ui,sans-serif; font-size:16px; font-weight:800;
-          cursor:pointer; color:#fff; letter-spacing:-.01em;
-          background:linear-gradient(135deg, #006B78, #008C9C 50%, #00B4CC);
-          box-shadow:0 8px 36px rgba(0,140,160,.52), 0 0 60px rgba(0,140,160,.16);
-          transition:all .25s; position:relative; overflow:hidden;
-        }
-        .mo-final-btn::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,.12),transparent); border-radius:inherit; }
-        .mo-final-btn:hover { box-shadow:0 12px 44px rgba(0,140,160,.7), 0 0 80px rgba(0,180,204,.2); transform:translateY(-2px); }
-        .mo-final-btn:active { transform:scale(.97); }
-        .mo-final-btn:disabled { opacity:.58; cursor:not-allowed; transform:none; }
-        .mo-final-g-icon { background:rgba(255,255,255,.14); border-radius:10px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .mo-footer{padding:26px 24px;border-top:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;max-width:1100px;margin:0 auto;}
+        .mo-footer-left{font-size:11px;color:rgba(255,255,255,.28);}
+        .mo-footer-links{display:flex;gap:14px;}
+        .mo-footer-link{font-size:11px;color:rgba(255,255,255,.28);text-decoration:none;transition:color .2s;}
+        .mo-footer-link:hover{color:rgba(255,255,255,.6);}
 
-        /* ── FOOTER ── */
-        .mo-footer {
-          padding:26px 24px; border-top:1px solid rgba(255,255,255,.05);
-          display:flex; align-items:center; justify-content:space-between;
-          flex-wrap:wrap; gap:10px; max-width:1100px; margin:0 auto;
-        }
-        .mo-footer-left { font-size:11px; color:rgba(255,255,255,.28); }
-        .mo-footer-links { display:flex; gap:14px; }
-        .mo-footer-link { font-size:11px; color:rgba(255,255,255,.28); text-decoration:none; transition:color .2s; }
-        .mo-footer-link:hover { color:rgba(255,255,255,.6); }
-
-        /* fade-in */
-        .mo-fadein { opacity:0; animation:fadeUp .72s cubic-bezier(.16,1,.3,1) forwards; }
-        .mo-d1 { animation-delay:.1s; }
-        .mo-d2 { animation-delay:.22s; }
-        .mo-d3 { animation-delay:.36s; }
-        .mo-d4 { animation-delay:.5s; }
+        .mo-fadein{opacity:0;animation:fadeUp .72s cubic-bezier(.16,1,.3,1) forwards;}
+        .mo-d1{animation-delay:.1s;} .mo-d2{animation-delay:.22s;} .mo-d3{animation-delay:.36s;} .mo-d4{animation-delay:.5s;}
       `}</style>
 
       <div className="mo-root">
-
-        {/* ══ HERO ══ */}
         <div className="mo-hero">
           <div className="mo-hero-bg" />
           <div className="mo-orb mo-orb-1" />
           <div className="mo-orb mo-orb-2" />
-          <div className="mo-orb mo-orb-3" />
-          <div className="mo-vline" />
 
-          {/* NAV */}
           <nav className="mo-nav">
             <Link href="/" className="mo-logo-wrap">
               <div className="mo-logo-box">
@@ -408,9 +273,7 @@ export default function MosadLanding() {
             </div>
           </nav>
 
-          {/* HERO BODY */}
           <div className="mo-hero-body" style={{ opacity: visible ? 1 : 0, transition:'opacity .5s ease' }}>
-
             <div className="mo-badge mo-fadein mo-d1">
               <div className="mo-badge-dot" />
               <Building2 size={12} />
@@ -427,7 +290,6 @@ export default function MosadLanding() {
               כנסי עם Google, עדכני פרטים ופרסמי משרות
             </p>
 
-            {/* GLASS CTA CARD */}
             <div className="mo-card mo-fadein mo-d3">
               <div className="mo-card-bar" />
               <div className="mo-card-title">כניסה למערכת המוסד</div>
@@ -439,6 +301,42 @@ export default function MosadLanding() {
               </button>
 
               {err && <div className="mo-err">{err}</div>}
+
+              <div className="mo-divider">
+                <div className="mo-divider-line" />
+                <span className="mo-divider-text">או</span>
+                <div className="mo-divider-line" />
+              </div>
+
+              {/* Code login — fallback for institutions blocked by Google filters */}
+              <div className="mo-code-section">
+                <div className="mo-code-header">
+                  <div className="mo-code-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                  </div>
+                  <span className="mo-code-title">קיבלתי קוד כניסה ב-WhatsApp</span>
+                </div>
+                <div className="mo-code-hint">הזיני את הקוד שקיבלת על מנת להיכנס</div>
+                {codeError && <div className="mo-code-error">{codeError}</div>}
+                <div className="mo-code-row">
+                  <input
+                    type="text"
+                    value={accessCode}
+                    onChange={e => setAccessCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}
+                    onKeyDown={e => e.key === 'Enter' && accessCode.length === 6 && redeemCode()}
+                    placeholder="XXXXXX"
+                    maxLength={6}
+                    dir="ltr"
+                    className="mo-code-input"
+                  />
+                  <button onClick={redeemCode} disabled={codeLoading || accessCode.length !== 6} className="mo-code-btn">
+                    {codeLoading ? '...' : 'כנסי'}
+                  </button>
+                </div>
+              </div>
 
               <div className="mo-trust">
                 {['כניסה מיידית', 'ללא הרשמה', 'עדכוני WhatsApp'].map(t => (
@@ -458,19 +356,15 @@ export default function MosadLanding() {
                 </a>
               </div>
             </div>
-
           </div>
         </div>
 
-        {/* ══ STEPS ══ */}
+        {/* STEPS */}
         <div id="steps">
           <div className="mo-section">
             <div className="mo-section-label">תהליך הכניסה</div>
             <h2 className="mo-section-title">שלושה צעדים פשוטים</h2>
-            <p className="mo-section-sub">
-              הנתונים שלכם כבר קיימים — תוך דקות תהיו בפנים ומוכנים לגייס
-            </p>
-
+            <p className="mo-section-sub">הנתונים שלכם כבר קיימים — תוך דקות תהיו בפנים ומוכנים לגייס</p>
             <div className="mo-steps-grid">
               {STEPS.map(s => (
                 <div key={s.n} className="mo-step-card">
@@ -483,21 +377,16 @@ export default function MosadLanding() {
           </div>
         </div>
 
-        {/* ══ ACTIONS ══ */}
+        {/* ACTIONS */}
         <div id="actions">
           <div className="mo-section" style={{ paddingTop:'72px' }}>
             <div className="mo-section-label">מה עושים בפנים</div>
             <h2 className="mo-section-title">עדכון ופרסום — הכל במקום אחד</h2>
-            <p className="mo-section-sub">
-              עדכנו את פרטי המוסד, פרסמו משרות ונהלו מועמדויות — הכל ממסך אחד
-            </p>
-
+            <p className="mo-section-sub">עדכנו את פרטי המוסד, פרסמו משרות ונהלו מועמדויות — הכל ממסך אחד</p>
             <div className="mo-feat-grid">
               {ACTIONS.map(({ icon: Icon, title, desc, c, bg }) => (
                 <div key={title} className="mo-feat">
-                  <div className="mo-feat-icon" style={{ background:bg }}>
-                    <Icon size={16} color={c} />
-                  </div>
+                  <div className="mo-feat-icon" style={{ background:bg }}><Icon size={16} color={c} /></div>
                   <div className="mo-feat-title">{title}</div>
                   <div className="mo-feat-desc">{desc}</div>
                 </div>
@@ -506,13 +395,12 @@ export default function MosadLanding() {
           </div>
         </div>
 
-        {/* ══ APPLICATION FLOW ══ */}
+        {/* FLOW */}
         <div>
           <div className="mo-section" style={{ paddingTop:'56px', paddingBottom:'56px' }}>
             <div className="mo-section-label">מחזור חיים של מועמדות</div>
             <h2 className="mo-section-title" style={{ fontSize:'clamp(22px,3.5vw,32px)', marginBottom:'8px' }}>איך נראה התהליך?</h2>
             <p className="mo-section-sub" style={{ marginBottom:'32px' }}>כל שלב מתעדכן אוטומטית — לכם ולמועמדת</p>
-
             <div className="mo-flow-wrap">
               {[
                 { label:'הגשה',   c:'#00B4CC', bg:'rgba(0,180,204,.15)' },
@@ -530,7 +418,7 @@ export default function MosadLanding() {
           </div>
         </div>
 
-        {/* ══ FINAL CTA ══ */}
+        {/* FINAL CTA */}
         <div className="mo-final-cta">
           <div className="mo-final-orb" />
           <div className="mo-final-inner">
@@ -538,33 +426,24 @@ export default function MosadLanding() {
               <LogIn size={13} style={{ display:'inline', marginLeft:'6px' }} />
               מוכנים להתחיל?
             </div>
-            <h2 className="mo-final-title">
-              כנסו עם המייל שלכם<br />והתחילו לגייס
-            </h2>
-            <p className="mo-final-sub">
-              הנתונים כבר מחכים לכם — כניסה ראשונה לוקחת דקה
-            </p>
+            <h2 className="mo-final-title">כנסו עם המייל שלכם<br />והתחילו לגייס</h2>
+            <p className="mo-final-sub">הנתונים כבר מחכים לכם — כניסה ראשונה לוקחת דקה</p>
             <button className="mo-final-btn" onClick={signIn} disabled={pending}>
               <div className="mo-final-g-icon"><GoogleIcon /></div>
               <span>{pending ? 'מתחבר...' : 'כניסה עם Google'}</span>
             </button>
-            <div style={{ marginTop:'16px', fontSize:'11.5px', color:'rgba(255,255,255,.28)' }}>
-              השתמשו במייל שבו המוסד רשום במערכת
-            </div>
+            <div style={{ marginTop:'16px', fontSize:'11.5px', color:'rgba(255,255,255,.28)' }}>השתמשו במייל שבו המוסד רשום במערכת</div>
           </div>
         </div>
 
-        {/* ══ FOOTER ══ */}
+        {/* FOOTER */}
         <div className="mo-footer">
-          <div className="mo-footer-left">
-            © 2026 הַשְּׁבִיל · עתודות לשליחות · כל הזכויות שמורות
-          </div>
+          <div className="mo-footer-left">© 2026 הַשְּׁבִיל · עתודות לשליחות · כל הזכויות שמורות</div>
           <div className="mo-footer-links">
-            <Link href="/"        className="mo-footer-link">עמוד הבית</Link>
+            <Link href="/" className="mo-footer-link">עמוד הבית</Link>
             <a href="/mumedet" className="mo-footer-link">פורטל מועמדת</a>
           </div>
         </div>
-
       </div>
     </>
   )
