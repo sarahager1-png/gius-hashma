@@ -12,6 +12,7 @@ interface Match {
   college: string | null; academicLevel: string | null; specialization: string | null
   availabilityStatus: string; cvUrl: string | null
   jobId: string; jobTitle: string; score: number; reasons: string[]
+  wasInvited?: boolean
 }
 
 function scoreStyle(s: number) {
@@ -300,7 +301,7 @@ export default function MatchesClient({ institutionId }: { institutionId: string
                 {group.items.map(m => {
                   const sc = scoreStyle(m.score)
                   const key = `${m.jobId}:${m.candidateId}`
-                  const alreadyInvited = invitedKeys.has(key)
+                  const alreadyInvited = m.wasInvited || invitedKeys.has(key)
                   const isHighlighted = highlightedKey === key
                   return (
                     <div
@@ -377,11 +378,14 @@ export default function MatchesClient({ institutionId }: { institutionId: string
                           <MessageCircle size={12} />WA
                         </a>
                         <button onClick={() => handleDismiss(m.jobId, m.candidateId)}
+                          disabled={alreadyInvited}
                           className="w-8 h-8 rounded-[8px] border flex items-center justify-center transition-all"
-                          style={{ borderColor: 'var(--line)', color: 'var(--ink-4)', background: '#fff' }}
+                          style={alreadyInvited
+                            ? { borderColor: 'var(--line)', color: 'var(--ink-5)', background: '#fff', opacity: 0.35, cursor: 'not-allowed' }
+                            : { borderColor: 'var(--line)', color: 'var(--ink-4)', background: '#fff' }}
                           title="לא מתאים"
-                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#FECACA'; (e.currentTarget as HTMLElement).style.color = '#DC2626'; (e.currentTarget as HTMLElement).style.background = '#FEF2F2' }}
-                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--line)'; (e.currentTarget as HTMLElement).style.color = 'var(--ink-4)'; (e.currentTarget as HTMLElement).style.background = '#fff' }}>
+                          onMouseEnter={e => { if (!alreadyInvited) { (e.currentTarget as HTMLElement).style.borderColor = '#FECACA'; (e.currentTarget as HTMLElement).style.color = '#DC2626'; (e.currentTarget as HTMLElement).style.background = '#FEF2F2' } }}
+                          onMouseLeave={e => { if (!alreadyInvited) { (e.currentTarget as HTMLElement).style.borderColor = 'var(--line)'; (e.currentTarget as HTMLElement).style.color = 'var(--ink-4)'; (e.currentTarget as HTMLElement).style.background = '#fff' } }}>
                           <X size={13} />
                         </button>
                         <button onClick={() => !alreadyInvited && setInviteModal(m)} disabled={alreadyInvited}

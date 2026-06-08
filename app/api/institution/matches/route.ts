@@ -34,11 +34,14 @@ export async function GET() {
       service.from('match_dismissals').select('candidate_id, job_id').eq('institution_id', institution.id),
     ])
 
-  const usedPairs = new Set([
+  // applications + dismissals are hidden; invitations still shown (with wasInvited flag)
+  const skipPairs = new Set([
     ...(existingApps ?? []).map((a: { job_id: string; candidate_id: string }) => `${a.job_id}:${a.candidate_id}`),
-    ...(existingInvites ?? []).map((i: { job_id: string; candidate_id: string }) => `${i.job_id}:${i.candidate_id}`),
     ...(dismissed ?? []).map((d: { job_id: string; candidate_id: string }) => `${d.job_id}:${d.candidate_id}`),
   ])
+  const invitedPairs = new Set(
+    (existingInvites ?? []).map((i: { job_id: string; candidate_id: string }) => `${i.job_id}:${i.candidate_id}`)
+  )
 
   const matches: {
     candidateId: string; candidateName: string; candidatePhone: string | null
@@ -46,11 +49,12 @@ export async function GET() {
     college: string | null; academicLevel: string | null; specialization: string | null
     availabilityStatus: string; cvUrl: string | null
     jobId: string; jobTitle: string; score: number; reasons: string[]
+    wasInvited: boolean
   }[] = []
 
   for (const job of jobs ?? []) {
     for (const cand of candidates ?? []) {
-      if (usedPairs.has(`${job.id}:${cand.id}`)) continue
+      if (skipPairs.has(`${job.id}:${cand.id}`)) continue
 
       let score = 0
       const reasons: string[] = []
@@ -92,6 +96,7 @@ export async function GET() {
           jobTitle: job.title,
           score,
           reasons,
+          wasInvited: invitedPairs.has(`${job.id}:${cand.id}`),
         })
       }
     }
