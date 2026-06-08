@@ -52,3 +52,17 @@ export function isShabbatOrChag(now: Date = new Date()): boolean {
   const last = toggles[toggles.length - 1]
   return last ? last.desc === 'Candle lighting' : false
 }
+
+/**
+ * True when the Israel clock time is outside the allowed sending window (08:00–20:00).
+ * All automated messaging is suppressed during quiet hours.
+ */
+export function isQuietHours(now: Date = new Date()): boolean {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Jerusalem',
+    hour: '2-digit',
+    hour12: false,
+  }).formatToParts(now)
+  const hour = parseInt(parts.find((p) => p.type === 'hour')!.value, 10)
+  return hour < 8 || hour >= 20
+}

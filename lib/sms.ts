@@ -1,7 +1,7 @@
 // SMS via Inforu (inforu.co.il) — Israeli SMS provider
 // Set env vars: INFORU_USERNAME, INFORU_API_KEY, INFORU_SENDER_NAME
 // Without credentials, logs code to console (dev mode)
-import { isShabbatOrChag } from '@/lib/shabbat'
+import { isShabbatOrChag, isQuietHours } from '@/lib/shabbat'
 
 // ── Named SMS helpers ────────────────────────────────────────────
 export function smsNewApplication(phone: string, candidateName: string, jobTitle: string) {
@@ -31,9 +31,12 @@ export function smsSurveyInvitation(phone: string, token: string, otherPartyName
 
 // ── Core send function ───────────────────────────────────────
 export async function sendSms(phone: string, message: string): Promise<boolean> {
-  // Never send on Shabbat / Yom Tov
   if (isShabbatOrChag()) {
     console.log(`[Shabbat] SMS send suppressed → ${phone}`)
+    return false
+  }
+  if (isQuietHours()) {
+    console.log(`[QuietHours] SMS send suppressed → ${phone}`)
     return false
   }
 

@@ -1,5 +1,5 @@
 import webpush from 'web-push'
-import { isShabbatOrChag } from '@/lib/shabbat'
+import { isShabbatOrChag, isQuietHours } from '@/lib/shabbat'
 
 // VAPID keys must be set in environment variables.
 // Generate once with: npx web-push generate-vapid-keys
@@ -23,9 +23,9 @@ export async function sendPushToSubscription(
 ) {
   if (!VAPID_PUBLIC || !VAPID_PRIVATE) return
 
-  // No push notifications on Shabbat / Yom Tov. The in-app DB notification is
-  // still stored by the caller, so the user sees it after Shabbat/Chag.
+  // No push notifications on Shabbat / Yom Tov, or outside 08:00–20:00 Israel time.
   if (isShabbatOrChag()) return
+  if (isQuietHours()) return
 
   await webpush.sendNotification(
     {
