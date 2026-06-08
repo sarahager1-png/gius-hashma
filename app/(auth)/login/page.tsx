@@ -251,8 +251,9 @@ function LoginPageInner() {
         .lg-register a:hover { color:rgba(0,155,185,.95); border-color:rgba(0,155,185,.5); }
         .lg-error { margin-top:12px; padding:10px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#FCA5A5; background:rgba(200,60,60,.14); border:1px solid rgba(200,60,60,.25); text-align:center; animation:fadeUp .3s ease both; }
         .lg-code-section { margin-top:18px; border-radius:14px; border:1px solid rgba(0,140,175,.18); background:rgba(0,140,175,.04); padding:14px 16px; animation:fadeIn .4s .4s both; }
-        .lg-code-label { font-size:12px; font-weight:700; color:rgba(0,130,155,.72); letter-spacing:.06em; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+        .lg-code-label { font-size:12px; font-weight:700; color:rgba(0,130,155,.72); letter-spacing:.06em; margin-bottom:4px; display:flex; align-items:center; gap:6px; }
         .lg-code-dot { width:5px; height:5px; border-radius:50%; background:rgba(0,155,185,.7); flex-shrink:0; }
+        .lg-code-hint { font-size:11.5px; color:rgba(8,24,44,.4); margin-bottom:10px; line-height:1.5; }
         .lg-code-row { display:flex; gap:8px; }
         .lg-code-input { flex:1; height:48px; border-radius:12px; border:1.5px solid rgba(8,24,44,.16); padding:0 14px; font-size:21px; font-weight:800; letter-spacing:.22em; text-align:center; outline:none; background:rgba(8,24,44,.04); color:rgba(8,24,44,.85); font-family:monospace; transition:border-color .18s, background .18s; text-transform:uppercase; }
         .lg-code-input::placeholder { letter-spacing:.14em; font-size:14px; font-weight:500; }
@@ -327,7 +328,7 @@ function LoginPageInner() {
                   <span className="lg-eyebrow-text">כניסה למערכת</span>
                 </div>
                 <h1 className="lg-heading">ברוכה הבאה,</h1>
-                <p className="lg-sub">היכנסי עם חשבון Google שלך כדי<br />לגשת למערכת הגיוס וההשמה</p>
+                <p className="lg-sub">רשומה כבר? היכנסי עם Google.<br />פעם ראשונה? הגישי מועמדות חדשה.</p>
               </div>
               <div className="lg-tabs">
                 <button className="lg-tab active">מועמדת</button>
@@ -348,8 +349,9 @@ function LoginPageInner() {
               <div className="lg-code-section">
                 <div className="lg-code-label">
                   <span className="lg-code-dot" />
-                  כניסה עם קוד
+                  כניסה עם קוד גישה
                 </div>
+                <div className="lg-code-hint">קיבלת קוד ב-WhatsApp מהמערכת? הזיני אותו כאן.</div>
                 {codeError && <div className="lg-code-error">{codeError}</div>}
                 <div className="lg-code-row">
                   <input
