@@ -47,7 +47,7 @@ function computeScore(cand: CandRow, job: JobRow): number {
   return score
 }
 
-// Vercel Cron — runs every Monday at 08:00 Israel time (06:00 UTC)
+// Vercel Cron — runs every Sunday and Wednesday at 09:00 Israel time (06:00 UTC)
 // Sends ONE consolidated WhatsApp per candidate listing their matching institutions
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization')
