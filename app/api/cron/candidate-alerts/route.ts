@@ -27,6 +27,9 @@ type JobRow = {
     id: string
     institution_name: string
     city: string | null
+    profile_id: string
+    whatsapp_preference: boolean | null
+    profiles: { phone: string | null } | null
   }
 }
 
@@ -48,7 +51,8 @@ function computeScore(cand: CandRow, job: JobRow): number {
 }
 
 // Vercel Cron — runs every Sunday and Wednesday at 09:00 Israel time (06:00 UTC)
-// Sends ONE consolidated WhatsApp per candidate listing their matching institutions
+// 1. Sends ONE consolidated WhatsApp per candidate listing their matching institutions
+// 2. Sends ONE WhatsApp per institution about new matching candidates
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
@@ -65,10 +69,11 @@ export async function GET(request: Request) {
       .from('candidates')
       .select('id, profile_id, specialization, district, city, work_cities, level, availability_status, whatsapp_preference, profiles(full_name, phone)')
       .gte('created_at', sevenDaysAgo)
-      .not('availability_status', 'in', '("משובצת","לא פעילה")'),
+      .not('availability_status', 'in', '("משובצת","לא פעילה")')
+    ,
     service
       .from('jobs')
-      .select('id, institution_id, specialization, district, city, level, institutions!inner(id, institution_name, city)')
+      .select('id, institution_id, specialization, district, city, level, institutions!inner(id, institution_name, city, profile_id, whatsapp_preference, profiles(phone))')
       .eq('status', 'פעילה'),
   ])
 
@@ -81,7 +86,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: jobsErr.message }, { status: 500 })
   }
   if (!candidates?.length || !jobs?.length) {
-    return NextResponse.json({ ok: true, alerts_sent: 0 })
+    return NextResponse.json({ ok: true, cand_alerts_sent: 0, inst_alerts_sent: 0 })
   }
 
   // Build scored pairs grouped by candidate profile_id
@@ -98,32 +103,32 @@ export async function GET(request: Request) {
     }
   }
 
-  if (!pairsByCand.size) return NextResponse.json({ ok: true, alerts_sent: 0 })
+  if (!pairsByCand.size) return NextResponse.json({ ok: true, cand_alerts_sent: 0, inst_alerts_sent: 0 })
 
-  // Dedup — load existing candidate_match_alert notifications
+  // ── 1. Candidate notifications ────────────────────────────────────────
+
   const candProfileIds = [...pairsByCand.keys()]
-  const { data: existingNotifs } = await service
+  const { data: existingCandNotifs } = await service
     .from('notifications')
     .select('profile_id, url')
     .eq('type', 'candidate_match_alert')
     .in('profile_id', candProfileIds)
 
-  const notifiedSet = new Set(
-    (existingNotifs ?? []).map((n: { profile_id: string; url: string | null }) =>
+  const notifiedCandSet = new Set(
+    (existingCandNotifs ?? []).map((n: { profile_id: string; url: string | null }) =>
       `${n.profile_id}::${n.url ?? ''}`
     )
   )
 
-  let totalSent = 0
+  let candSent = 0
 
   for (const [candProfileId, pairs] of pairsByCand) {
     const fresh = pairs.filter(p => {
       const url = `/profile?inst=${p.job.institutions.id}`
-      return !notifiedSet.has(`${candProfileId}::${url}`)
+      return !notifiedCandSet.has(`${candProfileId}::${url}`)
     })
     if (!fresh.length) continue
 
-    // ONE message per candidate — top 5 institutions sorted by score, deduplicated
     const top5 = fresh.sort((a, b) => b.score - a.score).slice(0, 5)
     const cand = top5[0].cand
     const candPhone = cand.profiles?.phone ?? null
@@ -146,12 +151,12 @@ export async function GET(request: Request) {
     const count = uniqueInsts.length
     const waMessage = [
       `✨ *שלום${firstName ? ` ${firstName}` : ''}!*`,
-      `המערכת מצאה עבורך ${count} מוסד${count !== 1 ? 'ות' : ''} מתאים${count !== 1 ? 'ות' : ''} לפרופיל שלך:`,
+      `המערכת מצאה עבורך ${count} מוסד${count !== 1 ? 'ות' : ''} מתאימ${count !== 1 ? 'ות' : ''} לפרופיל שלך:`,
       '',
       instLines,
       '',
       `📌 *כיצד לפנות?*`,
-      `היכנסי לפרופיל שלך, עברי על ההצעות ולחצי "הגישי מועמדות" ליד המוסד שמעניין אותך — ואנחנו נעביר את הפרטים שלך.`,
+      `היכנסי לפרופיל שלך, עברי על ההצעות ולחצי “הגישי מועמדות” ליד המוסד שמעניין אותך — ואנחנו נעביר את הפרטים שלך.`,
       '',
       `${appUrl}/profile`,
     ].join('\n')
@@ -174,8 +179,91 @@ export async function GET(request: Request) {
       }))
     )
 
-    totalSent++
+    candSent++
   }
 
-  return NextResponse.json({ ok: true, alerts_sent: totalSent })
+  // ── 2. Institution notifications ───────────────────────────────────
+  // Group all qualifying pairs by institution
+
+  type InstInfo = {
+    profileId: string
+    name: string
+    phone: string | null
+    waPref: boolean | null
+    candSet: Set<string>
+  }
+  const instInfoMap = new Map<string, InstInfo>()
+
+  for (const [candProfileId, pairs] of pairsByCand) {
+    for (const p of pairs) {
+      const inst = p.job.institutions
+      if (!instInfoMap.has(inst.id)) {
+        instInfoMap.set(inst.id, {
+          profileId: inst.profile_id,
+          name: inst.institution_name,
+          phone: inst.profiles?.phone ?? null,
+          waPref: inst.whatsapp_preference,
+          candSet: new Set(),
+        })
+      }
+      instInfoMap.get(inst.id)!.candSet.add(candProfileId)
+    }
+  }
+
+  // Load existing institution_match_alert notifications for dedup
+  const instProfileIdsList = [...instInfoMap.values()].map(e => e.profileId).filter(Boolean)
+  let notifiedInstSet = new Set<string>()
+  if (instProfileIdsList.length > 0) {
+    const { data: existingInstNotifs } = await service
+      .from('notifications')
+      .select('profile_id, url')
+      .eq('type', 'institution_match_alert')
+      .in('profile_id', instProfileIdsList)
+    notifiedInstSet = new Set(
+      (existingInstNotifs ?? []).map((n: { profile_id: string; url: string | null }) =>
+        `${n.profile_id}::${n.url ?? ''}`
+      )
+    )
+  }
+
+  let instSent = 0
+
+  for (const [, entry] of instInfoMap) {
+    const freshCandIds: string[] = []
+    for (const candProfileId of entry.candSet) {
+      const key = `${entry.profileId}::/institution/matches?cand=${candProfileId}`
+      if (!notifiedInstSet.has(key)) freshCandIds.push(candProfileId)
+    }
+    if (!freshCandIds.length || !entry.phone) continue
+
+    const count = freshCandIds.length
+    const waMessage = [
+      `✨ *שלום!*`,
+      `נמצאו ${count} מועמד${count !== 1 ? 'ות' : 'ת'} חדש${count !== 1 ? 'ות' : 'ה'} שמתאימ${count !== 1 ? 'ות' : 'ה'} למשרות ${entry.name}.`,
+      ``,
+      `הן קיבלו הודעה ועשויות לפנות אליך בקרוב — כדאי להכיר אותן מראש כדי שתוכלי להגיב מהר:`,
+      `${appUrl}/institution/matches`,
+    ].join('\n')
+
+    void sendExternal({
+      phone: entry.phone,
+      whatsapp_preference: entry.waPref,
+      waMessage,
+      smsMessage: `נמצאו ${count} מועמדות מתאימות למשרותך: ${appUrl}/institution/matches`,
+    })
+
+    void service.from('notifications').insert(
+      freshCandIds.map(candProfileId => ({
+        profile_id: entry.profileId,
+        type: 'institution_match_alert',
+        title: `✨ ${count} מועמדות חדשות`,
+        body: entry.name,
+        url: `/institution/matches?cand=${candProfileId}`,
+      }))
+    )
+
+    instSent++
+  }
+
+  return NextResponse.json({ ok: true, cand_alerts_sent: candSent, inst_alerts_sent: instSent })
 }
