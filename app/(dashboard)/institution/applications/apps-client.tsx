@@ -8,7 +8,7 @@ import {
   X, Phone, FileText, Search, Sparkles, StickyNote, Check, Star, History, Trash2,
 } from 'lucide-react'
 
-type AppStatus = 'ממתינה' | 'נצפתה' | 'התקבלה' | 'נדחתה' | 'בוטלה'
+type AppStatus = 'ממתינה' | 'נצפה' | 'התקבלה' | 'נדחתה' | 'בוטלה'
 
 export interface AppRow {
   id: string
@@ -33,7 +33,7 @@ export interface AppRow {
 
 const STATUS_CFG: Record<AppStatus, { label: string; bg: string; color: string; dot: string; icon: React.ElementType }> = {
   'ממתינה': { label: 'ממתינה',  bg: '#EDE9FE', color: '#5B3E9E', dot: '#8B5CF6', icon: Clock        },
-  'נצפתה':  { label: 'נצפתה',   bg: '#FFFBEB', color: '#B45309', dot: '#F59E0B', icon: Eye          },
+  'נצפה':  { label: 'נצפה',   bg: '#FFFBEB', color: '#B45309', dot: '#F59E0B', icon: Eye          },
   'התקבלה': { label: 'התקבלה',  bg: '#E4F6ED', color: '#1A7A4A', dot: '#22C55E', icon: CheckCircle2 },
   'נדחתה':  { label: 'נדחתה',   bg: '#F4F4F5', color: '#71717A', dot: '#9CA3AF', icon: XCircle      },
   'בוטלה':  { label: 'בוטלה',   bg: '#F4F4F5', color: '#71717A', dot: '#9CA3AF', icon: XCircle      },
@@ -50,7 +50,7 @@ const GRADIENTS = [
 const TABS: { key: AppStatus | 'הכל'; label: string }[] = [
   { key: 'הכל',    label: 'הכל'      },
   { key: 'ממתינה', label: 'ממתינות'  },
-  { key: 'נצפתה',  label: 'נצפו'     },
+  { key: 'נצפה',  label: 'נצפו'     },
   { key: 'התקבלה', label: 'התקבלו'   },
   { key: 'נדחתה',  label: 'נדחו'     },
 ]
@@ -61,6 +61,10 @@ function fmtDate(d: string) {
   if (days === 1) return 'אתמול'
   if (days < 7) return `לפני ${days} ימים`
   return new Date(d).toLocaleDateString('he-IL', { day: 'numeric', month: 'long' })
+}
+
+function waitingDays(d: string) {
+  return Math.floor((Date.now() - new Date(d).getTime()) / 86_400_000)
 }
 
 interface Props {
@@ -113,7 +117,7 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
   const counts = {
     'הכל':    apps.length,
     'ממתינה': apps.filter(a => a.status === 'ממתינה').length,
-    'נצפתה':  apps.filter(a => a.status === 'נצפתה').length,
+    'נצפה':  apps.filter(a => a.status === 'נצפה').length,
     'התקבלה': apps.filter(a => a.status === 'התקבלה').length,
     'נדחתה':  apps.filter(a => a.status === 'נדחתה').length,
   }
@@ -129,6 +133,11 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
       if (!name.includes(q) && !city.includes(q) && !job.includes(q)) return false
     }
     return true
+  }).sort((a, b) => {
+    // Oldest pending first so urgent cases rise to the top
+    if (a.status === 'ממתינה' && b.status === 'ממתינה')
+      return new Date(a.applied_at).getTime() - new Date(b.applied_at).getTime()
+    return 0
   })
 
   const jobSeen = new Set<string>()
@@ -169,7 +178,7 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
       body: JSON.stringify({ application_id: interview.appId, scheduled_at: scheduledAt, location: intLocation || null }),
     })
     const app = apps.find(a => a.id === interview.appId)
-    if (app?.status === 'ממתינה') await updateStatus(interview.appId, 'נצפתה')
+    if (app?.status === 'ממתינה') await updateStatus(interview.appId, 'נצפה')
     setSavingInt(false)
     setInterview(null)
     setIntDate(''); setIntTime('09:00'); setIntLocation('')
@@ -197,9 +206,9 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
   function waMsg(a: AppRow, type: 'accept' | 'reject' | 'interview') {
     const first = a.candidates?.profiles?.full_name?.split(' ')[0] ?? 'שלום'
     const job   = a.jobs?.title ?? 'המשרה'
-    if (type === 'accept')    return `שלום ${first},\nאנחנו מ${institutionName} ושמחים לבשר לך שהתקבלת למשרת "${job}"! נשמח לתאם את המשך התהליך.\nבברכה`
-    if (type === 'reject')    return `שלום ${first},\nתודה על הגשתך למשרת "${job}" ב${institutionName}. לאחר בחינה מעמיקה, החלטנו להמשיך עם מועמדים אחרים. מאחלים לך הצלחה!\nבברכה`
-    return `שלום ${first},\nמ${institutionName}. נשמח להזמין אותך לראיון למשרת "${job}". מה הזמינות שלך?\nבברכה`
+    if (type === 'accept')    return `שלום ${first},\nאנחנו מ${institutionName} ושמחים לבשר לך שהתקבלת למשרת “${job}”! נשמח לתאם את המשך התהליך.\nבברכה`
+    if (type === 'reject')    return `שלום ${first},\nתודה על הגשתך למשרת “${job}” ב${institutionName}. לאחר בחינה מעמיקה, החלטנו להמשיך עם מועמדים אחרים. מאחלים לך הצלחה!\nבברכה`
+    return `שלום ${first},\nמ${institutionName}. נשמח להזמין אותך לראיון למשרת “${job}”. מה הזמינות שלך?\nבברכה`
   }
 
   return (
@@ -297,6 +306,23 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
         )}
       </div>
 
+      {/* ── Stale pending banner ── */}
+      {(() => {
+        const stale = apps.filter(a => a.status === 'ממתינה' && waitingDays(a.applied_at) >= 3)
+        if (!stale.length) return null
+        return (
+          <div className="mb-5 px-4 py-3 rounded-[14px] flex items-center gap-3"
+            style={{ background: '#FFFBEB', border: '1px solid #FCD34D' }}>
+            <span style={{ fontSize: 20 }}>🙏</span>
+            <p className="text-[13px] font-medium leading-snug" style={{ color: '#92400E' }}>
+              {stale.length === 1
+                ? 'יש מועמדת אחת שמחכה לתשובתך כבר יותר מ-3 ימים — תגובה מהירה שלך חשובה לה מאוד.'
+                : `יש ${stale.length} מועמדות שמחכות לתשובתך יותר מ-3 ימים — כל תגובה מהירה עוזרת להן מאוד.`}
+            </p>
+          </div>
+        )
+      })()}
+
       {/* ── Empty ── */}
       {filtered.length === 0 ? (
         <div className="rounded-[20px] border p-16 text-center"
@@ -306,7 +332,7 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
             <Sparkles size={24} style={{ color: 'var(--purple)' }} />
           </div>
           <p className="text-[16px] font-bold mb-1" style={{ color: 'var(--ink)' }}>
-            {tab !== 'הכל' ? `אין הגשות בסטטוס "${tab}"` : 'עדיין אין הגשות'}
+            {tab !== 'הכל' ? `אין הגשות בסטטוס “${tab}”` : 'עדיין אין הגשות'}
           </p>
           <p className="text-[13px] mb-4" style={{ color: 'var(--ink-3)' }}>
             שלחו הזמנות למועמדות מתאימות
@@ -331,6 +357,7 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
             const grad     = GRADIENTS[idx % GRADIENTS.length]
             const isLoad   = loading === app.id
             const canAct   = !['התקבלה', 'נדחתה', 'בוטלה'].includes(app.status)
+            const daysWaiting = waitingDays(app.applied_at)
 
             return (
               <div key={app.id}
@@ -418,7 +445,7 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
                           </div>
                         </div>
 
-                        {/* Right: status + date */}
+                        {/* Right: status + date + waiting badge */}
                         <div className="flex flex-col items-end gap-1.5 shrink-0">
                           <span className="inline-flex items-center gap-1.5 text-[12px] font-bold px-2.5 py-1 rounded-full"
                             style={{ background: sc.bg, color: sc.color }}>
@@ -427,6 +454,13 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
                           <span className="text-[11px]" style={{ color: 'var(--ink-4)' }}>
                             {fmtDate(app.applied_at)}
                           </span>
+                          {app.status === 'ממתינה' && daysWaiting >= 2 && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                              style={{ background: '#FEF3C7', color: '#B45309' }}>
+                              <Clock size={9} />
+                              {daysWaiting === 2 ? 'יומיים' : `${daysWaiting} ימים`} בהמתנה
+                            </span>
+                          )}
                         </div>
                       </div>
 
@@ -728,7 +762,7 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
                 const dt = new Date(`${intDate}T${intTime}`).toLocaleString('he-IL', {
                   weekday: 'short', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
                 })
-                const msg = `שלום ${interview.name.split(' ')[0]}, מ${institutionName}.\nנשמח לראיינך למשרת "${interview.jobTitle}" בתאריך ${dt}${intLocation ? ', ב' + intLocation : ''}.\nנא אשרי קבלה.\nבברכה`
+                const msg = `שלום ${interview.name.split(' ')[0]}, מ${institutionName}.\nנשמח לראיינך למשרת “${interview.jobTitle}” בתאריך ${dt}${intLocation ? ', ב' + intLocation : ''}.\nנא אשרי קבלה.\nבברכה`
                 return (
                   <a href={waLink(interview.phone, msg)} target="_blank" rel="noreferrer"
                     className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[10px] text-[14px] font-bold no-underline"
