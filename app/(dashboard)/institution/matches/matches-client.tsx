@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Sparkles, Phone, FileText, MapPin, MessageCircle, Send, X, Check, CalendarDays, GraduationCap } from 'lucide-react'
 
@@ -119,14 +120,32 @@ function InviteModal({ match, institutionId, onClose, onSent }: {
 }
 
 export default function MatchesClient({ institutionId }: { institutionId: string }) {
+  const searchParams = useSearchParams()
+  const focusJobId = searchParams.get('job') ?? null
+  const focusCandId = searchParams.get('candidate') ?? null
+
   const [inviteModal, setInviteModal] = useState<Match | null>(null)
   const [invitedKeys, setInvitedKeys] = useState<Set<string>>(new Set())
+  const [highlightedKey, setHighlightedKey] = useState<string | null>(null)
+  const rowRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const qc = useQueryClient()
 
   const { data: matches = [], isLoading } = useQuery<Match[]>({
     queryKey: ['institution-matches', institutionId],
     queryFn: () => fetch('/api/institution/matches').then(r => r.json()),
   })
+
+  // Scroll to and highlight the focused pair once data loads
+  useEffect(() => {
+    if (!focusJobId || !focusCandId || matches.length === 0) return
+    const key = `${focusJobId}:${focusCandId}`
+    const el = rowRefs.current[key]
+    if (!el) return
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    setHighlightedKey(key)
+    const t = setTimeout(() => setHighlightedKey(null), 3000)
+    return () => clearTimeout(t)
+  }, [matches, focusJobId, focusCandId])
 
   function markInvited(key: string) {
     setInvitedKeys(prev => new Set(prev).add(key))
@@ -138,6 +157,15 @@ export default function MatchesClient({ institutionId }: { institutionId: string
     if (!byJob[m.jobId]) byJob[m.jobId] = { jobId: m.jobId, jobTitle: m.jobTitle, items: [] }
     byJob[m.jobId].items.push(m)
   }
+
+  // Put the focused job group first so it's immediately visible
+  const sortedGroups = Object.values(byJob).sort((a, b) => {
+    if (focusJobId) {
+      if (a.jobId === focusJobId) return -1
+      if (b.jobId === focusJobId) return 1
+    }
+    return 0
+  })
 
   return (
     <div className="p-4 md:p-8 max-w-5xl">
@@ -173,7 +201,7 @@ export default function MatchesClient({ institutionId }: { institutionId: string
         </div></div>
       ) : (
         <div className="space-y-5">
-          {Object.values(byJob).map(group => (
+          {sortedGroups.map(group => (
             <div key={group.jobId} className="rounded-[16px] border overflow-hidden"
               style={{ background: '#fff', borderColor: 'var(--line)', borderInlineStart: '3px solid var(--purple)', boxShadow: '0 1px 4px rgba(75,46,131,.06)' }}>
 
@@ -191,10 +219,19 @@ export default function MatchesClient({ institutionId }: { institutionId: string
                   const sc = scoreStyle(m.score)
                   const key = `${m.jobId}:${m.candidateId}`
                   const alreadyInvited = invitedKeys.has(key)
+                  const isHighlighted = highlightedKey === key
                   return (
-                    <div key={key} className="px-5 py-3.5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 transition-colors"
-                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-2)')}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                    <div
+                      key={key}
+                      ref={el => { rowRefs.current[key] = el }}
+                      className="px-5 py-3.5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4"
+                      style={{
+                        background: isHighlighted ? 'var(--purple-050)' : undefined,
+                        boxShadow: isHighlighted ? 'inset 0 0 0 2px var(--purple-200)' : undefined,
+                        transition: 'background 0.6s ease, box-shadow 0.6s ease',
+                      }}
+                      onMouseEnter={e => { if (!isHighlighted) e.currentTarget.style.background = 'var(--bg-2)' }}
+                      onMouseLeave={e => { if (!isHighlighted) e.currentTarget.style.background = 'transparent' }}>
 
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                       <div className="w-9 h-9 rounded-[10px] flex items-center justify-center font-black text-[15px] shrink-0"
