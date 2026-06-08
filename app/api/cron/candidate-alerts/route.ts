@@ -97,7 +97,7 @@ export async function GET(request: Request) {
   type Pair = { cand: CandRow; job: JobRow; score: number }
   const pairsByInst = new Map<string, Pair[]>()
 
-  for (const cand of candidates as CandRow[]) {
+  for (const cand of candidates as unknown as CandRow[]) {
     for (const job of jobs as unknown as JobRow[]) {
       const score = computeScore(cand, job)
       if (score < 6) continue
