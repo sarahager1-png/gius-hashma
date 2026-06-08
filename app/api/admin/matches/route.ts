@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { inSameCityGroup } from '@/lib/city-affinity'
 
 interface ScoredMatch {
   candidateId: string
@@ -32,7 +33,6 @@ export async function GET() {
   if (!profile || !['מנהלת מערכת', 'אדמין מערכת', 'מנהל רשת'].includes(profile.role))
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  // Fetch approved institutions, active jobs, and candidates in parallel
   const [
     { data: institutions },
     { data: jobs },
@@ -49,9 +49,7 @@ export async function GET() {
     service.from('applications').select('job_id, candidate_id'),
   ])
 
-  // Build institution lookup
   const instMap = new Map((institutions ?? []).map(i => [i.id, i]))
-
   const appliedPairs = new Set(
     (existingApps ?? []).map(a => `${a.job_id}:${a.candidate_id}`)
   )
@@ -75,7 +73,7 @@ export async function GET() {
       let locationHit = false
       let roleHit = false
 
-      // ── Location signals ───────────────────────────────────────────
+      // ── Location signals ──────────────────────────────────────────
       if (jobCity) {
         if (cand.city && cand.city === jobCity) {
           score += 5; reasons.push(`עיר: ${cand.city}`); locationHit = true
@@ -84,12 +82,13 @@ export async function GET() {
         }
       }
       if (cand.district && jobDistrict && cand.district === jobDistrict) {
-        score += 3; reasons.push(`מחוז: ${cand.district}`)
-        // district always counts as location hit (work_cities list is aspirational, not exclusive)
-        locationHit = true
+        score += 3; reasons.push(`מחוז: ${cand.district}`); locationHit = true
+      }
+      if (!locationHit && cand.city && jobCity && inSameCityGroup(cand.city, jobCity)) {
+        score += 2; reasons.push(`אזור קרוב: ${jobCity}`); locationHit = true
       }
 
-      // ── Role / specialization signals ──────────────────────────────
+      // ── Role / specialization signals ─────────────────────────────
       const candSpecs = cand.specialization?.split(',').map((s: string) => s.trim()) ?? []
       if (cand.specialization && job.specialization &&
           (cand.specialization === job.specialization || candSpecs.includes(job.specialization))) {
@@ -104,7 +103,6 @@ export async function GET() {
 
       if (cand.availability_status === "מחפשת סטאג'") score += 1
 
-      // Require a meaningful signal on both dimensions
       if (!locationHit || !roleHit) continue
       if (score < 7) continue
 

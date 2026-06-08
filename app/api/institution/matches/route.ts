@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { inSameCityGroup } from '@/lib/city-affinity'
 
 export async function GET() {
   const supabase = await createClient()
@@ -76,6 +77,12 @@ export async function GET() {
       }
       if (cand.work_cities && job.city && (cand.work_cities as string[]).includes(job.city)) {
         score += 3; reasons.push(`עיר עבודה: ${job.city}`)
+      }
+      // City affinity — nearby communities
+      const affinityCity = institution.city ?? job.city
+      if (cand.city && affinityCity && inSameCityGroup(cand.city, affinityCity) &&
+          !reasons.some(r => r.startsWith('עיר'))) {
+        score += 2; reasons.push(`אזור קרוב: ${affinityCity}`)
       }
       if (cand.availability_status === "מחפשת סטאג'") score += 1
 

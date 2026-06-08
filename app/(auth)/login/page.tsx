@@ -15,7 +15,6 @@ function LoginPageInner() {
   const [accessCode, setAccessCode]   = useState('')
   const [codeLoading, setCodeLoading] = useState(false)
   const [codeError, setCodeError]     = useState('')
-  const [showCode, setShowCode]       = useState(false)
   const searchParams = useSearchParams()
 
   const errParam = searchParams.get('error')
@@ -91,7 +90,6 @@ function LoginPageInner() {
           background: #060F1A;
         }
 
-        /* ══ HERO PANEL (right, 44%) ══ */
         .lg-hero {
           width: 44%; flex-shrink: 0;
           position: relative; overflow: hidden;
@@ -146,14 +144,12 @@ function LoginPageInner() {
           box-shadow:14px 9px 0 0 rgba(201,168,76,.18),-20px 16px 0 1px rgba(0,200,235,.12),38px -6px 0 0 rgba(255,255,255,.07),-10px -22px 0 1px rgba(201,168,76,.1);
           animation:dustRise 11s ease-out 1.8s infinite;
         }
-
         .lg-hero-content {
           position:relative; z-index:10;
           flex:1; display:flex; flex-direction:column;
           align-items:center; justify-content:center;
           padding:32px 44px; text-align:center;
         }
-
         .lg-logo-wrap { position:relative; margin-bottom:24px; }
         .lg-logo-box {
           position:relative;
@@ -178,25 +174,10 @@ function LoginPageInner() {
           border:1px solid rgba(201,168,76,.16);
           animation:pulseWarm 7s ease-in-out infinite; pointer-events:none;
         }
-
-        .lg-hero-eyebrow {
-          font-size:10px; font-weight:700; letter-spacing:.18em;
-          color:rgba(0,195,225,.55); margin-bottom:8px;
-        }
-        .lg-hero-divider {
-          width:36px; height:1.5px;
-          background:linear-gradient(90deg, transparent, rgba(0,195,225,.5), transparent);
-          margin:0 auto 16px;
-        }
-        .lg-hero-name {
-          font-size:52px; font-weight:900; letter-spacing:-.04em; line-height:1;
-          color:#fff; margin-bottom:6px;
-        }
-        .lg-hero-sub {
-          font-size:12px; font-weight:400; letter-spacing:.08em;
-          color:rgba(255,255,255,.32); margin-bottom:44px;
-        }
-
+        .lg-hero-eyebrow { font-size:10px; font-weight:700; letter-spacing:.18em; color:rgba(0,195,225,.55); margin-bottom:8px; }
+        .lg-hero-divider { width:36px; height:1.5px; background:linear-gradient(90deg, transparent, rgba(0,195,225,.5), transparent); margin:0 auto 16px; }
+        .lg-hero-name { font-size:52px; font-weight:900; letter-spacing:-.04em; line-height:1; color:#fff; margin-bottom:6px; }
+        .lg-hero-sub { font-size:12px; font-weight:400; letter-spacing:.08em; color:rgba(255,255,255,.32); margin-bottom:44px; }
         .lg-quote-card {
           width:100%; max-width:298px; margin:0 auto 40px;
           background:rgba(201,168,76,.055);
@@ -206,116 +187,33 @@ function LoginPageInner() {
           box-shadow:0 1px 0 rgba(255,255,255,.07) inset, 0 0 28px rgba(201,168,76,.09);
           position:relative;
         }
-        .lg-quote-mark {
-          position:absolute; top:-10px; right:18px;
-          font-size:40px; line-height:1;
-          background:linear-gradient(135deg, #D4A840, #EDD870, #C9941C);
-          -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
-          font-family:Georgia,serif;
-        }
-        .lg-quote-text {
-          font-size:16px; font-weight:700;
-          color:rgba(255,255,255,.88); line-height:1.65; margin-bottom:10px;
-        }
-        .lg-quote-text em {
-          font-style:normal;
-          background:linear-gradient(90deg, #C8A040 0%, #EDD070 30%, #F8E898 55%, #EDD070 75%, #C8A040 100%);
-          background-size:200% auto;
-          -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
-          animation:shimG 8s linear infinite;
-        }
-        .lg-quote-src {
-          font-size:10px; font-weight:700; letter-spacing:.12em;
-          background:linear-gradient(90deg, #C9A84C, #E8C96A, #C9A84C);
-          background-size:200% auto;
-          -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
-          animation:shimGold 6s linear infinite; opacity:.8;
-        }
-
+        .lg-quote-mark { position:absolute; top:-10px; right:18px; font-size:40px; line-height:1; background:linear-gradient(135deg, #D4A840, #EDD870, #C9941C); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; font-family:Georgia,serif; }
+        .lg-quote-text { font-size:16px; font-weight:700; color:rgba(255,255,255,.88); line-height:1.65; margin-bottom:10px; }
+        .lg-quote-text em { font-style:normal; background:linear-gradient(90deg, #C8A040 0%, #EDD070 30%, #F8E898 55%, #EDD070 75%, #C8A040 100%); background-size:200% auto; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; animation:shimG 8s linear infinite; }
+        .lg-quote-src { font-size:10px; font-weight:700; letter-spacing:.12em; background:linear-gradient(90deg, #C9A84C, #E8C96A, #C9A84C); background-size:200% auto; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; animation:shimGold 6s linear infinite; opacity:.8; }
         .lg-features { display:flex; flex-direction:column; gap:10px; width:100%; max-width:290px; margin:0 auto; }
-        .lg-feat-row {
-          display:flex; align-items:center; gap:14px;
-          padding:13px 16px; border-radius:15px;
-          background:rgba(255,255,255,.05);
-          border:1px solid rgba(255,255,255,.09);
-          transition:background .25s, border-color .25s, transform .25s;
-          position:relative; overflow:hidden;
-        }
-        .lg-feat-row::before {
-          content:''; position:absolute; right:0; top:0; bottom:0; width:2px;
-          border-radius:0 2px 2px 0;
-        }
+        .lg-feat-row { display:flex; align-items:center; gap:14px; padding:13px 16px; border-radius:15px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.09); transition:background .25s, border-color .25s, transform .25s; position:relative; overflow:hidden; }
+        .lg-feat-row::before { content:''; position:absolute; right:0; top:0; bottom:0; width:2px; border-radius:0 2px 2px 0; }
         .lg-feat-row:hover { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.14); transform:translateX(-2px); }
-        .lg-feat-icon {
-          width:36px; height:36px; border-radius:11px; flex-shrink:0;
-          display:flex; align-items:center; justify-content:center;
-        }
+        .lg-feat-icon { width:36px; height:36px; border-radius:11px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
         .lg-feat-text { font-size:12.5px; font-weight:500; color:rgba(255,255,255,.58); flex:1; text-align:right; line-height:1.4; }
+        .lg-hero-footer { position:relative; z-index:10; text-align:center; padding:0 0 20px; font-size:10px; color:rgba(255,255,255,.12); letter-spacing:.05em; }
 
-        .lg-hero-footer {
-          position:relative; z-index:10; text-align:center; padding:0 0 20px;
-          font-size:10px; color:rgba(255,255,255,.12); letter-spacing:.05em;
-        }
-
-        /* ══ FORM PANEL ══ */
         .lg-form {
           flex:1; display:flex; flex-direction:column;
           position:relative; overflow:hidden;
           background:linear-gradient(170deg, #EAF2FA 0%, #DDE8F3 55%, #E6EDF6 100%);
         }
-        .lg-form::before {
-          content:''; position:absolute; top:-80px; left:50%; transform:translateX(-50%);
-          width:90%; height:420px; border-radius:50%;
-          background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,175,210,.18) 0%, transparent 65%);
-          pointer-events:none;
-        }
-        .lg-form::after {
-          content:''; position:absolute; bottom:-60px; left:-60px;
-          width:340px; height:340px; border-radius:50%;
-          background:radial-gradient(circle, rgba(201,168,76,.09) 0%, transparent 70%);
-          pointer-events:none;
-        }
-        .lg-form-grain {
-          position:absolute; inset:0; pointer-events:none; z-index:1;
-          opacity:.007;
-          background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-          background-size:180px 180px;
-          animation:grainAnim .4s steps(1) infinite;
-        }
-
-        .lg-topbar {
-          position:absolute; top:20px; left:24px; z-index:10;
-        }
-        .lg-admin-btn {
-          display:flex; align-items:center; gap:6px;
-          padding:7px 14px; border-radius:10px;
-          font-size:12px; font-weight:600;
-          color:rgba(26,46,66,.45);
-          background:rgba(26,46,66,.06); border:1px solid rgba(26,46,66,.1);
-          text-decoration:none; transition:all .2s;
-          font-family:'Heebo',system-ui,sans-serif;
-        }
+        .lg-form::before { content:''; position:absolute; top:-80px; left:50%; transform:translateX(-50%); width:90%; height:420px; border-radius:50%; background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,175,210,.18) 0%, transparent 65%); pointer-events:none; }
+        .lg-form::after { content:''; position:absolute; bottom:-60px; left:-60px; width:340px; height:340px; border-radius:50%; background:radial-gradient(circle, rgba(201,168,76,.09) 0%, transparent 70%); pointer-events:none; }
+        .lg-form-grain { position:absolute; inset:0; pointer-events:none; z-index:1; opacity:.007; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E"); background-size:180px 180px; animation:grainAnim .4s steps(1) infinite; }
+        .lg-topbar { position:absolute; top:20px; left:24px; z-index:10; }
+        .lg-admin-btn { display:flex; align-items:center; gap:6px; padding:7px 14px; border-radius:10px; font-size:12px; font-weight:600; color:rgba(26,46,66,.45); background:rgba(26,46,66,.06); border:1px solid rgba(26,46,66,.1); text-decoration:none; transition:all .2s; font-family:'Heebo',system-ui,sans-serif; }
         .lg-admin-btn:hover { background:rgba(26,46,66,.1); color:rgba(26,46,66,.75); border-color:rgba(26,46,66,.18); }
-
-        .lg-mobile-brand {
-          display:none; flex-direction:column;
-          align-items:center; padding:52px 24px 20px;
-          text-align:center; position:relative; z-index:2;
-        }
+        .lg-mobile-brand { display:none; flex-direction:column; align-items:center; padding:52px 24px 20px; text-align:center; position:relative; z-index:2; }
         @media(max-width:1023px){ .lg-mobile-brand { display:flex; } }
-        .lg-mobile-logo {
-          width:64px; height:64px; border-radius:18px;
-          background:rgba(255,252,248,.95);
-          box-shadow:0 4px 20px rgba(26,46,66,.15), 0 0 32px rgba(0,175,215,.12);
-          display:flex; align-items:center; justify-content:center;
-          margin-bottom:12px;
-        }
-
-        .lg-form-main {
-          flex:1; display:flex; align-items:center; justify-content:center;
-          padding:40px 24px; position:relative; z-index:2;
-          overflow-y:auto; min-height:0;
-        }
+        .lg-mobile-logo { width:64px; height:64px; border-radius:18px; background:rgba(255,252,248,.95); box-shadow:0 4px 20px rgba(26,46,66,.15), 0 0 32px rgba(0,175,215,.12); display:flex; align-items:center; justify-content:center; margin-bottom:12px; }
+        .lg-form-main { flex:1; display:flex; align-items:center; justify-content:center; padding:40px 24px; position:relative; z-index:2; overflow-y:auto; min-height:0; }
         .lg-card {
           width:100%; max-width:400px;
           background:rgba(255,255,255,.72);
@@ -330,169 +228,57 @@ function LoginPageInner() {
           animation:floatCard 6s ease-in-out infinite;
           position:relative;
         }
-        .lg-card::before {
-          content:''; position:absolute; top:0; left:16px; right:16px; height:1px;
-          background:linear-gradient(90deg, transparent, rgba(0,175,210,.5), rgba(201,168,76,.3), transparent);
-          border-radius:1px;
-        }
-
+        .lg-card::before { content:''; position:absolute; top:0; left:16px; right:16px; height:1px; background:linear-gradient(90deg, transparent, rgba(0,175,210,.5), rgba(201,168,76,.3), transparent); border-radius:1px; }
         .lg-welcome { margin-bottom:30px; animation:fadeUp .6s cubic-bezier(.16,1,.3,1) both; }
         .lg-eyebrow-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
-        .lg-eyebrow-dot {
-          width:6px; height:6px; border-radius:50%; flex-shrink:0;
-          background:linear-gradient(135deg, #B8920A, #D4A820);
-        }
-        .lg-eyebrow-text {
-          font-size:11px; font-weight:700; letter-spacing:.12em;
-          color:rgba(160,118,10,.8); text-transform:uppercase;
-        }
-        .lg-heading {
-          font-size:28px; font-weight:900; color:rgba(8,24,44,.9);
-          line-height:1.2; letter-spacing:-.03em; margin-bottom:8px;
-        }
-        .lg-sub {
-          font-size:13.5px; color:rgba(8,24,44,.46);
-          line-height:1.65; font-weight:400;
-        }
-
-        .lg-tabs {
-          display:flex; gap:8px;
-          background:transparent; border:none;
-          margin-bottom:24px;
-          animation:fadeUp .5s .1s cubic-bezier(.16,1,.3,1) both;
-        }
-        .lg-tab {
-          flex:1; padding:11px 10px;
-          font-size:13px; font-weight:700;
-          color:rgba(8,24,44,.42);
-          background:rgba(8,24,44,.06);
-          border:1px solid rgba(8,24,44,.1);
-          border-radius:13px; cursor:pointer;
-          transition:all .22s cubic-bezier(.16,1,.3,1);
-          font-family:'Heebo',system-ui,sans-serif;
-          letter-spacing:-.01em;
-        }
-        .lg-tab.active {
-          color:#fff;
-          background:linear-gradient(135deg, #007A8C, #00A4BC);
-          border-color:rgba(0,164,188,.6);
-          box-shadow:0 4px 18px rgba(0,140,175,.3), inset 0 1px 0 rgba(255,255,255,.2);
-        }
+        .lg-eyebrow-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg, #B8920A, #D4A820); }
+        .lg-eyebrow-text { font-size:11px; font-weight:700; letter-spacing:.12em; color:rgba(160,118,10,.8); text-transform:uppercase; }
+        .lg-heading { font-size:28px; font-weight:900; color:rgba(8,24,44,.9); line-height:1.2; letter-spacing:-.03em; margin-bottom:8px; }
+        .lg-sub { font-size:13.5px; color:rgba(8,24,44,.46); line-height:1.65; font-weight:400; }
+        .lg-tabs { display:flex; gap:8px; background:transparent; border:none; margin-bottom:24px; animation:fadeUp .5s .1s cubic-bezier(.16,1,.3,1) both; }
+        .lg-tab { flex:1; padding:11px 10px; font-size:13px; font-weight:700; color:rgba(8,24,44,.42); background:rgba(8,24,44,.06); border:1px solid rgba(8,24,44,.1); border-radius:13px; cursor:pointer; transition:all .22s cubic-bezier(.16,1,.3,1); font-family:'Heebo',system-ui,sans-serif; letter-spacing:-.01em; }
+        .lg-tab.active { color:#fff; background:linear-gradient(135deg, #007A8C, #00A4BC); border-color:rgba(0,164,188,.6); box-shadow:0 4px 18px rgba(0,140,175,.3), inset 0 1px 0 rgba(255,255,255,.2); }
         .lg-tab:hover:not(.active) { color:rgba(8,24,44,.72); background:rgba(8,24,44,.1); border-color:rgba(8,24,44,.16); transform:translateY(-1px); }
-
-        .lg-goog-btn {
-          width:100%; height:52px; border-radius:14px;
-          display:flex; align-items:center; justify-content:center; gap:11px;
-          font-family:'Heebo',system-ui,sans-serif; font-size:14.5px; font-weight:700;
-          cursor:pointer; outline:none; position:relative; overflow:hidden;
-          background:rgba(8,24,44,.07);
-          border:1px solid rgba(8,24,44,.14);
-          color:rgba(8,24,44,.82); transition:all .28s cubic-bezier(.16,1,.3,1); letter-spacing:-.01em;
-          box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 2px 8px rgba(10,30,60,.08);
-          animation:fadeUp .6s .2s cubic-bezier(.16,1,.3,1) both;
-        }
+        .lg-goog-btn { width:100%; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; gap:11px; font-family:'Heebo',system-ui,sans-serif; font-size:14.5px; font-weight:700; cursor:pointer; outline:none; position:relative; overflow:hidden; background:rgba(8,24,44,.07); border:1px solid rgba(8,24,44,.14); color:rgba(8,24,44,.82); transition:all .28s cubic-bezier(.16,1,.3,1); letter-spacing:-.01em; box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 2px 8px rgba(10,30,60,.08); animation:fadeUp .6s .2s cubic-bezier(.16,1,.3,1) both; }
         .lg-goog-btn:hover { transform:translateY(-2px); background:rgba(8,24,44,.11); border-color:rgba(8,24,44,.22); box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 6px 20px rgba(10,30,60,.12); }
         .lg-goog-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
         .lg-goog-icon { background:rgba(255,255,255,.9); border-radius:8px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 1px 4px rgba(0,0,0,.1); }
-
-        .lg-divider {
-          display:flex; align-items:center; gap:14px;
-          margin:18px 0; animation:fadeIn .5s .3s both;
-        }
+        .lg-divider { display:flex; align-items:center; gap:14px; margin:18px 0; animation:fadeIn .5s .3s both; }
         .lg-divider-line { flex:1; height:1px; background:rgba(8,24,44,.1); }
         .lg-divider-text { font-size:11px; font-weight:600; color:rgba(8,24,44,.32); letter-spacing:.08em; }
-
-        .lg-register {
-          display:block; text-align:center; animation:fadeIn .5s .35s both;
-        }
-        .lg-register a {
-          font-size:13px; font-weight:600;
-          color:rgba(0,130,155,.85); text-decoration:none;
-          border-bottom:1px solid rgba(0,130,155,.25); transition:all .2s;
-        }
+        .lg-register { display:block; text-align:center; animation:fadeIn .5s .35s both; }
+        .lg-register a { font-size:13px; font-weight:600; color:rgba(0,130,155,.85); text-decoration:none; border-bottom:1px solid rgba(0,130,155,.25); transition:all .2s; }
         .lg-register a:hover { color:rgba(0,155,185,.95); border-color:rgba(0,155,185,.5); }
-
-        .lg-error {
-          margin-top:12px; padding:10px 14px;
-          border-radius:12px; font-size:13px; font-weight:600;
-          color:#FCA5A5; background:rgba(200,60,60,.14);
-          border:1px solid rgba(200,60,60,.25); text-align:center;
-          animation:fadeUp .3s ease both;
-        }
-
-        .lg-code-toggle {
-          background:none; border:none; cursor:pointer;
-          font-size:11px; font-weight:600; letter-spacing:.06em;
-          color:rgba(8,24,44,.38); transition:color .2s;
-          font-family:'Heebo',system-ui,sans-serif; white-space:nowrap; padding:0;
-        }
-        .lg-code-toggle:hover { color:rgba(0,130,155,.8); }
-        .lg-code-toggle.open { color:rgba(0,130,155,.85); }
-
-        .lg-code-row {
-          display:flex; gap:8px; margin-top:12px;
-          animation:fadeUp .25s ease both;
-        }
-        .lg-code-input {
-          flex:1; height:48px; border-radius:12px;
-          border:1.5px solid rgba(8,24,44,.16);
-          padding:0 14px;
-          font-size:21px; font-weight:800; letter-spacing:.22em;
-          text-align:center; outline:none;
-          background:rgba(8,24,44,.04);
-          color:rgba(8,24,44,.85);
-          font-family:monospace;
-          transition:border-color .18s, background .18s;
-          text-transform:uppercase;
-        }
+        .lg-error { margin-top:12px; padding:10px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#FCA5A5; background:rgba(200,60,60,.14); border:1px solid rgba(200,60,60,.25); text-align:center; animation:fadeUp .3s ease both; }
+        .lg-code-section { margin-top:18px; border-radius:14px; border:1px solid rgba(0,140,175,.18); background:rgba(0,140,175,.04); padding:14px 16px; animation:fadeIn .4s .4s both; }
+        .lg-code-label { font-size:12px; font-weight:700; color:rgba(0,130,155,.72); letter-spacing:.06em; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+        .lg-code-dot { width:5px; height:5px; border-radius:50%; background:rgba(0,155,185,.7); flex-shrink:0; }
+        .lg-code-row { display:flex; gap:8px; }
+        .lg-code-input { flex:1; height:48px; border-radius:12px; border:1.5px solid rgba(8,24,44,.16); padding:0 14px; font-size:21px; font-weight:800; letter-spacing:.22em; text-align:center; outline:none; background:rgba(8,24,44,.04); color:rgba(8,24,44,.85); font-family:monospace; transition:border-color .18s, background .18s; text-transform:uppercase; }
         .lg-code-input::placeholder { letter-spacing:.14em; font-size:14px; font-weight:500; }
         .lg-code-input:focus { border-color:rgba(0,140,175,.6); background:#fff; }
-        .lg-code-btn {
-          height:48px; padding:0 18px;
-          border-radius:12px; border:none;
-          background:linear-gradient(135deg, #007A8C, #00A4BC);
-          color:#fff; font-size:14px; font-weight:700;
-          cursor:pointer; transition:all .22s;
-          font-family:'Heebo',system-ui,sans-serif;
-          box-shadow:0 3px 12px rgba(0,140,175,.28);
-        }
+        .lg-code-btn { height:48px; padding:0 18px; border-radius:12px; border:none; background:linear-gradient(135deg, #007A8C, #00A4BC); color:#fff; font-size:14px; font-weight:700; cursor:pointer; transition:all .22s; font-family:'Heebo',system-ui,sans-serif; box-shadow:0 3px 12px rgba(0,140,175,.28); }
         .lg-code-btn:disabled { opacity:.45; cursor:not-allowed; box-shadow:none; }
         .lg-code-btn:not(:disabled):hover { transform:translateY(-1px); box-shadow:0 5px 18px rgba(0,140,175,.4); }
-
-        .lg-code-error {
-          margin-top:8px; padding:8px 12px;
-          border-radius:10px; font-size:12.5px; font-weight:600;
-          color:#FCA5A5; background:rgba(200,60,60,.12);
-          border:1px solid rgba(200,60,60,.22); text-align:center;
-        }
-
-        .lg-form-footer {
-          position:relative; z-index:2; text-align:center; padding:0 0 20px;
-          font-size:10.5px; color:rgba(26,46,66,.3); letter-spacing:.04em;
-        }
+        .lg-code-error { margin-bottom:8px; padding:8px 12px; border-radius:10px; font-size:12.5px; font-weight:600; color:#FCA5A5; background:rgba(200,60,60,.12); border:1px solid rgba(200,60,60,.22); text-align:center; }
+        .lg-form-footer { position:relative; z-index:2; text-align:center; padding:0 0 20px; font-size:10.5px; color:rgba(26,46,66,.3); letter-spacing:.04em; }
       `}</style>
 
       <div className="lg-root">
-
-        {/* ══ Hero Panel ══ */}
         <div className="lg-hero">
           <div className="lg-hero-bg" />
           <div className="lg-hero-grain" />
           <div className="lg-hero-dust" />
-
           <div className="lg-hero-content" style={{ opacity: 1, transition: 'opacity .8s ease' }}>
-
             <div className="lg-logo-wrap">
               <div className="lg-logo-box">
                 <Image src="/logo-chabad.png" alt="השביל" width={58} height={58} style={{ objectFit:'contain' }} />
               </div>
             </div>
-
             <div className="lg-hero-eyebrow">מערכת גיוס והשמה · רשת חינוך חב״ד</div>
             <div className="lg-hero-divider" />
             <div className="lg-hero-name">הַשְּׁבִיל</div>
             <div className="lg-hero-sub">מערכת חכמה לגיוס והשמה</div>
-
             <div className="lg-quote-card">
               <div className="lg-quote-mark">&ldquo;</div>
               <div className="lg-quote-text" style={{ fontSize:'13px', fontWeight:500, lineHeight:1.75 }}>
@@ -500,7 +286,6 @@ function LoginPageInner() {
               </div>
               <div className="lg-quote-src">הרבי · התקשרות · עמוד 115</div>
             </div>
-
             <div className="lg-features">
               {([
                 { Icon: Sparkles,       color: '#00B4CC', text: 'חיבור מועמדות למוסדות חינוך חב״ד בלבד' },
@@ -517,129 +302,80 @@ function LoginPageInner() {
               ))}
             </div>
           </div>
-
-          <div className="lg-hero-footer">
-            הַשְּׁבִיל · עתודות לשליחות · 2026
-          </div>
+          <div className="lg-hero-footer">הַשְּׁבִיל · עתודות לשליחות · 2026</div>
         </div>
 
-        {/* ══ Form Panel ══ */}
         <div className="lg-form">
           <div className="lg-form-grain" />
-
           <div className="lg-topbar">
-            <a href="/register/admin" className="lg-admin-btn">
-              <KeyRound size={12} />
-              הנהלה
-            </a>
+            <a href="/register/admin" className="lg-admin-btn"><KeyRound size={12} />הנהלה</a>
           </div>
-
-          {/* Mobile brand */}
           <div className="lg-mobile-brand">
             <div className="lg-mobile-logo">
               <Image src="/logo-chabad.png" alt="השביל" width={44} height={44} style={{ objectFit:'contain' }} />
             </div>
-            <div style={{ fontSize:'22px', fontWeight:900, color:'#1A2E42', letterSpacing:'-.03em', marginBottom:'2px' }}>
-              הַשְּׁבִיל
-            </div>
-            <div style={{ fontSize:'12px', fontWeight:600, color:'#2563EB', marginBottom:'2px' }}>
-              השליחות החינוכית
-            </div>
-            <div style={{ fontSize:'13px', color:'#5A7085' }}>
-              מערכת חכמה לגיוס והשמה
-            </div>
+            <div style={{ fontSize:'22px', fontWeight:900, color:'#1A2E42', letterSpacing:'-.03em', marginBottom:'2px' }}>הַשְּׁבִיל</div>
+            <div style={{ fontSize:'12px', fontWeight:600, color:'#2563EB', marginBottom:'2px' }}>השליחות החינוכית</div>
+            <div style={{ fontSize:'13px', color:'#5A7085' }}>מערכת חכמה לגיוס והשמה</div>
           </div>
 
           <div className="lg-form-main">
             <div className="lg-card" style={{ opacity: 1, transition: 'opacity .6s .1s ease' }}>
-
               <div className="lg-welcome">
                 <div className="lg-eyebrow-row">
                   <div className="lg-eyebrow-dot" />
                   <span className="lg-eyebrow-text">כניסה למערכת</span>
                 </div>
                 <h1 className="lg-heading">ברוכה הבאה,</h1>
-                <p className="lg-sub">
-                  היכנסי עם חשבון Google שלך כדי<br />
-                  לגשת למערכת הגיוס וההשמה
-                </p>
+                <p className="lg-sub">היכנסי עם חשבון Google שלך כדי<br />לגשת למערכת הגיוס וההשמה</p>
               </div>
-
               <div className="lg-tabs">
                 <button className="lg-tab active">מועמדת</button>
                 <a href="/mosad" className="lg-tab" style={{ textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>מוסד</a>
               </div>
-
               <button onClick={signInWithGoogle} disabled={loading} className="lg-goog-btn">
-                {loading ? (
-                  <span>מתחברת...</span>
-                ) : (
-                  <>
-                    <div className="lg-goog-icon"><GoogleIcon /></div>
-                    <span>כניסה עם Google</span>
-                  </>
-                )}
+                {loading ? <span>מתחברת...</span> : <><div className="lg-goog-icon"><GoogleIcon /></div><span>כניסה עם Google</span></>}
               </button>
-
               {error && <div className="lg-error">{error}</div>}
-
               <div className="lg-divider">
                 <div className="lg-divider-line" />
                 <span className="lg-divider-text">או</span>
                 <div className="lg-divider-line" />
               </div>
-
               <div className="lg-register">
                 <a href="/register/candidate">הגשת מועמדות חדשה ←</a>
               </div>
-
-              {/* Access code section */}
-              <div className="lg-divider" style={{ marginTop: '16px' }}>
-                <div className="lg-divider-line" />
-                <button
-                  onClick={() => { setShowCode(s => !s); setCodeError('') }}
-                  className={`lg-code-toggle${showCode ? ' open' : ''}`}>
-                  {showCode ? '✕ סגרי' : 'יש לי קוד כניסה'}
-                </button>
-                <div className="lg-divider-line" />
-              </div>
-
-              {showCode && (
-                <div>
-                  {codeError && <div className="lg-code-error">{codeError}</div>}
-                  <div className="lg-code-row">
-                    <input
-                      type="text"
-                      value={accessCode}
-                      onChange={e => setAccessCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}
-                      onKeyDown={e => e.key === 'Enter' && accessCode.length === 6 && redeemCode()}
-                      placeholder="XXXXXX"
-                      maxLength={6}
-                      dir="ltr"
-                      className="lg-code-input"
-                      autoFocus
-                    />
-                    <button
-                      onClick={redeemCode}
-                      disabled={codeLoading || accessCode.length !== 6}
-                      className="lg-code-btn">
-                      {codeLoading ? '...' : 'כנסי'}
-                    </button>
-                  </div>
+              <div className="lg-code-section">
+                <div className="lg-code-label">
+                  <span className="lg-code-dot" />
+                  כניסה עם קוד
                 </div>
-              )}
-
+                {codeError && <div className="lg-code-error">{codeError}</div>}
+                <div className="lg-code-row">
+                  <input
+                    type="text"
+                    value={accessCode}
+                    onChange={e => setAccessCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}
+                    onKeyDown={e => e.key === 'Enter' && accessCode.length === 6 && redeemCode()}
+                    placeholder="XXXXXX"
+                    maxLength={6}
+                    dir="ltr"
+                    className="lg-code-input"
+                  />
+                  <button onClick={redeemCode} disabled={codeLoading || accessCode.length !== 6} className="lg-code-btn">
+                    {codeLoading ? '...' : 'כנסי'}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="lg-form-footer">
             © 2026 רשת חינוך חב״ד · כל הזכויות שמורות
             <span className="mx-2" style={{ color: 'var(--line)' }}>|</span>
-            פיתוח ובניית אתר: שרה הגר&nbsp;
-            <a href="tel:0503339770" style={{ color: 'inherit', textDecoration: 'none' }}>0503339770</a>
+            פיתוח ובניית אתר: שרה הגר&nbsp;<a href="tel:0503339770" style={{ color: 'inherit', textDecoration: 'none' }}>0503339770</a>
           </div>
         </div>
-
       </div>
     </>
   )
