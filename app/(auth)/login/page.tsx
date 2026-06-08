@@ -10,8 +10,12 @@ import { KeyRound, Sparkles, ClipboardCheck, HeartHandshake } from 'lucide-react
 function LoginPageInner() {
   const supabase = createClient()
   const router   = useRouter()
-  const [loading, setLoading] = useState(false)
-  const [formError, setFormError] = useState('')
+  const [loading, setLoading]         = useState(false)
+  const [formError, setFormError]     = useState('')
+  const [accessCode, setAccessCode]   = useState('')
+  const [codeLoading, setCodeLoading] = useState(false)
+  const [codeError, setCodeError]     = useState('')
+  const [showCode, setShowCode]       = useState(false)
   const searchParams = useSearchParams()
 
   const errParam = searchParams.get('error')
@@ -43,6 +47,23 @@ function LoginPageInner() {
       },
     })
     if (error) { setFormError('שגיאה בכניסה עם Google'); setLoading(false) }
+  }
+
+  async function redeemCode() {
+    if (!accessCode.trim()) return
+    setCodeLoading(true); setCodeError('')
+    const res = await fetch('/api/auth/redeem-access-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: accessCode.trim() }),
+    })
+    const data = await res.json()
+    setCodeLoading(false)
+    if (data.url) {
+      window.location.href = data.url
+    } else {
+      setCodeError(data.error ?? 'קוד שגוי')
+    }
   }
 
   return (
@@ -133,7 +154,6 @@ function LoginPageInner() {
           padding:32px 44px; text-align:center;
         }
 
-        /* logo box — matches landing page */
         .lg-logo-wrap { position:relative; margin-bottom:24px; }
         .lg-logo-box {
           position:relative;
@@ -177,7 +197,6 @@ function LoginPageInner() {
           color:rgba(255,255,255,.32); margin-bottom:44px;
         }
 
-        /* quote card — matches landing style */
         .lg-quote-card {
           width:100%; max-width:298px; margin:0 auto 40px;
           background:rgba(201,168,76,.055);
@@ -213,7 +232,6 @@ function LoginPageInner() {
           animation:shimGold 6s linear infinite; opacity:.8;
         }
 
-        /* feature rows */
         .lg-features { display:flex; flex-direction:column; gap:10px; width:100%; max-width:290px; margin:0 auto; }
         .lg-feat-row {
           display:flex; align-items:center; gap:14px;
@@ -239,7 +257,7 @@ function LoginPageInner() {
           font-size:10px; color:rgba(255,255,255,.12); letter-spacing:.05em;
         }
 
-        /* ══ FORM PANEL (left, 56%) ══ */
+        /* ══ FORM PANEL ══ */
         .lg-form {
           flex:1; display:flex; flex-direction:column;
           position:relative; overflow:hidden;
@@ -279,7 +297,6 @@ function LoginPageInner() {
         }
         .lg-admin-btn:hover { background:rgba(26,46,66,.1); color:rgba(26,46,66,.75); border-color:rgba(26,46,66,.18); }
 
-        /* Mobile brand */
         .lg-mobile-brand {
           display:none; flex-direction:column;
           align-items:center; padding:52px 24px 20px;
@@ -294,7 +311,6 @@ function LoginPageInner() {
           margin-bottom:12px;
         }
 
-        /* form area */
         .lg-form-main {
           flex:1; display:flex; align-items:center; justify-content:center;
           padding:40px 24px; position:relative; z-index:2;
@@ -338,7 +354,6 @@ function LoginPageInner() {
           line-height:1.65; font-weight:400;
         }
 
-        /* Tabs */
         .lg-tabs {
           display:flex; gap:8px;
           background:transparent; border:none;
@@ -364,7 +379,6 @@ function LoginPageInner() {
         }
         .lg-tab:hover:not(.active) { color:rgba(8,24,44,.72); background:rgba(8,24,44,.1); border-color:rgba(8,24,44,.16); transform:translateY(-1px); }
 
-        /* Google button */
         .lg-goog-btn {
           width:100%; height:52px; border-radius:14px;
           display:flex; align-items:center; justify-content:center; gap:11px;
@@ -403,6 +417,52 @@ function LoginPageInner() {
           color:#FCA5A5; background:rgba(200,60,60,.14);
           border:1px solid rgba(200,60,60,.25); text-align:center;
           animation:fadeUp .3s ease both;
+        }
+
+        .lg-code-toggle {
+          background:none; border:none; cursor:pointer;
+          font-size:11px; font-weight:600; letter-spacing:.06em;
+          color:rgba(8,24,44,.38); transition:color .2s;
+          font-family:'Heebo',system-ui,sans-serif; white-space:nowrap; padding:0;
+        }
+        .lg-code-toggle:hover { color:rgba(0,130,155,.8); }
+        .lg-code-toggle.open { color:rgba(0,130,155,.85); }
+
+        .lg-code-row {
+          display:flex; gap:8px; margin-top:12px;
+          animation:fadeUp .25s ease both;
+        }
+        .lg-code-input {
+          flex:1; height:48px; border-radius:12px;
+          border:1.5px solid rgba(8,24,44,.16);
+          padding:0 14px;
+          font-size:21px; font-weight:800; letter-spacing:.22em;
+          text-align:center; outline:none;
+          background:rgba(8,24,44,.04);
+          color:rgba(8,24,44,.85);
+          font-family:monospace;
+          transition:border-color .18s, background .18s;
+          text-transform:uppercase;
+        }
+        .lg-code-input::placeholder { letter-spacing:.14em; font-size:14px; font-weight:500; }
+        .lg-code-input:focus { border-color:rgba(0,140,175,.6); background:#fff; }
+        .lg-code-btn {
+          height:48px; padding:0 18px;
+          border-radius:12px; border:none;
+          background:linear-gradient(135deg, #007A8C, #00A4BC);
+          color:#fff; font-size:14px; font-weight:700;
+          cursor:pointer; transition:all .22s;
+          font-family:'Heebo',system-ui,sans-serif;
+          box-shadow:0 3px 12px rgba(0,140,175,.28);
+        }
+        .lg-code-btn:disabled { opacity:.45; cursor:not-allowed; box-shadow:none; }
+        .lg-code-btn:not(:disabled):hover { transform:translateY(-1px); box-shadow:0 5px 18px rgba(0,140,175,.4); }
+
+        .lg-code-error {
+          margin-top:8px; padding:8px 12px;
+          border-radius:10px; font-size:12.5px; font-weight:600;
+          color:#FCA5A5; background:rgba(200,60,60,.12);
+          border:1px solid rgba(200,60,60,.22); text-align:center;
         }
 
         .lg-form-footer {
@@ -531,6 +591,42 @@ function LoginPageInner() {
               <div className="lg-register">
                 <a href="/register/candidate">הגשת מועמדות חדשה ←</a>
               </div>
+
+              {/* Access code section */}
+              <div className="lg-divider" style={{ marginTop: '16px' }}>
+                <div className="lg-divider-line" />
+                <button
+                  onClick={() => { setShowCode(s => !s); setCodeError('') }}
+                  className={`lg-code-toggle${showCode ? ' open' : ''}`}>
+                  {showCode ? '✕ סגרי' : 'יש לי קוד כניסה'}
+                </button>
+                <div className="lg-divider-line" />
+              </div>
+
+              {showCode && (
+                <div>
+                  {codeError && <div className="lg-code-error">{codeError}</div>}
+                  <div className="lg-code-row">
+                    <input
+                      type="text"
+                      value={accessCode}
+                      onChange={e => setAccessCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}
+                      onKeyDown={e => e.key === 'Enter' && accessCode.length === 6 && redeemCode()}
+                      placeholder="XXXXXX"
+                      maxLength={6}
+                      dir="ltr"
+                      className="lg-code-input"
+                      autoFocus
+                    />
+                    <button
+                      onClick={redeemCode}
+                      disabled={codeLoading || accessCode.length !== 6}
+                      className="lg-code-btn">
+                      {codeLoading ? '...' : 'כנסי'}
+                    </button>
+                  </div>
+                </div>
+              )}
 
             </div>
           </div>

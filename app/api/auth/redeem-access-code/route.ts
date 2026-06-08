@@ -1,0 +1,44 @@
+import { NextResponse } from 'next/server'
+import { createServiceClient } from '@/lib/supabase/server'
+
+export async function POST(request: Request) {
+  const { origin } = new URL(request.url)
+  const body = await request.json().catch(() => ({}))
+  const code = typeof body.code === 'string' ? body.code.toUpperCase().trim() : ''
+  if (!code) return NextResponse.json({ error: 'קוד נדרש' }, { status: 400 })
+
+  const service = createServiceClient()
+
+  const { data: row } = await service
+    .from('access_codes')
+    .select('id, user_email, used_at, expires_at')
+    .eq('code', code)
+    .single()
+
+  if (!row)
+    return NextResponse.json({ error: 'קוד שגוי או לא קיים' }, { status: 404 })
+  if (row.used_at)
+    return NextResponse.json({ error: 'קוד זה כבר נוצל' }, { status: 410 })
+  if (!row.user_email)
+    return NextResponse.json({ error: 'קוד זה אינו מוגדר לכניסה — פני למנהלת' }, { status: 400 })
+  if (row.expires_at && new Date(row.expires_at) < new Date())
+    return NextResponse.json({ error: 'הקוד פג תוקפו — בקשי קוד חדש' }, { status: 410 })
+
+  const { data, error } = await service.auth.admin.generateLink({
+    type: 'magiclink',
+    email: row.user_email,
+    options: { redirectTo: `${origin}/auth/callback` },
+  })
+
+  if (error || !data?.properties?.action_link) {
+    console.error('[redeem-access-code]', error)
+    return NextResponse.json({ error: 'שגיאה ביצירת קישור כניסה — נסי שוב' }, { status: 500 })
+  }
+
+  await service
+    .from('access_codes')
+    .update({ used_at: new Date().toISOString() })
+    .eq('id', row.id)
+
+  return NextResponse.json({ url: data.properties.action_link })
+}

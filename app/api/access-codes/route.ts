@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 function genCode() {
@@ -16,11 +16,12 @@ export async function POST(request: Request) {
   const service = createServiceClient()
   const { data } = await service
     .from('access_codes')
-    .select('id, used_by')
+    .select('id, used_at, user_email, expires_at')
     .eq('code', String(code).toUpperCase().trim())
     .single()
 
-  if (!data || data.used_by) return NextResponse.json({ valid: false })
+  if (!data || data.used_at) return NextResponse.json({ valid: false })
+  if (data.expires_at && new Date(data.expires_at) < new Date()) return NextResponse.json({ valid: false })
   return NextResponse.json({ valid: true })
 }
 
@@ -37,7 +38,7 @@ export async function GET() {
   const service = createServiceClient()
   const { data } = await service
     .from('access_codes')
-    .select('id, code, label, used_at, created_at, profiles(full_name)')
+    .select('id, code, label, user_email, used_at, expires_at, created_at, profiles(full_name)')
     .order('created_at', { ascending: false })
 
   return NextResponse.json(data ?? [])
@@ -55,6 +56,7 @@ export async function PUT(request: Request) {
 
   const body = await request.json().catch(() => ({}))
   const label: string | null = body.label || null
+  const userEmail: string | null = body.email?.trim().toLowerCase() || null
 
   const service = createServiceClient()
   let code = genCode()
@@ -66,7 +68,7 @@ export async function PUT(request: Request) {
 
   const { data, error } = await service
     .from('access_codes')
-    .insert({ code, label })
+    .insert({ code, label, user_email: userEmail })
     .select()
     .single()
 
