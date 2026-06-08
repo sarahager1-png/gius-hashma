@@ -1,1 +1,517 @@
-J3VzZSBjbGllbnQnCgppbXBvcnQgTGluayBmcm9tICduZXh0L2xpbmsnCmltcG9ydCBJbWFnZSBmcm9tICduZXh0L2ltYWdlJwppbXBvcnQgeyB1c2VQYXRobmFtZSwgdXNlUm91dGVyIH0gZnJvbSAnbmV4dC9uYXZpZ2F0aW9uJwppbXBvcnQgeyBjcmVhdGVDbGllbnQgfSBmcm9tICdAL2xpYi9zdXBhYmFzZS9jbGllbnQnCmltcG9ydCB0eXBlIHsgVXNlclJvbGUgfSBmcm9tICdAL2xpYi90eXBlcycKaW1wb3J0IHsKICBMYXlvdXREYXNoYm9hcmQsIFVzZXJzLCBCcmllZmNhc2UsIEJ1aWxkaW5nMiwgQmFyQ2hhcnQzLAogIFNldHRpbmdzLCBMb2dPdXQsIENsaXBib2FyZExpc3QsIFVzZXJQbHVzLCBTcGFya2xlcywKICBTaGllbGRDaGVjaywgTWFpbCwgSGlzdG9yeSwgSGVscENpcmNsZSwgTWVzc2FnZUNpcmNsZSwgU2VuZCwgVXNlckNvZywgSW5ib3gsCiAgRmlsZVN0YWNrLCBDYWxlbmRhckRheXMsIEJlbGxSaW5nLCBVcGxvYWQsIFNjcm9sbFRleHQsIE1haWxPcGVuLCBTdGFyLAogIFJhZGlvLCBDYWxlbmRhckNoZWNrLCBHcmFkdWF0aW9uQ2FwLAp9IGZyb20gJ2x1Y2lkZS1yZWFjdCcKCmludGVyZmFjZSBOYXZJdGVtIHsKICBocmVmOiBzdHJpbmcKICBsYWJlbDogc3RyaW5nCiAgaWNvbjogUmVhY3QuQ29tcG9uZW50VHlwZTx7IHNpemU/OiBudW1iZXI7IHN0cm9rZVdpZHRoPzogbnVtYmVyIH0+CiAgYmFkZ2U/OiBudW1iZXIKfQoKaW50ZXJmYWNlIE5hdkdyb3VwIHsKICBsYWJlbD86IHN0cmluZwogIGl0ZW1zOiBOYXZJdGVtW10KfQoKY29uc3QgTkFWX0dST1VQUzogUmVjb3JkPFVzZXJSb2xlLCBOYXZHcm91cFtdPiA9IHsKICAn157Xldei157Xk9eqJzogWwogICAgewogICAgICBsYWJlbDogJ9eU15vXqNeY15nXoSDXqdec15knLAogICAgICBpdGVtczogWwogICAgICAgIHsgaHJlZjogJy9wcm9maWxlJywgICAgICAgICBsYWJlbDogJ9eU16TXqNeV16TXmdecINep15zXmScsICBpY29uOiBVc2VycyAgICAgICAgICAgfSwKICAgICAgXSwKICAgIH0sCiAgICB7CiAgICAgIGxhYmVsOiAn157Xqdeo15XXqicsCiAgICAgIGl0ZW1zOiBbCiAgICAgICAgeyBocmVmOiAnL2pvYnMnLCAgICAgICAgICAgIGxhYmVsOiAn157Xqdeo15XXqiDXpNeq15XXl9eV16onLCAgaWNvbjogQnJpZWZjYXNlICAgICAgIH0sCiAgICAgICAgeyBocmVmOiAnL215LWFwcGxpY2F0aW9ucycsIGxhYmVsOiAn15TXktep15XXqiDXqdec15knLCAgICAgaWNvbjogQ2xpcGJvYXJkTGlzdCAgIH0sCiAgICAgICAgeyBocmVmOiAnL215LWludml0YXRpb25zJywgIGxhYmVsOiAn15TXltee16DXldeqINec16jXkNeZ15XXnycsIGljb246IE1haWwgICAgICAgICAgICB9LAogICAgICAgIHsgaHJlZjogJy9ib29rLWludGVydmlldycsICBsYWJlbDogJ9en15HXmdei16og16jXkNeZ15XXnycsICAgaWNvbjogQ2FsZW5kYXJDaGVjayAgIH0sCiAgICAgICAgeyBocmVmOiAnL2hpc3RvcnknLCAgICAgICAgIGxhYmVsOiAn15TXmdeh15jXldeo15nXlCcsICAgICAgaWNvbjogSGlzdG9yeSAgICAgICAgIH0sCiAgICAgIF0sCiAgICB9LAogICAgewogICAgICBsYWJlbDogJ9eq16fXqdeV16jXqicsCiAgICAgIGl0ZW1zOiBbCiAgICAgICAgeyBocmVmOiAnL2luYm94JywgICAgICAgICAgIGxhYmVsOiAn15TXldeT16LXldeqJywgICAgICAgIGljb246IE1haWxPcGVuICAgICAgICB9LAogICAgICAgIHsgaHJlZjogJy9ub3RpZmljYXRpb25zJywgICBsYWJlbDogJ9eU16rXqNeQ15XXqicsICAgICAgICBpY29uOiBCZWxsUmluZyAgICAgICAgfSwKICAgICAgXSwKICAgIH0sCiAgICB7CiAgICAgIGl0ZW1zOiBbCiAgICAgICAgeyBocmVmOiAnL2hlbHAnLCAgICAgICAgICAgIGxhYmVsOiAn15TXoNeX15nXldeqJywgICAgICAgIGljb246IEhlbHBDaXJjbGUgICAgICB9LAogICAgICBdLAogICAgfSwKICBdLAogICfXnteV16HXkyc6IFsKICAgIHsKICAgICAgbGFiZWw6ICfXkteZ15XXoScsCiAgICAgIGl0ZW1zOiBbCiAgICAgICAgeyBocmVmOiAnL2luc3RpdHV0aW9uL2pvYnMnLCAgICAgICAgIGxhYmVsOiAn16TXqNeh15XXnSDXntep16jXldeqJywgICAgIGljb246IEJyaWVmY2FzZSAgICAgICB9LAogICAgICAgIHsgaHJlZjogJy9pbnN0aXR1dGlvbi9jYW5kaWRhdGVzJywgICBsYWJlbDogJ9eX15nXpNeV16kg157Xldei157Xk9eV16onLCAgaWNvbjogVXNlcnMgICAgICAgICAgIH0sCiAgICAgICAgeyBocmVmOiAnL2luc3RpdHV0aW9uL21hdGNoZXMnLCAgICAgIGxhYmVsOiAn15TXqteQ157XldeqJywgICAgICAgICAgaWNvbjogU3BhcmtsZXMgICAgICAgIH0sCiAgICAgIF0sCiAgICB9LAogICAgewogICAgICBsYWJlbDogJ9eq16fXqdeV16jXqicsCiAgICAgIGl0ZW1zOiBbCiAgICAgICAgeyBocmVmOiAnL2luc3RpdHV0aW9uL2FwcGxpY2F0aW9ucycsIGxhYmVsOiAn15TXktep15XXqicsICAgICAgICAgICBpY29uOiBDbGlwYm9hcmRMaXN0ICAgfSwKICAgICAgICB7IGhyZWY6ICcvaW5zdGl0dXRpb24vaW52aXRhdGlvbnMnLCAgbGFiZWw6ICfXlNeW157XoNeV16og16nXnNeZ15fXlCcsICAgaWNvbjogU2VuZCAgICAgICAgICAgIH0sCiAgICAgICAgeyBocmVmOiAnL2luc3RpdHV0aW9uL2lucXVpcmllcycsICAgIGxhYmVsOiAn16TXoNeZ15XXqicsICAgICAgICAgICBpY29uOiBNZXNzYWdlQ2lyY2xlICAgfSwKICAgICAgICB7IGhyZWY6ICcvaW5zdGl0dXRpb24vaW50ZXJ2aWV3cycsICAgbGFiZWw6ICfXqNeQ15nXldeg15XXqicsICAgICAgICAgaWNvbjogQ2FsZW5kYXJDaGVjayAgIH0sCiAgICAgIF0sCiAgICB9LAogICAgewogICAgICBsYWJlbDogJ9eX16nXkdeV158nLAogICAgICBpdGVtczogWwogICAgICAgIHsgaHJlZjogJy9pbnN0aXR1dGlvbi9wcm9maWxlJywgICAgICBsYWJlbDogJ9ek16jXldek15nXnCDXlNee15XXodeTJywgICBpY29uOiBVc2VyQ29nICAgICAgICAgfSwKICAgICAgICB7IGhyZWY6ICcvc2V0dGluZ3MnLCAgICAgICAgICAgICAgICAgbGFiZWw6ICfXlNeS15PXqNeV16onLCAgICAgICAgICBpY29uOiBTZXR0aW5ncyAgICAgICAgfSwKICAgICAgICB7IGhyZWY6ICcvaGVscCcsICAgICAgICAgICAgICAgICAgICAgbGFiZWw6ICfXlNeg15fXmdeV16onLCAgICAgICAgICBpY29uOiBIZWxwQ2lyY2xlICAgICAgfSwKICAgICAgXSwKICAgIH0sCiAgXSwKICAn157XoNeU15zXqiDXntei16jXm9eqJzogWwogICAgewogICAgICBpdGVtczogWwogICAgICAgIHsgaHJlZjogJy9kYXNoYm9hcmQnLCAgICAgICAgICAgICAgICBsYWJlbDogJ9eT16nXkdeV16jXkyDXqNeQ16nXmScsICAgIGljb246IExheW91dERhc2hib2FyZCB9LAogICAgICBdLAogICAgfSwKICAgIHsKICAgICAgbGFiZWw6ICfXoNeZ15XXldeYINeV157XmdeV158nLAogICAgICBpdGVtczogWwogICAgICAgIHsgaHJlZjogJy9jYW5kaWRhdGVzJywgICAgICAgICAgICAgICBsYWJlbDogJ9ee15XXotee15PXldeqJywgICAgICAgICBpY29uOiBVc2VycyAgICAgICAgICAgfSwKICAgICAgICB7IGhyZWY6ICcvYWRtaW4vbWF0Y2hlcycsICAgICAgICAgICAgbGFiZWw6ICfXqdec15HXmSDXlNee15nXldefJywgICAgICBpY29uOiBTcGFya2xlcyAgICAgICAgfSwKICAgICAgICB7IGhyZWY6ICcvYWRtaW4vaW50ZXJ2aWV3LXNsb3RzJywgICAgbGFiZWw6ICfXqNeQ15nXldeg15XXqicsICAgICAgICAgaWNvbjogQ2FsZW5kYXJDaGVjayAgIH0sCiAgICAgICAgeyBocmVmOiAnL2FkbWluL3JlcG9ydHMnLCAgICAgICAgICAgIGxhYmVsOiAn15TXntec16bXldeqINeV16nXmdeR15XXpteZ150nLCBpY29uOiBCYXJDaGFydDMgICAgICAgfSwKICAgICAgICB7IGhyZWY6ICcvYWRtaW4vc3RhZmaW5nLW5lZWRzJywgICAgIGxhYmVsOiAn16bXqNeb15kg15TXm9ep16jXlCcsICAgICAgaWNvbjogR3JhZHVhdGlvbkNhcCAgIH0sCiAgICAgIF0sCiAgICB9LAogICAgewogICAgICBsYWJlbDogJ9eq16TXoteV15wnLAogICAgICBpdGVtczogWwogICAgICAgIHsgaHJlZjogJy9hZG1pbi9jYW5kaWRhdGUtcmVxdWVzdHMnLCBsYWJlbDogJ9eR16fXqdeV16og15TXpteY16jXpNeV16onLCAgaWNvbjogVXNlclBsdXMgICAgICAgIH0sCiAgICAgICAgeyBocmVmOiAnL2pvYnMnLCAgICAgICAgICAgICAgICAgICAgIGxhYmVsOiAn157Xqdeo15XXqicsICAgICAgICAgICBpY29uOiBCcmllZmNhc2UgICAgICAgfSwKICAgICAgICB7IGhyZWY6ICcvYWRtaW4vaW5zdGl0dXRpb25zJywgICAgICAgbGFiZWw6ICfXnteV16HXk9eV16onLCAgICAgICAgICBpY29uOiBCdWlsZGluZzIgICAgICAgfSwKICAgICAgICB7IGhyZWY6ICcvYWRtaW4vc3VydmV5cycsICAgICAgICAgICAgbGFiZWw6ICfXoden16jXmSDXntep15XXkScsICAgICAgIGljb246IFN0YXIgICAgICAgICAgICB9LAogICAgICAgIHsgaHJlZjogJy9hZG1pbi9pbXBvcnQnLCAgICAgICAgICAgICBsYWJlbDogJ9eZ15nXkdeV15AgQ1NWJywgICAgICAgaWNvbjogVXBsb2FkICAgICAgICAgIH0sCiAgICAgIF0sCiAgICB9LAogICAgewogICAgICBsYWJlbDogJ9eq16fXqdeV16jXqicsCiAgICAgIGl0ZW1zOiBbCiAgICAgICAgeyBocmVmOiAnL21lc3NhZ2VzJywgICAgICAgICAgICAgICAgIGxhYmVsOiAn15TXldeT16LXldeqJywgICAgICAgICAgaWNvbjogTWVzc2FnZUNpcmNsZSAgIH0sCiAgICAgICAgeyBocmVmOiAnL2FkbWluL2NvbW11bmljYXRpb24nLCAgICAgIGxhYmVsOiAn16rXp9ep15XXqNeqINeV16rXkdeg15nXldeqJywgaWNvbjogUmFkaW8gICAgICAgICAgIH0sCiAgICAgICAgeyBocmVmOiAnL2FkbWluL21lc3NhZ2VzLWxvZycsICAgICAgIGxhYmVsOiAn15nXldee158g15TXldeT16LXldeqJywgICAgaWNvbjogQmVsbFJpbmcgICAgICAgIH0sCiAgICAgIF0sCiAgICB9LAogICAgewogICAgICBsYWJlbDogJ9ee16LXqNeb16onLAogICAgICBpdGVtczogWwogICAgICAgIHsgaHJlZjogJy9hZG1pbi9hdWRpdCcsICAgICAgICAgICAgICBsYWJlbDogJ9eZ15XXntefINek16LXldec15XXqicsICAgIGljb246IFNjcm9sbFRleHQgICAgICB9LAogICAgICAgIHsgaHJlZjogJy9hZG1pbi9hZG1pbnMnLCAgICAgICAgICAgICBsYWJlbDogJ9ee16DXlNec15kg157Xoteo15vXqicsICAgIGljb246IFNoaWVsZENoZWNrICAgICB9LAogICAgICAgIHsgaHJlZjogJy9zZXR0aW5ncycsICAgICAgICAgICAgICAgICBsYWJlbDogJ9eU15LXk9eo15XXqicsICAgICAgICAgIGljb246IFNldHRpbmdzICAgICAgICB9LAogICAgICAgIHsgaHJlZjogJy9oZWxwJywgICAgICAgICAgICAgICAgICAgICBsYWJlbDogJ9eU16DXl9eZ15XXqicsICAgICAgICAgIGljb246IEhlbHBDaXJjbGUgICAgICB9LAogICAgICBdLAogICAgfSwKICBdLAogICfXnteg15TXnCDXqNep16onOiBbCiAgICB7CiAgICAgIGl0ZW1zOiBbCiAgICAgICAgeyBocmVmOiAnL2Rhc2hib2FyZCcsICAgICAgICAgICAgICAgIGxhYmVsOiAn15PXqdeR15XXqNeUINeo15DXqdeZJywgICAgaWNvbjogTGF5b3V0RGFzaGJvYXJkIH0sCiAgICAgIF0sCiAgICB9LAogICAgewogICAgICBsYWJlbDogJ9eg15nXldek15XXmCDXldee15nXldefJywKICAgICAgaXRlbXM6IFsKICAgICAgICB7IGhyZWY6ICcvY2FuZGlkYXRlcycsICAgICAgICAgICAgICAgbGFiZWw6ICfXnteV16LXnteT15XXqicsICAgICAgICAgaWNvbjogVXNlcnMgICAgICAgICAgIH0sCiAgICAgICAgeyBocmVmOiAnL2FkbWluL21hdGNoZXMnLCAgICAgICAgICAgIGxhYmVsOiAn16nXnNeR15kg15TXnteZ15XXnycsICAgICAgaWNvbjogU3BhcmtsZXMgICAgICAgIH0sCiAgICAgICAgeyBocmVmOiAnL2FkbWluL2ludGVydmlldy1zbG90cycsICAgIGxhYmVsOiAn16jXkNeZ15XXoNeV16onLCAgICAgICAgIGljb246IENhbGVuZGFyQ2hlY2sgICB9LAogICAgICAgIHsgaHJlZjogJy9hZG1pbi9yZXBvcnRzJywgICAgICAgICAgICBsYWJlbDogJ9eU157XnNem15XXqiDXldep15nXkdeV16bXmdedJywgaWNvbjogQmFyQ2hhcnQzICAgICAgIH0sCiAgICAgICAgeyBocmVmOiAnL2FkbWluL3N0YWZmaW5nLW5lZWRzJywgICAgIGxhYmVsOiAn16bXqNeb15kg15TXm9ep16jXlCcsICAgICAgaWNvbjogR3JhZHVhdGlvbkNhcCAgIH0sCiAgICAgIF0sCiAgICB9LAogICAgewogICAgICBsYWJlbDogJ9eq16TXoteV15wnLAogICAgICBpdGVtczogWwogICAgICAgIHsgaHJlZjogJy9hZG1pbi9jYW5kaWRhdGUtcmVxdWVzdHMnLCBsYWJlbDogJ9eR16fXqdeV16og15TXpteY16jXpNeV16onLCAgaWNvbjogVXNlclBsdXMgICAgICAgIH0sCiAgICAgICAgeyBocmVmOiAnL2pvYnMnLCAgICAgICAgICAgICAgICAgICAgIGxhYmVsOiAn157Xqdeo15XXqicsICAgICAgICAgICBpY29uOiBCcmllZmNhc2UgICAgICAgfSwKICAgICAgICB7IGhyZWY6ICcvYWRtaW4vaW5zdGl0dXRpb25zJywgICAgICAgbGFiZWw6ICfXnteV16HXk9eV16onLCAgICAgICAgICBpY29uOiBCdWlsZGluZzIgICAgICAgfSwKICAgICAgXSwKICAgIH0sCiAgICB7CiAgICAgIGxhYmVsOiAn16rXp9ep15XXqNeqJywKICAgICAgaXRlbXM6IFsKICAgICAgICB7IGhyZWY6ICcvbWVzc2FnZXMnLCAgICAgICAgICAgICAgICAgbGFiZWw6ICfXlNeV15PXoteV16onLCAgICAgICAgICBpY29uOiBNZXNzYWdlQ2lyY2xlICAgfSwKICAgICAgXSwKICAgIH0sCiAgICB7CiAgICAgIGxhYmVsOiAn157Xoteo15vXqicsCiAgICAgIGl0ZW1zOiBbCiAgICAgICAgeyBocmVmOiAnL3NldHRpbmdzJywgICAgICAgICAgICAgICAgIGxhYmVsOiAn15TXkteT16jXldeqJywgICAgICAgICAgaWNvbjogU2V0dGluZ3MgICAgICAgIH0sCiAgICAgICAgeyBocmVmOiAnL2hlbHAnLCAgICAgICAgICAgICAgICAgICAgIGxhYmVsOiAn15TXoNeX15nXldeqJywgICAgICAgICAgaWNvbjogSGVscENpcmNsZSAgICAgIH0sCiAgICAgIF0sCiAgICB9LAogIF0sCiAgJ9eQ15PXnteZ158g157Xoteo15vXqic6IFsKICAgIHsKICAgICAgaXRlbXM6IFsKICAgICAgICB7IGhyZWY6ICcvZGFzaGJvYXJkJywgICAgICAgICAgICAgICAgbGFiZWw6ICfXk9ep15HXldeo15Mg16jXkNep15knLCAgICBpY29uOiBMYXlvdXREYXNoYm9hcmQgfSwKICAgICAgXSwKICAgIH0sCiAgICB7CiAgICAgIGxhYmVsOiAn16DXmdeV15XXmCDXldee15nXldefJywKICAgICAgaXRlbXM6IFsKICAgICAgICB7IGhyZWY6ICcvY2FuZGlkYXRlcycsICAgICAgICAgICAgICAgbGFiZWw6ICfXnteV16LXnteT15XXqicsICAgICAgICAgaWNvbjogVXNlcnMgICAgICAgICAgIH0sCiAgICAgICAgeyBocmVmOiAnL2FkbWluL21hdGNoZXMnLCAgICAgICAgICAgIGxhYmVsOiAn16nXnNeR15kg15TXnteZ15XXnycsICAgICAgaWNvbjogU3BhcmtsZXMgICAgICAgIH0sCiAgICAgICAgeyBocmVmOiAnL2FkbWluL2ludGVydmlldy1zbG90cycsICAgIGxhYmVsOiAn16jXkNeZ15XXoNeV16onLCAgICAgICAgIGljb246IENhbGVuZGFyQ2hlY2sgICB9LAogICAgICAgIHsgaHJlZjogJy9hZG1pbi9yZXBvcnRzJywgICAgICAgICAgICBsYWJlbDogJ9eU157XnNem15XXqiDXldep15nXkdeV16bXmdedJywgaWNvbjogQmFyQ2hhcnQzICAgICAgIH0sCiAgICAgICAgeyBocmVmOiAnL2FkbWluL3N0YWZmaW5nLW5lZWRzJywgICAgIGxhYmVsOiAn16bXqNeb15kg15TXm9ep16jXlCcsICAgICAgaWNvbjogR3JhZHVhdGlvbkNhcCAgIH0sCiAgICAgIF0sCiAgICB9LAogICAgewogICAgICBsYWJlbDogJ9eq16TXoteV15wnLAogICAgICBpdGVtczogWwogICAgICAgIHsgaHJlZjogJy9hZG1pbi9jYW5kaWRhdGUtcmVxdWVzdHMnLCBsYWJlbDogJ9eR16fXqdeV16og15TXpteY16jXpNeV16onLCAgaWNvbjogVXNlclBsdXMgICAgICAgIH0sCiAgICAgICAgeyBocmVmOiAnL2pvYnMnLCAgICAgICAgICAgICAgICAgICAgIGxhYmVsOiAn157Xqdeo15XXqicsICAgICAgICAgICBpY29uOiBCcmllZmNhc2UgICAgICAgfSwKICAgICAgICB7IGhyZWY6ICcvYWRtaW4vaW5zdGl0dXRpb25zJywgICAgICAgbGFiZWw6ICfXnteV16HXk9eV16onLCAgICAgICAgICBpY29uOiBCdWlsZGluZzIgICAgICAgfSwKICAgICAgICB7IGhyZWY6ICcvYWRtaW4vc3VydmV5cycsICAgICAgICAgICAgbGFiZWw6ICfXoden16jXmSDXntep15XXkScsICAgICAgIGljb246IFN0YXIgICAgICAgICAgICB9LAogICAgICAgIHsgaHJlZjogJy9hZG1pbi9pbXBvcnQnLCAgICAgICAgICAgICBsYWJlbDogJ9eZ15nXkdeV15AgQ1NWJywgICAgICAgaWNvbjogVXBsb2FkICAgICAgICAgIH0sCiAgICAgIF0sCiAgICB9LAogICAgewogICAgICBsYWJlbDogJ9eq16fXqdeV16jXqicsCiAgICAgIGl0ZW1zOiBbCiAgICAgICAgeyBocmVmOiAnL21lc3NhZ2VzJywgICAgICAgICAgICAgICAgIGxhYmVsOiAn15TXldeT16LXldeqJywgICAgICAgICAgaWNvbjogTWVzc2FnZUNpcmNsZSAgIH0sCiAgICAgICAgeyBocmVmOiAnL2FkbWluL2NvbW11bmljYXRpb24nLCAgICAgIGxhYmVsOiAn16rXp9ep15XXqNeqINeV16rXkdeg15nXldeqJywgaWNvbjogUmFkaW8gICAgICAgICAgIH0sCiAgICAgICAgeyBocmVmOiAnL2FkbWluL21lc3NhZ2VzLWxvZycsICAgICAgIGxhYmVsOiAn15nXldee158g15TXldeT16LXldeqJywgICAgaWNvbjogQmVsbFJpbmcgICAgICAgIH0sCiAgICAgIF0sCiAgICB9LAogICAgewogICAgICBsYWJlbDogJ9ee16LXqNeb16onLAogICAgICBpdGVtczogWwogICAgICAgIHsgaHJlZjogJy9hZG1pbi9hdWRpdCcsICAgICAgICAgICAgICBsYWJlbDogJ9eZ15XXntefINek16LXldec15XXqicsICAgIGljb246IFNjcm9sbFRleHQgICAgICB9LAogICAgICAgIHsgaHJlZjogJy9hZG1pbi9hZG1pbnMnLCAgICAgICAgICAgICBsYWJlbDogJ9ee16DXlNec15kg157Xoteo15vXqicsICAgIGljb246IFNoaWVsZENoZWNrICAgICB9LAogICAgICAgIHsgaHJlZjogJy9zZXR0aW5ncycsICAgICAgICAgICAgICAgICBsYWJlbDogJ9eU15LXk9eo15XXqicsICAgICAgICAgIGljb246IFNldHRpbmdzICAgICAgICB9LAogICAgICAgIHsgaHJlZjogJy9oZWxwJywgICAgICAgICAgICAgICAgICAgICBsYWJlbDogJ9eU16DXl9eZ15XXqicsICAgICAgICAgIGljb246IEhlbHBDaXJjbGUgICAgICB9LAogICAgICBdLAogICAgfSwKICBdLAp9CgppbnRlcmZhY2UgUHJvcHMgewogIHJvbGU6IFVzZXJSb2xlCiAgZnVsbE5hbWU6IHN0cmluZyB8IG51bGwKICBwZW5kaW5nSW5zdGl0dXRpb25zPzogbnVtYmVyCiAgcGVuZGluZ0FwcGxpY2F0aW9ucz86IG51bWJlcgogIHBlbmRpbmdJbnF1aXJpZXM/OiBudW1iZXIKICBwZW5kaW5nQ2FuZGlkYXRlUmVxcz86IG51bWJlcgogIHBlbmRpbmdNYXRjaGVzPzogbnVtYmVyCn0KCmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIEFwcFNpZGViYXIoewogIHJvbGUsCiAgZnVsbE5hbWUsCiAgcGVuZGluZ0luc3RpdHV0aW9ucyAgPSAwLAogIHBlbmRpbmdBcHBsaWNhdGlvbnMgID0gMCwKICBwZW5kaW5nSW5xdWlyaWVzICAgICA9IDAsCiAgcGVuZGluZ0NhbmRpZGF0ZVJlcXMgPSAwLAogIHBlbmRpbmdNYXRjaGVzICAgICAgID0gMCwKfTogUHJvcHMpIHsKICBjb25zdCBwYXRobmFtZSA9IHVzZVBhdGhuYW1lKCkKICBjb25zdCByb3V0ZXIgICA9IHVzZVJvdXRlcigpCiAgY29uc3Qgc3VwYWJhc2UgPSBjcmVhdGVDbGllbnQoKQoKICBjb25zdCBncm91cHM6IE5hdkdyb3VwW10gPSAoTkFWX0dST1VQU1tyb2xlXSA/PyBbXSkubWFwKGdyb3VwID0+ICh7CiAgICAuLi5ncm91cCwKICAgIGl0ZW1zOiBncm91cC5pdGVtcy5tYXAoaXRlbSA9PiB7CiAgICAgIGlmIChpdGVtLmhyZWYgPT09ICcvYWRtaW4vY2FuZGlkYXRlLXJlcXVlc3RzJyAmJiBwZW5kaW5nQ2FuZGlkYXRlUmVxcyA+IDApCiAgICAgICAgcmV0dXJuIHsgLi4uaXRlbSwgYmFkZ2U6IHBlbmRpbmdDYW5kaWRhdGVSZXFzIH0KICAgICAgaWYgKGl0ZW0uaHJlZiA9PT0gJy9hZG1pbi9pbnN0aXR1dGlvbnMnICYmIHBlbmRpbmdJbnN0aXR1dGlvbnMgPiAwKQogICAgICAgIHJldHVybiB7IC4uLml0ZW0sIGJhZGdlOiBwZW5kaW5nSW5zdGl0dXRpb25zIH0KICAgICAgaWYgKGl0ZW0uaHJlZiA9PT0gJy9pbnN0aXR1dGlvbi9hcHBsaWNhdGlvbnMnICYmIHBlbmRpbmdBcHBsaWNhdGlvbnMgPiAwKQogICAgICAgIHJldHVybiB7IC4uLml0ZW0sIGJhZGdlOiBwZW5kaW5nQXBwbGljYXRpb25zIH0KICAgICAgaWYgKGl0ZW0uaHJlZiA9PT0gJy9pbnN0aXR1dGlvbi9pbnF1aXJpZXMnICYmIHBlbmRpbmdJbnF1aXJpZXMgPiAwKQogICAgICAgIHJldHVybiB7IC4uLml0ZW0sIGJhZGdlOiBwZW5kaW5nSW5xdWlyaWVzIH0KICAgICAgaWYgKGl0ZW0uaHJlZiA9PT0gJy9pbnN0aXR1dGlvbi9tYXRjaGVzJyAmJiBwZW5kaW5nTWF0Y2hlcyA+IDApCiAgICAgICAgcmV0dXJuIHsgLi4uaXRlbSwgYmFkZ2U6IHBlbmRpbmdNYXRjaGVzIH0KICAgICAgcmV0dXJuIGl0ZW0KICAgIH0pLAogIH0pKQoKICBhc3luYyBmdW5jdGlvbiBzaWduT3V0KCkgewogICAgYXdhaXQgc3VwYWJhc2UuYXV0aC5zaWduT3V0KCkKICAgIHJvdXRlci5wdXNoKCcvbG9naW4nKQogICAgcm91dGVyLnJlZnJlc2goKQogIH0KCiAgZnVuY3Rpb24gaXNBY3RpdmUoaHJlZjogc3RyaW5nKSB7CiAgICBpZiAoaHJlZiA9PT0gJy9kYXNoYm9hcmQnKSByZXR1cm4gcGF0aG5hbWUgPT09IGhyZWYKICAgIHJldHVybiBwYXRobmFtZSA9PT0gaHJlZiB8fCBwYXRobmFtZS5zdGFydHNXaXRoKGhyZWYgKyAnLycpCiAgfQoKICBjb25zdCByb2xlTGFiZWw6IFJlY29yZDxVc2VyUm9sZSwgc3RyaW5nPiA9IHsKICAgICfXnteV16LXnteT16onOiAgICAgICAn16TXqNeV16TXmdecINee15XXotee15PXqicsCiAgICAn157Xldeh15MnOiAgICAgICAgICfXpNeo15XXpNeZ15wg157Xldeh15MnLAogICAgJ9ee16DXlNec16og157Xoteo15vXqic6ICfXoNeZ15TXldecINee16LXqNeb16onLAogICAgJ9eQ15PXnteZ158g157Xoteo15vXqic6ICfXoNeZ15TXldecINee16LXqNeb16onLAogICAgJ9ee16DXlNecINeo16nXqic6ICAgICfXoNeZ15TXldecINee16LXqNeb16onLAogIH0KCiAgY29uc3QgaG9tZUhyZWYgPQogICAgcm9sZSA9PT0gJ9ee15XXotee15PXqicgPyAnL3Byb2ZpbGUnIDoKICAgIHJvbGUgPT09ICfXnteV16HXkycgICA/ICcvaW5zdGl0dXRpb24vam9icycgOgogICAgJy9kYXNoYm9hcmQnCgogIHJldHVybiAoCiAgICA8YXNpZGUgY2xhc3NOYW1lPSJkYXNoYm9hcmQtc2lkZWJhciBmbGV4IGZsZXgtY29sIiBkaXI9InJ0bCI+CgogICAgICB7Lyog4pSA4pSAIEJyYW5kIOKUgOKUgCAqL30KICAgICAgPGRpdiBjbGFzc05hbWU9InNocmluay0wIiBzdHlsZT17eyBib3JkZXJCb3R0b206ICcxcHggc29saWQgcmdiYSgyNTUsMjU1LDI1NSwuMDcpJyB9fT4KICAgICAgICA8TGluayBocmVmPXtob21lSHJlZn0gY2xhc3NOYW1lPSJuby11bmRlcmxpbmUgYmxvY2siIHN0eWxlPXt7IHBhZGRpbmc6ICcxOHB4IDE2cHggMTRweCcgfX0+CiAgICAgICAgICB7LyogTG9nbyAqL30KICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPSJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMyBtYi0zIj4KICAgICAgICAgICAgPGRpdgogICAgICAgICAgICAgIGNsYXNzTmFtZT0icm91bmRlZC1bMTRweF0gc2hyaW5rLTAgb3ZlcmZsb3ctaGlkZGVuIGZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyIgogICAgICAgICAgICAgIHN0eWxlPXt7CiAgICAgICAgICAgICAgICB3aWR0aDogJzUycHgnLCBoZWlnaHQ6ICc1MnB4JywKICAgICAgICAgICAgICAgIGJhY2tncm91bmQ6ICdyZ2JhKDI1NSwyNTUsMjU1LC45NSknLAogICAgICAgICAgICAgICAgYm9yZGVyOiAnMXB4IHNvbGlkIHJnYmEoMjU1LDI1NSwyNTUsLjMpJywKICAgICAgICAgICAgICAgIGJveFNoYWRvdzogJzAgNHB4IDIwcHggcmdiYSgwLDAsMCwuMjUpLCAwIDFweCA0cHggcmdiYSgwLDAsMCwuMiknLAogICAgICAgICAgICAgIH19CiAgICAgICAgICAgID4KICAgICAgICAgICAgICA8SW1hZ2UKICAgICAgICAgICAgICAgIHNyYz0iL2xvZ28tY2hhYmFkLnBuZyIKICAgICAgICAgICAgICAgIGFsdD0i16jXqdeqINeX15nXoNeV15og15fXkde015MiCiAgICAgICAgICAgICAgICB3aWR0aD17NDJ9IGhlaWdodD17NDJ9CiAgICAgICAgICAgICAgICBjbGFzc05hbWU9Im9iamVjdC1jb250YWluIgogICAgICAgICAgICAgICAgc3R5bGU9e3sgZGlzcGxheTogJ2Jsb2NrJyB9fQogICAgICAgICAgICAgICAgb25FcnJvcj17KCkgPT4ge319CiAgICAgICAgICAgICAgLz4KICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPSJtaW4tdy0wIGZsZXgtMSI+CiAgICAgICAgICAgICAgPGRpdiBzdHlsZT17ewogICAgICAgICAgICAgICAgZm9udFNpemU6ICcxN3B4JywgZm9udFdlaWdodDogOTAwLAogICAgICAgICAgICAgICAgY29sb3I6ICcjZmZmZmZmJywgbGV0dGVyU3BhY2luZzogJy0uMDNlbScsCiAgICAgICAgICAgICAgICBsaW5lSGVpZ2h0OiAxLjIsCiAgICAgICAgICAgICAgfX0+CiAgICAgICAgICAgICAgICDXlNa316nWsNa814HXkda015nXnAogICAgICAgICAgICAgIDwvZGl2PgogICAgICAgICAgICAgIDxkaXYgc3R5bGU9e3sKICAgICAgICAgICAgICAgIGZvbnRTaXplOiAnMTAuNXB4JywgZm9udFdlaWdodDogNjAwLAogICAgICAgICAgICAgICAgY29sb3I6ICdyZ2JhKDIxMiwxNzYsMTA2LC43KScsCiAgICAgICAgICAgICAgICBsZXR0ZXJTcGFjaW5nOiAnLjAzZW0nLAogICAgICAgICAgICAgICAgbWFyZ2luVG9wOiAnM3B4JywKICAgICAgICAgICAgICB9fT4KICAgICAgICAgICAgICAgINeo16nXqiDXkNeU15zXmSDXmdeV16HXoyDXmdem15fXpwogICAgICAgICAgICAgIDwvZGl2PgogICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgIDwvZGl2PgoKICAgICAgICAgIHsvKiBSb2xlIHBpbGwgKi99CiAgICAgICAgICA8ZGl2IHN0eWxlPXt7CiAgICAgICAgICAgIGRpc3BsYXk6ICdpbmxpbmUtZmxleCcsIGFsaWduSXRlbXM6ICdjZW50ZXInLCBnYXA6ICc2cHgnLAogICAgICAgICAgICBwYWRkaW5nOiAnNXB4IDEwcHgnLAogICAgICAgICAgICBib3JkZXJSYWRpdXM6ICc4cHgnLAogICAgICAgICAgICBiYWNrZ3JvdW5kOiAncmdiYSgwLDE2NywxODEsLjE1KScsCiAgICAgICAgICAgIGJvcmRlcjogJzFweCBzb2xpZCByZ2JhKDAsMTY3LDE4MSwuMjUpJywKICAgICAgICAgIH19PgogICAgICAgICAgICA8c3BhbiBzdHlsZT17ewogICAgICAgICAgICAgIHdpZHRoOiAnNnB4JywgaGVpZ2h0OiAnNnB4JywgYm9yZGVyUmFkaXVzOiAnNTAlJywKICAgICAgICAgICAgICBiYWNrZ3JvdW5kOiAnIzAwRDRFOCcsCiAgICAgICAgICAgICAgYm94U2hhZG93OiAnMCAwIDZweCByZ2JhKDAsMjEyLDIzMiwuNyknLAogICAgICAgICAgICAgIGZsZXhTaHJpbms6IDAsCiAgICAgICAgICAgIH19IC8+CiAgICAgICAgICAgIDxzcGFuIHN0eWxlPXt7CiAgICAgICAgICAgICAgZm9udFNpemU6ICcxMXB4JywgZm9udFdlaWdodDogNzAwLAogICAgICAgICAgICAgIGNvbG9yOiAncmdiYSgwLDIxMiwyMzIsLjkpJywKICAgICAgICAgICAgICBsZXR0ZXJTcGFjaW5nOiAnLjAyZW0nLAogICAgICAgICAgICB9fT4KICAgICAgICAgICAgICB7cm9sZUxhYmVsW3JvbGVdfQogICAgICAgICAgICA8L3NwYW4+CiAgICAgICAgICA8L2Rpdj4KCiAgICAgICAgICB7LyogUGVyc29uYWwgZ3JlZXRpbmcgKi99CiAgICAgICAgICB7ZnVsbE5hbWUgJiYgKAogICAgICAgICAgICA8ZGl2IHN0eWxlPXt7IG1hcmdpblRvcDogJzEwcHgnIH19PgogICAgICAgICAgICAgIDxwIHN0eWxlPXt7CiAgICAgICAgICAgICAgICBmb250U2l6ZTogJzEzcHgnLCBmb250V2VpZ2h0OiA3MDAsCiAgICAgICAgICAgICAgICBjb2xvcjogJ3JnYmEoMjU1LDI1NSwyNTUsLjg1KScsCiAgICAgICAgICAgICAgICBsZXR0ZXJTcGFjaW5nOiAnLS4wMWVtJywKICAgICAgICAgICAgICAgIG1hcmdpbjogMCwKICAgICAgICAgICAgICB9fT4KICAgICAgICAgICAgICAgINep15zXldedLCB7ZnVsbE5hbWUuc3BsaXQoJyAnKVswXX0g8J+RiwogICAgICAgICAgICAgIDwvcD4KICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgICApfQogICAgICAgIDwvTGluaz4KCiAgICAgICAgey8qIEJyYW5kIGdyYWRpZW50IGxpbmUgKi99CiAgICAgICAgPGRpdiBzdHlsZT17ewogICAgICAgICAgaGVpZ2h0OiAnMnB4JywKICAgICAgICAgIGJhY2tncm91bmQ6ICdsaW5lYXItZ3JhZGllbnQoOTBkZWcsIHJnYmEoNzUsNDYsMTMxLDApIDAlLCByZ2JhKDc1LDQ2LDEzMSwuNikgMzAlLCByZ2JhKDAsMTY3LDE4MSwuOCkgNzAlLCByZ2JhKDAsMTY3LDE4MSwwKSAxMDAlKScsCiAgICAgICAgfX0gLz4KICAgICAgPC9kaXY+CgogICAgICB7Lyog4pSA4pSAIE5hdiDilIDilIAgKi99CiAgICAgIDxuYXYgY2xhc3NOYW1lPSJmbGV4LTEgb3ZlcmZsb3cteS1hdXRvIiBzdHlsZT17eyBwYWRkaW5nOiAnMTJweCAxMHB4JyB9fT4KICAgICAgICB7Z3JvdXBzLm1hcCgoZ3JvdXAsIGdpKSA9PiAoCiAgICAgICAgICA8ZGl2IGtleT17Z2l9IHN0eWxlPXt7IG1hcmdpbkJvdHRvbTogZ3JvdXAubGFiZWwgPyAnNHB4JyA6ICc4cHgnIH19PgogICAgICAgICAgICB7Z3JvdXAubGFiZWwgJiYgKAogICAgICAgICAgICAgIDxwIHN0eWxlPXt7CiAgICAgICAgICAgICAgICBmb250U2l6ZTogJzEwcHgnLCBmb250V2VpZ2h0OiA3MDAsCiAgICAgICAgICAgICAgICBsZXR0ZXJTcGFjaW5nOiAnLjE0ZW0nLAogICAgICAgICAgICAgICAgdGV4dFRyYW5zZm9ybTogJ3VwcGVyY2FzZScsCiAgICAgICAgICAgICAgICBjb2xvcjogJ3JnYmEoMjU1LDI1NSwyNTUsLjIyKScsCiAgICAgICAgICAgICAgICBwYWRkaW5nOiAnOHB4IDEwcHggNXB4JywKICAgICAgICAgICAgICAgIG1hcmdpbjogMCwKICAgICAgICAgICAgICB9fT4KICAgICAgICAgICAgICAgIHtncm91cC5sYWJlbH0KICAgICAgICAgICAgICA8L3A+CiAgICAgICAgICAgICl9CiAgICAgICAgICAgIDx1bCBjbGFzc05hbWU9Imxpc3Qtbm9uZSBwLTAgbS0wIGZsZXggZmxleC1jb2wiIHN0eWxlPXt7IGdhcDogJzFweCcgfX0+CiAgICAgICAgICAgICAge2dyb3VwLml0ZW1zLm1hcChpdGVtID0+ICgKICAgICAgICAgICAgICAgIDxOYXZJdGVtUm93IGtleT17aXRlbS5ocmVmfSBpdGVtPXtpdGVtfSBhY3RpdmU9e2lzQWN0aXZlKGl0ZW0uaHJlZil9IC8+CiAgICAgICAgICAgICAgKSl9CiAgICAgICAgICAgIDwvdWw+CiAgICAgICAgICA8L2Rpdj4KICAgICAgICApKX0KICAgICAgPC9uYXY+CgogICAgICB7Lyog4pSA4pSAIEZvb3RlciDilIDilIAgKi99CiAgICAgIDxkaXYgY2xhc3NOYW1lPSJzaHJpbmstMCIgc3R5bGU9e3sKICAgICAgICBib3JkZXJUb3A6ICcxcHggc29saWQgcmdiYSgyNTUsMjU1LDI1NSwuMDYpJywKICAgICAgICBwYWRkaW5nOiAnMTBweCAxMHB4IDE0cHgnLAogICAgICB9fT4KICAgICAgICA8YQogICAgICAgICAgaHJlZj0iaHR0cHM6Ly93YS5tZS85NzI1MDMzMzk3NzAiCiAgICAgICAgICB0YXJnZXQ9Il9ibGFuayIKICAgICAgICAgIHJlbD0ibm9vcGVuZXIgbm9yZWZlcnJlciIKICAgICAgICAgIGNsYXNzTmFtZT0iYmxvY2sgdy1mdWxsIHRleHQtY2VudGVyIG5vLXVuZGVybGluZSBtYi0yIgogICAgICAgICAgc3R5bGU9e3sKICAgICAgICAgICAgZm9udFNpemU6ICcxMC41cHgnLAogICAgICAgICAgICBjb2xvcjogJ3JnYmEoMjU1LDI1NSwyNTUsLjUpJywKICAgICAgICAgICAgcGFkZGluZzogJzZweCA4cHgnLAogICAgICAgICAgICBsaW5lSGVpZ2h0OiAxLjYsCiAgICAgICAgICAgIGJvcmRlclRvcDogJzFweCBzb2xpZCByZ2JhKDI1NSwyNTUsMjU1LC4wOCknLAogICAgICAgICAgfX0KICAgICAgICA+CiAgICAgICAgICDXpNeZ16rXldeXINeV15HXoNeZ15nXqiDXkNeq16g6INep16jXlCDXlNeS16gKICAgICAgICAgIDxzcGFuIHN0eWxlPXt7IGRpc3BsYXk6ICdibG9jaycsIGNvbG9yOiAncmdiYSgwLDIxMiwyMzIsLjYpJywgZm9udFNpemU6ICcxMHB4JyB9fT4wNTAzMzM5NzcwPC9zcGFuPgogICAgICAgIDwvYT4KICAgICAgICA8YnV0dG9uCiAgICAgICAgICBvbkNsaWNrPXtzaWduT3V0fQogICAgICAgICAgY2xhc3NOYW1lPSJ3LWZ1bGwgZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIuNSByb3VuZGVkLVsxMHB4XSB0cmFuc2l0aW9uLWFsbCIKICAgICAgICAgIHN0eWxlPXt7CiAgICAgICAgICAgIHBhZGRpbmc6ICc5cHggMTJweCcsCiAgICAgICAgICAgIGZvbnRTaXplOiAnMTNweCcsIGZvbnRXZWlnaHQ6IDYwMCwKICAgICAgICAgICAgY29sb3I6ICdyZ2JhKDI1NSwyNTUsMjU1LC4zNSknLAogICAgICAgICAgICBiYWNrZ3JvdW5kOiAndHJhbnNwYXJlbnQnLAogICAgICAgICAgICBib3JkZXI6ICdub25lJywgY3Vyc29yOiAncG9pbnRlcicsCiAgICAgICAgICAgIGZvbnRGYW1pbHk6ICdpbmhlcml0JywKICAgICAgICAgIH19CiAgICAgICAgICBvbk1vdXNlRW50ZXI9e2UgPT4gewogICAgICAgICAgICBlLmN1cnJlbnRUYXJnZXQuc3R5bGUuYmFja2dyb3VuZCA9ICdyZ2JhKDIyMCw2MCw2MCwuMTIpJwogICAgICAgICAgICBlLmN1cnJlbnRUYXJnZXQuc3R5bGUuY29sb3IgPSAnI0ZGODA4MCcKICAgICAgICAgIH19CiAgICAgICAgICBvbk1vdXNlTGVhdmU9e2UgPT4gewogICAgICAgICAgICBlLmN1cnJlbnRUYXJnZXQuc3R5bGUuYmFja2dyb3VuZCA9ICd0cmFuc3BhcmVudCcKICAgICAgICAgICAgZS5jdXJyZW50VGFyZ2V0LnN0eWxlLmNvbG9yID0gJ3JnYmEoMjU1LDI1NSwyNTUsLjM1KScKICAgICAgICAgIH19CiAgICAgICAgPgogICAgICAgICAgPExvZ091dCBzaXplPXsxNH0gc3Ryb2tlV2lkdGg9ezJ9IHN0eWxlPXt7IGZsZXhTaHJpbms6IDAgfX0gLz4KICAgICAgICAgIDxzcGFuPteU16rXoNeq16fXldeqPC9zcGFuPgogICAgICAgIDwvYnV0dG9uPgogICAgICA8L2Rpdj4KICAgIDwvYXNpZGU+CiAgKQp9CgpmdW5jdGlvbiBOYXZJdGVtUm93KHsgaXRlbSwgYWN0aXZlIH06IHsgaXRlbTogTmF2SXRlbTsgYWN0aXZlOiBib29sZWFuIH0pIHsKICBjb25zdCBJY29uID0gaXRlbS5pY29uCgogIGZ1bmN0aW9uIGhhbmRsZUNsaWNrKCkgewogICAgd2luZG93LmRpc3BhdGNoRXZlbnQobmV3IEN1c3RvbUV2ZW50KCdzaWRlYmFyLWNsb3NlJywgeyBkZXRhaWw6ICdjbG9zZScgfSkpCiAgfQoKICByZXR1cm4gKAogICAgPGxpPgogICAgICA8TGluawogICAgICAgIGhyZWY9e2l0ZW0uaHJlZn0KICAgICAgICBvbkNsaWNrPXtoYW5kbGVDbGlja30KICAgICAgICBjbGFzc05hbWU9ImZsZXggaXRlbXMtY2VudGVyIGdhcC0yLjUgbm8tdW5kZXJsaW5lIHRyYW5zaXRpb24tYWxsIgogICAgICAgIHN0eWxlPXt7CiAgICAgICAgICBwYWRkaW5nOiAnOHB4IDEwcHgnLAogICAgICAgICAgYm9yZGVyUmFkaXVzOiAnMTBweCcsCiAgICAgICAgICBmb250U2l6ZTogJzEzLjVweCcsCiAgICAgICAgICBmb250V2VpZ2h0OiBhY3RpdmUgPyA3MDAgOiA1MDAsCiAgICAgICAgICBwb3NpdGlvbjogJ3JlbGF0aXZlJywKICAgICAgICAgIC4uLihhY3RpdmUgPyB7CiAgICAgICAgICAgIGJhY2tncm91bmQ6ICdsaW5lYXItZ3JhZGllbnQoOTBkZWcsIHJnYmEoMCwxNjcsMTgxLC4yKSAwJSwgcmdiYSgyNTUsMjU1LDI1NSwuMDcpIDEwMCUpJywKICAgICAgICAgICAgY29sb3I6ICcjZmZmZmZmJywKICAgICAgICAgICAgYm94U2hhZG93OiAnaW5zZXQgMCAxcHggMCByZ2JhKDI1NSwyNTUsMjU1LC4wNyknLAogICAgICAgICAgICBib3JkZXJJbmxpbmVFbmQ6ICczcHggc29saWQgIzAwRDRFOCcsCiAgICAgICAgICB9IDogewogICAgICAgICAgICBjb2xvcjogJ3JnYmEoMjU1LDI1NSwyNTUsLjUyKScsCiAgICAgICAgICAgIGJhY2tncm91bmQ6ICd0cmFuc3BhcmVudCcsCiAgICAgICAgICB9KSwKICAgICAgICB9fQogICAgICAgIG9uTW91c2VFbnRlcj17ZSA9PiB7CiAgICAgICAgICBpZiAoIWFjdGl2ZSkgewogICAgICAgICAgICBlLmN1cnJlbnRUYXJnZXQuc3R5bGUuYmFja2dyb3VuZCA9ICdyZ2JhKDI1NSwyNTUsMjU1LC4wNyknCiAgICAgICAgICAgIGUuY3VycmVudFRhcmdldC5zdHlsZS5jb2xvciA9ICdyZ2JhKDI1NSwyNTUsMjU1LC44NSknCiAgICAgICAgICB9CiAgICAgICAgfX0KICAgICAgICBvbk1vdXNlTGVhdmU9e2UgPT4gewogICAgICAgICAgaWYgKCFhY3RpdmUpIHsKICAgICAgICAgICAgZS5jdXJyZW50VGFyZ2V0LnN0eWxlLmJhY2tncm91bmQgPSAndHJhbnNwYXJlbnQnCiAgICAgICAgICAgIGUuY3VycmVudFRhcmdldC5zdHlsZS5jb2xvcjogPSAncmdiYSgyNTUsMjU1LDI1NSwuNTIpJwogICAgICAgICAgfQogICAgICAgIH19CiAgICAgID4KICAgICAgICB7LyogSWNvbiAqL30KICAgICAgICA8c3BhbiBzdHlsZT17ewogICAgICAgICAgZmxleFNocmluazogMCwgZGlzcGxheTogJ2ZsZXgnLAogICAgICAgICAgY29sb3I6IGFjdGl2ZSA/ICcjMDBENEU4JyA6ICdyZ2JhKDI1NSwyNTUsMjU1LC4yOCknLAogICAgICAgICAgZmlsdGVyOiBhY3RpdmUgPyAnZHJvcC1zaGFkb3coMCAwIDVweCByZ2JhKDAsMTY3LDE4MSwuNTUpKScgOiAnbm9uZScsCiAgICAgICAgICB0cmFuc2l0aW9uOiAnY29sb3IgMTUwbXMsIGZpbHRlciAxNTBtcycsCiAgICAgICAgfX0+CiAgICAgICAgICA8SWNvbiBzaXplPXsxNX0gc3Ryb2tlV2lkdGg9e2FjdGl2ZSA/IDIuNSA6IDJ9IC8+CiAgICAgICAgPC9zcGFuPgoKICAgICAgICB7LyogTGFiZWwgKi99CiAgICAgICAgPHNwYW4gY2xhc3NOYW1lPSJ0cnVuY2F0ZSBmbGV4LTEiPntpdGVtLmxhYmVsfTwvc3Bhbj4KCiAgICAgICAgey8qIEJhZGdlICovfQogICAgICAgIHtpdGVtLmJhZGdlICE9IG51bGwgJiYgaXRlbS5iYWRnZSA+IDAgJiYgKAogICAgICAgICAgPHNwYW4gc3R5bGU9e3sKICAgICAgICAgICAgbWFyZ2luSW5saW5lU3RhcnQ6ICdhdXRvJywKICAgICAgICAgICAgZm9udFNpemU6ICcxMC41cHgnLCBmb250V2VpZ2h0OiA3MDAsCiAgICAgICAgICAgIHBhZGRpbmc6ICcycHggNnB4JywKICAgICAgICAgICAgYm9yZGVyUmFkaXVzOiAnMTAwcHgnLAogICAgICAgICAgICBiYWNrZ3JvdW5kOiAnIzAwQTdCNScsCiAgICAgICAgICAgIGNvbG9yOiAnI2ZmZicsCiAgICAgICAgICAgIG1pbldpZHRoOiAnMjBweCcsCiAgICAgICAgICAgIHRleHRBbGlnbjogJ2NlbnRlcicsCiAgICAgICAgICAgIGZsZXhTaHJpbms6IDAsCiAgICAgICAgICAgIGJveFNoYWRvdzogJzAgMnB4IDhweCByZ2JhKDAsMTY3LDE4MSwuNCknLAogICAgICAgICAgfX0+CiAgICAgICAgICAgIHtpdGVtLmJhZGdlfQogICAgICAgICAgPC9zcGFuPgogICAgICAgICl9CiAgICAgIDwvTGluaz4KICAgIDwvbGk+CiAgKQp9Cg==
+'use client'
+
+import Link from 'next/link'
+import Image from 'next/image'
+import { usePathname, useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import type { UserRole } from '@/lib/types'
+import {
+  LayoutDashboard, Users, Briefcase, Building2, BarChart3,
+  Settings, LogOut, ClipboardList, UserPlus, Sparkles,
+  ShieldCheck, Mail, History, HelpCircle, MessageCircle, Send, UserCog, Inbox,
+  FileStack, CalendarDays, BellRing, Upload, ScrollText, MailOpen, Star,
+  Radio, CalendarCheck, GraduationCap,
+} from 'lucide-react'
+
+interface NavItem {
+  href: string
+  label: string
+  icon: React.ComponentType<{ size?: number; strokeWidth?: number }>
+  badge?: number
+}
+
+interface NavGroup {
+  label?: string
+  items: NavItem[]
+}
+
+const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
+  'מועמדת': [
+    {
+      label: 'הכרטיס שלי',
+      items: [
+        { href: '/profile',         label: 'הפרופיל שלי',  icon: Users           },
+      ],
+    },
+    {
+      label: 'משרות',
+      items: [
+        { href: '/jobs',            label: 'משרות פתוחות',  icon: Briefcase       },
+        { href: '/my-applications', label: 'הגשות שלי',     icon: ClipboardList   },
+        { href: '/my-invitations',  label: 'הזמנות לראיון', icon: Mail            },
+        { href: '/book-interview',  label: 'קביעת ראיון',   icon: CalendarCheck   },
+        { href: '/history',         label: 'היסטוריה',      icon: History         },
+      ],
+    },
+    {
+      label: 'תקשורת',
+      items: [
+        { href: '/inbox',           label: 'הודעות',        icon: MailOpen        },
+        { href: '/notifications',   label: 'התראות',        icon: BellRing        },
+      ],
+    },
+    {
+      items: [
+        { href: '/help',            label: 'הנחיות',        icon: HelpCircle      },
+      ],
+    },
+  ],
+  'מוסד': [
+    {
+      label: 'גיוס',
+      items: [
+        { href: '/institution/jobs',         label: 'פרסום משרות',     icon: Briefcase       },
+        { href: '/institution/candidates',   label: 'חיפוש מועמדות',  icon: Users           },
+        { href: '/institution/matches',      label: 'התאמות',          icon: Sparkles        },
+      ],
+    },
+    {
+      label: 'תקשורת',
+      items: [
+        { href: '/institution/applications', label: 'הגשות',           icon: ClipboardList   },
+        { href: '/institution/invitations',  label: 'הזמנות שליחה',   icon: Send            },
+        { href: '/institution/inquiries',    label: 'פניות',           icon: MessageCircle   },
+        { href: '/institution/interviews',   label: 'ראיונות',         icon: CalendarCheck   },
+      ],
+    },
+    {
+      label: 'חשבון',
+      items: [
+        { href: '/institution/profile',      label: 'פרופיל המוסד',   icon: UserCog         },
+        { href: '/settings',                 label: 'הגדרות',          icon: Settings        },
+        { href: '/help',                     label: 'הנחיות',          icon: HelpCircle      },
+      ],
+    },
+  ],
+  'מנהלת מערכת': [
+    {
+      items: [
+        { href: '/dashboard',                label: 'דשבורד ראשי',    icon: LayoutDashboard },
+      ],
+    },
+    {
+      label: 'ניווט ומיון',
+      items: [
+        { href: '/candidates',               label: 'מועמדות',         icon: Users           },
+        { href: '/admin/matches',            label: 'שלבי המיון',      icon: Sparkles        },
+        { href: '/admin/interview-slots',    label: 'ראיונות',         icon: CalendarCheck   },
+        { href: '/admin/reports',            label: 'המלצות ושיבוצים', icon: BarChart3       },
+        { href: '/admin/staffing-needs',     label: 'צרכי הכשרה',      icon: GraduationCap   },
+      ],
+    },
+    {
+      label: 'תפעול',
+      items: [
+        { href: '/admin/candidate-requests', label: 'בקשות הצטרפות',  icon: UserPlus        },
+        { href: '/jobs',                     label: 'משרות',           icon: Briefcase       },
+        { href: '/admin/institutions',       label: 'מוסדות',          icon: Building2       },
+        { href: '/admin/surveys',            label: 'סקרי משוב',       icon: Star            },
+        { href: '/admin/import',             label: 'ייבוא CSV',       icon: Upload          },
+      ],
+    },
+    {
+      label: 'תקשורת',
+      items: [
+        { href: '/messages',                 label: 'הודעות',          icon: MessageCircle   },
+        { href: '/admin/communication',      label: 'תקשורת ותבניות', icon: Radio           },
+        { href: '/admin/messages-log',       label: 'יומן הודעות',    icon: BellRing        },
+      ],
+    },
+    {
+      label: 'מערכת',
+      items: [
+        { href: '/admin/audit',              label: 'יומן פעולות',    icon: ScrollText      },
+        { href: '/admin/admins',             label: 'מנהלי מערכת',    icon: ShieldCheck     },
+        { href: '/settings',                 label: 'הגדרות',          icon: Settings        },
+        { href: '/help',                     label: 'הנחיות',          icon: HelpCircle      },
+      ],
+    },
+  ],
+  'מנהל רשת': [
+    {
+      items: [
+        { href: '/dashboard',                label: 'דשבורד ראשי',    icon: LayoutDashboard },
+      ],
+    },
+    {
+      label: 'ניווט ומיון',
+      items: [
+        { href: '/candidates',               label: 'מועמדות',         icon: Users           },
+        { href: '/admin/matches',            label: 'שלבי המיון',      icon: Sparkles        },
+        { href: '/admin/interview-slots',    label: 'ראיונות',         icon: CalendarCheck   },
+        { href: '/admin/reports',            label: 'המלצות ושיבוצים', icon: BarChart3       },
+        { href: '/admin/staffing-needs',     label: 'צרכי הכשרה',      icon: GraduationCap   },
+      ],
+    },
+    {
+      label: 'תפעול',
+      items: [
+        { href: '/admin/candidate-requests', label: 'בקשות הצטרפות',  icon: UserPlus        },
+        { href: '/jobs',                     label: 'משרות',           icon: Briefcase       },
+        { href: '/admin/institutions',       label: 'מוסדות',          icon: Building2       },
+      ],
+    },
+    {
+      label: 'תקשורת',
+      items: [
+        { href: '/messages',                 label: 'הודעות',          icon: MessageCircle   },
+      ],
+    },
+    {
+      label: 'מערכת',
+      items: [
+        { href: '/settings',                 label: 'הגדרות',          icon: Settings        },
+        { href: '/help',                     label: 'הנחיות',          icon: HelpCircle      },
+      ],
+    },
+  ],
+  'אדמין מערכת': [
+    {
+      items: [
+        { href: '/dashboard',                label: 'דשבורד ראשי',    icon: LayoutDashboard },
+      ],
+    },
+    {
+      label: 'ניווט ומיון',
+      items: [
+        { href: '/candidates',               label: 'מועמדות',         icon: Users           },
+        { href: '/admin/matches',            label: 'שלבי המיון',      icon: Sparkles        },
+        { href: '/admin/interview-slots',    label: 'ראיונות',         icon: CalendarCheck   },
+        { href: '/admin/reports',            label: 'המלצות ושיבוצים', icon: BarChart3       },
+        { href: '/admin/staffing-needs',     label: 'צרכי הכשרה',      icon: GraduationCap   },
+      ],
+    },
+    {
+      label: 'תפעול',
+      items: [
+        { href: '/admin/candidate-requests', label: 'בקשות הצטרפות',  icon: UserPlus        },
+        { href: '/jobs',                     label: 'משרות',           icon: Briefcase       },
+        { href: '/admin/institutions',       label: 'מוסדות',          icon: Building2       },
+        { href: '/admin/surveys',            label: 'סקרי משוב',       icon: Star            },
+        { href: '/admin/import',             label: 'ייבוא CSV',       icon: Upload          },
+      ],
+    },
+    {
+      label: 'תקשורת',
+      items: [
+        { href: '/messages',                 label: 'הודעות',          icon: MessageCircle   },
+        { href: '/admin/communication',      label: 'תקשורת ותבניות', icon: Radio           },
+        { href: '/admin/messages-log',       label: 'יומן הודעות',    icon: BellRing        },
+      ],
+    },
+    {
+      label: 'מערכת',
+      items: [
+        { href: '/admin/audit',              label: 'יומן פעולות',    icon: ScrollText      },
+        { href: '/admin/admins',             label: 'מנהלי מערכת',    icon: ShieldCheck     },
+        { href: '/settings',                 label: 'הגדרות',          icon: Settings        },
+        { href: '/help',                     label: 'הנחיות',          icon: HelpCircle      },
+      ],
+    },
+  ],
+}
+
+interface Props {
+  role: UserRole
+  fullName: string | null
+  pendingInstitutions?: number
+  pendingApplications?: number
+  pendingInquiries?: number
+  pendingCandidateReqs?: number
+  pendingMatches?: number
+}
+
+export default function AppSidebar({
+  role,
+  fullName,
+  pendingInstitutions  = 0,
+  pendingApplications  = 0,
+  pendingInquiries     = 0,
+  pendingCandidateReqs = 0,
+  pendingMatches       = 0,
+}: Props) {
+  const pathname = usePathname()
+  const router   = useRouter()
+  const supabase = createClient()
+
+  const groups: NavGroup[] = (NAV_GROUPS[role] ?? []).map(group => ({
+    ...group,
+    items: group.items.map(item => {
+      if (item.href === '/admin/candidate-requests' && pendingCandidateReqs > 0)
+        return { ...item, badge: pendingCandidateReqs }
+      if (item.href === '/admin/institutions' && pendingInstitutions > 0)
+        return { ...item, badge: pendingInstitutions }
+      if (item.href === '/institution/applications' && pendingApplications > 0)
+        return { ...item, badge: pendingApplications }
+      if (item.href === '/institution/inquiries' && pendingInquiries > 0)
+        return { ...item, badge: pendingInquiries }
+      if (item.href === '/institution/matches' && pendingMatches > 0)
+        return { ...item, badge: pendingMatches }
+      return item
+    }),
+  }))
+
+  async function signOut() {
+    await supabase.auth.signOut()
+    router.push('/login')
+    router.refresh()
+  }
+
+  function isActive(href: string) {
+    if (href === '/dashboard') return pathname === href
+    return pathname === href || pathname.startsWith(href + '/')
+  }
+
+  const roleLabel: Record<UserRole, string> = {
+    'מועמדת':       'פרופיל מועמדת',
+    'מוסד':         'פרופיל מוסד',
+    'מנהלת מערכת': 'ניהול מערכת',
+    'אדמין מערכת': 'ניהול מערכת',
+    'מנהל רשת':    'ניהול מערכת',
+  }
+
+  const homeHref =
+    role === 'מועמדת' ? '/profile' :
+    role === 'מוסד'   ? '/institution/jobs' :
+    '/dashboard'
+
+  return (
+    <aside className="dashboard-sidebar flex flex-col" dir="rtl">
+
+      {/* ── Brand ── */}
+      <div className="shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,.07)' }}>
+        <Link href={homeHref} className="no-underline block" style={{ padding: '18px 16px 14px' }}>
+          {/* Logo */}
+          <div className="flex items-center gap-3 mb-3">
+            <div
+              className="rounded-[14px] shrink-0 overflow-hidden flex items-center justify-center"
+              style={{
+                width: '52px', height: '52px',
+                background: 'rgba(255,255,255,.95)',
+                border: '1px solid rgba(255,255,255,.3)',
+                boxShadow: '0 4px 20px rgba(0,0,0,.25), 0 1px 4px rgba(0,0,0,.2)',
+              }}
+            >
+              <Image
+                src="/logo-chabad.png"
+                alt="רשת חינוך חב׳ד"
+                width={42} height={42}
+                className="object-contain"
+                style={{ display: 'block' }}
+                onError={() => {}}
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div style={{
+                fontSize: '17px', fontWeight: 900,
+                color: '#ffffff', letterSpacing: '-.03em',
+                lineHeight: 1.2,
+              }}>
+                הַשְּׁבִיל
+              </div>
+              <div style={{
+                fontSize: '10.5px', fontWeight: 600,
+                color: 'rgba(212,176,106,.7)',
+                letterSpacing: '.03em',
+                marginTop: '3px',
+              }}>
+                רשת אהלי יוסף יצחק
+              </div>
+            </div>
+          </div>
+
+          {/* Role pill */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '6px',
+            padding: '5px 10px',
+            borderRadius: '8px',
+            background: 'rgba(0,167,181,.15)',
+            border: '1px solid rgba(0,167,181,.25)',
+          }}>
+            <span style={{
+              width: '6px', height: '6px', borderRadius: '50%',
+              background: '#00D4E8',
+              boxShadow: '0 0 6px rgba(0,212,232,.7)',
+              flexShrink: 0,
+            }} />
+            <span style={{
+              fontSize: '11px', fontWeight: 700,
+              color: 'rgba(0,212,232,.9)',
+              letterSpacing: '.02em',
+            }}>
+              {roleLabel[role]}
+            </span>
+          </div>
+
+          {/* Personal greeting */}
+          {fullName && (
+            <div style={{ marginTop: '10px' }}>
+              <p style={{
+                fontSize: '13px', fontWeight: 700,
+                color: 'rgba(255,255,255,.85)',
+                letterSpacing: '-.01em',
+                margin: 0,
+              }}>
+                שלום, {fullName.split(' ')[0]} 👋
+              </p>
+            </div>
+          )}
+        </Link>
+
+        {/* Brand gradient line */}
+        <div style={{
+          height: '2px',
+          background: 'linear-gradient(90deg, rgba(75,46,131,0) 0%, rgba(75,46,131,.6) 30%, rgba(0,167,181,.8) 70%, rgba(0,167,181,0) 100%)',
+        }} />
+      </div>
+
+      {/* ── Nav ── */}
+      <nav className="flex-1 overflow-y-auto" style={{ padding: '12px 10px' }}>
+        {groups.map((group, gi) => (
+          <div key={gi} style={{ marginBottom: group.label ? '4px' : '8px' }}>
+            {group.label && (
+              <p style={{
+                fontSize: '10px', fontWeight: 700,
+                letterSpacing: '.14em',
+                textTransform: 'uppercase',
+                color: 'rgba(255,255,255,.22)',
+                padding: '8px 10px 5px',
+                margin: 0,
+              }}>
+                {group.label}
+              </p>
+            )}
+            <ul className="list-none p-0 m-0 flex flex-col" style={{ gap: '1px' }}>
+              {group.items.map(item => (
+                <NavItemRow key={item.href} item={item} active={isActive(item.href)} />
+              ))}
+            </ul>
+          </div>
+        ))}
+      </nav>
+
+      {/* ── Footer ── */}
+      <div className="shrink-0" style={{
+        borderTop: '1px solid rgba(255,255,255,.06)',
+        padding: '10px 10px 14px',
+      }}>
+        <a
+          href="https://wa.me/972503339770"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block w-full text-center no-underline mb-2"
+          style={{
+            fontSize: '10.5px',
+            color: 'rgba(255,255,255,.5)',
+            padding: '6px 8px',
+            lineHeight: 1.6,
+            borderTop: '1px solid rgba(255,255,255,.08)',
+          }}
+        >
+          פיתוח ובניית אתר: שרה הגר
+          <span style={{ display: 'block', color: 'rgba(0,212,232,.6)', fontSize: '10px' }}>0503339770</span>
+        </a>
+        <button
+          onClick={signOut}
+          className="w-full flex items-center gap-2.5 rounded-[10px] transition-all"
+          style={{
+            padding: '9px 12px',
+            fontSize: '13px', fontWeight: 600,
+            color: 'rgba(255,255,255,.35)',
+            background: 'transparent',
+            border: 'none', cursor: 'pointer',
+            fontFamily: 'inherit',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = 'rgba(220,60,60,.12)'
+            e.currentTarget.style.color = '#FF8080'
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = 'transparent'
+            e.currentTarget.style.color = 'rgba(255,255,255,.35)'
+          }}
+        >
+          <LogOut size={14} strokeWidth={2} style={{ flexShrink: 0 }} />
+          <span>התנתקות</span>
+        </button>
+      </div>
+    </aside>
+  )
+}
+
+function NavItemRow({ item, active }: { item: NavItem; active: boolean }) {
+  const Icon = item.icon
+
+  function handleClick() {
+    window.dispatchEvent(new CustomEvent('sidebar-close', { detail: 'close' }))
+  }
+
+  return (
+    <li>
+      <Link
+        href={item.href}
+        onClick={handleClick}
+        className="flex items-center gap-2.5 no-underline transition-all"
+        style={{
+          padding: '8px 10px',
+          borderRadius: '10px',
+          fontSize: '13.5px',
+          fontWeight: active ? 700 : 500,
+          position: 'relative',
+          ...(active ? {
+            background: 'linear-gradient(90deg, rgba(0,167,181,.2) 0%, rgba(255,255,255,.07) 100%)',
+            color: '#ffffff',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,.07)',
+            borderInlineEnd: '3px solid #00D4E8',
+          } : {
+            color: 'rgba(255,255,255,.52)',
+            background: 'transparent',
+          }),
+        }}
+        onMouseEnter={e => {
+          if (!active) {
+            e.currentTarget.style.background = 'rgba(255,255,255,.07)'
+            e.currentTarget.style.color = 'rgba(255,255,255,.85)'
+          }
+        }}
+        onMouseLeave={e => {
+          if (!active) {
+            e.currentTarget.style.background = 'transparent'
+            e.currentTarget.style.color = 'rgba(255,255,255,.52)'
+          }
+        }}
+      >
+        {/* Icon */}
+        <span style={{
+          flexShrink: 0, display: 'flex',
+          color: active ? '#00D4E8' : 'rgba(255,255,255,.28)',
+          filter: active ? 'drop-shadow(0 0 5px rgba(0,167,181,.55))' : 'none',
+          transition: 'color 150ms, filter 150ms',
+        }}>
+          <Icon size={15} strokeWidth={active ? 2.5 : 2} />
+        </span>
+
+        {/* Label */}
+        <span className="truncate flex-1">{item.label}</span>
+
+        {/* Badge */}
+        {item.badge != null && item.badge > 0 && (
+          <span style={{
+            marginInlineStart: 'auto',
+            fontSize: '10.5px', fontWeight: 700,
+            padding: '2px 6px',
+            borderRadius: '100px',
+            background: '#00A7B5',
+            color: '#fff',
+            minWidth: '20px',
+            textAlign: 'center',
+            flexShrink: 0,
+            boxShadow: '0 2px 8px rgba(0,167,181,.4)',
+          }}>
+            {item.badge}
+          </span>
+        )}
+      </Link>
+    </li>
+  )
+}
