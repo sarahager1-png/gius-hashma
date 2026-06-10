@@ -69,7 +69,7 @@ export async function GET(request: Request) {
     ,
     service
       .from('jobs')
-      .select('id, institution_id, specialization, district, city, institutions!inner(id, institution_name, city, profile_id, whatsapp_preference, profiles(phone))')
+      .select('id, institution_id, specialization, district, city, institutions!inner(id, institution_name, city, profile_id, whatsapp_preference, profiles!profile_id(phone))')
       .eq('status', 'פעילה'),
   ])
 
