@@ -61,14 +61,12 @@ export async function GET(request: Request) {
   }
 
   const service = createServiceClient()
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
 
   const [{ data: candidates, error: candErr }, { data: jobs, error: jobsErr }] = await Promise.all([
     service
       .from('candidates')
       .select('id, profile_id, specialization, district, city, work_cities, level, availability_status, whatsapp_preference, profiles(full_name, phone)')
-      .gte('created_at', sevenDaysAgo)
       .not('availability_status', 'in', '("משובצת","לא פעילה")')
     ,
     service
@@ -156,7 +154,7 @@ export async function GET(request: Request) {
       instLines,
       '',
       `📌 *כיצד לפנות?*`,
-      `היכנסי לפרופיל שלך, עברי על ההצעות ולחצי “הגישי מועמדות” ליד המוסד שמעניין אותך — ואנחנו נעביר את הפרטים שלך.`,
+      `היכנסי לפרופיל שלך, עברי על ההצעות ולחצי "הגישי מועמדות" ליד המוסד שמעניין אותך — ואנחנו נעביר את הפרטים שלך.`,
       '',
       `${appUrl}/profile`,
     ].join('\n')
