@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendApplicationAccepted, sendApplicationRejected, sendApplicationViewedEmail } from '@/lib/email'
 import { sendExternal } from '@/lib/notify-external'
@@ -28,10 +28,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
   }
 
-  const { status, institution_notes } = await request.json()
+  const { status, institution_notes, rejection_reason } = await request.json()
   const update: Record<string, string | null> = {}
   if (status) update.status = status
   if (institution_notes !== undefined) update.institution_notes = institution_notes
+  if (status === 'נדחתה' && rejection_reason) update.rejection_reason = rejection_reason
   if (status === 'התקבלה') update.placement_date = new Date().toISOString().slice(0, 10)
 
   const { error } = await service.from('applications').update(update).eq('id', id)
@@ -60,7 +61,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 
   if (status === 'התקבלה' || status === 'נדחתה') {
-    // fetch application details for automation + notification
     const { data: app } = await service
       .from('applications')
       .select('job_id, candidate_id, jobs(title, institutions(institution_name, profile_id)), candidates(profile_id, whatsapp_preference, profiles(full_name, phone))')
@@ -75,13 +75,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       const institutionProfileId = (app.jobs as unknown as { institutions: { profile_id: string } } | null)?.institutions?.profile_id
 
       if (status === 'התקבלה') {
-        // mark job as filled + candidate as placed
         await Promise.all([
           service.from('jobs').update({ status: 'אוישה' }).eq('id', app.job_id),
           service.from('candidates').update({ availability_status: 'משובצת' }).eq('id', app.candidate_id),
         ])
 
-        // notify all admins about the placement (in-app + SMS + WA)
         const { data: admins } = await service
           .from('profiles')
           .select('id, phone, whatsapp_preference')
@@ -103,7 +101,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
           }
         }
 
-        // notify candidate (in-app + email + SMS)
         if (candidateProfileId) {
           await service.from('notifications').insert({
             profile_id: candidateProfileId,
@@ -120,7 +117,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
           const acceptMsg = `ברכות ${candidateName}! התקבלת למשרת "${jobTitle}" ב${institutionName}. נציג מהמוסד יצור איתך קשר בקרוב 🎉`
           void sendExternal({ phone: candidatePhone, whatsapp_preference: candWaPrefAccept, waMessage: acceptMsg, smsMessage: acceptMsg })
         }
-        // create satisfaction surveys immediately so both parties can fill them in-app
         if (candidateProfileId && institutionProfileId) {
           void service.from('placement_surveys').insert([
             { application_id: id, survey_type: 'candidate_about_institution', respondent_profile_id: candidateProfileId },
@@ -128,13 +124,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
           ])
         }
       } else if (status === 'נדחתה') {
-        // notify candidate (in-app + email + SMS)
+        const reasonSuffix = rejection_reason ? ` סיבה: ${rejection_reason}` : ''
         if (candidateProfileId) {
           await service.from('notifications').insert({
             profile_id: candidateProfileId,
             type: 'application_rejected',
             title: 'תודה על פנייתך',
-            body: `תודה רבה על עניינך ב"${jobTitle}" ב${institutionName}. לאחר בחינת המועמדויות, לצערנו לא נמצאה התאמה הפעם. אנו מאחלים לך הצלחה רבה בהמשך הדרך!`,
+            body: `תודה רבה על עניינך ב"${jobTitle}" ב${institutionName}. לאחר בחינת המועמדויות, לצערנו לא נמצאה התאמה הפעם.${reasonSuffix}`,
             related_id: id,
           })
           void sendApplicationRejected({ candidateProfileId, candidateName, jobTitle, institutionName })
@@ -142,7 +138,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         const candidatePhoneRej = (app.candidates as unknown as { profiles: { phone: string | null } } | null)?.profiles?.phone
         const candWaPref = (app.candidates as unknown as { whatsapp_preference?: boolean | null } | null)?.whatsapp_preference
         if (candidatePhoneRej) {
-          const rejMsg = `שלום ${candidateName}, תודה על פנייתך למשרת "${jobTitle}" ב${institutionName}. לצערנו לא נמצאה התאמה הפעם. בהצלחה! 🙏`
+          const rejMsg = `שלום ${candidateName}, תודה על פנייתך למשרת "${jobTitle}" ב${institutionName}. לצערנו לא נמצאה התאמה הפעם.${reasonSuffix} בהצלחה! 🙏`
           void sendExternal({ phone: candidatePhoneRej, whatsapp_preference: candWaPref, waMessage: rejMsg, smsMessage: rejMsg })
         }
       }
@@ -176,14 +172,12 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   if (!app) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   if (!isAdmin) {
-    // Institution manager — can delete applications on their own jobs
     if (profile.role === 'מוסד') {
       const instProfileId = (app.jobs as unknown as { institutions: { profile_id: string } | null } | null)
         ?.institutions?.profile_id
       if (instProfileId !== user.id)
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     } else {
-      // Candidate — can only withdraw pending/viewed applications
       const { data: cand } = await service.from('candidates').select('id').eq('profile_id', user.id).single()
       if (!cand || app.candidate_id !== cand.id)
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
