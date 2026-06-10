@@ -721,11 +721,14 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
                 <X size={18} />
               </button>
             </div>
-            <p className="text-[13px] mb-5" style={{ color: 'var(--ink-3)' }}>{rejectModal.name}</p>
+            <p className="text-[13px] mb-4" style={{ color: 'var(--ink-3)' }}>{rejectModal.name}</p>
 
-            <label className="text-[12px] font-semibold block mb-1.5" style={{ color: 'var(--ink-3)' }}>
+            <label className="text-[12px] font-semibold block mb-1" style={{ color: 'var(--ink-3)' }}>
               סיבת הדחייה (אופציונלי)
             </label>
+            <p className="text-[11.5px] mb-2 leading-relaxed" style={{ color: 'var(--ink-4)' }}>
+              הסיבה תישמר במערכת ותעזור לנו לשפר את ההתאמות וההשמות.
+            </p>
             <textarea
               value={rejectReason}
               onChange={e => setRejectReason(e.target.value)}
