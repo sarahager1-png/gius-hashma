@@ -99,6 +99,8 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
   const [historyLoading, setHistoryLoading] = useState<string | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [rejectModal, setRejectModal] = useState<{ appId: string; name: string; phone: string | null } | null>(null)
+  const [rejectReason, setRejectReason] = useState('')
 
   async function toggleHistory(appId: string) {
     if (historyOpen.has(appId)) {
@@ -134,7 +136,6 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
     }
     return true
   }).sort((a, b) => {
-    // Oldest pending first so urgent cases rise to the top
     if (a.status === 'ממתינה' && b.status === 'ממתינה')
       return new Date(a.applied_at).getTime() - new Date(b.applied_at).getTime()
     return 0
@@ -145,13 +146,13 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
     .map(a => a.jobs)
     .filter((j): j is { id: string; title: string; city: string | null } => !!j && !jobSeen.has(j.id) && jobSeen.add(j.id) !== undefined)
 
-  async function updateStatus(appId: string, newStatus: AppStatus) {
+  async function updateStatus(appId: string, newStatus: AppStatus, rejection_reason?: string) {
     setLoading(appId)
     setApps(prev => prev.map(a => a.id === appId ? { ...a, status: newStatus } : a))
     const res = await fetch(`/api/applications/${appId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus }),
+      body: JSON.stringify({ status: newStatus, ...(rejection_reason ? { rejection_reason } : {}) }),
     })
     setLoading(null)
     if (!res.ok) {
@@ -206,9 +207,9 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
   function waMsg(a: AppRow, type: 'accept' | 'reject' | 'interview') {
     const first = a.candidates?.profiles?.full_name?.split(' ')[0] ?? 'שלום'
     const job   = a.jobs?.title ?? 'המשרה'
-    if (type === 'accept')    return `שלום ${first},\nאנחנו מ${institutionName} ושמחים לבשר לך שהתקבלת למשרת “${job}”! נשמח לתאם את המשך התהליך.\nבברכה`
-    if (type === 'reject')    return `שלום ${first},\nתודה על הגשתך למשרת “${job}” ב${institutionName}. לאחר בחינה מעמיקה, החלטנו להמשיך עם מועמדים אחרים. מאחלים לך הצלחה!\nבברכה`
-    return `שלום ${first},\nמ${institutionName}. נשמח להזמין אותך לראיון למשרת “${job}”. מה הזמינות שלך?\nבברכה`
+    if (type === 'accept')    return `שלום ${first},\nאנחנו מ${institutionName} ושמחים לבשר לך שהתקבלת למשרת "${job}"! נשמח לתאם את המשך התהליך.\nבברכה`
+    if (type === 'reject')    return `שלום ${first},\nתודה על הגשתך למשרת "${job}" ב${institutionName}. לאחר בחינה מעמיקה, החלטנו להמשיך עם מועמדים אחרים. מאחלים לך הצלחה!\nבברכה`
+    return `שלום ${first},\nמ${institutionName}. נשמח להזמין אותך לראיון למשרת "${job}". מה הזמינות שלך?\nבברכה`
   }
 
   return (
@@ -242,7 +243,6 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
 
       {/* ── Filters ── */}
       <div className="flex items-center gap-3 mb-5 flex-wrap">
-        {/* Search */}
         <div className="relative">
           <Search size={14} className="absolute top-1/2 -translate-y-1/2 end-3 pointer-events-none"
             style={{ color: 'var(--ink-4)' }} />
@@ -253,7 +253,6 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
               paddingInlineEnd: '34px', paddingInlineStart: '12px', minWidth: 200 }} />
         </div>
 
-        {/* Status tabs — mobile: select, desktop: tabs */}
         <select
           value={tab} onChange={e => setTab(e.target.value as AppStatus | 'הכל')}
           className="md:hidden h-9 rounded-[10px] border text-[13px] font-medium outline-none px-3"
@@ -286,7 +285,6 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
           })}
         </div>
 
-        {/* Job filter */}
         {uniqueJobs.length > 1 && (
           <div className="relative">
             <select value={jobFilter} onChange={e => setJobFilter(e.target.value)}
@@ -332,7 +330,7 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
             <Sparkles size={24} style={{ color: 'var(--purple)' }} />
           </div>
           <p className="text-[16px] font-bold mb-1" style={{ color: 'var(--ink)' }}>
-            {tab !== 'הכל' ? `אין הגשות בסטטוס “${tab}”` : 'עדיין אין הגשות'}
+            {tab !== 'הכל' ? `אין הגשות בסטטוס "${tab}"` : 'עדיין אין הגשות'}
           </p>
           <p className="text-[13px] mb-4" style={{ color: 'var(--ink-3)' }}>
             שלחו הזמנות למועמדות מתאימות
@@ -492,10 +490,7 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
                           </ActionBtn>
 
                           <ActionBtn
-                            onClick={() => {
-                              updateStatus(app.id, 'נדחתה')
-                              if (phone) window.open(waLink(phone, waMsg(app, 'reject')), '_blank')
-                            }}
+                            onClick={() => setRejectModal({ appId: app.id, name, phone })}
                             disabled={isLoad}
                             style={{ background: '#F4F4F5', color: '#71717A', border: '1px solid #E4E4E7' }}
                             hoverStyle={{ background: '#FEF2F2', color: '#DC2626', borderColor: '#FECACA' }}
@@ -665,7 +660,6 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
                         {/* History timeline */}
                         {historyOpen.has(app.id) && (
                           <div className="mt-2 ms-1 ps-3 border-s-2 space-y-2" style={{ borderColor: 'var(--purple-200)' }}>
-                            {/* Initial "created" entry */}
                             <div className="flex items-center gap-2">
                               <div className="w-2 h-2 rounded-full -ms-[17px] shrink-0" style={{ background: 'var(--purple-200)' }} />
                               <span className="text-[11px]" style={{ color: 'var(--ink-4)' }}>
@@ -712,6 +706,72 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* ── Reject Modal ── */}
+      {rejectModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,.52)' }}
+          onClick={e => e.target === e.currentTarget && setRejectModal(null)}>
+          <div className="bg-white rounded-[22px] shadow-2xl w-full max-w-sm p-6" dir="rtl">
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-[18px] font-extrabold" style={{ color: 'var(--ink)' }}>דחיית מועמדת</h2>
+              <button onClick={() => { setRejectModal(null); setRejectReason('') }} style={{ color: 'var(--ink-3)' }}>
+                <X size={18} />
+              </button>
+            </div>
+            <p className="text-[13px] mb-5" style={{ color: 'var(--ink-3)' }}>{rejectModal.name}</p>
+
+            <label className="text-[12px] font-semibold block mb-1.5" style={{ color: 'var(--ink-3)' }}>
+              סיבת הדחייה (אופציונלי)
+            </label>
+            <textarea
+              value={rejectReason}
+              onChange={e => setRejectReason(e.target.value)}
+              placeholder="למשל: ניסיון לא מתאים / המשרה אוישה..."
+              rows={3}
+              autoFocus
+              className="w-full px-3 py-2 rounded-[10px] border text-[13px] resize-none outline-none leading-relaxed mb-5"
+              style={{ borderColor: 'var(--line)', background: '#FAFAFA', color: 'var(--ink)', fontFamily: 'inherit' }}
+            />
+
+            <div className="flex gap-2">
+              {rejectModal.phone && (() => {
+                const app = apps.find(a => a.id === rejectModal.appId)
+                if (!app) return null
+                return (
+                  <a href={waLink(rejectModal.phone!, waMsg(app, 'reject'))}
+                    target="_blank" rel="noreferrer"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-[13px] font-bold no-underline"
+                    style={{ background: '#25D366', color: '#fff' }}
+                    onClick={() => {
+                      updateStatus(rejectModal.appId, 'נדחתה', rejectReason || undefined)
+                      setRejectModal(null)
+                      setRejectReason('')
+                    }}>
+                    <MessageCircle size={14} />דחי + WA
+                  </a>
+                )
+              })()}
+              <button
+                onClick={() => {
+                  updateStatus(rejectModal.appId, 'נדחתה', rejectReason || undefined)
+                  setRejectModal(null)
+                  setRejectReason('')
+                }}
+                className="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold border"
+                style={{ borderColor: 'var(--line)', color: 'var(--ink-2)', background: '#fff' }}>
+                דחי בלי WA
+              </button>
+              <button
+                onClick={() => { setRejectModal(null); setRejectReason('') }}
+                className="px-4 py-2.5 rounded-[10px] text-[13px] font-semibold"
+                style={{ color: 'var(--ink-3)' }}>
+                ביטול
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -762,7 +822,7 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
                 const dt = new Date(`${intDate}T${intTime}`).toLocaleString('he-IL', {
                   weekday: 'short', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
                 })
-                const msg = `שלום ${interview.name.split(' ')[0]}, מ${institutionName}.\nנשמח לראיינך למשרת “${interview.jobTitle}” בתאריך ${dt}${intLocation ? ', ב' + intLocation : ''}.\nנא אשרי קבלה.\nבברכה`
+                const msg = `שלום ${interview.name.split(' ')[0]}, מ${institutionName}.\nנשמח לראיינך למשרת "${interview.jobTitle}" בתאריך ${dt}${intLocation ? ', ב' + intLocation : ''}.\nנא אשרי קבלה.\nבברכה`
                 return (
                   <a href={waLink(interview.phone, msg)} target="_blank" rel="noreferrer"
                     className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[10px] text-[14px] font-bold no-underline"
