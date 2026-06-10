@@ -42,7 +42,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { data: cand } = await service.from('candidates').select('id').eq('profile_id', user.id).single()
   if (!cand) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { status } = await request.json()
+  const { status, rejection_reason } = await request.json()
   if (!['התקבלה', 'נדחתה'].includes(status))
     return NextResponse.json({ error: 'invalid status' }, { status: 400 })
 
@@ -54,7 +54,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!inv || inv.candidate_id !== cand.id)
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  await service.from('invitations').update({ status }).eq('id', id)
+  const updateData: Record<string, string | null> = { status }
+  if (status === 'נדחתה' && rejection_reason) updateData.rejection_reason = rejection_reason
+
+  await service.from('invitations').update(updateData).eq('id', id)
 
   // if accepted → auto-create application + interview + notify institution
   if (status === 'התקבלה') {
@@ -108,7 +111,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
   }
 
-  // if declined → notify institution (in-app + SMS/WA)
+  // if declined → notify institution with reason
   if (status === 'נדחתה') {
     const [instRes, candRes, jobRes] = await Promise.all([
       service.from('institutions').select('profile_id, phone, whatsapp_preference').eq('id', inv.institution_id).single(),
@@ -120,17 +123,18 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const instWaPref = instRes.data?.whatsapp_preference
     const candidateName = (candRes.data?.profiles as unknown as { full_name: string | null } | null)?.full_name ?? 'מועמדת'
     const jobTitle = jobRes.data?.title ?? ''
+    const reasonSuffix = rejection_reason ? ` סיבה: ${rejection_reason}` : ''
     if (instProfileId) {
       await service.from('notifications').insert({
         profile_id: instProfileId,
         type: 'invitation_declined',
         title: `${candidateName} דחתה את ההזמנה`,
-        body: `המועמדת דחתה את ההזמנה לראיון למשרת "${jobTitle}"`,
+        body: `המועמדת דחתה את ההזמנה לראיון למשרת "${jobTitle}".${reasonSuffix}`,
         related_id: inv.id,
       })
     }
     if (instPhone) {
-      const msg = `${candidateName} דחתה את ההזמנה לראיון למשרת "${jobTitle}". ניתן להזמין מועמדת אחרת: giuus.vercel.app/institution/candidates`
+      const msg = `${candidateName} דחתה את ההזמנה לראיון למשרת "${jobTitle}".${reasonSuffix} ניתן להזמין מועמדת אחרת: giuus.vercel.app/institution/candidates`
       void sendExternal({ phone: instPhone, whatsapp_preference: instWaPref, waMessage: msg, smsMessage: msg })
     }
   }
