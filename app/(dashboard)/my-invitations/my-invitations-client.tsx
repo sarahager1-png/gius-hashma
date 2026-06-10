@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { Calendar, Building2, MapPin, Check, X, Clock, CheckCircle, XCircle, MessageCircle } from 'lucide-react'
@@ -51,19 +51,23 @@ export default function MyInvitationsClient({ invitations: initial }: Props) {
   const [invitations, setInvitations] = useState(initial)
   const [responding, setResponding] = useState<string | null>(null)
   const [declinedIds, setDeclinedIds] = useState<Set<string>>(new Set())
+  const [decliningId, setDecliningId] = useState<string | null>(null)
+  const [declineReason, setDeclineReason] = useState('')
 
   const pending  = invitations.filter(i => i.status === 'ממתינה').length
   const accepted = invitations.filter(i => i.status === 'התקבלה').length
 
-  async function respond(invId: string, status: 'התקבלה' | 'נדחתה') {
+  async function respond(invId: string, status: 'התקבלה' | 'נדחתה', reason?: string) {
     setResponding(invId)
     await fetch(`/api/invitations/${invId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ status, ...(reason ? { rejection_reason: reason } : {}) }),
     })
     setInvitations(prev => prev.map(i => i.id === invId ? { ...i, status } : i))
     if (status === 'נדחתה') setDeclinedIds(p => new Set([...p, invId]))
+    setDecliningId(null)
+    setDeclineReason('')
     setResponding(null)
   }
 
@@ -136,21 +140,55 @@ export default function MyInvitationsClient({ invitations: initial }: Props) {
                 </div>
 
                 {isPending && (
-                  <div className="flex gap-2 pt-3" style={{ borderTop: '1px solid var(--line-soft)' }}>
-                    <button
-                      onClick={() => respond(inv.id, 'התקבלה')}
-                      disabled={responding === inv.id}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[8px] text-[13px] font-bold transition-all"
-                      style={{ background: '#E4F6ED', color: '#1A7A4A' }}>
-                      <Check size={14} />קבלת ההזמנה
-                    </button>
-                    <button
-                      onClick={() => respond(inv.id, 'נדחתה')}
-                      disabled={responding === inv.id}
-                      className="flex-1 py-2 rounded-[8px] text-[13px] font-bold transition-all"
-                      style={{ background: '#F4F4F5', color: '#71717A' }}>
-                      <X size={13} className="inline ml-1" />לא יכולה כרגע
-                    </button>
+                  <div className="pt-3" style={{ borderTop: '1px solid var(--line-soft)' }}>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => respond(inv.id, 'התקבלה')}
+                        disabled={responding === inv.id}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[8px] text-[13px] font-bold transition-all"
+                        style={{ background: '#E4F6ED', color: '#1A7A4A' }}>
+                        <Check size={14} />קבלת ההזמנה
+                      </button>
+                      <button
+                        onClick={() => decliningId === inv.id ? setDecliningId(null) : setDecliningId(inv.id)}
+                        disabled={responding === inv.id}
+                        className="flex-1 py-2 rounded-[8px] text-[13px] font-bold transition-all"
+                        style={{ background: decliningId === inv.id ? '#FEF2F2' : '#F4F4F5', color: decliningId === inv.id ? '#DC2626' : '#71717A' }}>
+                        <X size={13} className="inline ml-1" />לא יכולה כרגע
+                      </button>
+                    </div>
+
+                    {decliningId === inv.id && (
+                      <div className="mt-3">
+                        <label className="text-[12px] font-semibold block mb-1.5" style={{ color: 'var(--ink-3)' }}>
+                          סיבת הדחייה (אופציונלי)
+                        </label>
+                        <textarea
+                          value={declineReason}
+                          onChange={e => setDeclineReason(e.target.value)}
+                          placeholder="למשל: כבר מצאתי עבודה / התאריך לא מתאים..."
+                          rows={2}
+                          autoFocus
+                          className="w-full px-3 py-2 rounded-[10px] border text-[12.5px] resize-none outline-none leading-relaxed"
+                          style={{ borderColor: 'var(--purple-200)', background: '#fff', color: 'var(--ink)', fontFamily: 'inherit' }}
+                        />
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            onClick={() => respond(inv.id, 'נדחתה', declineReason || undefined)}
+                            disabled={responding === inv.id}
+                            className="flex-1 py-2 rounded-[8px] text-[13px] font-bold"
+                            style={{ background: '#F4F4F5', color: '#71717A' }}>
+                            {responding === inv.id ? '...' : 'אשרי דחייה'}
+                          </button>
+                          <button
+                            onClick={() => { setDecliningId(null); setDeclineReason('') }}
+                            className="px-4 py-2 rounded-[8px] text-[12px] font-semibold"
+                            style={{ color: 'var(--ink-3)' }}>
+                            ביטול
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
