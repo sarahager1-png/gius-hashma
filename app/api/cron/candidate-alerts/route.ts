@@ -10,7 +10,7 @@ type CandRow = {
   district: string | null
   city: string | null
   work_cities: string[] | null
-  level: string | null
+  academic_level: string | null
   availability_status: string | null
   whatsapp_preference: boolean | null
   profiles: { full_name: string | null; phone: string | null } | null
@@ -22,7 +22,6 @@ type JobRow = {
   specialization: string | null
   district: string | null
   city: string | null
-  level: string | null
   institutions: {
     id: string
     institution_name: string
@@ -45,7 +44,6 @@ function computeScore(cand: CandRow, job: JobRow): number {
     const jSpec = job.specialization.trim().toLowerCase()
     if (jSpec === 'שניהם' || cSpecs.some(s => jSpec.includes(s) || s.includes(jSpec))) score += 5
   }
-  if (cand.level && job.level && cand.level === job.level) score += 2
   if (cand.availability_status && ['פנויה', 'פנוי', 'פנוי/ה'].includes(cand.availability_status)) score += 1
   return score
 }
@@ -66,12 +64,12 @@ export async function GET(request: Request) {
   const [{ data: candidates, error: candErr }, { data: jobs, error: jobsErr }] = await Promise.all([
     service
       .from('candidates')
-      .select('id, profile_id, specialization, district, city, work_cities, level, availability_status, whatsapp_preference, profiles(full_name, phone)')
+      .select('id, profile_id, specialization, district, city, work_cities, academic_level, availability_status, whatsapp_preference, profiles(full_name, phone)')
       .not('availability_status', 'in', '("משובצת","לא פעילה")')
     ,
     service
       .from('jobs')
-      .select('id, institution_id, specialization, district, city, level, institutions!inner(id, institution_name, city, profile_id, whatsapp_preference, profiles(phone))')
+      .select('id, institution_id, specialization, district, city, institutions!inner(id, institution_name, city, profile_id, whatsapp_preference, profiles(phone))')
       .eq('status', 'פעילה'),
   ])
 
@@ -181,7 +179,6 @@ export async function GET(request: Request) {
   }
 
   // ── 2. Institution notifications ───────────────────────────────────
-  // Group all qualifying pairs by institution
 
   type InstInfo = {
     profileId: string
@@ -208,7 +205,6 @@ export async function GET(request: Request) {
     }
   }
 
-  // Load existing institution_match_alert notifications for dedup
   const instProfileIdsList = [...instInfoMap.values()].map(e => e.profileId).filter(Boolean)
   let notifiedInstSet = new Set<string>()
   if (instProfileIdsList.length > 0) {
