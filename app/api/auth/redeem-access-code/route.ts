@@ -54,7 +54,9 @@ export async function POST(request: Request) {
     .eq('id', row.id)
 
   // Verify server-side via /auth/confirm (the raw action_link returns the session
-  // in a URL fragment the server can never read)
-  const confirmUrl = `${origin}/auth/confirm?token_hash=${encodeURIComponent(data.properties.hashed_token)}&type=magiclink`
+  // in a URL fragment the server can never read). For a never-confirmed user the
+  // generated token is a 'signup' token, not 'magiclink' — use the actual type.
+  const vtype = data.properties.verification_type || 'magiclink'
+  const confirmUrl = `${origin}/auth/confirm?token_hash=${encodeURIComponent(data.properties.hashed_token)}&type=${encodeURIComponent(vtype)}`
   return NextResponse.json({ url: confirmUrl })
 }
