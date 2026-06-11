@@ -24,13 +24,26 @@ export async function POST(request: Request) {
   if (row.expires_at && new Date(row.expires_at) < new Date())
     return NextResponse.json({ error: 'הקוד פג תוקפו — בקשי קוד חדש' }, { status: 410 })
 
-  const { data, error } = await service.auth.admin.generateLink({
+  let { data, error } = await service.auth.admin.generateLink({
     type: 'magiclink',
     email: row.user_email,
-    options: { redirectTo: `${origin}/auth/callback` },
   })
 
-  if (error || !data?.properties?.action_link) {
+  // First-ever login with this email — create the auth user, then retry
+  if (error) {
+    const { error: createErr } = await service.auth.admin.createUser({
+      email: row.user_email,
+      email_confirm: true,
+    })
+    if (!createErr) {
+      ;({ data, error } = await service.auth.admin.generateLink({
+        type: 'magiclink',
+        email: row.user_email,
+      }))
+    }
+  }
+
+  if (error || !data?.properties?.hashed_token) {
     console.error('[redeem-access-code]', error)
     return NextResponse.json({ error: 'שגיאה ביצירת קישור כניסה — נסי שוב' }, { status: 500 })
   }
@@ -40,5 +53,8 @@ export async function POST(request: Request) {
     .update({ used_at: new Date().toISOString() })
     .eq('id', row.id)
 
-  return NextResponse.json({ url: data.properties.action_link })
+  // Verify server-side via /auth/confirm (the raw action_link returns the session
+  // in a URL fragment the server can never read)
+  const confirmUrl = `${origin}/auth/confirm?token_hash=${encodeURIComponent(data.properties.hashed_token)}&type=magiclink`
+  return NextResponse.json({ url: confirmUrl })
 }

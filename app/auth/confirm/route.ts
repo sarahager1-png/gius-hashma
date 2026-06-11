@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { createServiceClient } from '@/lib/supabase/server'
+import { resolvePostLogin } from '@/lib/auth/post-login'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -39,19 +40,13 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}${next}`)
   }
 
-  const userId = session.user.id
   const service = createServiceClient()
-  const { data: profile } = await service.from('profiles').select('role').eq('id', userId).single()
+  const path = await resolvePostLogin(
+    service,
+    session.user.id,
+    session.user.email?.toLowerCase() ?? '',
+    session.user.user_metadata?.full_name ?? session.user.email ?? '',
+  )
 
-  if (profile) {
-    return NextResponse.redirect(`${origin}${roleHome(profile.role)}`)
-  }
-
-  return NextResponse.redirect(`${origin}/profile`)
-}
-
-function roleHome(role: string): string {
-  if (role === 'מועמדת') return '/profile'
-  if (role === 'מוסד') return '/institution/jobs'
-  return '/dashboard'
+  return NextResponse.redirect(`${origin}${path}`)
 }
