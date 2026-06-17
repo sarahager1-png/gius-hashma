@@ -22,6 +22,7 @@ export default async function SearchCandidatesPage() {
       .from('candidates')
       .select('*, profiles(full_name, phone)')
       .neq('availability_status', 'לא פעילה')
+      .neq('availability_status', 'משובצת')
       .order('updated_at', { ascending: false }),
     service
       .from('jobs')
