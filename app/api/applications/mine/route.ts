@@ -12,11 +12,31 @@ export async function GET() {
 
   const { data } = await service
     .from('applications')
-    .select('id, status, applied_at, cover_letter, jobs(title, city, job_type, institutions(institution_name))')
+    .select('id, status, applied_at, updated_at, placement_date, cover_letter, jobs(title, city, job_type, institutions(institution_name))')
     .eq('candidate_id', cand.id)
     .order('applied_at', { ascending: false })
 
   const apps = data ?? []
+
+  // attach the latest interview (scheduled_at) per application — drives the timeline "ראיון" stage
+  const interviewMap: Record<string, { scheduled_at: string; location: string | null; candidate_confirmed: boolean | null }> = {}
+  if (apps.length > 0) {
+    const { data: interviews } = await service
+      .from('interviews')
+      .select('application_id, scheduled_at, location, candidate_confirmed')
+      .in('application_id', apps.map(a => a.id))
+      .order('scheduled_at', { ascending: false })
+    for (const iv of interviews ?? []) {
+      // keep the most recent interview per application (first seen due to desc order)
+      if (!interviewMap[iv.application_id]) {
+        interviewMap[iv.application_id] = {
+          scheduled_at: iv.scheduled_at,
+          location: iv.location,
+          candidate_confirmed: iv.candidate_confirmed,
+        }
+      }
+    }
+  }
 
   // attach survey token for accepted applications
   const acceptedIds = apps.filter(a => a.status === 'התקבלה').map(a => a.id)
@@ -36,5 +56,6 @@ export async function GET() {
   return NextResponse.json(apps.map(a => ({
     ...a,
     survey_token: surveyTokenMap[a.id] ?? null,
+    interview: interviewMap[a.id] ?? null,
   })))
 }

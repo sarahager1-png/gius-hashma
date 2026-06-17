@@ -7,6 +7,7 @@ import {
   Calendar, MessageCircle, Check, X, ChevronDown, ChevronUp,
   GraduationCap, MapPin, Phone, BookOpen, AlertCircle, Loader2,
 } from 'lucide-react'
+import ApplicationTimeline from '@/components/application-timeline'
 
 type AppWithDetails = Application & {
   candidates: (Candidate & { profiles: Profile }) | null
@@ -291,6 +292,18 @@ export default function ApplicationsInboxClient({
                       </a>
                     )}
                   </div>
+                </div>
+
+                {/* Stage timeline */}
+                <div className="px-5 pb-4 pt-1">
+                  <ApplicationTimeline
+                    status={app.status}
+                    appliedAt={app.applied_at}
+                    updatedAt={app.updated_at}
+                    placementDate={app.placement_date}
+                    interview={iv ? { scheduled_at: iv.scheduled_at } : null}
+                    compact
+                  />
                 </div>
 
                 {/* Cover letter */}

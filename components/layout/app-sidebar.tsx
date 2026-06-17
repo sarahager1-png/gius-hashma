@@ -10,7 +10,7 @@ import {
   Settings, LogOut, ClipboardList, UserPlus, Sparkles,
   ShieldCheck, Mail, History, HelpCircle, MessageCircle, Send, UserCog, Inbox,
   FileStack, CalendarDays, BellRing, Upload, ScrollText, MailOpen, Star,
-  Radio, CalendarCheck, GraduationCap,
+  Radio, CalendarCheck, GraduationCap, Route,
 } from 'lucide-react'
 
 interface NavItem {
@@ -96,6 +96,7 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
         { href: '/admin/matches',            label: 'שלבי המיון',      icon: Sparkles        },
         { href: '/admin/interview-slots',    label: 'ראיונות',         icon: CalendarCheck   },
         { href: '/admin/reports',            label: 'המלצות ושיבוצים', icon: BarChart3       },
+        { href: '/admin/pipeline',           label: 'מסלול מועמדות',   icon: Route           },
         { href: '/admin/staffing-needs',     label: 'צרכי הכשרה',      icon: GraduationCap   },
       ],
     },
@@ -140,6 +141,7 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
         { href: '/admin/matches',            label: 'שלבי המיון',      icon: Sparkles        },
         { href: '/admin/interview-slots',    label: 'ראיונות',         icon: CalendarCheck   },
         { href: '/admin/reports',            label: 'המלצות ושיבוצים', icon: BarChart3       },
+        { href: '/admin/pipeline',           label: 'מסלול מועמדות',   icon: Route           },
         { href: '/admin/staffing-needs',     label: 'צרכי הכשרה',      icon: GraduationCap   },
       ],
     },
@@ -178,6 +180,7 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
         { href: '/admin/matches',            label: 'שלבי המיון',      icon: Sparkles        },
         { href: '/admin/interview-slots',    label: 'ראיונות',         icon: CalendarCheck   },
         { href: '/admin/reports',            label: 'המלצות ושיבוצים', icon: BarChart3       },
+        { href: '/admin/pipeline',           label: 'מסלול מועמדות',   icon: Route           },
         { href: '/admin/staffing-needs',     label: 'צרכי הכשרה',      icon: GraduationCap   },
       ],
     },

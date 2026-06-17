@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Briefcase, MapPin, Clock, CheckCircle, XCircle, Eye, Star } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import WithdrawButton from './withdraw-button'
+import ApplicationTimeline from '@/components/application-timeline'
 
 const STATUS_ICONS: Record<string, React.ReactNode> = {
   'ממתינה':  <Clock size={14} />,
@@ -26,8 +27,11 @@ type AppItem = {
   id: string
   status: string
   applied_at: string
+  updated_at?: string | null
+  placement_date?: string | null
   cover_letter: string | null
   survey_token?: string | null
+  interview?: { scheduled_at: string; location: string | null; candidate_confirmed: boolean | null } | null
   jobs?: { title: string; city: string | null; job_type: string | null; institutions?: { institution_name: string } } | null
 }
 
@@ -91,8 +95,9 @@ export default function MyApplicationsPage() {
             const canWithdraw = ['ממתינה', 'נצפתה'].includes(app.status)
             return (
               <div key={app.id}
-                className="rounded-[16px] border flex items-center gap-4 p-5"
+                className="rounded-[16px] border flex flex-col gap-4 p-5"
                 style={{ background: '#fff', borderColor: 'var(--line)', boxShadow: 'var(--shadow-sm)' }}>
+                <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                   style={{ background: 'var(--purple-050)', color: 'var(--purple)' }}>
                   <Briefcase size={18} />
@@ -138,6 +143,17 @@ export default function MyApplicationsPage() {
                       {formatDate(app.applied_at)}
                     </span>
                   </div>
+                </div>
+                </div>
+
+                <div className="pt-3 border-t" style={{ borderColor: 'var(--line)' }}>
+                  <ApplicationTimeline
+                    status={app.status}
+                    appliedAt={app.applied_at}
+                    updatedAt={app.updated_at}
+                    placementDate={app.placement_date}
+                    interview={app.interview}
+                  />
                 </div>
               </div>
             )
