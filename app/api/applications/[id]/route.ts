@@ -80,6 +80,81 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
           service.from('candidates').update({ availability_status: 'משובצת' }).eq('id', app.candidate_id),
         ])
 
+        // ── closure #2: reject the OTHER applicants competing for the SAME job ──
+        // (acceptance sets the job to אוישה directly, bypassing the jobs PATCH cascade)
+        const { data: siblings } = await service
+          .from('applications')
+          .select('id, candidates(profile_id, whatsapp_preference, profiles(full_name, phone))')
+          .eq('job_id', app.job_id)
+          .neq('id', id)
+          .in('status', ['ממתינה', 'נצפתה'])
+        if (siblings?.length) {
+          await service.from('applications')
+            .update({ status: 'נדחתה', rejection_reason: 'המשרה אוישה על ידי מועמדת אחרת' })
+            .eq('job_id', app.job_id).neq('id', id).in('status', ['ממתינה', 'נצפתה'])
+
+          const sibNotifs = siblings.map(s => {
+            const pid = (s.candidates as unknown as { profile_id: string } | null)?.profile_id
+            return pid ? {
+              profile_id: pid,
+              type: 'application_rejected',
+              title: 'תודה על פנייתך',
+              body: `תודה על עניינך ב"${jobTitle}". המשרה אוישה הפעם. נשמח לעזור לך למצוא משרה מתאימה אחרת! 🙏`,
+              related_id: s.id,
+            } : null
+          }).filter(Boolean)
+          if (sibNotifs.length) await service.from('notifications').insert(sibNotifs)
+
+          for (const s of siblings) {
+            const prof = (s.candidates as unknown as { profiles: { full_name: string | null; phone: string | null } } | null)?.profiles
+            const waPref = (s.candidates as unknown as { whatsapp_preference: boolean | null } | null)?.whatsapp_preference
+            if (prof?.phone) {
+              const m = `שלום ${prof.full_name ?? 'מועמדת'}, תודה על פנייתך ל"${jobTitle}". המשרה אוישה הפעם — נשמח לעזור במשרה אחרת! 🙏`
+              void sendExternal({ phone: prof.phone, whatsapp_preference: waPref, waMessage: m, smsMessage: m })
+            }
+          }
+        }
+
+        // ── closure #1: close the placed candidate's OTHER open applications ──
+        // she is now משובצת — no longer an active applicant anywhere else
+        const { data: otherApps } = await service
+          .from('applications')
+          .select('id, jobs(title, institutions(institution_name, profile_id, phone, whatsapp_preference))')
+          .eq('candidate_id', app.candidate_id)
+          .neq('id', id)
+          .in('status', ['ממתינה', 'נצפתה'])
+        if (otherApps?.length) {
+          await service.from('applications')
+            .update({ status: 'בוטלה', rejection_reason: 'המועמדת שובצה במשרה אחרת' })
+            .eq('candidate_id', app.candidate_id).neq('id', id).in('status', ['ממתינה', 'נצפתה'])
+
+          const instNotifs: Record<string, unknown>[] = []
+          for (const o of otherApps) {
+            const inst = (o.jobs as unknown as { title: string; institutions: { institution_name: string; profile_id: string; phone: string | null; whatsapp_preference: boolean | null } | null } | null)
+            const otitle = inst?.title ?? ''
+            const ip = inst?.institutions
+            if (ip?.profile_id) {
+              instNotifs.push({
+                profile_id: ip.profile_id,
+                type: 'application_withdrawn',
+                title: 'מועמדת שובצה במקום אחר',
+                body: `${candidateName} שובצה למשרה אחרת, ולכן מועמדותה ל"${otitle}" נסגרה.`,
+                related_id: o.id,
+              })
+              if (ip.phone) {
+                const m = `עדכון: ${candidateName} שובצה במשרה אחרת, ולכן מועמדותה ל"${otitle}" נסגרה.`
+                void sendExternal({ phone: ip.phone, whatsapp_preference: ip.whatsapp_preference, waMessage: m, smsMessage: m })
+              }
+            }
+          }
+          if (instNotifs.length) await service.from('notifications').insert(instNotifs)
+        }
+
+        // close any pending invitations to her — she's placed
+        void service.from('invitations')
+          .update({ status: 'נדחתה' })
+          .eq('candidate_id', app.candidate_id).eq('status', 'ממתינה')
+
         const { data: admins } = await service
           .from('profiles')
           .select('id, phone, whatsapp_preference')
