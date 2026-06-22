@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendInvitationEmail } from '@/lib/email'
 import { sendExternal } from '@/lib/notify-external'
@@ -24,7 +24,8 @@ export async function POST(request: Request) {
   if (!inst) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   if (!isAdmin) {
-    const { data: ownedInst } = await supabase
+    // Use service client (bypasses RLS) but explicitly check profile_id = caller — safe ownership check
+    const { data: ownedInst } = await service
       .from('institutions').select('id').eq('id', institution_id).eq('profile_id', user.id).single()
     if (!ownedInst) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
       profile_id: cand.profile_id,
       type: 'interview_scheduled',
       title: `הוזמנת לראיון — ${inst.institution_name}`,
-      body: `${jobTitle}${dt ? ' · ' + dt : ''}. ניתן לאשר או לסרב בדשבורד.`,
+      body: `${jobTitle}${dt ? ' · ' + dt : ''}. ניתן לאשר או לסרב ישירות מדף ההתראות.`,
       related_id: inv.id,
     })
     const candidateName = (cand.profiles as unknown as { full_name: string | null } | null)?.full_name ?? 'מועמדת'
