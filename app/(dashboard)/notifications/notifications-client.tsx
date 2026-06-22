@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Bell, BellOff, Check, CheckCheck } from 'lucide-react'
+import { Bell, BellOff, Check, CheckCheck, X, Calendar } from 'lucide-react'
 import { Notification } from '@/lib/types'
 
 function fmtDt(iso: string) {
@@ -47,6 +47,8 @@ interface Props {
 export default function NotificationsClient({ notifications: initial }: Props) {
   const [items, setItems] = useState<Notification[]>(initial)
   const [marking, setMarking] = useState(false)
+  const [responding, setResponding] = useState<string | null>(null)
+  const [respondedMap, setRespondedMap] = useState<Record<string, 'התקבלה' | 'נדחתה'>>({})
 
   const unreadCount = items.filter(n => !n.read).length
 
@@ -68,6 +70,31 @@ export default function NotificationsClient({ notifications: initial }: Props) {
       body: JSON.stringify({ all: true }),
     })
     setMarking(false)
+  }
+
+  async function respondInvitation(notifId: string, invId: string, status: 'התקבלה' | 'נדחתה') {
+    setResponding(notifId)
+    try {
+      await fetch(`/api/invitations/${invId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status,
+          ...(status === 'נדחתה' ? { rejection_reason: 'המשרה אינה מתאימה לי' } : {}),
+        }),
+      })
+      setRespondedMap(prev => ({ ...prev, [notifId]: status }))
+      if (!items.find(n => n.id === notifId)?.read) {
+        setItems(prev => prev.map(n => n.id === notifId ? { ...n, read: true } : n))
+        await fetch('/api/notifications', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: notifId }),
+        })
+      }
+    } finally {
+      setResponding(null)
+    }
   }
 
   const groups = groupByDate(items)
@@ -118,62 +145,102 @@ export default function NotificationsClient({ notifications: initial }: Props) {
               </div>
 
               <div className="space-y-2">
-                {group.items.map(n => (
-                  <div
-                    key={n.id}
-                    className="flex items-start gap-3 rounded-[12px] border p-4 transition-all"
-                    style={{
-                      background: n.read ? '#fff' : '#F5F3FF',
-                      borderColor: n.read ? 'var(--line)' : 'var(--purple)',
-                      borderRight: `3px solid ${n.read ? 'var(--line)' : 'var(--purple)'}`,
-                    }}
-                  >
+                {group.items.map(n => {
+                  const isInvite = n.type === 'interview_scheduled' && !!n.related_id
+                  const responded = respondedMap[n.id]
+                  const isResponding = responding === n.id
+                  return (
                     <div
-                      className="flex items-center justify-center rounded-full shrink-0 mt-0.5"
+                      key={n.id}
+                      className="flex items-start gap-3 rounded-[12px] border p-4 transition-all"
                       style={{
-                        width: 32,
-                        height: 32,
-                        background: n.read ? '#F4F4F5' : '#EDE9FE',
-                        color: n.read ? 'var(--ink-4)' : 'var(--purple)',
+                        background: n.read ? '#fff' : '#F5F3FF',
+                        borderColor: n.read ? 'var(--line)' : 'var(--purple)',
+                        borderRight: `3px solid ${n.read ? 'var(--line)' : 'var(--purple)'}`,
                       }}
                     >
-                      <Bell size={15} />
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className="text-[14px] font-bold"
-                        style={{ color: n.read ? 'var(--ink-3)' : 'var(--ink)' }}
-                      >
-                        {n.title}
-                      </p>
-                      {n.body && (
-                        <p className="text-[13px] mt-0.5" style={{ color: 'var(--ink-3)' }}>
-                          {n.body}
-                        </p>
-                      )}
-                      <p className="text-[11px] mt-1.5" style={{ color: 'var(--ink-4)' }}>
-                        {fmtDt(n.created_at)}
-                      </p>
-                    </div>
-
-                    {!n.read && (
-                      <button
-                        onClick={() => markOne(n.id)}
-                        title="סמן כנקרא"
-                        className="flex items-center justify-center rounded-full shrink-0 transition-all hover:opacity-80"
+                      <div
+                        className="flex items-center justify-center rounded-full shrink-0 mt-0.5"
                         style={{
-                          width: 28,
-                          height: 28,
-                          background: '#EDE9FE',
-                          color: 'var(--purple)',
+                          width: 32,
+                          height: 32,
+                          background: isInvite ? '#EDE9FE' : (n.read ? '#F4F4F5' : '#EDE9FE'),
+                          color: isInvite ? 'var(--purple)' : (n.read ? 'var(--ink-4)' : 'var(--purple)'),
                         }}
                       >
-                        <Check size={13} />
-                      </button>
-                    )}
-                  </div>
-                ))}
+                        {isInvite ? <Calendar size={15} /> : <Bell size={15} />}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className="text-[14px] font-bold"
+                          style={{ color: n.read ? 'var(--ink-3)' : 'var(--ink)' }}
+                        >
+                          {n.title}
+                        </p>
+                        {n.body && (
+                          <p className="text-[13px] mt-0.5" style={{ color: 'var(--ink-3)' }}>
+                            {n.body}
+                          </p>
+                        )}
+                        <p className="text-[11px] mt-1.5" style={{ color: 'var(--ink-4)' }}>
+                          {fmtDt(n.created_at)}
+                        </p>
+
+                        {/* Action buttons for interview invitation notifications */}
+                        {isInvite && !responded && (
+                          <div className="flex gap-2 mt-3 flex-wrap">
+                            <button
+                              onClick={() => respondInvitation(n.id, n.related_id!, 'התקבלה')}
+                              disabled={!!isResponding}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12.5px] font-bold transition-all"
+                              style={{ background: '#E4F6ED', color: '#1A7A4A', opacity: isResponding ? 0.6 : 1 }}
+                            >
+                              <Check size={12} />קבלת ההזמנה
+                            </button>
+                            <button
+                              onClick={() => respondInvitation(n.id, n.related_id!, 'נדחתה')}
+                              disabled={!!isResponding}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12.5px] font-bold transition-all"
+                              style={{ background: '#F4F4F5', color: '#71717A', opacity: isResponding ? 0.6 : 1 }}
+                            >
+                              <X size={12} />המשרה אינה מתאימה לי
+                            </button>
+                          </div>
+                        )}
+                        {isInvite && responded && (
+                          <div className="mt-2">
+                            <span
+                              className="inline-flex items-center gap-1.5 text-[12px] font-bold px-2.5 py-1 rounded-full"
+                              style={responded === 'התקבלה'
+                                ? { background: '#E4F6ED', color: '#1A7A4A' }
+                                : { background: '#F4F4F5', color: '#71717A' }}
+                            >
+                              <Check size={11} />
+                              {responded === 'התקבלה' ? 'ההזמנה התקבלה' : 'המשרה אינה מתאימה'}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {!n.read && (
+                        <button
+                          onClick={() => markOne(n.id)}
+                          title="סמן כנקרא"
+                          className="flex items-center justify-center rounded-full shrink-0 transition-all hover:opacity-80"
+                          style={{
+                            width: 28,
+                            height: 28,
+                            background: '#EDE9FE',
+                            color: 'var(--purple)',
+                          }}
+                        >
+                          <Check size={13} />
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           ))}
