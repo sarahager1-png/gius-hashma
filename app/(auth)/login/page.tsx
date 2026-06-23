@@ -1,4 +1,6 @@
-'use client'
+﻿'use client'
+
+export const dynamic = 'force-dynamic'
 
 import React, { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -275,9 +277,9 @@ function LoginPageInner() {
           font-size:12px;color:rgba(8,24,44,.45);margin-bottom:12px;line-height:1.5;
           padding-right:42px;
         }
-        .lg-code-row{display:flex;gap:8px;}
+        .lg-code-row{display:flex;flex-direction:column;gap:8px;}
         .lg-code-input{
-          flex:1;height:50px;border-radius:12px;border:1.5px solid rgba(8,24,44,.16);
+          width:100%;height:50px;border-radius:12px;border:1.5px solid rgba(8,24,44,.16);
           padding:0 14px;font-size:22px;font-weight:800;letter-spacing:.22em;
           text-align:center;outline:none;background:rgba(255,255,255,.7);
           color:rgba(8,24,44,.85);font-family:monospace;
@@ -286,7 +288,7 @@ function LoginPageInner() {
         .lg-code-input::placeholder{letter-spacing:.14em;font-size:14px;font-weight:500;color:rgba(8,24,44,.3);}
         .lg-code-input:focus{border-color:rgba(0,140,175,.65);background:#fff;box-shadow:0 0 0 3px rgba(0,140,175,.12);}
         .lg-code-btn{
-          height:50px;padding:0 20px;border-radius:12px;border:none;
+          width:100%;height:50px;padding:0 20px;border-radius:12px;border:none;
           background:linear-gradient(135deg,#007A8C,#00A4BC);
           color:#fff;font-size:14px;font-weight:700;cursor:pointer;
           transition:all .22s;font-family:'Heebo',system-ui,sans-serif;
@@ -420,8 +422,8 @@ function LoginPageInner() {
             </div>
           </div>
 
-          <div className="lg-form-footer">
-            © 2026 רשת חינוך חב״ד · פיתוח: שרה הגר&nbsp;<a href="tel:0503339770" style={{ color:'inherit', textDecoration:'none' }}>0503339770</a>
+          <div className="lg-form-footer" style={{ display: 'flex', justifyContent: 'center' }}>
+            <img src="/logo-mefateach.png" alt="מפתח · שרה הגר" style={{ width: 'auto', maxWidth: 140, height: 'auto', objectFit: 'contain', opacity: 0.85 }} />
           </div>
         </div>
       </div>

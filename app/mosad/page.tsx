@@ -138,9 +138,9 @@ export default function MosadLanding() {
         .mo-card{
           width:100%;max-width:400px;
           background:rgba(255,255,255,.04);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);
-          border:1px solid rgba(255,255,255,.12);border-radius:28px;padding:28px 28px 24px;
+          border:1px solid rgba(255,255,255,.12);border-radius:28px;padding:28px 28px 28px;
           box-shadow:0 24px 64px rgba(0,0,0,.48),0 0 0 1px rgba(0,180,204,.07),inset 0 1px 0 rgba(255,255,255,.1);
-          position:relative;overflow:hidden;
+          position:relative;
         }
         .mo-card::before{content:'';position:absolute;top:-55px;left:50%;transform:translateX(-50%);width:200px;height:110px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,140,160,.45) 0%,transparent 70%);pointer-events:none;}
         .mo-card-bar{height:2px;width:100%;background:linear-gradient(90deg,rgba(0,180,204,.7),rgba(201,168,76,.6),rgba(123,90,196,.5));border-radius:1px;margin-bottom:22px;}
@@ -176,9 +176,9 @@ export default function MosadLanding() {
         .mo-code-icon{width:30px;height:30px;border-radius:9px;flex-shrink:0;background:linear-gradient(135deg,rgba(0,122,140,.8),rgba(0,164,188,.8));display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,140,175,.35);}
         .mo-code-title{font-size:13.5px;font-weight:800;color:rgba(150,230,240,.9);}
         .mo-code-hint{font-size:11.5px;color:rgba(255,255,255,.38);margin-bottom:11px;line-height:1.5;padding-right:40px;}
-        .mo-code-row{display:flex;gap:8px;}
+        .mo-code-row{display:flex;flex-direction:column;gap:8px;}
         .mo-code-input{
-          flex:1;height:46px;border-radius:11px;
+          width:100%;height:46px;border-radius:11px;
           border:1.5px solid rgba(255,255,255,.15);padding:0 12px;
           font-size:20px;font-weight:800;letter-spacing:.22em;text-align:center;outline:none;
           background:rgba(255,255,255,.08);color:#fff;font-family:monospace;
@@ -187,7 +187,7 @@ export default function MosadLanding() {
         .mo-code-input::placeholder{letter-spacing:.14em;font-size:13px;font-weight:500;color:rgba(255,255,255,.25);}
         .mo-code-input:focus{border-color:rgba(0,180,204,.6);background:rgba(255,255,255,.12);box-shadow:0 0 0 3px rgba(0,180,204,.15);}
         .mo-code-btn{
-          height:46px;padding:0 16px;border-radius:11px;border:none;
+          width:100%;height:46px;padding:0 16px;border-radius:11px;border:none;
           background:linear-gradient(135deg,#007A8C,#00A4BC);color:#fff;
           font-size:13.5px;font-weight:700;cursor:pointer;transition:all .22s;
           font-family:'Heebo',system-ui,sans-serif;box-shadow:0 3px 12px rgba(0,140,175,.3);white-space:nowrap;
