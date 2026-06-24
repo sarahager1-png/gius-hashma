@@ -76,7 +76,7 @@ export async function POST(request: Request) {
         day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
       }) : ''
       const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
-      const inviteMsg = `שלום ${candidateName}! 😊 ${inst.institution_name} מזמינה אותך לראיון למשרת "${jobTitle}"${dtStr ? ' · ' + dtStr : ''}. לפרטים ולאישור: ${appUrl}/my-invitations`
+      const inviteMsg = `שלום ${candidateName}! 😊 ${inst.institution_name} מזמינה אותך לראיון למשרת "${jobTitle}"${dtStr ? ' · ' + dtStr : ''}. לאישור, ולדחייה אם המשרה לא רלוונטית: ${appUrl}/my-invitations`
       void sendExternal({ phone: candidatePhone, whatsapp_preference: candidateWaPref, waMessage: inviteMsg, smsMessage: inviteMsg })
     }
   }

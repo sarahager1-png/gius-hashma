@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Calendar, Building2, MapPin, Check, X, Clock, CheckCircle, XCircle, MessageCircle } from 'lucide-react'
+import { Calendar, Building2, MapPin, Check, X, Clock, CheckCircle, XCircle, MessageCircle, Ban } from 'lucide-react'
 
 interface Invitation {
   id: string
@@ -13,9 +13,10 @@ interface Invitation {
 }
 
 const STATUS_CFG: Record<string, { bg: string; color: string; icon: React.ReactNode; label: string }> = {
-  'ממתינה':  { bg: '#EDE9FE', color: 'var(--purple)', icon: <Clock size={13} />,       label: 'ממתינה לתגובה' },
-  'התקבלה': { bg: '#E4F6ED', color: '#1A7A4A', icon: <CheckCircle size={13} />, label: 'קיבלת' },
-  'נדחתה':  { bg: '#F4F4F5', color: '#71717A', icon: <XCircle size={13} />,    label: 'לא יכולת' },
+  'ממתינה':        { bg: '#EDE9FE', color: 'var(--purple)', icon: <Clock size={13} />,       label: 'ממתינה לתגובה' },
+  'התקבלה':       { bg: '#E4F6ED', color: '#1A7A4A', icon: <CheckCircle size={13} />, label: 'קיבלת' },
+  'נדחתה':        { bg: '#F4F4F5', color: '#71717A', icon: <XCircle size={13} />,    label: 'לא יכולת כרגע' },
+  'לא מעוניינת':  { bg: '#FEF2F2', color: '#DC2626', icon: <Ban size={13} />,        label: 'לא מעוניינת' },
 }
 
 function fmtDate(iso: string) {
@@ -51,13 +52,14 @@ export default function MyInvitationsClient({ invitations: initial }: Props) {
   const [invitations, setInvitations] = useState(initial)
   const [responding, setResponding] = useState<string | null>(null)
   const [declinedIds, setDeclinedIds] = useState<Set<string>>(new Set())
-  const [decliningId, setDecliningId] = useState<string | null>(null)
+  // 'temp' = showing "לא יכולה כרגע" sub-form, 'perm' = confirming "לא מעוניינת"
+  const [decliningId, setDecliningId] = useState<{ id: string; mode: 'temp' | 'perm' } | null>(null)
   const [declineReason, setDeclineReason] = useState('')
 
   const pending  = invitations.filter(i => i.status === 'ממתינה').length
   const accepted = invitations.filter(i => i.status === 'התקבלה').length
 
-  async function respond(invId: string, status: 'התקבלה' | 'נדחתה', reason?: string) {
+  async function respond(invId: string, status: 'התקבלה' | 'נדחתה' | 'לא מעוניינת', reason?: string) {
     setResponding(invId)
     await fetch(`/api/invitations/${invId}`, {
       method: 'PATCH',
@@ -91,6 +93,7 @@ export default function MyInvitationsClient({ invitations: initial }: Props) {
           {invitations.map(inv => {
             const sc  = STATUS_CFG[inv.status] ?? STATUS_CFG['נדחתה']
             const isPending = inv.status === 'ממתינה'
+            const isThisDeclining = decliningId?.id === inv.id
 
             return (
               <div key={inv.id}
@@ -141,25 +144,32 @@ export default function MyInvitationsClient({ invitations: initial }: Props) {
 
                 {isPending && (
                   <div className="pt-3" style={{ borderTop: '1px solid var(--line-soft)' }}>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => respond(inv.id, 'התקבלה')}
-                        disabled={responding === inv.id}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[8px] text-[13px] font-bold transition-all"
-                        style={{ background: '#E4F6ED', color: '#1A7A4A' }}>
-                        <Check size={14} />קבלת ההזמנה
-                      </button>
-                      <button
-                        onClick={() => decliningId === inv.id ? setDecliningId(null) : setDecliningId(inv.id)}
-                        disabled={responding === inv.id}
-                        className="flex-1 py-2 rounded-[8px] text-[13px] font-bold transition-all"
-                        style={{ background: decliningId === inv.id ? '#FEF2F2' : '#F4F4F5', color: decliningId === inv.id ? '#DC2626' : '#71717A' }}>
-                        <X size={13} className="inline ml-1" />לא יכולה כרגע
-                      </button>
-                    </div>
+                    {/* Primary action row */}
+                    {!isThisDeclining && (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => respond(inv.id, 'התקבלה')}
+                          disabled={responding === inv.id}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[8px] text-[13px] font-bold transition-all"
+                          style={{ background: '#E4F6ED', color: '#1A7A4A' }}>
+                          <Check size={14} />קבלת ההזמנה
+                        </button>
+                        <button
+                          onClick={() => { setDecliningId({ id: inv.id, mode: 'temp' }); setDeclineReason('') }}
+                          disabled={responding === inv.id}
+                          className="flex-1 py-2 rounded-[8px] text-[13px] font-bold transition-all"
+                          style={{ background: '#FEF2F2', color: '#DC2626' }}>
+                          <X size={13} className="inline ml-1" />דחיית המשרה
+                        </button>
+                      </div>
+                    )}
 
-                    {decliningId === inv.id && (
-                      <div className="mt-3">
+                    {/* Decline mode selector */}
+                    {isThisDeclining && !decliningId?.mode && null}
+
+                    {/* "לא יכולה כרגע" — temporary decline with optional reason */}
+                    {isThisDeclining && decliningId?.mode === 'temp' && (
+                      <div>
                         <label className="text-[12px] font-semibold block mb-1.5" style={{ color: 'var(--ink-3)' }}>
                           סיבת הדחייה (אופציונלי)
                         </label>
@@ -181,6 +191,13 @@ export default function MyInvitationsClient({ invitations: initial }: Props) {
                             {responding === inv.id ? '...' : 'אשרי דחייה'}
                           </button>
                           <button
+                            onClick={() => setDecliningId({ id: inv.id, mode: 'perm' })}
+                            disabled={responding === inv.id}
+                            className="flex-1 py-2 rounded-[8px] text-[13px] font-bold"
+                            style={{ background: '#FEF2F2', color: '#DC2626' }}>
+                            <Ban size={12} className="inline ml-1" />לא מעוניינת בכלל
+                          </button>
+                          <button
                             onClick={() => { setDecliningId(null); setDeclineReason('') }}
                             className="px-4 py-2 rounded-[8px] text-[12px] font-semibold"
                             style={{ color: 'var(--ink-3)' }}>
@@ -189,10 +206,40 @@ export default function MyInvitationsClient({ invitations: initial }: Props) {
                         </div>
                       </div>
                     )}
+
+                    {/* "לא מעוניינת" — permanent, confirm before sending */}
+                    {isThisDeclining && decliningId?.mode === 'perm' && (
+                      <div className="rounded-[12px] p-4" style={{ background: '#FEF2F2', border: '1px solid #FECACA' }}>
+                        <div className="flex items-start gap-2 mb-3">
+                          <Ban size={16} style={{ color: '#DC2626', marginTop: 2, flexShrink: 0 }} />
+                          <div>
+                            <p className="text-[13px] font-bold" style={{ color: '#DC2626' }}>לא מעוניינת בהצעה זו</p>
+                            <p className="text-[12px] mt-0.5" style={{ color: '#7F1D1D' }}>
+                              ההצעה לא תחזור אליך. המוסד יקבל הודעה שאינך מעוניינת.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => respond(inv.id, 'לא מעוניינת')}
+                            disabled={responding === inv.id}
+                            className="flex-1 py-2 rounded-[8px] text-[13px] font-bold"
+                            style={{ background: '#DC2626', color: '#fff' }}>
+                            {responding === inv.id ? '...' : 'אשרי — לא מעוניינת'}
+                          </button>
+                          <button
+                            onClick={() => setDecliningId({ id: inv.id, mode: 'temp' })}
+                            className="px-4 py-2 rounded-[8px] text-[12px] font-semibold"
+                            style={{ color: '#71717A', background: '#F4F4F5' }}>
+                            חזרה
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {/* כפתור WA למוסד אחרי דחייה */}
+                {/* כפתור WA למוסד אחרי דחייה זמנית */}
                 {inv.status === 'נדחתה' && declinedIds.has(inv.id) && (() => {
                   const waLink = buildInstWaLink(inv)
                   if (!waLink) return null
