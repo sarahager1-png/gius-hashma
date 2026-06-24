@@ -1,6 +1,4 @@
-﻿'use client'
-
-export const dynamic = 'force-dynamic'
+'use client'
 
 import React, { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -12,11 +10,8 @@ import { KeyRound, Sparkles, ClipboardCheck, HeartHandshake } from 'lucide-react
 function LoginPageInner() {
   const supabase = createClient()
   const router   = useRouter()
-  const [loading, setLoading]         = useState(false)
-  const [formError, setFormError]     = useState('')
-  const [accessCode, setAccessCode]   = useState('')
-  const [codeLoading, setCodeLoading] = useState(false)
-  const [codeError, setCodeError]     = useState('')
+  const [loading, setLoading]     = useState(false)
+  const [formError, setFormError] = useState('')
   const searchParams = useSearchParams()
 
   const errParam = searchParams.get('error')
@@ -48,23 +43,6 @@ function LoginPageInner() {
       },
     })
     if (error) { setFormError('שגיאה בכניסה עם Google'); setLoading(false) }
-  }
-
-  async function redeemCode() {
-    if (!accessCode.trim()) return
-    setCodeLoading(true); setCodeError('')
-    const res = await fetch('/api/auth/redeem-access-code', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: accessCode.trim() }),
-    })
-    const data = await res.json()
-    setCodeLoading(false)
-    if (data.url) {
-      window.location.href = data.url
-    } else {
-      setCodeError(data.error ?? 'קוד שגוי או שפג')
-    }
   }
 
   return (
@@ -251,53 +229,6 @@ function LoginPageInner() {
 
         .lg-error{margin-top:10px;padding:10px 14px;border-radius:12px;font-size:13px;font-weight:600;color:#FCA5A5;background:rgba(200,60,60,.14);border:1px solid rgba(200,60,60,.25);text-align:center;animation:fadeUp .3s ease both;}
 
-        /* ── Code section — prominent ───────────────────────── */
-        .lg-code-section{
-          margin-top:16px;
-          border-radius:16px;
-          border:1.5px solid rgba(0,140,175,.28);
-          background:rgba(0,140,175,.06);
-          padding:16px 18px;
-          animation:fadeIn .4s .4s both;
-        }
-        .lg-code-header{
-          display:flex;align-items:center;gap:10px;
-          margin-bottom:6px;
-        }
-        .lg-code-icon{
-          width:32px;height:32px;border-radius:10px;flex-shrink:0;
-          background:linear-gradient(135deg,#007A8C,#00A4BC);
-          display:flex;align-items:center;justify-content:center;
-          box-shadow:0 3px 10px rgba(0,140,175,.3);
-        }
-        .lg-code-title{
-          font-size:14px;font-weight:800;color:rgba(0,100,130,.9);letter-spacing:-.01em;
-        }
-        .lg-code-hint{
-          font-size:12px;color:rgba(8,24,44,.45);margin-bottom:12px;line-height:1.5;
-          padding-right:42px;
-        }
-        .lg-code-row{display:flex;flex-direction:column;gap:8px;}
-        .lg-code-input{
-          width:100%;height:50px;border-radius:12px;border:1.5px solid rgba(8,24,44,.16);
-          padding:0 14px;font-size:22px;font-weight:800;letter-spacing:.22em;
-          text-align:center;outline:none;background:rgba(255,255,255,.7);
-          color:rgba(8,24,44,.85);font-family:monospace;
-          transition:border-color .18s,background .18s;text-transform:uppercase;
-        }
-        .lg-code-input::placeholder{letter-spacing:.14em;font-size:14px;font-weight:500;color:rgba(8,24,44,.3);}
-        .lg-code-input:focus{border-color:rgba(0,140,175,.65);background:#fff;box-shadow:0 0 0 3px rgba(0,140,175,.12);}
-        .lg-code-btn{
-          width:100%;height:50px;padding:0 20px;border-radius:12px;border:none;
-          background:linear-gradient(135deg,#007A8C,#00A4BC);
-          color:#fff;font-size:14px;font-weight:700;cursor:pointer;
-          transition:all .22s;font-family:'Heebo',system-ui,sans-serif;
-          box-shadow:0 3px 12px rgba(0,140,175,.3);white-space:nowrap;
-        }
-        .lg-code-btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}
-        .lg-code-btn:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(0,140,175,.4);}
-        .lg-code-error{margin-bottom:10px;padding:8px 12px;border-radius:10px;font-size:12.5px;font-weight:600;color:#FCA5A5;background:rgba(200,60,60,.12);border:1px solid rgba(200,60,60,.22);text-align:center;}
-
         .lg-form-footer{position:relative;z-index:2;text-align:center;padding:0 0 16px;font-size:10.5px;color:rgba(26,46,66,.3);letter-spacing:.04em;flex-shrink:0;}
       `}</style>
 
@@ -369,7 +300,7 @@ function LoginPageInner() {
                   <span className="lg-eyebrow-text">כניסה למערכת</span>
                 </div>
                 <h1 className="lg-heading">ברוכה הבאה,</h1>
-                <p className="lg-sub">רשומה כבר? היכנסי עם Google.פעם ראשונה? הגישי מועמדות.</p>
+                <p className="lg-sub">רשומה כבר? היכנסי עם Google. פעם ראשונה? הגישי מועמדות.</p>
               </div>
               <div className="lg-tabs">
                 <button className="lg-tab active">מועמדת</button>
@@ -389,41 +320,11 @@ function LoginPageInner() {
               <div className="lg-register">
                 <a href="/register/candidate">הגשת מועמדות חדשה ←</a>
               </div>
-
-              {/* Code login — prominent card */}
-              <div className="lg-code-section">
-                <div className="lg-code-header">
-                  <div className="lg-code-icon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="11" width="18" height="11" rx="2"/>
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                    </svg>
-                  </div>
-                  <span className="lg-code-title">קיבלתי קוד כניסה ב-WhatsApp</span>
-                </div>
-                <div className="lg-code-hint">הזיני את הקוד שקיבלת על מנת להיכנס</div>
-                {codeError && <div className="lg-code-error">{codeError}</div>}
-                <div className="lg-code-row">
-                  <input
-                    type="text"
-                    value={accessCode}
-                    onChange={e => setAccessCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}
-                    onKeyDown={e => e.key === 'Enter' && accessCode.length === 6 && redeemCode()}
-                    placeholder="XXXXXX"
-                    maxLength={6}
-                    dir="ltr"
-                    className="lg-code-input"
-                  />
-                  <button onClick={redeemCode} disabled={codeLoading || accessCode.length !== 6} className="lg-code-btn">
-                    {codeLoading ? '...' : 'כנסי'}
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
 
-          <div className="lg-form-footer" style={{ display: 'flex', justifyContent: 'center' }}>
-            <img src="/logo-mefateach.png" alt="מפתח · שרה הגר" style={{ width: 'auto', maxWidth: 140, height: 'auto', objectFit: 'contain', opacity: 0.85 }} />
+          <div className="lg-form-footer">
+            © 2026 רשת חינוך חב״ד · פיתוח: שרה הגר&nbsp;<a href="tel:0503339770" style={{ color:'inherit', textDecoration:'none' }}>0503339770</a>
           </div>
         </div>
       </div>
