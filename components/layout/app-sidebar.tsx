@@ -411,7 +411,7 @@ export default function AppSidebar({
             borderTop: '1px solid rgba(255,255,255,.08)',
           }}
         >
-          <img src="/logo-mefateach.png" alt="מפתח · שרה הגר" style={{ width: 'auto', maxWidth: 140, height: 'auto', objectFit: 'contain', opacity: 0.85 }} />
+          בנוי ופיתוח: שרה הגר · 0503339770
         </a>
         <button
           onClick={signOut}
