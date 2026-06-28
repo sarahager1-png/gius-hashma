@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+
+export const dynamic = 'force-dynamic'
 import Providers from './providers'
 import InstallPwa from '@/components/layout/install-pwa'
 

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
@@ -411,8 +411,7 @@ export default function AppSidebar({
             borderTop: '1px solid rgba(255,255,255,.08)',
           }}
         >
-          פיתוח ובניית אתר: שרה הגר
-          <span style={{ display: 'block', color: 'rgba(0,212,232,.6)', fontSize: '10px' }}>0503339770</span>
+          <img src="/logo-mefateach.png" alt="מפתח · שרה הגר" style={{ width: 'auto', maxWidth: 140, height: 'auto', objectFit: 'contain', opacity: 0.85 }} />
         </a>
         <button
           onClick={signOut}

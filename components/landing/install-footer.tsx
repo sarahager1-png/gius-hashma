@@ -66,7 +66,10 @@ export default function InstallFooter() {
 
       <div style={{ textAlign: 'center', borderTop: '1px solid var(--line-soft)', paddingTop: '16px' }}>
         <p style={{ margin: '0 0 4px', fontSize: '12px', color: 'var(--ink-4)' }}>
-          © כל הזכויות שמורות לשרה הגר
+          בנוי ופיתוח: שרה הגר · 0503339770
+        </p>
+        <p style={{ margin: '0 0 4px', fontSize: '12px', color: 'var(--ink-4)' }}>
+          יעוץ ארגוני | פתרונות דיגיטליים · מהבנת הארגון לפתרון שעובד.
         </p>
         <a href={WA_LINK} target="_blank" rel="noreferrer"
           style={{ fontSize: '12px', color: '#25D366', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>

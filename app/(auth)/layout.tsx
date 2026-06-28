@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 
+export const dynamic = 'force-dynamic'
+
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <>
@@ -11,26 +13,10 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
 
 function DevCredit() {
   return (
-    <a
-      href="https://wa.me/972503339770"
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{
-        position: 'fixed',
-        bottom: '14px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        fontSize: '11px',
-        color: 'rgba(0,0,0,.35)',
-        textDecoration: 'none',
-        textAlign: 'center',
-        whiteSpace: 'nowrap',
-        zIndex: 50,
-        lineHeight: 1.5,
-      }}
-    >
-      פיתוח ובניית אתר: שרה הגר ·{' '}
-      <span style={{ color: '#00A7B5' }}>0503339770</span>
-    </a>
+    <div style={{ position: 'fixed', bottom: '14px', left: '50%', transform: 'translateX(-50%)', zIndex: 50 }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/logo-mefateach.png" alt="מפתח · שרה הגר"
+        style={{ width: 'auto', maxWidth: 140, height: 'auto', objectFit: 'contain', opacity: 0.85 }} />
+    </div>
   )
 }

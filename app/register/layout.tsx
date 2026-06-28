@@ -24,6 +24,7 @@ export default function RegisterLayout({ children }: { children: ReactNode }) {
       >
         פיתוח ובניית אתר: שרה הגר ·{' '}
         <span style={{ color: '#00A7B5' }}>0503339770</span>
+        <span style={{ display: 'block', marginTop: '2px' }}>יעוץ ארגוני | פתרונות דיגיטליים · מהבנת הארגון לפתרון שעובד.</span>
       </a>
     </>
   )
