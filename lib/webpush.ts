@@ -5,10 +5,18 @@ import { isShabbatOrChag, isQuietHours } from '@/lib/shabbat'
 // Generate once with: npx web-push generate-vapid-keys
 const VAPID_PUBLIC  = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY  ?? ''
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY             ?? ''
-const VAPID_EMAIL   = process.env.VAPID_EMAIL                   ?? 'mailto:admin@example.com'
+const RAW_EMAIL     = process.env.VAPID_EMAIL                   ?? 'admin@example.com'
+
+// web-push requires the VAPID subject to be a mailto:/https: URL.
+// A bare email (e.g. VAPID_EMAIL=noreply@giuus.vercel.app) would throw at build.
+const VAPID_SUBJECT = /^(mailto:|https?:)/.test(RAW_EMAIL) ? RAW_EMAIL : `mailto:${RAW_EMAIL}`
 
 if (VAPID_PUBLIC && VAPID_PRIVATE) {
-  webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC, VAPID_PRIVATE)
+  try {
+    webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE)
+  } catch (e) {
+    console.error('[webpush] invalid VAPID config, push disabled:', e)
+  }
 }
 
 export interface PushSubscriptionRecord {
