@@ -31,17 +31,25 @@ export async function GET() {
       activeJobIds.length > 0
         ? service.from('applications').select('job_id, candidate_id').in('job_id', activeJobIds)
         : Promise.resolve({ data: [] }),
-      service.from('invitations').select('job_id, candidate_id').eq('institution_id', institution.id),
+      service.from('invitations').select('job_id, candidate_id, status').eq('institution_id', institution.id),
       service.from('match_dismissals').select('candidate_id, job_id').eq('institution_id', institution.id),
     ])
 
-  // applications + dismissals are hidden; invitations still shown (with wasInvited flag)
+  // applications + dismissals + "לא מעוניינת" invitations are hidden completely
+  // other invitations still shown (with wasInvited flag)
+  const notInterestedInvites = (existingInvites ?? []).filter(
+    (i: { status: string }) => i.status === 'לא מעוניינת'
+  )
+  const otherInvites = (existingInvites ?? []).filter(
+    (i: { status: string }) => i.status !== 'לא מעוניינת'
+  )
   const skipPairs = new Set([
     ...(existingApps ?? []).map((a: { job_id: string; candidate_id: string }) => `${a.job_id}:${a.candidate_id}`),
     ...(dismissed ?? []).map((d: { job_id: string; candidate_id: string }) => `${d.job_id}:${d.candidate_id}`),
+    ...notInterestedInvites.map((i: { job_id: string; candidate_id: string }) => `${i.job_id}:${i.candidate_id}`),
   ])
   const invitedPairs = new Set(
-    (existingInvites ?? []).map((i: { job_id: string; candidate_id: string }) => `${i.job_id}:${i.candidate_id}`)
+    otherInvites.map((i: { job_id: string; candidate_id: string }) => `${i.job_id}:${i.candidate_id}`)
   )
 
   const matches: {

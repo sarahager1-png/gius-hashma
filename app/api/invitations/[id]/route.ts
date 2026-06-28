@@ -43,7 +43,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!cand) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { status, rejection_reason } = await request.json()
-  if (!['התקבלה', 'נדחתה'].includes(status))
+  if (!['התקבלה', 'נדחתה', 'לא מעוניינת'].includes(status))
     return NextResponse.json({ error: 'invalid status' }, { status: 400 })
 
   const { data: inv } = await service
@@ -111,8 +111,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
   }
 
-  // if declined → notify institution with reason
-  if (status === 'נדחתה') {
+  // if declined or permanently not interested → notify institution
+  if (status === 'נדחתה' || status === 'לא מעוניינת') {
     const [instRes, candRes, jobRes] = await Promise.all([
       service.from('institutions').select('profile_id, phone, whatsapp_preference').eq('id', inv.institution_id).single(),
       service.from('candidates').select('profiles(full_name)').eq('id', cand.id).single(),
@@ -123,18 +123,23 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const instWaPref = instRes.data?.whatsapp_preference
     const candidateName = (candRes.data?.profiles as unknown as { full_name: string | null } | null)?.full_name ?? 'מועמדת'
     const jobTitle = jobRes.data?.title ?? ''
+    const isPermanent = status === 'לא מעוניינת'
     const reasonSuffix = rejection_reason ? ` סיבה: ${rejection_reason}` : ''
     if (instProfileId) {
       await service.from('notifications').insert({
         profile_id: instProfileId,
         type: 'invitation_declined',
-        title: `${candidateName} דחתה את ההזמנה`,
-        body: `המועמדת דחתה את ההזמנה לראיון למשרת "${jobTitle}".${reasonSuffix}`,
+        title: isPermanent ? `${candidateName} לא מעוניינת בהצעה` : `${candidateName} דחתה את ההזמנה`,
+        body: isPermanent
+          ? `המועמדת ציינה שאינה מעוניינת במשרת "${jobTitle}". ההצעה לא תוצג לה שוב.`
+          : `המועמדת דחתה את ההזמנה לראיון למשרת "${jobTitle}".${reasonSuffix}`,
         related_id: inv.id,
       })
     }
     if (instPhone) {
-      const msg = `${candidateName} דחתה את ההזמנה לראיון למשרת "${jobTitle}".${reasonSuffix} ניתן להזמין מועמדת אחרת: giuus.vercel.app/institution/candidates`
+      const msg = isPermanent
+        ? `${candidateName} ציינה שאינה מעוניינת במשרת "${jobTitle}". ניתן להזמין מועמדת אחרת: giuus.vercel.app/institution/candidates`
+        : `${candidateName} דחתה את ההזמנה לראיון למשרת "${jobTitle}".${reasonSuffix} ניתן להזמין מועמדת אחרת: giuus.vercel.app/institution/candidates`
       void sendExternal({ phone: instPhone, whatsapp_preference: instWaPref, waMessage: msg, smsMessage: msg })
     }
   }

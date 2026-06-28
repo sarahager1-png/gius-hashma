@@ -408,7 +408,7 @@ CREATE TABLE IF NOT EXISTS invitations (
   candidate_id uuid NOT NULL REFERENCES candidates(id) ON DELETE CASCADE,
   job_id uuid NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
   status text NOT NULL DEFAULT 'ממתינה'
-    CHECK (status IN ('ממתינה', 'התקבלה', 'נדחתה')),
+    CHECK (status IN ('ממתינה', 'התקבלה', 'נדחתה', 'לא מעוניינת')),
   message text,
   scheduled_at timestamptz,
   created_at timestamptz DEFAULT now(),
