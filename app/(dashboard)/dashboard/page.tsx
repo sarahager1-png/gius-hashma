@@ -67,7 +67,8 @@ export default async function DashboardPage() {
     const sorted = [...(allActiveJobs ?? [])].sort((a, b) =>
       scoreJob(b as ActiveJob & Record<string, unknown>) - scoreJob(a as ActiveJob & Record<string, unknown>)
     )
-    const matchedJobs = sorted.slice(0, 3)
+    // "מותאמות" = רק משרות עם התאמה אמיתית (אזור/התמחות). משרה רחוקה לא תסומן כמותאמת.
+    const matchedJobs = sorted.filter(j => scoreJob(j as ActiveJob & Record<string, unknown>) > 0).slice(0, 3)
     const suggestedJobs = sorted.slice(0, 5)
 
     const [appsRes, interviewsRes, notifsRes, invitationsRes] = await Promise.all([
