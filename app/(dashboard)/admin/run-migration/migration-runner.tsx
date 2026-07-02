@@ -14,10 +14,10 @@ ALTER TABLE candidates ADD CONSTRAINT candidates_specialization_check
   CHECK (specialization IN ('יסודי','חט"ב','מתמטיקה','אנגלית','חינוך מיוחד','אחר'));
 
 UPDATE candidates SET academic_level = NULL
-  WHERE academic_level NOT IN ('שנה ב'' - סטאג''','שנה ג'' - סטאג''','תואר ראשון','תואר שני');
+  WHERE academic_level NOT IN ('שנה ב'' - סטאג''','שנה ג'' - סטאג''','שנה ד'' - סטאג''','תואר ראשון','תואר שני');
 ALTER TABLE candidates DROP CONSTRAINT IF EXISTS candidates_academic_level_check;
 ALTER TABLE candidates ADD CONSTRAINT candidates_academic_level_check
-  CHECK (academic_level IN ('שנה ב'' - סטאג''','שנה ג'' - סטאג''','תואר ראשון','תואר שני'));
+  CHECK (academic_level IN ('שנה ב'' - סטאג''','שנה ג'' - סטאג''','שנה ד'' - סטאג''','תואר ראשון','תואר שני'));
 
 UPDATE jobs SET specialization = NULL
   WHERE specialization NOT IN ('יסודי','חט"ב','מתמטיקה','אנגלית','חינוך מיוחד','אחר');

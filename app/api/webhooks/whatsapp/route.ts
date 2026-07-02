@@ -157,19 +157,19 @@ async function handleRegistrationFlow(
     await updateSession('awaiting_academic_level', { specialization: spec })
     await sendWA(phone,
       `✓ תחום: *${spec}*\n\n*מה הרמה האקדמית שלך?*\n` +
-      `1️⃣ שנה ב' — סטאג'\n2️⃣ שנה ג' — סטאג'\n3️⃣ תואר ראשון\n4️⃣ תואר שני`
+      `1️⃣ שנה ב' — סטאג'\n2️⃣ שנה ג' — סטאג'\n3️⃣ שנה ד' — סטאג'\n4️⃣ תואר ראשון\n5️⃣ תואר שני`
     )
     return
   }
 
   if (state === 'awaiting_academic_level') {
     const levels: Record<string, string> = {
-      "1": "שנה ב' - סטאג'", "2": "שנה ג' - סטאג'",
-      "3": 'תואר ראשון', "4": 'תואר שני',
+      "1": "שנה ב' - סטאג'", "2": "שנה ג' - סטאג'", "3": "שנה ד' - סטאג'",
+      "4": 'תואר ראשון', "5": 'תואר שני',
     }
     const level = levels[text.trim()] ?? (Object.values(levels).includes(text) ? text : null)
     if (!level) {
-      await sendWA(phone, 'נא לשלוח מספר בין 1 ל-4:')
+      await sendWA(phone, 'נא לשלוח מספר בין 1 ל-5:')
       return
     }
     await updateSession('confirm', { academic_level: level })

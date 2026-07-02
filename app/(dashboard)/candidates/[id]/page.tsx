@@ -97,7 +97,7 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
     ? (candidate.experiences as WorkEntry[]).filter(e => e?.workplace?.trim())
     : []
 
-  const showExperience = ['סטאג׳', "שנה ב' - סטאג'", "שנה ג' - סטאג'"].includes(candidate.academic_level ?? '')
+  const showExperience = ['סטאג׳', "שנה ב' - סטאג'", "שנה ג' - סטאג'", "שנה ד' - סטאג'"].includes(candidate.academic_level ?? '')
 
   return (
     <div className="p-4 md:p-8 max-w-2xl" dir="rtl">

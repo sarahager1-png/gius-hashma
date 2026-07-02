@@ -47,6 +47,7 @@ export const PLACEMENT_TYPES = ['שיבוץ לשנה', 'שיבוץ קבוע', '�
 export const ACADEMIC_LEVELS: AcademicLevel[] = [
   "שנה ב' - סטאג'",
   "שנה ג' - סטאג'",
+  "שנה ד' - סטאג'",
   'תואר ראשון',
   'תואר שני',
 ]

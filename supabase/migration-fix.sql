@@ -11,7 +11,7 @@ ALTER TABLE candidates ADD CONSTRAINT candidates_specialization_check
 
 ALTER TABLE candidates DROP CONSTRAINT IF EXISTS candidates_academic_level_check;
 ALTER TABLE candidates ADD CONSTRAINT candidates_academic_level_check
-  CHECK (academic_level IN ('שנה ב'' - סטאג''', 'שנה ג'' - סטאג''', 'תואר ראשון', 'תואר שני'));
+  CHECK (academic_level IN ('שנה ב'' - סטאג''', 'שנה ג'' - סטאג''', 'שנה ד'' - סטאג''', 'תואר ראשון', 'תואר שני'));
 
 -- 2. תיקון constraints בטבלת jobs
 -- -----------------------------------------------

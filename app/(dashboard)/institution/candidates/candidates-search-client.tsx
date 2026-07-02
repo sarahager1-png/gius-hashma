@@ -216,7 +216,7 @@ export default function CandidateSearchClient({ candidates, institutionId, insti
             const sc = STATUS_COLORS[c.availability_status] ?? STATUS_COLORS['לא פעילה']
             const initials = name !== '—' ? name.split(' ').slice(0, 2).map(w => w[0]).join('') : '?'
             const grad = GRADIENTS[idx % GRADIENTS.length]
-            const isStage = ["שנה ב' - סטאג'", "שנה ג' - סטאג'"].includes(c.academic_level ?? '')
+            const isStage = ["שנה ב' - סטאג'", "שנה ג' - סטאג'", "שנה ד' - סטאג'"].includes(c.academic_level ?? '')
             const alreadyInvited = invited.has(c.id)
 
             return (

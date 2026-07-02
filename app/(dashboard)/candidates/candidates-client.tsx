@@ -9,8 +9,8 @@ import {
 } from 'lucide-react'
 import type { Candidate } from '@/lib/types'
 
-const STAGE_LEVELS = ["שנה ב' - סטאג'", "שנה ג' - סטאג'"]
-const ACAD_LEVELS = ["שנה ב' - סטאג'", "שנה ג' - סטאג'", 'תואר ראשון', 'תואר שני']
+const STAGE_LEVELS = ["שנה ב' - סטאג'", "שנה ג' - סטאג'", "שנה ד' - סטאג'"]
+const ACAD_LEVELS = ["שנה ב' - סטאג'", "שנה ג' - סטאג'", "שנה ד' - סטאג'", 'תואר ראשון', 'תואר שני']
 const AVAIL_STATUSES = ["מחפשת סטאג'", 'פתוחה להצעות', 'משובצת', 'בוגרת מחפשת משרה', 'לא פעילה']
 const STATUSES = ['הכל', "מחפשת סטאג'", 'פתוחה להצעות', 'משובצת']
 
