@@ -17,6 +17,18 @@
       "schedule": "15 6 * * *"
     },
     {
+      "path": "/api/cron/job-relevance",
+      "schedule": "45 5 * * 0"
+    },
+    {
+      "path": "/api/cron/candidate-relevance",
+      "schedule": "50 5 * * 0"
+    },
+    {
+      "path": "/api/cron/relevance-enforce",
+      "schedule": "45 6 * * *"
+    },
+    {
       "path": "/api/cron/candidate-pending-applications",
       "schedule": "20 6 * * 0"
     },

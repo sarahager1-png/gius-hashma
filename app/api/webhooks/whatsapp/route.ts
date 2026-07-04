@@ -1,6 +1,21 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { parseWebhookMessages, parseIntent, sendWA } from '@/lib/whatsapp'
+import { notifyMany } from '@/lib/notify'
+
+// record a relevance answer in the system for the admin team
+async function notifyAdmins(
+  service: ReturnType<typeof createServiceClient>,
+  input: { type: string; title: string; body: string; related_id?: string; url?: string },
+) {
+  const { data: admins } = await service
+    .from('profiles')
+    .select('id')
+    .in('role', ['מנהלת מערכת', 'אדמין מערכת'])
+  if (admins?.length) {
+    await notifyMany(admins.map(a => a.id), input)
+  }
+}
 
 interface WaSession {
   id: string
@@ -58,15 +73,17 @@ async function processMessage(
 ) {
   void service.from('wa_log').insert({ direction: 'inbound', phone, message: text })
 
-  // Look up active session
+  // Look up active session — sessions are stored with either local (05…) or
+  // international (972…) phone format depending on who created them, so match both.
+  const localFormat = phone.replace(/^972/, '0')
   const { data: session } = await service
     .from('wa_sessions')
     .select('*')
-    .eq('phone', phone)
+    .or(`phone.eq.${phone},phone.eq.${localFormat}`)
     .gt('expires_at', new Date().toISOString())
     .order('created_at', { ascending: false })
     .limit(1)
-    .single()
+    .maybeSingle()
 
   const intent = parseIntent(text)
 
@@ -665,7 +682,7 @@ async function handleRelevanceCheck(
   text: string,
   intent: ReturnType<typeof parseIntent>,
 ) {
-  const data = session.data as { profile_id: string; user_type: 'candidate' | 'institution'; jobs?: string }
+  const data = session.data as { profile_id: string; user_type: 'candidate' | 'institution'; institution_id?: string; institution_name?: string; jobs?: string }
   const state = session.state as string
 
   // ── State: awaiting which jobs to close (institution with multiple jobs) ──
@@ -689,6 +706,13 @@ async function handleRelevanceCheck(
     await service.from('jobs').update({ status: 'מושהית' }).in('id', toClose)
     await service.from('wa_sessions').delete().eq('id', session.id)
     const closedTitles = toClose.map(id => jobs.find(j => j.id === id)?.title).filter(Boolean).join(', ')
+    await notifyAdmins(service, {
+      type: 'relevance_response',
+      title: `🏫 מוסד סגר משרות${data.institution_name ? ` — ${data.institution_name}` : ''}`,
+      body: `בעקבות בדיקת הרלוונטיות נסגרו: ${closedTitles}`,
+      related_id: data.institution_id,
+      url: '/institutions',
+    })
     await sendWA(phone, `✅ המשרות הבאות הושהו: ${closedTitles}.\nכשתרצו לחזור — כנסו לפנל המוסד: giuus.vercel.app/institution/jobs`)
     return
   }
@@ -696,6 +720,12 @@ async function handleRelevanceCheck(
   // ── State: awaiting initial yes/no reply ──
   if (intent === 'confirm') {
     await service.from('wa_sessions').delete().eq('id', session.id)
+    if (data.user_type === 'candidate') {
+      await service.from('candidates').update({
+        relevance_response: 'רלוונטי',
+        relevance_checked_at: new Date().toISOString(),
+      }).eq('profile_id', data.profile_id)
+    }
     await sendWA(phone, '✅ מעולה! נמשיך לעדכן אותך במשרות ומועמדות מתאימות.')
     return
   }
@@ -703,13 +733,40 @@ async function handleRelevanceCheck(
   if (intent === 'decline') {
     if (data.user_type === 'candidate') {
       await service.from('wa_sessions').delete().eq('id', session.id)
-      await service.from('candidates').update({ availability_status: 'לא פעילה' }).eq('profile_id', data.profile_id)
+      await service.from('candidates').update({
+        availability_status: 'לא פעילה',
+        relevance_response: 'ביקשה הסרה',
+        relevance_checked_at: new Date().toISOString(),
+      }).eq('profile_id', data.profile_id)
+
+      // withdraw her pending applications and record the answer for the admin team
+      const { data: cand } = await service
+        .from('candidates')
+        .select('id, profiles(full_name)')
+        .eq('profile_id', data.profile_id)
+        .maybeSingle()
+      if (cand) {
+        await service.from('applications')
+          .update({ status: 'בוטלה' })
+          .eq('candidate_id', cand.id)
+          .in('status', ['ממתינה', 'נצפתה'])
+      }
+      const candName = (cand?.profiles as unknown as { full_name: string | null } | null)?.full_name ?? phone
+      await notifyAdmins(service, {
+        type: 'relevance_response',
+        title: `👋 מועמדת ביקשה הסרה — ${candName}`,
+        body: 'ענתה "לא" לבדיקת הרלוונטיות. הועברה ללא פעילה וההגשות הפתוחות שלה בוטלו.',
+        url: '/candidates',
+      })
       await sendWA(phone, 'הבנו! הסרנו אותך זמנית מהרשימה הפעילה. כשתרצי לחזור — כנסי לפרופיל ועדכני את הסטטוס: giuus.vercel.app/profile')
       return
     }
 
-    // Institution — fetch active jobs
-    const { data: inst } = await service.from('institutions').select('id').eq('profile_id', data.profile_id).single()
+    // Institution — resolve directly by institution_id when available (imported
+    // institutions may have no linked profile), else by owner profile
+    const { data: inst } = data.institution_id
+      ? await service.from('institutions').select('id').eq('id', data.institution_id).maybeSingle()
+      : await service.from('institutions').select('id').eq('profile_id', data.profile_id).maybeSingle()
     if (!inst) { await service.from('wa_sessions').delete().eq('id', session.id); return }
 
     const { data: activeJobs } = await service
@@ -724,6 +781,13 @@ async function handleRelevanceCheck(
     if (activeJobs.length === 1) {
       await service.from('jobs').update({ status: 'מושהית' }).eq('id', activeJobs[0].id)
       await service.from('wa_sessions').delete().eq('id', session.id)
+      await notifyAdmins(service, {
+        type: 'relevance_response',
+        title: `🏫 מוסד סגר משרה${data.institution_name ? ` — ${data.institution_name}` : ''}`,
+        body: `בעקבות בדיקת הרלוונטיות נסגרה: "${activeJobs[0].title}"`,
+        related_id: inst.id,
+        url: '/institutions',
+      })
       await sendWA(phone, `✅ המשרה "${activeJobs[0].title}" הושהתה. כשתרצו לחזור: giuus.vercel.app/institution/jobs`)
       return
     }

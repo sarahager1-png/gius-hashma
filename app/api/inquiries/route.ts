@@ -1,5 +1,7 @@
 ﻿import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { notify } from '@/lib/notify'
+import { sendExternal } from '@/lib/notify-external'
 
 // POST — candidate sends inquiry to institution about a job
 export async function POST(request: Request) {
@@ -27,7 +29,7 @@ export async function POST(request: Request) {
   if (!job) return NextResponse.json({ error: 'משרה לא נמצאה' }, { status: 404 })
 
   const { data: inst } = await service
-    .from('institutions').select('id, institution_name, profile_id').eq('id', job.institution_id).single()
+    .from('institutions').select('id, institution_name, profile_id, phone, whatsapp_preference').eq('id', job.institution_id).single()
   if (!inst) return NextResponse.json({ error: 'מוסד לא נמצא' }, { status: 404 })
 
   const { data: inquiry, error } = await service
@@ -42,14 +44,38 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  // notify institution
-  await service.from('notifications').insert({
-    profile_id: inst.profile_id,
-    type: 'candidate_inquiry',
-    title: `פנייה חדשה — ${profile?.full_name ?? 'מועמדת'}`,
-    body: `${message.trim().slice(0, 90)}${message.trim().length > 90 ? '...' : ''} · ${job.title}`,
-    related_id: inquiry.id,
-  })
+  // notify institution — in-app + web push, must pop immediately
+  const candidateName = profile?.full_name ?? 'מועמדת'
+  const preview = `${message.trim().slice(0, 90)}${message.trim().length > 90 ? '...' : ''}`
+  if (inst.profile_id) {
+    await notify({
+      profile_id: inst.profile_id,
+      type: 'candidate_inquiry',
+      title: `פנייה חדשה — ${candidateName}`,
+      body: `${preview} · ${job.title}`,
+      related_id: inquiry.id,
+      url: '/institution/inquiries',
+    })
+  }
+
+  // instant WhatsApp/SMS to the principal
+  if (inst.phone) {
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
+    const waMessage = [
+      `🔔 *פנייה חדשה מחכה לך!*`,
+      `*${candidateName}* פנתה אליך לגבי משרת "${job.title}":`,
+      '',
+      `"${preview}"`,
+      '',
+      `למענה: ${appUrl}/institution/inquiries`,
+    ].join('\n')
+    void sendExternal({
+      phone: inst.phone,
+      whatsapp_preference: inst.whatsapp_preference,
+      waMessage,
+      smsMessage: `פנייה חדשה מ${candidateName} לגבי "${job.title}". למענה: ${appUrl}/institution/inquiries`,
+    }).catch(() => null)
+  }
 
   return NextResponse.json(inquiry, { status: 201 })
 }
