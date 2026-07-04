@@ -29,7 +29,8 @@ export async function GET(req: Request) {
 
   let sent = 0
   for (const r of reminders) {
-    const phone = (r.profiles as { phone?: string | null } | null)?.phone ?? null
+    // target_phone allows scheduling messages to people who have no account yet
+    const phone = (r.target_phone as string | null) ?? (r.profiles as { phone?: string | null } | null)?.phone ?? null
     let ok = false
 
     if (r.channel === 'in_app' || (!phone && r.channel !== 'wa' && r.channel !== 'sms')) {
