@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
+import { safeNext } from '@/lib/auth/safe-next'
 
 export async function POST(request: Request) {
   const { origin } = new URL(request.url)
   const body = await request.json().catch(() => ({}))
   const code = typeof body.code === 'string' ? body.code.toUpperCase().trim() : ''
+  const next = safeNext(typeof body.next === 'string' ? body.next : null)
   if (!code) return NextResponse.json({ error: 'קוד נדרש' }, { status: 400 })
 
   const service = createServiceClient()
@@ -57,6 +59,6 @@ export async function POST(request: Request) {
   // in a URL fragment the server can never read). For a never-confirmed user the
   // generated token is a 'signup' token, not 'magiclink' — use the actual type.
   const vtype = data.properties.verification_type || 'magiclink'
-  const confirmUrl = `${origin}/auth/confirm?token_hash=${encodeURIComponent(data.properties.hashed_token)}&type=${encodeURIComponent(vtype)}`
+  const confirmUrl = `${origin}/auth/confirm?token_hash=${encodeURIComponent(data.properties.hashed_token)}&type=${encodeURIComponent(vtype)}${next ? `&next=${encodeURIComponent(next)}` : ''}`
   return NextResponse.json({ url: confirmUrl })
 }

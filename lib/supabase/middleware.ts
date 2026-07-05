@@ -29,7 +29,14 @@ export async function updateSession(request: NextRequest) {
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone()
+    const target = request.nextUrl.pathname + request.nextUrl.search
     url.pathname = '/login'
+    url.search = ''
+    // Preserve the destination (e.g. a candidate link opened from WhatsApp)
+    // so the login flow can return to it instead of the role home page
+    if (!request.nextUrl.pathname.startsWith('/api')) {
+      url.searchParams.set('next', target)
+    }
     return NextResponse.redirect(url)
   }
 

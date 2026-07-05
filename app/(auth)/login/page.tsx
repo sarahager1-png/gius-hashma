@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { Suspense } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
+import { safeNext } from '@/lib/auth/safe-next'
 import { KeyRound, Sparkles, ClipboardCheck, HeartHandshake } from 'lucide-react'
 
 function LoginPageInner() {
@@ -14,6 +15,7 @@ function LoginPageInner() {
   const [formError, setFormError] = useState('')
   const searchParams = useSearchParams()
 
+  const nextPath = safeNext(searchParams.get('next'))
   const errParam = searchParams.get('error')
   const urlError = errParam === 'oauth'               ? 'שגיאה בהתחברות עם Google — בדקי שהחשבון מורשה'
                  : errParam === 'exchange'             ? 'שגיאה בקבלת הסשן — נסי שוב'
@@ -29,16 +31,17 @@ function LoginPageInner() {
       const home = profile.role === 'מועמדת' ? '/profile'
         : profile.role === 'מוסד' ? '/institution/jobs'
         : '/dashboard'
-      router.replace(home)
+      router.replace(nextPath ?? home)
     })
-  }, [router, supabase])
+  }, [router, supabase, nextPath])
 
   async function signInWithGoogle() {
     setLoading(true); setFormError('')
+    const callback = `${window.location.origin}/auth/callback${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ''}`
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: callback,
         queryParams: { prompt: 'select_account' },
       },
     })
@@ -304,7 +307,7 @@ function LoginPageInner() {
               </div>
               <div className="lg-tabs">
                 <button className="lg-tab active">מועמדת</button>
-                <a href="/mosad" className="lg-tab" style={{ textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>מוסד</a>
+                <a href={`/mosad${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ''}`} className="lg-tab" style={{ textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>מוסד</a>
               </div>
               <button onClick={signInWithGoogle} disabled={loading} className="lg-goog-btn">
                 {loading

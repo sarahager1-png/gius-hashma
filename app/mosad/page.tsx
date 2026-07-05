@@ -49,11 +49,18 @@ export default function MosadLanding() {
     return () => clearTimeout(t)
   }, [])
 
+  // A preserved destination (e.g. a candidate link opened from WhatsApp before login)
+  function nextParam(): string | null {
+    const n = new URLSearchParams(window.location.search).get('next')
+    return n && n.startsWith('/') && !n.startsWith('//') ? n : null
+  }
+
   async function signIn() {
     setPending(true); setErr('')
+    const next = nextParam()
     const { error } = await createClient().auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${window.location.origin}/auth/callback${next ? `?next=${encodeURIComponent(next)}` : ''}` },
     })
     if (error) { setErr('שגיאה בכניסה עם Google. נסו שוב.'); setPending(false) }
   }
@@ -64,7 +71,7 @@ export default function MosadLanding() {
     const res = await fetch('/api/auth/redeem-access-code', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: accessCode.trim() }),
+      body: JSON.stringify({ code: accessCode.trim(), next: nextParam() }),
     })
     const data = await res.json()
     setCodeLoading(false)
