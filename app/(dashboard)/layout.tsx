@@ -32,6 +32,7 @@ function canAccess(role: string, pathname: string): boolean {
       '/institution/inquiries',
       '/institution/interviews',
       '/institution/profile',
+      '/candidates', // candidate detail pages — the index page itself redirects non-admins
       '/settings',
       '/help',
     ]
