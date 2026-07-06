@@ -64,6 +64,37 @@ export async function POST(request: Request) {
   return NextResponse.json({ ok: true })
 }
 
+// ── Freeform-message guard ────────────────────────────────────────────
+// Sessions the SYSTEM initiated (the bot pinged the user first). While such
+// a session is open, only answer-like texts may trigger the bot — a normal
+// human message must be left unanswered (and the session kept alive).
+const SYSTEM_INITIATED = new Set([
+  'confirm_interview', 'confirm_invitation', 'relevance_check',
+  'admin_approve', 'admin_approvals', 'lead_info_request',
+])
+
+const COURTESY_WORDS = ['תודה', 'תודה רבה', 'תודה!', 'אמן', 'מעולה', 'סבבה', '🙏', '❤️', '💜', '👍🏻']
+
+function isAnswerLike(text: string): boolean {
+  const t = text.trim()
+  if (COURTESY_WORDS.includes(t)) return false
+  if (/^(אשר|דחה)\s+\d+/.test(t)) return true
+  return t.length <= 25
+}
+
+// nag ("ענו כן או לא") at most once per session, then stay silent
+async function nagOnce(
+  service: ReturnType<typeof createServiceClient>,
+  session: WaSession,
+  phone: string,
+  message: string,
+) {
+  const data = session.data as Record<string, string>
+  if (data.nagged === 'true') return
+  await service.from('wa_sessions').update({ data: { ...data, nagged: 'true' } }).eq('id', session.id)
+  await sendWA(phone, message)
+}
+
 // ── Message processor ─────────────────────────────────────────────────
 async function processMessage(
   service: ReturnType<typeof createServiceClient>,
@@ -89,6 +120,10 @@ async function processMessage(
 
   // ── Active session: continue flow ────────────────────────────────
   if (session) {
+    // a human wrote a normal message, not an answer to the bot — stay silent
+    if (SYSTEM_INITIATED.has(session.session_type) && !isAnswerLike(text)) {
+      return
+    }
     switch (session.session_type) {
       case 'create_job':         return handleJobCreationFlow(service, session, phone, text)
       case 'confirm_interview':  return handleInterviewConfirmation(service, session, phone, intent)
@@ -650,7 +685,7 @@ async function handleInterviewConfirmation(
     await service.from('wa_sessions').delete().eq('id', session.id)
     await sendWA(phone, 'הבנתי, הראיון בוטל. ניתן לפנות למוסד לתיאום מחדש: giuus.vercel.app/my-applications')
   } else {
-    await sendWA(phone, 'שלחי *1* או *כן* לאישור הראיון, *2* או *לא* לדחייה:')
+    await nagOnce(service, session, phone, 'שלחי *1* או *כן* לאישור הראיון, *2* או *לא* לדחייה:')
   }
 }
 
@@ -670,7 +705,7 @@ async function handleInvitationConfirmation(
     await service.from('wa_sessions').delete().eq('id', session.id)
     await sendWA(phone, 'הבנתי, ההזמנה נדחתה. אנחנו כאן כשתצטרכי: giuus.vercel.app/jobs')
   } else {
-    await sendWA(phone, 'שלחי *1* או *כן* לאישור ההזמנה, *2* או *לא* לדחייה:')
+    await nagOnce(service, session, phone, 'שלחי *1* או *כן* לאישור ההזמנה, *2* או *לא* לדחייה:')
   }
 }
 
@@ -802,7 +837,7 @@ async function handleRelevanceCheck(
     return
   }
 
-  await sendWA(phone, 'ענו *כן* להמשך קבלת עדכונים, או *לא* להשהיה זמנית.')
+  await nagOnce(service, session, phone, 'ענו *כן* להמשך קבלת עדכונים, או *לא* להשהיה זמנית.')
 }
 
 // ── Lead info request (institution lead replied "כן" to reminder) ────
@@ -853,7 +888,7 @@ async function handleAdminApprove(
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://giuus.vercel.app').trim()
 
   if (intent !== 'confirm' && intent !== 'decline') {
-    await sendWA(phone, `*${data.entity_name}* — ענו *כן* לאישור, *לא* לדחייה:`)
+    await nagOnce(service, session, phone, `*${data.entity_name}* — ענו *כן* לאישור, *לא* לדחייה:`)
     return
   }
 
@@ -975,7 +1010,7 @@ async function handleAdminApprovals(
   const rejectMatch  = normalized.match(/^דחה\s+(\d+)(?:\s+(.+))?$/i)
 
   if (!approveMatch && !rejectMatch) {
-    await sendWA(phone, `לאישור: *אשר [מספר]*\nלדחייה: *דחה [מספר]* או *דחה [מספר] סיבה*`)
+    await nagOnce(service, session, phone, `לאישור: *אשר [מספר]*\nלדחייה: *דחה [מספר]* או *דחה [מספר] סיבה*`)
     return
   }
 
