@@ -136,10 +136,10 @@ export default async function AdminSurveysPage() {
                      r.recommend === false ? <ThumbsDown size={14} style={{ color: '#DC2626' }} /> :
                      <span style={{ color: 'var(--ink-4)' }}>—</span>}
                   </td>
-                  <td className="px-3 py-2.5 max-w-[160px]">
+                  <td className="px-3 py-2.5 max-w-[260px]">
                     {r.notes ? (
-                      <span className="text-[12px] truncate block" style={{ color: 'var(--ink-2)' }} title={r.notes}>
-                        {r.notes.slice(0, 40)}{r.notes.length > 40 ? '…' : ''}
+                      <span className="text-[12px] whitespace-pre-wrap block" style={{ color: 'var(--ink-2)' }}>
+                        {r.notes}
                       </span>
                     ) : <span style={{ color: 'var(--ink-4)' }}>—</span>}
                   </td>

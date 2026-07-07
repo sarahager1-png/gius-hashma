@@ -31,6 +31,25 @@ export interface AppRow {
   } | null
 }
 
+function CoverLetter({ text }: { text: string }) {
+  const [open, setOpen] = useState(false)
+  const long = text.length > 130
+  return (
+    <div className="mt-3 px-3 py-2 rounded-[10px] text-[12.5px] leading-relaxed whitespace-pre-wrap"
+      style={{ background: 'var(--bg)', color: 'var(--ink-2)',
+        borderInlineStart: '3px solid var(--purple-200)' }}>
+      {open || !long ? text : text.slice(0, 130) + '…'}
+      {long && (
+        <button type="button" onClick={e => { e.stopPropagation(); setOpen(o => !o) }}
+          className="block mt-1 text-[12px] font-bold"
+          style={{ color: 'var(--purple)' }}>
+          {open ? 'הצגת פחות' : 'לקריאת ההמשך'}
+        </button>
+      )}
+    </div>
+  )
+}
+
 const STATUS_CFG: Record<AppStatus, { label: string; bg: string; color: string; dot: string; icon: React.ElementType }> = {
   'ממתינה': { label: 'ממתינה',  bg: '#EDE9FE', color: '#5B3E9E', dot: '#8B5CF6', icon: Clock        },
   'נצפה':  { label: 'נצפה',   bg: '#FFFBEB', color: '#B45309', dot: '#F59E0B', icon: Eye          },
@@ -463,15 +482,7 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
                       </div>
 
                       {/* Cover letter */}
-                      {app.cover_letter && (
-                        <div className="mt-3 px-3 py-2 rounded-[10px] text-[12.5px] leading-relaxed"
-                          style={{ background: 'var(--bg)', color: 'var(--ink-2)',
-                            borderInlineStart: '3px solid var(--purple-200)' }}>
-                          {app.cover_letter.length > 130
-                            ? app.cover_letter.slice(0, 130) + '…'
-                            : app.cover_letter}
-                        </div>
-                      )}
+                      {app.cover_letter && <CoverLetter text={app.cover_letter} />}
 
                       {/* Action buttons */}
                       {canAct ? (

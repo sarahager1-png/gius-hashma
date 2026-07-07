@@ -54,14 +54,7 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
   const allowed = ['מנהל רשת', 'מנהלת מערכת', 'אדמין מערכת', 'מוסד']
   if (!viewerProfile || !allowed.includes(viewerProfile.role)) redirect('/dashboard')
 
-  const { data: candidate } = await service
-    .from('candidates')
-    .select('*, profiles(full_name, phone)')
-    .eq('id', id)
-    .single()
-  if (!candidate) notFound()
-
-  // For institution viewers: load their active jobs
+  // For institution viewers: only approved institutions may see full candidate profiles
   let institutionForInvite: { id: string; institution_name: string } | null = null
   let activeJobsForInvite: { id: string; title: string }[] = []
   if (viewerProfile.role === 'מוסד') {
@@ -70,17 +63,23 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
       .select('id, institution_name, is_approved')
       .eq('profile_id', user.id)
       .single()
-    if (inst?.is_approved) {
-      institutionForInvite = inst
-      const { data: jobsData } = await service
-        .from('jobs')
-        .select('id, title')
-        .eq('institution_id', inst.id)
-        .eq('status', 'פעילה')
-        .order('created_at', { ascending: false })
-      activeJobsForInvite = (jobsData ?? []) as { id: string; title: string }[]
-    }
+    if (!inst?.is_approved) redirect('/dashboard')
+    institutionForInvite = inst
+    const { data: jobsData } = await service
+      .from('jobs')
+      .select('id, title')
+      .eq('institution_id', inst.id)
+      .eq('status', 'פעילה')
+      .order('created_at', { ascending: false })
+    activeJobsForInvite = (jobsData ?? []) as { id: string; title: string }[]
   }
+
+  const { data: candidate } = await service
+    .from('candidates')
+    .select('*, profiles(full_name, phone)')
+    .eq('id', id)
+    .single()
+  if (!candidate) notFound()
 
   type ProfileRow = { full_name?: string | null; phone?: string | null }
   const name    = (candidate.profiles as ProfileRow | null)?.full_name ?? '—'

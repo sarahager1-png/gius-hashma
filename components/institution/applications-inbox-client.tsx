@@ -341,6 +341,9 @@ export default function ApplicationsInboxClient({
                     {iv.location && (
                       <p className="text-[12px] mt-1 ms-5" style={{ color: '#5B21B6' }}>📍 {iv.location}</p>
                     )}
+                    {iv.notes && (
+                      <p className="text-[12px] mt-1 ms-5 whitespace-pre-wrap" style={{ color: '#5B21B6' }}>📝 {iv.notes}</p>
+                    )}
                   </div>
                 )}
 

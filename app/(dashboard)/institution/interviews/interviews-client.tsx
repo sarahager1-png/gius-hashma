@@ -435,6 +435,12 @@ export default function InterviewsClient({ interviews }: Props) {
                               </div>
                             )}
 
+                            {iv.notes && (
+                              <p className="mt-1.5 text-[12px] whitespace-pre-wrap" style={{ color: 'var(--ink-3)' }}>
+                                📝 {iv.notes}
+                              </p>
+                            )}
+
                             {iv.candidate_phone && !isPast && (
                               <div className="flex items-center gap-2 mt-3">
                                 <a href={`tel:${iv.candidate_phone}`}

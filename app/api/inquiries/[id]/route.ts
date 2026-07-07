@@ -59,7 +59,7 @@ export async function PATCH(
         profile_id: candidateProfileId,
         type: 'inquiry_reply',
         title: 'קיבלת תגובה לפנייתך',
-        body: institution_reply.trim().slice(0, 100),
+        body: institution_reply.trim(),
         related_id: id,
       })
     }

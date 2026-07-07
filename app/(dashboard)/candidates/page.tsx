@@ -9,7 +9,7 @@ export default async function CandidatesPage({ searchParams }: { searchParams: P
   if (!user) redirect('/login')
   const service = createServiceClient()
   const { data: profile } = await service.from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)) redirect('/dashboard')
+  if (!profile || !['מנהל רשת', 'מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)) redirect('/dashboard')
 
   const { q } = await searchParams
 
