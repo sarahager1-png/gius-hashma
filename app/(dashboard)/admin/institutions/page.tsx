@@ -23,6 +23,14 @@ export default async function AdminInstitutionsPage() {
     .is('registered_profile_id', null)
     .order('institution_name')
 
+  // institutions that filled the registration form but never logged in
+  // (the row is deleted automatically on first Google login — see lib/auth/post-login.ts)
+  const { data: preRegistered } = await service
+    .from('pre_registered_institutions')
+    .select('id, email, full_name, institution_name, city, district, school_type, phone, created_at')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false })
+
   // exclude leads whose name matches an already-registered institution
   const registeredNames = new Set(
     (institutions ?? []).map(i => i.institution_name.trim().toLowerCase())
@@ -62,7 +70,7 @@ export default async function AdminInstitutionsPage() {
       )}
 
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <InstitutionsManagerClient institutions={regularInstitutions as any} leads={unregisteredLeads} />
+      <InstitutionsManagerClient institutions={regularInstitutions as any} leads={unregisteredLeads} preRegistered={preRegistered ?? []} />
     </>
   )
 }

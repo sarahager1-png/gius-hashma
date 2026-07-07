@@ -27,7 +27,19 @@ type LeadRow = {
   institution_type: string | null
 }
 
-interface Props { institutions: InstRow[]; leads: LeadRow[] }
+type PreRegRow = {
+  id: string
+  email: string
+  full_name: string | null
+  institution_name: string
+  city: string | null
+  district: string | null
+  school_type: string | null
+  phone: string | null
+  created_at: string
+}
+
+interface Props { institutions: InstRow[]; leads: LeadRow[]; preRegistered: PreRegRow[] }
 
 function DeleteInstitutionButton({ institutionId, institutionName, onDeleted }: {
   institutionId: string
@@ -76,7 +88,10 @@ function DeleteInstitutionButton({ institutionId, institutionName, onDeleted }: 
 
 type EditInstTarget = { kind: 'inst'; data: InstRow } | { kind: 'lead'; data: LeadRow } | null
 
-export default function InstitutionsManagerClient({ institutions, leads }: Props) {
+export default function InstitutionsManagerClient({ institutions, leads, preRegistered }: Props) {
+  const [showPreReg, setShowPreReg] = useState(true)
+  const [preRegSending, setPreRegSending] = useState(false)
+  const [preRegResult, setPreRegResult] = useState<{ sent: number; skipped: number } | null>(null)
   const [search, setSearch]             = useState('')
   const [deletedIds, setDeletedIds]     = useState<Set<string>>(new Set())
   const [deletedLeadIds, setDeletedLeadIds] = useState<Set<string>>(new Set())
@@ -273,6 +288,76 @@ export default function InstitutionsManagerClient({ institutions, leads }: Props
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* מילאו טופס וטרם נכנסו — banner + expandable list */}
+      {preRegistered.length > 0 && (
+        <div className="rounded-[14px] border mb-6 overflow-hidden" style={{ borderColor: '#99F6E4' }}>
+          <div className="p-4 flex items-center justify-between gap-4" style={{ background: '#F0FDFB' }}>
+            <div>
+              <p className="text-[13.5px] font-bold" style={{ color: 'var(--teal-700, var(--teal))' }}>
+                <Clock size={14} className="inline me-1.5 -mt-0.5" />
+                {preRegistered.length} מוסדות מילאו טופס הרשמה וממתינים לכניסה ראשונה
+              </p>
+              <p className="text-[12px] mt-0.5" style={{ color: 'var(--ink-3)' }}>
+                ברגע שייכנסו עם Google — יעברו אוטומטית לרשימת המוסדות הרשומים
+              </p>
+              {preRegResult && (
+                <p className="text-[12px] mt-1 font-semibold" style={{ color: '#15803D' }}>
+                  ✓ תזכורת נשלחה ל-{preRegResult.sent} מוסדות{preRegResult.skipped > 0 ? ` · ${preRegResult.skipped} ללא טלפון דולגו` : ''}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button onClick={() => setShowPreReg(v => !v)}
+                className="h-9 px-4 rounded-[10px] text-[13px] font-bold border transition-all"
+                style={{ borderColor: '#5EEAD4', color: 'var(--teal-700, var(--teal))', background: '#fff' }}>
+                {showPreReg ? 'הסתר רשימה' : 'הצג רשימה'}
+              </button>
+              <button
+                onClick={async () => {
+                  setPreRegSending(true); setPreRegResult(null)
+                  const res = await fetch('/api/admin/send-preregistered-reminder', { method: 'POST' })
+                  const d = await res.json().catch(() => ({}))
+                  setPreRegResult(d); setPreRegSending(false)
+                }}
+                disabled={preRegSending}
+                className="h-9 px-4 rounded-[10px] text-[13px] font-bold text-white"
+                style={{ background: 'var(--teal)', opacity: preRegSending ? 0.6 : 1 }}>
+                <SendHorizonal size={14} className="inline me-1.5 -mt-0.5" />
+                {preRegSending ? 'שולח...' : 'תזכורת לכולן'}
+              </button>
+            </div>
+          </div>
+
+          {showPreReg && (
+            <div className="divide-y" style={{ borderTop: '1px solid #99F6E4', borderColor: '#CCFBF1' }}>
+              {preRegistered.map(p => (
+                <div key={p.id} className="px-4 py-3 flex items-center justify-between gap-3" style={{ background: '#F8FEFD' }}>
+                  <div className="min-w-0">
+                    <div className="text-[13.5px] font-semibold" style={{ color: 'var(--ink)' }}>{p.institution_name}</div>
+                    <div className="text-[12px]" style={{ color: 'var(--ink-3)' }}>
+                      {[p.full_name, p.city, p.district, p.school_type].filter(Boolean).join(' · ')}
+                    </div>
+                    <div className="text-[12px] mt-0.5 flex items-center gap-3 flex-wrap" style={{ color: 'var(--ink-3)' }}>
+                      <span dir="ltr">{p.email}</span>
+                      {p.phone && (
+                        <a href={`https://wa.me/972${p.phone.replace(/\D/g, '').replace(/^972/, '').replace(/^0/, '')}?text=${encodeURIComponent('שלום!')}`}
+                          target="_blank" rel="noreferrer"
+                          className="font-semibold no-underline" style={{ color: '#25D366' }}>
+                          📱 {p.phone}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-[11.5px] shrink-0" style={{ color: 'var(--ink-4)' }}>
+                    {formatDate(p.created_at)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
