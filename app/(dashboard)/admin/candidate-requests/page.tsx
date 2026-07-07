@@ -1,9 +1,10 @@
 ﻿'use client'
 
 import { useEffect, useState } from 'react'
-import { UserPlus, Check, X, MessageCircle, Copy, Phone, MapPin, GraduationCap, Clock, Mail, School, CalendarRange } from 'lucide-react'
+import { UserPlus, Check, X, MessageCircle, Copy, Phone, MapPin, GraduationCap, Clock, Mail, School, CalendarRange, ChevronDown } from 'lucide-react'
 
 interface PracticalWork { year: string; school_name: string; supervisor_name: string; supervisor_phone: string }
+interface Experience    { role?: string; employer?: string; years?: string }
 
 interface CandidateRequest {
   id: string
@@ -11,11 +12,28 @@ interface CandidateRequest {
   phone: string
   email: string | null
   city: string | null
+  district: string | null
+  address: string | null
+  birth_year: number | null
+  marital_status: string | null
+  maiden_name: string | null
   college: string | null
   graduation_year: number | null
   specialization: string | null
   academic_level: string | null
+  seniority_years: string | null
+  handwriting_font: string | null
+  study_day: string | null
+  technical_skills: string | null
+  interpersonal_skills: string | null
+  experiences: Experience[] | null
   practical_work: PracticalWork[] | null
+  shlichut_location: string | null
+  shlichut_years: string | null
+  past_projects: string | null
+  personal_note: string | null
+  work_cities: string[] | null
+  photo_url: string | null
   availability_from: string | null
   availability_to: string | null
   status: 'ממתינה' | 'אושרה' | 'נדחתה'
@@ -39,6 +57,81 @@ const STATUS_STYLE: Record<string, React.CSSProperties> = {
   'נדחתה':  { background: 'var(--red-bg)',     color: 'var(--red)'   },
 }
 
+function DetailRow({ label, value, ltr }: { label: string; value?: string | null; ltr?: boolean }) {
+  if (!value) return null
+  return (
+    <div className="flex items-start gap-2">
+      <span className="text-[12px] font-semibold shrink-0 w-28" style={{ color: 'var(--ink-3)' }}>{label}</span>
+      <span className="text-[12.5px] font-medium whitespace-pre-wrap" style={{ color: 'var(--ink)', direction: ltr ? 'ltr' : undefined }}>{value}</span>
+    </div>
+  )
+}
+
+function DetailGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="text-[10.5px] font-bold uppercase tracking-[.1em] mb-1.5" style={{ color: 'var(--ink-4)' }}>{title}</p>
+      <div className="space-y-1">{children}</div>
+    </div>
+  )
+}
+
+/* Everything the candidate filled in, grouped — so approval is done with the full picture */
+function FullDetails({ req }: { req: CandidateRequest }) {
+  const experiences = (req.experiences ?? []).filter(e => e?.role?.trim() || e?.employer?.trim())
+  return (
+    <div className="mt-3 p-4 rounded-[12px] space-y-4" style={{ background: 'var(--bg-2)', border: '1px solid var(--line)' }}>
+      <DetailGroup title="פרטים אישיים">
+        <DetailRow label="אימייל" value={req.email} ltr />
+        <DetailRow label="מחוז" value={req.district} />
+        <DetailRow label="כתובת" value={req.address} />
+        <DetailRow label="שנת לידה" value={req.birth_year ? String(req.birth_year) : null} />
+        <DetailRow label="מצב משפחתי" value={req.marital_status} />
+        <DetailRow label="שם נעורים" value={req.maiden_name} />
+        <DetailRow label="ערים לעבודה" value={req.work_cities?.length ? req.work_cities.join(' · ') : null} />
+      </DetailGroup>
+
+      {(req.seniority_years || req.study_day || req.handwriting_font) && (
+        <DetailGroup title="לימודים">
+          <DetailRow label="ותק" value={req.seniority_years} />
+          <DetailRow label="יום לימודים" value={req.study_day} />
+          <DetailRow label="כתב יד" value={req.handwriting_font} />
+        </DetailGroup>
+      )}
+
+      {(req.shlichut_location || req.shlichut_years) && (
+        <DetailGroup title="שליחות">
+          <DetailRow label="מיקום" value={req.shlichut_location} />
+          <DetailRow label="שנים" value={req.shlichut_years} />
+        </DetailGroup>
+      )}
+
+      {experiences.length > 0 && (
+        <DetailGroup title="ניסיון תעסוקתי">
+          {experiences.map((e, i) => (
+            <DetailRow key={i} label={`מקום ${i + 1}`}
+              value={[[e.role, e.employer].filter(Boolean).join(' · '), e.years?.trim() ? `(${e.years} שנים)` : ''].filter(Boolean).join(' ')} />
+          ))}
+        </DetailGroup>
+      )}
+
+      {(req.technical_skills || req.interpersonal_skills) && (
+        <DetailGroup title="כישורים">
+          <DetailRow label="מקצועיים" value={req.technical_skills} />
+          <DetailRow label="בין-אישיים" value={req.interpersonal_skills} />
+        </DetailGroup>
+      )}
+
+      {(req.past_projects || req.personal_note) && (
+        <DetailGroup title="במילים שלה">
+          <DetailRow label="פרויקטים" value={req.past_projects} />
+          <DetailRow label="על עצמה" value={req.personal_note} />
+        </DetailGroup>
+      )}
+    </div>
+  )
+}
+
 export default function CandidateRequestsPage() {
   const [requests, setRequests] = useState<CandidateRequest[]>([])
   const [loading, setLoading] = useState(true)
@@ -48,6 +141,15 @@ export default function CandidateRequestsPage() {
   const [filter, setFilter] = useState<'ממתינה' | 'אושרה' | 'נדחתה' | 'הכל'>('ממתינה')
   const [rejectTarget, setRejectTarget] = useState<string | null>(null)
   const [rejectReason, setRejectReason] = useState('')
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+
+  function toggleExpanded(id: string) {
+    setExpanded(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }
 
   async function load() {
     setLoading(true)
@@ -170,10 +272,17 @@ export default function CandidateRequestsPage() {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="w-9 h-9 rounded-[10px] flex items-center justify-center font-extrabold text-[14px] shrink-0"
-                        style={{ background: 'var(--purple-050)', color: 'var(--purple)' }}>
-                        {req.full_name.split(' ').slice(0, 2).map(w => w[0]).join('')}
-                      </div>
+                      {req.photo_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={req.photo_url} alt={req.full_name}
+                          className="w-9 h-9 rounded-[10px] object-cover shrink-0"
+                          style={{ border: '1px solid var(--line)' }} />
+                      ) : (
+                        <div className="w-9 h-9 rounded-[10px] flex items-center justify-center font-extrabold text-[14px] shrink-0"
+                          style={{ background: 'var(--purple-050)', color: 'var(--purple)' }}>
+                          {req.full_name.split(' ').slice(0, 2).map(w => w[0]).join('')}
+                        </div>
+                      )}
                       <div>
                         <div className="font-bold text-[16px]" style={{ color: 'var(--ink)' }}>{req.full_name}</div>
                         <div className="flex items-center gap-3 mt-0.5 text-[12.5px]" style={{ color: 'var(--ink-3)' }}>
@@ -219,6 +328,16 @@ export default function CandidateRequestsPage() {
                         ))}
                       </div>
                     )}
+
+                    {/* Full submission — everything the candidate wrote */}
+                    <button type="button" onClick={() => toggleExpanded(req.id)}
+                      className="flex items-center gap-1.5 mt-3 text-[12.5px] font-bold"
+                      style={{ color: 'var(--purple)' }}>
+                      <ChevronDown size={14}
+                        style={{ transform: expanded.has(req.id) ? 'rotate(180deg)' : 'none', transition: 'transform 160ms' }} />
+                      {expanded.has(req.id) ? 'הסתרת הפרטים המלאים' : 'כל מה שהמועמדת מילאה'}
+                    </button>
+                    {expanded.has(req.id) && <FullDetails req={req} />}
                   </div>
                 </div>
 

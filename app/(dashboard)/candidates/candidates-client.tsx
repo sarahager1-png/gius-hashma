@@ -494,6 +494,17 @@ export default function CandidatesClient({ candidates: initial, initialSearch = 
 
               const alreadySent = [...sentKeys].some(k => k.startsWith(c.id + ':'))
 
+              // Experience: legacy prev_* fields, or the first entry of the wizard's experiences array
+              type ExpEntry = { role?: string; employer?: string; workplace?: string }
+              const firstExp = Array.isArray(c.experiences)
+                ? (c.experiences as ExpEntry[]).find(e => e?.role?.trim() || e?.employer?.trim() || e?.workplace?.trim())
+                : null
+              const expText = (c.prev_employer || c.prev_role)
+                ? [c.prev_role, c.prev_employer].filter(Boolean).join(' · ')
+                : firstExp
+                  ? [firstExp.role, firstExp.employer ?? firstExp.workplace].filter(Boolean).join(' · ')
+                  : null
+
               return (
                 <div key={c.id} className="flex flex-col overflow-hidden cursor-pointer"
                   style={{
@@ -553,10 +564,10 @@ export default function CandidatesClient({ candidates: initial, initialSearch = 
                     {isStage ? (
                       <DataRow icon={<Building2 size={13} />}
                         label="מקום שליחות" value={c.placement_location ?? 'לא צוין'} />
-                    ) : (c.prev_employer || c.prev_role) ? (
+                    ) : expText ? (
                       <DataRow icon={<Building2 size={13} />}
                         label="ניסיון קודם"
-                        value={[c.prev_role, c.prev_employer].filter(Boolean).join(' · ')} />
+                        value={expText} />
                     ) : (
                       <DataRow icon={<Building2 size={13} />} value="ללא ניסיון קודם" muted />
                     )}

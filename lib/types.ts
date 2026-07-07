@@ -63,6 +63,7 @@ export interface Candidate {
   has_cv: boolean
   bio: string | null
   cv_url: string | null
+  photo_url: string | null
   whatsapp_preference: boolean | null
   created_at: string
   updated_at: string

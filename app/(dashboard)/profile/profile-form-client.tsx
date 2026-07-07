@@ -428,7 +428,7 @@ export default function ProfileFormClient({ profile, candidate }: Props) {
         {(candForm.bio || candForm.personal_note) && (
           <SectionCard title="ביטוי אישי">
             {candForm.bio && <p style={{ fontSize: 13.5, lineHeight: 1.65, color: 'var(--ink)', whiteSpace: 'pre-wrap' }}>{candForm.bio}</p>}
-            {candForm.personal_note && <p style={{ fontSize: 12.5, marginTop: 10, color: 'var(--ink-3)', lineHeight: 1.5 }}>{candForm.personal_note}</p>}
+            {candForm.personal_note && <p style={{ fontSize: 12.5, marginTop: 10, color: 'var(--ink-3)', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{candForm.personal_note}</p>}
           </SectionCard>
         )}
 

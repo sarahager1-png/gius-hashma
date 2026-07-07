@@ -122,6 +122,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       availability_to: req.availability_to || null,
       study_day: req.study_day || null,
       work_cities: req.work_cities || null,
+      photo_url: req.photo_url || null,
+      whatsapp_preference: typeof req.whatsapp_preference === 'boolean' ? req.whatsapp_preference : true,
     }, { onConflict: 'profile_id' })
 
     await service.from('candidate_requests').update({ status: 'אושרה' }).eq('id', id)
@@ -206,6 +208,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       availability_to: req.availability_to || null,
       study_day: req.study_day || null,
       work_cities: req.work_cities || null,
+      photo_url: req.photo_url || null,
       whatsapp_preference: typeof req.whatsapp_preference === 'boolean' ? req.whatsapp_preference : true,
     }, { onConflict: 'profile_id' })
 

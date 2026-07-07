@@ -7,7 +7,8 @@ import SendMessageButton from './send-message-button'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-type WorkEntry = { workplace: string; manager: string }
+type WorkEntry = { workplace?: string; manager?: string; role?: string; employer?: string; years?: string }
+type PracticalWork = { year?: string; school_name?: string; supervisor_name?: string; supervisor_phone?: string }
 
 function CardSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -93,8 +94,20 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
     return `https://wa.me/${n}?text=${t}`
   })() : null
 
-  const workHistory: WorkEntry[] = Array.isArray(candidate.experiences)
-    ? (candidate.experiences as WorkEntry[]).filter(e => e?.workplace?.trim())
+  // Wizard registration saves {role, employer, years}; profile editing saves {workplace, manager} — accept both
+  const workHistory = Array.isArray(candidate.experiences)
+    ? (candidate.experiences as WorkEntry[])
+        .map(e => ({
+          workplace: (e?.workplace ?? e?.employer ?? '').trim(),
+          role:      (e?.role ?? '').trim(),
+          years:     (e?.years ?? '').trim(),
+          manager:   (e?.manager ?? '').trim(),
+        }))
+        .filter(e => e.workplace || e.role)
+    : []
+
+  const practicalWork = Array.isArray(candidate.practical_work)
+    ? (candidate.practical_work as PracticalWork[]).filter(pw => pw?.school_name?.trim() || pw?.supervisor_name?.trim())
     : []
 
   const showExperience = ['סטאג׳', "שנה ב' - סטאג'", "שנה ג' - סטאג'", "שנה ד' - סטאג'"].includes(candidate.academic_level ?? '')
@@ -112,10 +125,17 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
         {/* Header */}
         <div className="px-6 py-6" style={{ background: 'linear-gradient(135deg, #3B1F6E 0%, #5B3AAB 100%)' }}>
           <div className="flex items-start gap-4">
-            <div className="w-14 h-14 rounded-full flex items-center justify-center text-[20px] font-black shrink-0"
-              style={{ background: 'rgba(255,255,255,.18)', color: '#fff', letterSpacing: '-.02em' }}>
-              {initials}
-            </div>
+            {candidate.photo_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={candidate.photo_url} alt={name}
+                className="w-14 h-14 rounded-full object-cover shrink-0"
+                style={{ border: '2px solid rgba(255,255,255,.35)' }} />
+            ) : (
+              <div className="w-14 h-14 rounded-full flex items-center justify-center text-[20px] font-black shrink-0"
+                style={{ background: 'rgba(255,255,255,.18)', color: '#fff', letterSpacing: '-.02em' }}>
+                {initials}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <h1 className="text-[19px] font-black text-white leading-tight">{name}</h1>
               {candidate.specialization && (
@@ -177,6 +197,8 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
           <CardRow label="מחוז" value={candidate.district} />
           <CardRow label="שנת לידה" value={candidate.birth_year ? String(candidate.birth_year) : null} />
           <CardRow label="מצב משפחתי" value={candidate.marital_status} />
+          <CardRow label="שם נעורים" value={candidate.maiden_name} />
+          <CardRow label="ערים לעבודה" value={Array.isArray(candidate.work_cities) && candidate.work_cities.length > 0 ? (candidate.work_cities as string[]).join(' · ') : null} />
         </CardSection>
 
         {/* Availability */}
@@ -216,7 +238,10 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
                   <div key={i} className="flex items-start gap-3">
                     <span className="text-[12px] font-semibold shrink-0 w-24" style={{ color: 'var(--ink-3)' }}>מקום {i + 1}</span>
                     <div>
-                      <p className="text-[13px] font-semibold" style={{ color: 'var(--ink)' }}>{e.workplace}</p>
+                      <p className="text-[13px] font-semibold" style={{ color: 'var(--ink)' }}>
+                        {[e.role, e.workplace].filter(Boolean).join(' · ')}
+                      </p>
+                      {e.years && <p className="text-[12px]" style={{ color: 'var(--ink-3)' }}>שנים: {e.years}</p>}
                       {e.manager && <p className="text-[12px]" style={{ color: 'var(--ink-3)' }}>מנהלת: {e.manager}</p>}
                     </div>
                   </div>
@@ -229,6 +254,27 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
                 <p className="text-[13px] whitespace-pre-wrap" style={{ color: 'var(--ink)' }}>{candidate.past_projects}</p>
               </div>
             )}
+          </CardSection>
+        )}
+
+        {/* Practical work */}
+        {practicalWork.length > 0 && (
+          <CardSection title="עבודה מעשית">
+            {practicalWork.map((pw, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <span className="text-[12px] font-semibold shrink-0 w-24" style={{ color: 'var(--ink-3)' }}>
+                  {pw.year ? `שנה ${pw.year}` : `מקום ${i + 1}`}
+                </span>
+                <div>
+                  {pw.school_name && <p className="text-[13px] font-semibold" style={{ color: 'var(--ink)' }}>{pw.school_name}</p>}
+                  {pw.supervisor_name && (
+                    <p className="text-[12px]" style={{ color: 'var(--ink-3)' }}>
+                      מדפית: {pw.supervisor_name}{pw.supervisor_phone ? ` · ${pw.supervisor_phone}` : ''}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
           </CardSection>
         )}
 
@@ -260,7 +306,12 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
         {(candidate.bio || candidate.personal_note) && (
           <CardSection title="ביטוי אישי">
             {candidate.bio && <p className="text-[13px] leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--ink)' }}>{candidate.bio}</p>}
-            {candidate.personal_note && <p className="text-[12px] mt-2" style={{ color: 'var(--ink-3)' }}>{candidate.personal_note}</p>}
+            {candidate.personal_note && (
+              <div className={candidate.bio ? 'mt-3' : ''}>
+                <p className="text-[12px] font-semibold mb-1" style={{ color: 'var(--ink-3)' }}>כמה מילים על עצמה</p>
+                <p className="text-[13px] leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--ink)' }}>{candidate.personal_note}</p>
+              </div>
+            )}
           </CardSection>
         )}
 
