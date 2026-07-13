@@ -98,6 +98,7 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
   const [jobFilter, setJobFilter] = useState('הכל')
   const [search, setSearch]       = useState('')
   const [loading, setLoading]     = useState<string | null>(null)
+  const [errorMsg, setErrorMsg]   = useState<string | null>(null)
   const [interview, setInterview] = useState<{
     appId: string; name: string; phone: string | null; jobTitle: string
   } | null>(null)
@@ -177,6 +178,9 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
     if (!res.ok) {
       const orig = initial.find(a => a.id === appId)
       if (orig) setApps(prev => prev.map(a => a.id === appId ? { ...a, status: orig.status } : a))
+      const j = await res.json().catch(() => null)
+      setErrorMsg(j?.error ?? 'הפעולה נכשלה, נסי שוב')
+      setTimeout(() => setErrorMsg(null), 5000)
     }
   }
 
@@ -233,6 +237,14 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
 
   return (
     <div className="p-4 md:p-8" dir="rtl">
+      {errorMsg && (
+        <div
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-[12px] text-[13px] font-bold shadow-lg max-w-[92vw] text-center"
+          style={{ background: 'var(--red)', color: '#fff' }}
+        >
+          {errorMsg}
+        </div>
+      )}
 
       {/* ── Header ── */}
       <div className="flex items-end justify-between gap-4 mb-6 flex-wrap">

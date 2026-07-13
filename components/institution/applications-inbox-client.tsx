@@ -96,6 +96,7 @@ export default function ApplicationsInboxClient({
   const [saving, setSaving]           = useState(false)
   const [confirmAccept, setConfirmAccept] = useState<string | null>(null)
   const [processing, setProcessing]   = useState<string | null>(null)
+  const [errorMsg, setErrorMsg]       = useState<string | null>(null)
 
   async function changeStatus(appId: string, status: string) {
     setProcessing(appId)
@@ -105,7 +106,12 @@ export default function ApplicationsInboxClient({
       body: JSON.stringify({ status }),
     })
     setProcessing(null)
-    if (!res.ok) return
+    if (!res.ok) {
+      const j = await res.json().catch(() => null)
+      setErrorMsg(j?.error ?? 'הפעולה נכשלה, נסי שוב')
+      setTimeout(() => setErrorMsg(null), 5000)
+      return
+    }
     setApps(prev => prev.map(a => a.id === appId ? { ...a, status: status as Application['status'] } : a))
     if (status === 'התקבלה') setJobStatus('אוישה')
     return true
@@ -182,6 +188,16 @@ export default function ApplicationsInboxClient({
 
   return (
     <div dir="rtl">
+      {/* Error toast */}
+      {errorMsg && (
+        <div
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-[12px] text-[13px] font-bold shadow-lg max-w-[92vw] text-center"
+          style={{ background: 'var(--red)', color: '#fff' }}
+        >
+          {errorMsg}
+        </div>
+      )}
+
       {/* Job status bar */}
       <div className="flex items-center gap-3 mb-5 p-4 rounded-[14px]"
         style={{ background: '#fff', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>

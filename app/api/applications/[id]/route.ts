@@ -29,17 +29,43 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 
   const { status, institution_notes, rejection_reason } = await request.json()
+
+  // ── read current state BEFORE mutating, so status-change automation is idempotent ──
+  const { data: current } = await service
+    .from('applications')
+    .select('status, candidate_id')
+    .eq('id', id)
+    .single()
+  if (!current) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  const prevStatus = current.status
+  const statusChanged = !!status && status !== prevStatus
+
+  // guard: never accept a candidate who is already placed elsewhere (double-placement)
+  if (status === 'התקבלה' && statusChanged) {
+    const { data: cand } = await service
+      .from('candidates')
+      .select('availability_status')
+      .eq('id', current.candidate_id)
+      .single()
+    if (cand?.availability_status === 'משובצת') {
+      return NextResponse.json(
+        { error: 'המועמדת כבר שובצה במשרה אחרת. יש לבטל את השיבוץ הקודם לפני קבלה חדשה.' },
+        { status: 409 },
+      )
+    }
+  }
+
   const update: Record<string, string | null> = {}
   if (status) update.status = status
   if (institution_notes !== undefined) update.institution_notes = institution_notes
   if (status === 'נדחתה' && rejection_reason) update.rejection_reason = rejection_reason
-  if (status === 'התקבלה') update.placement_date = new Date().toISOString().slice(0, 10)
+  if (statusChanged && status === 'התקבלה') update.placement_date = new Date().toISOString().slice(0, 10)
 
   const { error } = await service.from('applications').update(update).eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // ── automation on status change ──
-  if (status === 'נצפתה') {
+  // ── automation on status change (only on a real transition — prevents duplicate fires) ──
+  if (statusChanged && status === 'נצפתה') {
     const { data: app } = await service
       .from('applications')
       .select('jobs(title, institutions(institution_name)), candidates(profile_id)')
@@ -60,7 +86,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
   }
 
-  if (status === 'התקבלה' || status === 'נדחתה') {
+  if (statusChanged && (status === 'התקבלה' || status === 'נדחתה')) {
     const { data: app } = await service
       .from('applications')
       .select('job_id, candidate_id, jobs(title, institutions(institution_name, profile_id)), candidates(profile_id, whatsapp_preference, profiles(full_name, phone))')
