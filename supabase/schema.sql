@@ -68,14 +68,20 @@ CREATE POLICY "candidate can manage own row"
     profile_id = auth.uid()
   );
 
--- institutions can read all candidates
+-- only APPROVED institutions (and admins) can read candidates
+-- (updated 13/7/26 — unapproved institutions must not see candidate data)
 CREATE POLICY "institutions can read candidates"
   ON candidates FOR SELECT
   USING (
     EXISTS (
       SELECT 1 FROM profiles p
       WHERE p.id = auth.uid()
-        AND p.role IN ('מוסד', 'מנהלת מערכת', 'אדמין מערכת')
+        AND p.role IN ('מנהל רשת', 'אדמין מערכת')
+    )
+    OR EXISTS (
+      SELECT 1 FROM institutions i
+      WHERE i.profile_id = auth.uid()
+        AND i.is_approved = true
     )
   );
 

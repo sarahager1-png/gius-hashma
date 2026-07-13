@@ -27,6 +27,17 @@ export default async function InstitutionProfilePage({
 
   return (
     <div className="p-4 md:p-8 max-w-2xl">
+      {!institution.is_approved && (
+        <div className="rounded-[16px] p-5 mb-6 flex gap-4" style={{ background: 'linear-gradient(135deg, #FEF3C7 0%, #FFFBEB 100%)', border: '1.5px solid #FCD34D' }}>
+          <div className="text-2xl shrink-0">⏳</div>
+          <div>
+            <p className="text-[16px] font-extrabold mb-1" style={{ color: '#92400E' }}>המוסד ממתין לאישור מנהלת הרשת</p>
+            <p className="text-[13px]" style={{ color: '#B45309' }}>
+              בינתיים אפשר להשלים את פרטי המוסד. ברגע שהמוסד יאושר — תקבלו הודעה בוואטסאפ ותוכלו לפרסם משרות.
+            </p>
+          </div>
+        </div>
+      )}
       {isSetup && (
         <div className="rounded-[16px] p-5 mb-6 flex gap-4" style={{ background: 'linear-gradient(135deg, #EDE9FE 0%, #FAF5FF 100%)', border: '1.5px solid #C4B5FD' }}>
           <div className="text-2xl shrink-0">🏫</div>

@@ -60,25 +60,21 @@ export async function POST(req: Request) {
   // שליחת וואטסאפ עם קישור כניסה והסבר על המערכת
   if (phone) {
     const waMsg =
-      `שלום ${name}! 🎉 ברוכה הבאה למערכת *השביל* של רשת חינוך חב"ד!\n\n` +
-      `*איך המערכת עובדת?*\n` +
-      `📋 תפרסמי משרות פתוחות מהדשבורד שלך\n` +
-      `🔍 המערכת תציג לך מועמדות מתאימות לפי תפקיד, התמחות ומחוז\n` +
-      `📩 תשלחי הזמנה לראיון — *המועמדת תקבל הודעה בוואטסאפ*\n` +
-      `✅ לאחר שהמועמדת תאשר — תיצרו קשר ישיר ביניכן\n` +
-      `🎯 לאחר השיבוץ המשרה נסגרת אוטומטית\n\n` +
-      `*כל עדכון יגיע אלייך ישירות לוואטסאפ* 📱\n\n` +
-      `לכניסה למערכת:\n${mosadLink}\n` +
+      `שלום ${name}! 🎉 תודה על ההרשמה למערכת *השביל* של רשת חינוך חב"ד!\n\n` +
+      `השלב הבא — כניסה ראשונה למערכת:\n${mosadLink}\n` +
       `היכנסי עם Google עם המייל: ${cleanEmail}\n\n` +
+      `📝 לאחר הכניסה, בקשת ההצטרפות של המוסד תועבר לאישור מנהלת הרשת.\n` +
+      `✅ ברגע שהמוסד יאושר — תקבלי הודעה בוואטסאפ ותוכלי לפרסם משרות.\n\n` +
       `נשמח לעזור! 😊\n*רשת חינוך חב"ד*`
-    const smsMsg = `שלום ${name}! ברוכה הבאה למערכת השביל. לכניסה עם Google: ${mosadLink}`
+    const smsMsg = `שלום ${name}! תודה על ההרשמה למערכת השביל. לכניסה עם Google: ${mosadLink} — לאחר הכניסה הבקשה תועבר לאישור מנהלת הרשת.`
     await sendExternal({ phone, whatsapp_preference: true, waMessage: waMsg, smsMessage: smsMsg })
   }
 
   // התראה לאדמין — in-app notification
+  // (must be awaited — a void'ed supabase query builder never executes)
   const { data: admins } = await service.from('profiles').select('id').in('role', ['מנהלת מערכת', 'אדמין מערכת'])
   if (admins?.length) {
-    void service.from('notifications').insert(
+    await service.from('notifications').insert(
       admins.map(admin => ({
         profile_id: admin.id,
         type: 'institution_registered',

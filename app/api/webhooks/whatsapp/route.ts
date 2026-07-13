@@ -954,6 +954,8 @@ async function handleAdminApprove(
   // institution pending in pre_registered_institutions (not yet logged in)
   if (data.entity_type === 'institution_preregistered') {
     if (intent === 'confirm') {
+      // approved before first login — auto-approve the institution when it signs in
+      await service.from('pre_registered_institutions').update({ auto_approve: true, status: 'pending' }).eq('email', data.entity_id)
       const mosadLink = `${appUrl}/mosad`
       const instPhone = (data as Record<string, string>).institution_phone || null
       if (instPhone) {

@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { notify } from '@/lib/notify'
 
 export function roleHome(role: string): string {
   if (role === 'מועמדת') return '/profile'
@@ -45,8 +46,12 @@ export async function resolvePostLogin(
       .eq('profile_id', userId)
       .single()
 
+    // auto_approve is set only for institutions the admin pre-registered herself
+    // (or approved via WhatsApp); self-registered institutions wait for admin approval
+    const autoApprove = preReg.auto_approve === true
+
     if (!existingInst) {
-      const { error: instErr } = await service.from('institutions').insert({
+      const { data: newInst, error: instErr } = await service.from('institutions').insert({
         profile_id:       userId,
         institution_name: preReg.institution_name,
         city:             preReg.city,
@@ -55,20 +60,37 @@ export async function resolvePostLogin(
         institution_type: preReg.institution_type,
         phone:            preReg.phone ?? null,
         principal_name:   preReg.full_name ?? null,
-        is_approved:      true,
-        approved_at:      new Date().toISOString(),
+        is_approved:      autoApprove,
+        approved_at:      autoApprove ? new Date().toISOString() : null,
         whatsapp_preference: true,
-      })
+      }).select('id').single()
 
       if (instErr) {
         // Don't delete pre_registered so next login will retry
         console.error('[post-login] institution insert failed:', instErr.message, instErr.code)
         return '/login?error=institution_setup'
       }
+
+      if (!autoApprove) {
+        const { data: admins } = await service
+          .from('profiles')
+          .select('id')
+          .in('role', ['מנהלת מערכת', 'אדמין מערכת'])
+        for (const admin of admins ?? []) {
+          await notify({
+            profile_id: admin.id,
+            type:       'institution_registered',
+            title:      `מוסד חדש ממתין לאישור — ${preReg.institution_name}`,
+            body:       `${preReg.full_name ?? ''} · ${email}. אישור במסך ניהול המוסדות.`,
+            related_id: newInst?.id ?? null,
+            url:        '/admin/institutions',
+          })
+        }
+      }
     }
 
     await service.from('pre_registered_institutions').delete().eq('email', email)
-    return '/institution/jobs'
+    return autoApprove ? '/institution/jobs' : '/institution/profile'
   }
 
   const { data: profile } = await service.from('profiles').select('role').eq('id', userId).single()
