@@ -174,6 +174,30 @@ export default async function AdminReportsPage({
   const funnelMap: Record<string, number> = {}
   for (const a of allApps ?? []) funnelMap[a.status] = (funnelMap[a.status] ?? 0) + 1
 
+  // ── Job closure breakdown: filled through the system vs closed externally ──
+  // (עימוד כדי לעקוף את תקרת 1000 השורות של PostgREST)
+  const closedJobs: { id: string; status: string }[] = []
+  for (let from = 0; ; from += 1000) {
+    const { data } = await service.from('jobs').select('id, status')
+      .in('status', ['אוישה', 'בוטלה', 'פג תוקפה']).range(from, from + 999)
+    const rows = data ?? []
+    closedJobs.push(...rows)
+    if (rows.length < 1000) break
+  }
+  const acceptedJobSet = new Set<string>()
+  for (let from = 0; ; from += 1000) {
+    const { data } = await service.from('applications').select('job_id')
+      .eq('status', 'התקבלה').range(from, from + 999)
+    const rows = data ?? []
+    for (const r of rows) if (r.job_id) acceptedJobSet.add(r.job_id)
+    if (rows.length < 1000) break
+  }
+  const filledThroughSystem = closedJobs.filter(j => j.status === 'אוישה' && acceptedJobSet.has(j.id)).length
+  const filledExternal      = closedJobs.filter(j => j.status === 'אוישה' && !acceptedJobSet.has(j.id)).length
+  const cancelledJobs       = closedJobs.filter(j => j.status === 'בוטלה').length
+  const expiredJobs         = closedJobs.filter(j => j.status === 'פג תוקפה').length
+  const totalClosed         = closedJobs.length
+
   return (
     <div className="p-4 md:p-8 max-w-5xl">
       <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
@@ -290,6 +314,52 @@ export default async function AdminReportsPage({
             )
           })}
         </div>
+      </div>
+
+      {/* Job closure breakdown — filled through the system vs externally */}
+      <div className="rounded-[16px] border p-5 mb-6" style={{ background: '#fff', borderColor: 'var(--line)', boxShadow: 'var(--shadow-sm)' }}>
+        <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
+          <h3 className="text-[15px] font-bold" style={{ color: 'var(--ink)' }}>סגירת משרות — איך אוישו</h3>
+          <span className="text-[12px]" style={{ color: 'var(--ink-4)' }}>מתוך {totalClosed} משרות שנסגרו</span>
+        </div>
+        <p className="text-[12.5px] mb-4" style={{ color: 'var(--ink-4)' }}>
+          כמה מהמשרות אוישו בזכות שיבוץ במערכת, וכמה נסגרו מבחוץ (אוישו עצמאית או ירדו).
+        </p>
+        {totalClosed === 0 ? (
+          <p className="text-[13px]" style={{ color: 'var(--ink-4)' }}>עדיין לא נסגרו משרות</p>
+        ) : (
+          <>
+            <div className="flex h-3 rounded-full overflow-hidden mb-4" style={{ background: 'var(--bg-2)' }}>
+              {[
+                { v: filledThroughSystem, c: 'var(--green)' },
+                { v: filledExternal,      c: 'var(--amber)' },
+                { v: cancelledJobs,       c: '#6B7280'      },
+                { v: expiredJobs,         c: 'var(--red)'   },
+              ].filter(s => s.v > 0).map((s, i) => (
+                <div key={i} style={{ width: `${(s.v / totalClosed) * 100}%`, background: s.c }} />
+              ))}
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { label: 'דרך המערכת', hint: 'שיבוץ אמיתי',   value: filledThroughSystem, color: 'var(--green)' },
+                { label: 'אוישו מבחוץ', hint: 'עצמאית / ידני', value: filledExternal,      color: 'var(--amber)' },
+                { label: 'בוטלו',       hint: 'ירדו מהלוח',    value: cancelledJobs,       color: '#6B7280'      },
+                { label: 'פג תוקף',     hint: 'לא טופלו',      value: expiredJobs,         color: 'var(--red)'   },
+              ].map(s => (
+                <div key={s.label} className="rounded-[12px] border p-3" style={{ borderColor: 'var(--line)' }}>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: s.color }} />
+                    <span className="text-[12px] font-bold" style={{ color: 'var(--ink)' }}>{s.label}</span>
+                  </div>
+                  <div className="text-[22px] font-extrabold leading-none" style={{ color: s.color }}>{s.value}</div>
+                  <div className="text-[11px] mt-1" style={{ color: 'var(--ink-4)' }}>
+                    {s.hint} · {Math.round((s.value / totalClosed) * 100)}%
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Activity tracking — rejections & acceptances */}
