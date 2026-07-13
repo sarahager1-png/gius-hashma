@@ -29,7 +29,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data: profile } = await createServiceClient().from('profiles').select('role').eq('id', user.id).single()
-  const isAdmin = profile?.role && ['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)
+  const isAdmin = profile?.role && ['מנהל רשת', 'מנהלת מערכת', 'אדמין מערכת'].includes(profile.role)
 
   // non-admin must own the institution
   if (!isAdmin) {
