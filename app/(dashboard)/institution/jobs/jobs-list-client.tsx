@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Copy, Pencil, XCircle } from 'lucide-react'
+import { Copy, Pencil, XCircle, CheckCircle2 } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 
 const PLACEMENT_COLORS: Record<string, { bg: string; color: string; icon: string }> = {
@@ -47,10 +47,21 @@ export default function JobsListClient({ jobs: initialJobs }: Props) {
   const [jobs, setJobs] = useState(initialJobs)
   const [duplicating, setDuplicating] = useState<string | null>(null)
   const [closing, setClosing] = useState<string | null>(null)
+  const [filling, setFilling] = useState<string | null>(null)
+
+  async function handleFilled(e: React.MouseEvent, jobId: string) {
+    e.preventDefault(); e.stopPropagation()
+    if (!confirm('לסמן שהמשרה התאיישה? ההגשות הפתוחות ייסגרו והמועמדות יקבלו הודעה מסודרת.')) return
+    setFilling(jobId)
+    await fetch(`/api/jobs/${jobId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'אוישה' }) })
+    setJobs(prev => prev.map(j => j.id === jobId ? { ...j, status: 'אוישה' } : j))
+    setFilling(null)
+    router.refresh()
+  }
 
   async function handleClose(e: React.MouseEvent, jobId: string) {
     e.preventDefault(); e.stopPropagation()
-    if (!confirm('לסגור את המשרה? ההגשות הפתוחות יסומנו כנדחות.')) return
+    if (!confirm('להוריד את המשרה מהלוח? ההגשות הפתוחות ייסגרו.')) return
     setClosing(jobId)
     await fetch(`/api/jobs/${jobId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'בוטלה' }) })
     setJobs(prev => prev.map(j => j.id === jobId ? { ...j, status: 'בוטלה' } : j))
@@ -84,6 +95,7 @@ export default function JobsListClient({ jobs: initialJobs }: Props) {
         const pc = job.placement_type ? (PLACEMENT_COLORS[job.placement_type] ?? null) : null
         const isDuplicating = duplicating === job.id
         const isClosing = closing === job.id
+        const isFilling = filling === job.id
         const canClose = job.status === 'פעילה'
 
         return (
@@ -148,48 +160,57 @@ export default function JobsListClient({ jobs: initialJobs }: Props) {
               </div>
             </Link>
 
-            {/* Floating action buttons — visible on hover */}
+            {/* Action bar — always visible (works on mobile, not hover-gated) */}
             <div
-              className="absolute bottom-3 end-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{ pointerEvents: 'auto' }}
+              className="px-4 md:px-5 py-3 flex items-center gap-2 flex-wrap"
+              style={{ borderTop: '1px solid var(--line-soft)', background: 'var(--bg-3)' }}
             >
               {canClose && (
                 <button
-                  onClick={e => handleClose(e, job.id)}
-                  disabled={isClosing}
-                  title="סגרי משרה"
-                  className="flex items-center gap-1 h-7 px-2.5 rounded-[7px] text-[12px] font-bold transition-all"
-                  style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA' }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#FEE2E2'}
-                  onMouseLeave={e => e.currentTarget.style.background = '#FEF2F2'}
+                  onClick={e => handleFilled(e, job.id)}
+                  disabled={isFilling}
+                  title="סמני שהמשרה אוישה"
+                  className="flex items-center gap-1.5 h-8 px-3.5 rounded-[8px] text-[12.5px] font-bold text-white transition-all disabled:opacity-60"
+                  style={{ background: 'var(--teal)' }}
                 >
-                  <XCircle size={12} />
-                  {isClosing ? '...' : 'סגרי'}
+                  <CheckCircle2 size={14} />
+                  {isFilling ? 'רושם…' : 'המשרה התאיישה'}
                 </button>
               )}
-              <button
-                onClick={e => handleDuplicate(e, job.id)}
-                disabled={isDuplicating}
-                title="שכפלי משרה"
-                className="flex items-center gap-1 h-7 px-2.5 rounded-[7px] text-[12px] font-bold transition-all"
-                style={{ background: 'var(--purple-050)', color: 'var(--purple)', border: '1px solid var(--purple-200)' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'var(--purple-100)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'var(--purple-050)'}
-              >
-                <Copy size={12} />
-                {isDuplicating ? '...' : 'שכפלי'}
-              </button>
-              <Link
-                href={`/institution/jobs/${job.id}/edit`}
-                onClick={e => e.stopPropagation()}
-                title="ערכי משרה"
-                className="flex items-center gap-1 h-7 px-2.5 rounded-[7px] text-[12px] font-bold no-underline transition-all"
-                style={{ background: 'var(--bg-2)', color: 'var(--ink-3)', border: '1px solid var(--line)' }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = 'var(--ink)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-2)'; e.currentTarget.style.color = 'var(--ink-3)' }}
-              >
-                <Pencil size={12} />ערכי
-              </Link>
+
+              <div className="flex items-center gap-1.5 ms-auto">
+                {canClose && (
+                  <button
+                    onClick={e => handleClose(e, job.id)}
+                    disabled={isClosing}
+                    title="המשרה ירדה מהלוח (בוטלה)"
+                    className="flex items-center gap-1 h-8 px-2.5 rounded-[8px] text-[12px] font-bold transition-all disabled:opacity-60"
+                    style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA' }}
+                  >
+                    <XCircle size={12} />
+                    {isClosing ? '...' : 'ירדה'}
+                  </button>
+                )}
+                <button
+                  onClick={e => handleDuplicate(e, job.id)}
+                  disabled={isDuplicating}
+                  title="שכפלי משרה"
+                  className="flex items-center gap-1 h-8 px-2.5 rounded-[8px] text-[12px] font-bold transition-all disabled:opacity-60"
+                  style={{ background: 'var(--purple-050)', color: 'var(--purple)', border: '1px solid var(--purple-200)' }}
+                >
+                  <Copy size={12} />
+                  {isDuplicating ? '...' : 'שכפלי'}
+                </button>
+                <Link
+                  href={`/institution/jobs/${job.id}/edit`}
+                  onClick={e => e.stopPropagation()}
+                  title="ערכי משרה"
+                  className="flex items-center gap-1 h-8 px-2.5 rounded-[8px] text-[12px] font-bold no-underline transition-all"
+                  style={{ background: 'var(--bg-2)', color: 'var(--ink-3)', border: '1px solid var(--line)' }}
+                >
+                  <Pencil size={12} />ערכי
+                </Link>
+              </div>
             </div>
           </div>
         )
