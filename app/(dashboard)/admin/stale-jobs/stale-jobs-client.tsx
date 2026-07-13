@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Briefcase, MapPin, Users, Check, AlertTriangle, ListChecks } from 'lucide-react'
+import Link from 'next/link'
+import { Briefcase, MapPin, Users, Check, AlertTriangle, ListChecks, Megaphone } from 'lucide-react'
 
 interface Job {
   id: string
@@ -86,15 +87,24 @@ export default function StaleJobsClient({ jobs: initial }: { jobs: Job[] }) {
       )}
 
       {/* Header */}
-      <div className="mb-2">
-        <h1 className="page-title flex items-center gap-2">
-          <ListChecks size={22} style={{ color: 'var(--purple)' }} />
-          בדיקת משרות פתוחות
-        </h1>
-        <p className="text-[13px] mt-1" style={{ color: 'var(--ink-4)' }}>
-          משרות שעדיין מסומנות פתוחות במערכת. אם משרה כבר אוישה בשטח או ירדה — סמני אותה כאן,
-          וההגשות הפתוחות ייסגרו והמועמדות יקבלו הודעה מסודרת.
-        </p>
+      <div className="mb-2 flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="page-title flex items-center gap-2">
+            <ListChecks size={22} style={{ color: 'var(--purple)' }} />
+            בדיקת משרות פתוחות
+          </h1>
+          <p className="text-[13px] mt-1" style={{ color: 'var(--ink-4)' }}>
+            משרות שעדיין מסומנות פתוחות במערכת. אם משרה כבר אוישה בשטח או ירדה — סמני אותה כאן,
+            וההגשות הפתוחות ייסגרו והמועמדות יקבלו הודעה מסודרת.
+          </p>
+        </div>
+        <Link
+          href="/admin/notify-principals"
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-[10px] text-[13px] font-bold border no-underline shrink-0 transition-all"
+          style={{ borderColor: 'var(--purple-200)', color: 'var(--purple)', background: 'var(--purple-050)' }}
+        >
+          <Megaphone size={14} /> תזכורת למנהלות
+        </Link>
       </div>
 
       {/* KPI row */}
