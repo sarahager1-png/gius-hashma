@@ -414,7 +414,7 @@ export default function AppSidebar({
             borderTop: '1px solid rgba(255,255,255,.08)',
           }}
         >
-          בנוי ופיתוח: שרה הגר · 0503339770
+          בנוי ופיתוח: שרה הגר · 0503339770 · יעוץ ארגוני | פתרונות דיגיטליים · מהבנת הארגון לפתרון שעובד.
         </a>
         <button
           onClick={signOut}
