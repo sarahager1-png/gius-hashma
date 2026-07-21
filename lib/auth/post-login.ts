@@ -87,6 +87,14 @@ export async function resolvePostLogin(
           })
         }
       }
+
+      // משרה שהוכנה מראש (ע"י אדמין) לפני הכניסה הראשונה — נפתחת אוטומטית עכשיו
+      if (newInst?.id && preReg.pending_job) {
+        const { error: jobErr } = await service
+          .from('jobs')
+          .insert({ institution_id: newInst.id, ...preReg.pending_job })
+        if (jobErr) console.error('[post-login] pending_job insert failed:', jobErr.message)
+      }
     }
 
     await service.from('pre_registered_institutions').delete().eq('email', email)
