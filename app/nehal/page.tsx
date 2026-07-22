@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import InstallFooter from '@/components/landing/install-footer'
+import InAppBrowserBanner from '@/components/auth/in-app-browser-banner'
 
 const ADMIN_TOOLS = [
   {
@@ -161,6 +162,7 @@ export default function NehalLanding() {
 
   return (
     <div dir="rtl" style={{ minHeight: '100vh', background: 'var(--bg-2)', fontFamily: 'Heebo, system-ui, sans-serif' }}>
+      <InAppBrowserBanner />
 
       {/* ── Hero ── */}
       <div style={{ background: 'linear-gradient(135deg, #0F0623 0%, #1A0B35 30%, #2D1B5C 65%, #3D2570 100%)' }}>

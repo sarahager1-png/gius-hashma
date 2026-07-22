@@ -9,6 +9,7 @@ import {
   CheckCircle, ClipboardList, MapPin, GraduationCap,
   Building2, ArrowLeft,
 } from 'lucide-react'
+import InAppBrowserBanner from '@/components/auth/in-app-browser-banner'
 
 /* ─────────────────────────── data ─────────────────────────── */
 
@@ -50,22 +51,54 @@ const GoogleIcon = () => (
 
 /* ─────────────────────────── component ─────────────────────────── */
 export default function MumedetLanding() {
-  const [pending, setPending] = useState(false)
-  const [err, setErr]         = useState('')
-  const [visible, setVisible] = useState(false)
+  const [pending, setPending]     = useState(false)
+  const [err, setErr]             = useState('')
+  const [visible, setVisible]     = useState(false)
+  const [accessCode, setAccessCode] = useState('')
+  const [codeLoading, setCodeLoading] = useState(false)
+  const [codeError, setCodeError] = useState('')
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80)
     return () => clearTimeout(t)
   }, [])
 
+  // A preserved destination (e.g. a job link opened from WhatsApp before login)
+  function nextParam(): string | null {
+    const n = new URLSearchParams(window.location.search).get('next')
+    return n && n.startsWith('/') && !n.startsWith('//') ? n : null
+  }
+
   async function signIn() {
     setPending(true); setErr('')
+    const next = nextParam()
     const { error } = await createClient().auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${window.location.origin}/auth/callback${next ? `?next=${encodeURIComponent(next)}` : ''}` },
     })
     if (error) { setErr('שגיאה בכניסה עם Google. נסי שוב.'); setPending(false) }
+  }
+
+  async function redeemCode() {
+    if (!accessCode.trim()) return
+    setCodeLoading(true); setCodeError('')
+    try {
+      const res = await fetch('/api/auth/redeem-access-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: accessCode.trim(), next: nextParam() }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+        return
+      }
+      setCodeError(data.error ?? 'קוד שגוי או שפג')
+    } catch {
+      setCodeError('שגיאת רשת — נסי שוב')
+    } finally {
+      setCodeLoading(false)
+    }
   }
 
   return (
@@ -95,7 +128,9 @@ export default function MumedetLanding() {
 
         /* ── HERO ── */
         .mm-hero {
-          min-height:100svh;
+          /* shrinks by the in-app-browser banner's real height (set via JS) so its
+             centered CTA doesn't get pushed below the fold on short phones */
+          min-height:calc(100svh - var(--iab-banner-h, 0px));
           position:relative;
           display:flex;
           flex-direction:column;
@@ -251,6 +286,24 @@ export default function MumedetLanding() {
         .mm-trust-item { display:flex; align-items:center; gap:4px; font-size:11px; font-weight:600; color:rgba(255,255,255,.32); }
         .mm-trust-check { width:14px; height:14px; border-radius:50%; background:rgba(21,128,61,.25); border:1px solid rgba(21,128,61,.45); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
         .mm-err { background:rgba(220,38,38,.14); border:1px solid rgba(220,38,38,.28); border-radius:10px; padding:10px 14px; font-size:13px; color:#FCA5A5; margin-top:10px; text-align:center; }
+
+        /* Divider + code fallback — for candidates blocked by Google's in-app-browser filter */
+        .mm-divider { display:flex; align-items:center; gap:14px; margin:16px 0; }
+        .mm-divider-line { flex:1; height:1px; background:rgba(255,255,255,.1); }
+        .mm-divider-text { font-size:11px; font-weight:600; color:rgba(255,255,255,.3); letter-spacing:.08em; }
+        .mm-code-section { border-radius:14px; border:1.5px solid rgba(155,114,207,.28); background:rgba(155,114,207,.08); padding:14px 16px; }
+        .mm-code-header { display:flex; align-items:center; gap:10px; margin-bottom:5px; }
+        .mm-code-icon { width:30px; height:30px; border-radius:9px; flex-shrink:0; background:linear-gradient(135deg,rgba(123,90,196,.8),rgba(155,114,207,.8)); display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(123,90,196,.35); }
+        .mm-code-title { font-size:13.5px; font-weight:800; color:rgba(210,190,245,.9); }
+        .mm-code-hint { font-size:11.5px; color:rgba(255,255,255,.38); margin-bottom:11px; line-height:1.5; padding-right:40px; }
+        .mm-code-row { display:flex; flex-direction:column; gap:8px; }
+        .mm-code-input { width:100%; height:46px; border-radius:11px; border:1.5px solid rgba(255,255,255,.15); padding:0 12px; font-size:20px; font-weight:800; letter-spacing:.22em; text-align:center; outline:none; background:rgba(255,255,255,.08); color:#fff; font-family:monospace; transition:border-color .18s,background .18s; text-transform:uppercase; }
+        .mm-code-input::placeholder { letter-spacing:.14em; font-size:13px; font-weight:500; color:rgba(255,255,255,.25); }
+        .mm-code-input:focus { border-color:rgba(155,114,207,.6); background:rgba(255,255,255,.12); box-shadow:0 0 0 3px rgba(155,114,207,.15); }
+        .mm-code-btn { width:100%; height:46px; padding:0 16px; border-radius:11px; border:none; background:linear-gradient(135deg,#5F3FA0,#7B5AC4); color:#fff; font-size:13.5px; font-weight:700; cursor:pointer; transition:all .22s; font-family:'Heebo',system-ui,sans-serif; box-shadow:0 3px 12px rgba(123,90,196,.3); white-space:nowrap; }
+        .mm-code-btn:disabled { opacity:.4; cursor:not-allowed; box-shadow:none; }
+        .mm-code-btn:not(:disabled):hover { transform:translateY(-1px); box-shadow:0 5px 18px rgba(123,90,196,.45); }
+        .mm-code-error { margin-bottom:8px; padding:7px 11px; border-radius:9px; font-size:12px; font-weight:600; color:#FCA5A5; background:rgba(200,60,60,.15); border:1px solid rgba(200,60,60,.25); text-align:center; }
 
         /* Mosad link */
         .mm-mosad-link {
@@ -421,6 +474,7 @@ export default function MumedetLanding() {
         .mm-d4 { animation-delay:.5s; }
       `}</style>
 
+      <InAppBrowserBanner />
       <div className="mm-root">
 
         {/* ══ HERO ══ */}
@@ -482,6 +536,42 @@ export default function MumedetLanding() {
               </button>
 
               {err && <div className="mm-err">{err}</div>}
+
+              <div className="mm-divider">
+                <div className="mm-divider-line" />
+                <span className="mm-divider-text">או</span>
+                <div className="mm-divider-line" />
+              </div>
+
+              {/* Code login — fallback for candidates blocked by Google filters (e.g. WhatsApp in-app browser) */}
+              <div className="mm-code-section">
+                <div className="mm-code-header">
+                  <div className="mm-code-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                  </div>
+                  <span className="mm-code-title">קיבלתי קוד כניסה ב-WhatsApp</span>
+                </div>
+                <div className="mm-code-hint">הזיני את הקוד שקיבלת על מנת להיכנס</div>
+                {codeError && <div className="mm-code-error">{codeError}</div>}
+                <div className="mm-code-row">
+                  <input
+                    type="text"
+                    value={accessCode}
+                    onChange={e => setAccessCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}
+                    onKeyDown={e => e.key === 'Enter' && accessCode.length === 6 && redeemCode()}
+                    placeholder="XXXXXX"
+                    maxLength={6}
+                    dir="ltr"
+                    className="mm-code-input"
+                  />
+                  <button onClick={redeemCode} disabled={codeLoading || accessCode.length !== 6} className="mm-code-btn">
+                    {codeLoading ? '...' : 'כנסי'}
+                  </button>
+                </div>
+              </div>
 
               <div className="mm-trust">
                 {['הרשמה חינמית', 'פחות מ-5 דקות', 'עדכוני WhatsApp'].map(t => (

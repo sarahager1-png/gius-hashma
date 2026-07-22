@@ -9,6 +9,7 @@ import {
   Calendar, ClipboardList, Bell, FileStack,
   Building2, LogIn, Settings, GraduationCap,
 } from 'lucide-react'
+import InAppBrowserBanner from '@/components/auth/in-app-browser-banner'
 
 const STEPS = [
   { n: '01', title: 'כניסה עם Google', sub: 'כנסו עם המייל שבו המוסד שלכם רשום במערכת — הפרופיל נפתח אוטומטית', color: '#00B4CC', glow: 'rgba(0,180,204,.35)' },
@@ -68,17 +69,22 @@ export default function MosadLanding() {
   async function redeemCode() {
     if (!accessCode.trim()) return
     setCodeLoading(true); setCodeError('')
-    const res = await fetch('/api/auth/redeem-access-code', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: accessCode.trim(), next: nextParam() }),
-    })
-    const data = await res.json()
-    setCodeLoading(false)
-    if (data.url) {
-      window.location.href = data.url
-    } else {
+    try {
+      const res = await fetch('/api/auth/redeem-access-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: accessCode.trim(), next: nextParam() }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+        return
+      }
       setCodeError(data.error ?? 'קוד שגוי או שפג')
+    } catch {
+      setCodeError('שגיאת רשת — נסי שוב')
+    } finally {
+      setCodeLoading(false)
     }
   }
 
@@ -257,6 +263,7 @@ export default function MosadLanding() {
         .mo-d1{animation-delay:.1s;} .mo-d2{animation-delay:.22s;} .mo-d3{animation-delay:.36s;} .mo-d4{animation-delay:.5s;}
       `}</style>
 
+      <InAppBrowserBanner />
       <div className="mo-root">
         <div className="mo-hero">
           <div className="mo-hero-bg" />

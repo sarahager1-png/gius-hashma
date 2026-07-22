@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { safeNext } from '@/lib/auth/safe-next'
 import { KeyRound, Sparkles, ClipboardCheck, HeartHandshake } from 'lucide-react'
+import InAppBrowserBanner from '@/components/auth/in-app-browser-banner'
 
 function LoginPageInner() {
   const supabase = createClient()
@@ -67,7 +68,7 @@ function LoginPageInner() {
         *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 
         .lg-root {
-          height: 100svh;
+          min-height: 100svh;
           display: flex; direction: rtl;
           font-family: 'Heebo', system-ui, sans-serif;
           background: #060F1A;
@@ -235,6 +236,7 @@ function LoginPageInner() {
         .lg-form-footer{position:relative;z-index:2;text-align:center;padding:0 0 16px;font-size:10.5px;color:rgba(26,46,66,.3);letter-spacing:.04em;flex-shrink:0;}
       `}</style>
 
+      <InAppBrowserBanner />
       <div className="lg-root">
         {/* Desktop hero */}
         <div className="lg-hero">
