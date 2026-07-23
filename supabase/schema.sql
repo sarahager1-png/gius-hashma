@@ -76,7 +76,7 @@ CREATE POLICY "institutions can read candidates"
     EXISTS (
       SELECT 1 FROM profiles p
       WHERE p.id = auth.uid()
-        AND p.role IN ('מנהל רשת', 'אדמין מערכת')
+        AND p.role IN ('מנהלת מערכת', 'אדמין מערכת', 'מנהל רשת')
     )
     OR EXISTS (
       SELECT 1 FROM institutions i
