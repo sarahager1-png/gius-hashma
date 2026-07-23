@@ -10,7 +10,7 @@ import {
   Settings, LogOut, ClipboardList, UserPlus, Sparkles,
   ShieldCheck, Mail, History, HelpCircle, MessageCircle, Send, UserCog, Inbox,
   FileStack, CalendarDays, BellRing, Upload, ScrollText, MailOpen, Star,
-  Radio, CalendarCheck, GraduationCap, Route, ListChecks,
+  Radio, CalendarCheck, GraduationCap, Route, ListChecks, Search,
 } from 'lucide-react'
 
 interface NavItem {
@@ -87,6 +87,7 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
     {
       items: [
         { href: '/dashboard',                label: 'דשבורד ראשי',    icon: LayoutDashboard },
+        { href: '/admin/search',             label: 'חיפוש כללי',     icon: Search          },
       ],
     },
     {
@@ -105,6 +106,7 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
       label: 'תפעול',
       items: [
         { href: '/admin/candidate-requests', label: 'בקשות הצטרפות',  icon: UserPlus        },
+        { href: '/admin/candidates',         label: 'כלי מועמדות מתקדמים', icon: FileStack  },
         { href: '/jobs',                     label: 'משרות',           icon: Briefcase       },
         { href: '/admin/institutions',       label: 'מוסדות',          icon: Building2       },
         { href: '/admin/surveys',            label: 'סקרי משוב',       icon: Star            },
@@ -133,6 +135,7 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
     {
       items: [
         { href: '/dashboard',                label: 'דשבורד ראשי',    icon: LayoutDashboard },
+        { href: '/admin/search',             label: 'חיפוש כללי',     icon: Search          },
       ],
     },
     {
@@ -151,6 +154,7 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
       label: 'תפעול',
       items: [
         { href: '/admin/candidate-requests', label: 'בקשות הצטרפות',  icon: UserPlus        },
+        { href: '/admin/candidates',         label: 'כלי מועמדות מתקדמים', icon: FileStack  },
         { href: '/jobs',                     label: 'משרות',           icon: Briefcase       },
         { href: '/admin/institutions',       label: 'מוסדות',          icon: Building2       },
       ],
@@ -173,6 +177,7 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
     {
       items: [
         { href: '/dashboard',                label: 'דשבורד ראשי',    icon: LayoutDashboard },
+        { href: '/admin/search',             label: 'חיפוש כללי',     icon: Search          },
       ],
     },
     {
@@ -191,6 +196,7 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
       label: 'תפעול',
       items: [
         { href: '/admin/candidate-requests', label: 'בקשות הצטרפות',  icon: UserPlus        },
+        { href: '/admin/candidates',         label: 'כלי מועמדות מתקדמים', icon: FileStack  },
         { href: '/jobs',                     label: 'משרות',           icon: Briefcase       },
         { href: '/admin/institutions',       label: 'מוסדות',          icon: Building2       },
         { href: '/admin/surveys',            label: 'סקרי משוב',       icon: Star            },
@@ -271,9 +277,9 @@ export default function AppSidebar({
   const roleLabel: Record<UserRole, string> = {
     'מועמדת':       'פרופיל מועמדת',
     'מוסד':         'פרופיל מוסד',
-    'מנהלת מערכת': 'ניהול מערכת',
-    'אדמין מערכת': 'ניהול מערכת',
-    'מנהל רשת':    'ניהול מערכת',
+    'מנהלת מערכת': 'ניהול מערכת · מנהלת מערכת',
+    'אדמין מערכת': 'ניהול מערכת · אדמין מערכת',
+    'מנהל רשת':    'ניהול מערכת · מנהל רשת',
   }
 
   const homeHref =
