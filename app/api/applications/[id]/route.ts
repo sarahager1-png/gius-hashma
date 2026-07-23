@@ -30,6 +30,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   const { status, institution_notes, rejection_reason } = await request.json()
 
+  const VALID_STATUSES = ['ממתינה', 'נצפתה', 'התקבלה', 'נדחתה', 'בוטלה']
+  if (status && !VALID_STATUSES.includes(status))
+    return NextResponse.json({ error: 'סטטוס לא תקין' }, { status: 400 })
+
   // ── read current state BEFORE mutating, so status-change automation is idempotent ──
   const { data: current } = await service
     .from('applications')

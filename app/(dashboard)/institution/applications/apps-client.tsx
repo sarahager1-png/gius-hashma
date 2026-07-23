@@ -8,7 +8,7 @@ import {
   X, Phone, FileText, Search, Sparkles, StickyNote, Check, Star, History, Trash2,
 } from 'lucide-react'
 
-type AppStatus = 'ממתינה' | 'נצפה' | 'התקבלה' | 'נדחתה' | 'בוטלה'
+type AppStatus = 'ממתינה' | 'נצפתה' | 'התקבלה' | 'נדחתה' | 'בוטלה'
 
 export interface AppRow {
   id: string
@@ -52,7 +52,7 @@ function CoverLetter({ text }: { text: string }) {
 
 const STATUS_CFG: Record<AppStatus, { label: string; bg: string; color: string; dot: string; icon: React.ElementType }> = {
   'ממתינה': { label: 'ממתינה',  bg: '#EDE9FE', color: '#5B3E9E', dot: '#8B5CF6', icon: Clock        },
-  'נצפה':  { label: 'נצפה',   bg: '#FFFBEB', color: '#B45309', dot: '#F59E0B', icon: Eye          },
+  'נצפתה': { label: 'נצפתה',  bg: '#FFFBEB', color: '#B45309', dot: '#F59E0B', icon: Eye          },
   'התקבלה': { label: 'התקבלה',  bg: '#E4F6ED', color: '#1A7A4A', dot: '#22C55E', icon: CheckCircle2 },
   'נדחתה':  { label: 'נדחתה',   bg: '#F4F4F5', color: '#71717A', dot: '#9CA3AF', icon: XCircle      },
   'בוטלה':  { label: 'בוטלה',   bg: '#F4F4F5', color: '#71717A', dot: '#9CA3AF', icon: XCircle      },
@@ -69,7 +69,7 @@ const GRADIENTS = [
 const TABS: { key: AppStatus | 'הכל'; label: string }[] = [
   { key: 'הכל',    label: 'הכל'      },
   { key: 'ממתינה', label: 'ממתינות'  },
-  { key: 'נצפה',  label: 'נצפו'     },
+  { key: 'נצפתה', label: 'נצפו'     },
   { key: 'התקבלה', label: 'התקבלו'   },
   { key: 'נדחתה',  label: 'נדחו'     },
 ]
@@ -139,7 +139,7 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
   const counts = {
     'הכל':    apps.length,
     'ממתינה': apps.filter(a => a.status === 'ממתינה').length,
-    'נצפה':  apps.filter(a => a.status === 'נצפה').length,
+    'נצפתה': apps.filter(a => a.status === 'נצפתה').length,
     'התקבלה': apps.filter(a => a.status === 'התקבלה').length,
     'נדחתה':  apps.filter(a => a.status === 'נדחתה').length,
   }
@@ -202,7 +202,7 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
       body: JSON.stringify({ application_id: interview.appId, scheduled_at: scheduledAt, location: intLocation || null }),
     })
     const app = apps.find(a => a.id === interview.appId)
-    if (app?.status === 'ממתינה') await updateStatus(interview.appId, 'נצפה')
+    if (app?.status === 'ממתינה') await updateStatus(interview.appId, 'נצפתה')
     setSavingInt(false)
     setInterview(null)
     setIntDate(''); setIntTime('09:00'); setIntLocation('')
