@@ -45,6 +45,23 @@ export default function CandidateManagerClient({ candidates: initial }: Props) {
   const [showGroup, setShowGroup]   = useState(false)
   const [copied, setCopied]         = useState(false)
   const [deleting, setDeleting]     = useState<string | null>(null)
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null)
+
+  async function updateStatus(id: string, availability_status: string) {
+    setUpdatingStatus(id)
+    const res = await fetch(`/api/candidates/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ availability_status }),
+    })
+    setUpdatingStatus(null)
+    if (res.ok) {
+      setCandidates(prev => prev.map(c => c.id === id ? { ...c, availability_status } : c))
+    } else {
+      const d = await res.json().catch(() => ({}))
+      alert(d.error ?? 'שגיאה בעדכון סטטוס')
+    }
+  }
 
   async function deleteCandidate(id: string, name: string) {
     if (!confirm(`למחוק את ${name} לצמיתות? לא ניתן לשחזר.`)) return
@@ -284,9 +301,15 @@ export default function CandidateManagerClient({ candidates: initial }: Props) {
                         {c.specialization ?? '—'}
                       </td>
                       <td className="px-4 py-3" style={{ borderBottom: '1px solid var(--line-soft)' }}>
-                        <span className="inline-flex text-[11.5px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap" style={sc}>
-                          {c.availability_status}
-                        </span>
+                        <select
+                          value={c.availability_status}
+                          disabled={updatingStatus === c.id}
+                          onChange={e => updateStatus(c.id, e.target.value)}
+                          title="שינוי סטטוס זמינות"
+                          className="text-[11.5px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap border-0 outline-none cursor-pointer appearance-none"
+                          style={{ ...sc, opacity: updatingStatus === c.id ? 0.5 : 1 }}>
+                          {ALL_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
                       </td>
                       <td className="px-4 py-3" style={{ borderBottom: '1px solid var(--line-soft)' }}>
                         <div className="flex items-center gap-2">
