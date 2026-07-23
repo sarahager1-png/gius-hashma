@@ -63,10 +63,18 @@ export async function GET(req: Request) {
       service.from('jobs').select('created_at').gte('created_at', sinceIso).lte('created_at', untilIso),
       service.from('applications').select('updated_at').eq('status', 'התקבלה').gte('updated_at', sinceIso).lte('updated_at', untilIso),
     ])
+    // supabase-js doesn't throw on query errors — check explicitly so a failed
+    // query can't silently masquerade as "genuinely no data in this range"
+    const queryErr = res[0].error ?? res[1].error ?? res[2].error
+    if (queryErr) {
+      console.error('[trends] query error, returning empty (not real zero):', queryErr)
+      return NextResponse.json({ range, data: [], totals: { candidates: 0, jobs: 0, placements: 0 } })
+    }
     cands = res[0].data as { created_at: string }[]
     jobs  = res[1].data as { created_at: string }[]
     apps  = res[2].data as { updated_at: string }[]
-  } catch {
+  } catch (err) {
+    console.error('[trends] unexpected error:', err)
     return NextResponse.json({ range, data: [], totals: { candidates: 0, jobs: 0, placements: 0 } })
   }
 

@@ -44,12 +44,18 @@ export async function GET(req: Request) {
       jobsQ = jobsQ.lte('created_at', until)
     }
 
-    const [
-      { count: activeCandidates },
-      { count: activeJobs },
-      { count: placed },
-      { count: pendingApps },
-    ] = await Promise.all([candQ, jobsQ, placedQ, pendingQ])
+    const [candRes, jobsRes, placedRes, pendingRes] = await Promise.all([candQ, jobsQ, placedQ, pendingQ])
+    const queryErr = candRes.error ?? jobsRes.error ?? placedRes.error ?? pendingRes.error
+    if (queryErr) {
+      // supabase-js doesn't throw on query errors, so without this check a failed
+      // query silently looked identical to "genuinely zero" — surface it in logs
+      console.error('[kpis] query error, returning EMPTY (not a real zero):', queryErr)
+      return NextResponse.json(EMPTY)
+    }
+    const activeCandidates = candRes.count
+    const activeJobs = jobsRes.count
+    const placed = placedRes.count
+    const pendingApps = pendingRes.count
 
     const isEmpty = !activeCandidates && !activeJobs && !placed && !pendingApps
     if (isEmpty) return NextResponse.json(EMPTY)

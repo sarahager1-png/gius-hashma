@@ -62,13 +62,21 @@ export async function GET(req: Request) {
 
   try {
     const res = await Promise.all([candQ, appsQ, ivQ, accQ, placeQ, respQ])
+    // supabase-js doesn't throw on query errors — check explicitly so a failed
+    // query can't silently masquerade as a genuine all-zero funnel
+    const queryErr = res[0].error ?? res[1].error ?? res[2].error ?? res[3].error ?? res[4].error ?? res[5].error
+    if (queryErr) {
+      console.error('[funnel] query error, returning EMPTY (not a real zero):', queryErr)
+      return NextResponse.json(EMPTY)
+    }
     totalCandidates       = res[0].count
     appliedCandidates     = res[1].count
     interviewedCandidates = res[2].count
     acceptedApplications  = res[3].count
     placedCandidates      = res[4].count
     respondedApps         = res[5].data as { applied_at: string; updated_at: string }[]
-  } catch {
+  } catch (err) {
+    console.error('[funnel] unexpected error:', err)
     return NextResponse.json(EMPTY)
   }
 

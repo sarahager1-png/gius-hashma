@@ -17,15 +17,7 @@ export async function GET(request: Request) {
   const weekAgoStr = weekAgo.toISOString()
   const in7daysStr = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString()
 
-  const [
-    { count: newApplications },
-    { count: upcomingInterviews },
-    { count: pendingInvitations },
-    { count: pendingApplications },
-    { count: newJobs },
-    { count: newCandidates },
-    { count: newInstitutions },
-  ] = await Promise.all([
+  const weeklyResults = await Promise.all([
     service.from('applications').select('id', { count: 'exact', head: true })
       .gte('applied_at', weekAgoStr),
     service.from('interviews').select('id', { count: 'exact', head: true })
@@ -42,6 +34,24 @@ export async function GET(request: Request) {
     service.from('institutions').select('id', { count: 'exact', head: true })
       .gte('created_at', weekAgoStr),
   ])
+
+  // supabase-js doesn't throw on query errors — without this check, a failed count
+  // query would report as 0 and this cron would email admins a false "quiet week"
+  const weeklyErr = weeklyResults.map(r => r.error).find(Boolean)
+  if (weeklyErr) {
+    console.error('[CRON] weekly-summary query error, aborting send:', weeklyErr)
+    return NextResponse.json({ error: 'query failed, email not sent' }, { status: 500 })
+  }
+
+  const [
+    { count: newApplications },
+    { count: upcomingInterviews },
+    { count: pendingInvitations },
+    { count: pendingApplications },
+    { count: newJobs },
+    { count: newCandidates },
+    { count: newInstitutions },
+  ] = weeklyResults
 
   // fetch all admin profiles with their auth emails
   const { data: adminProfiles } = await service
