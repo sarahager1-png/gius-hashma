@@ -118,18 +118,33 @@ export type Intent =
   | 'register'
   | 'help' | 'unknown'
 
-const CONFIRM_WORDS      = ['1', 'כן', 'מאשרת', 'מאשר', 'אשר', 'אישור', 'ok', 'yes', '✓', '👍', 'בסדר']
-const DECLINE_WORDS      = ['2', 'לא', 'מסרבת', 'מסרב', 'סירוב', 'no', 'לא יכולה', 'לא יכול', '👎', 'ביטול']
+// Short/ambiguous replies (bare "לא", "כן", "1", "2"...) must match EXACTLY —
+// matching them as a prefix used to misread any free-text reply that merely
+// started with these words (e.g. "לא מתאים לי המחוז", "לא, כבר מצאתי משהו
+// אחר") as an unambiguous confirm/decline, which silently flipped candidates
+// to availability_status='לא פעילה' on unrelated replies. Longer, distinctive
+// phrases are safe to keep as a prefix match.
+const CONFIRM_WORDS_EXACT  = ['1', 'כן', 'אשר', 'אישור', 'ok', 'yes', '✓', '👍', 'בסדר']
+const CONFIRM_WORDS_PREFIX = ['מאשרת', 'מאשר']
+const DECLINE_WORDS_EXACT  = ['2', 'לא', 'no', '👎']
+const DECLINE_WORDS_PREFIX = ['מסרבת', 'מסרב', 'סירוב', 'לא יכולה', 'לא יכול', 'ביטול']
 const NEW_JOB_WORDS      = ['משרה חדשה', '+משרה', 'פרסם משרה', 'הוסף משרה', 'new job']
 const JOBS_WORDS         = ['משרות', 'משרה', 'עבודה', 'חפש', 'מה יש', 'jobs', 'הצג משרות']
 const APPLY_WORDS        = ['הגש', 'להגיש', 'אני רוצה', 'apply', 'הגשה']
 const MY_APPS_WORDS      = ['הגשות', 'הגשות שלי', 'סטטוס', 'status', 'מה קורה', 'עדכון']
 const REGISTER_WORDS     = ['הרשמה', 'להצטרף', 'רוצה להצטרף', 'רשמי אותי', 'register', 'new', 'חדשה']
 
+function matchesWord(t: string, exactWords: string[], prefixWords: string[]): boolean {
+  const normalized = t.replace(/[.,!?׳'"״]+$/g, '').trim()
+  if (exactWords.some(w => normalized === w.toLowerCase())) return true
+  if (prefixWords.some(w => t.startsWith(w.toLowerCase()))) return true
+  return false
+}
+
 export function parseIntent(text: string): Intent {
   const t = text.trim().toLowerCase()
-  if (CONFIRM_WORDS.some(w => t === w.toLowerCase() || t.startsWith(w.toLowerCase()))) return 'confirm'
-  if (DECLINE_WORDS.some(w => t === w.toLowerCase() || t.startsWith(w.toLowerCase()))) return 'decline'
+  if (matchesWord(t, CONFIRM_WORDS_EXACT, CONFIRM_WORDS_PREFIX)) return 'confirm'
+  if (matchesWord(t, DECLINE_WORDS_EXACT, DECLINE_WORDS_PREFIX)) return 'decline'
   if (NEW_JOB_WORDS.some(w => t.includes(w.toLowerCase()))) return 'new_job'
   if (APPLY_WORDS.some(w => t.includes(w.toLowerCase()))) return 'apply'
   if (MY_APPS_WORDS.some(w => t.includes(w.toLowerCase()))) return 'my_applications'
