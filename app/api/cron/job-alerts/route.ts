@@ -103,8 +103,10 @@ export async function GET(request: Request) {
         void sendExternal({ phone, whatsapp_preference: candidate.whatsapp_preference, waMessage: jobLine, smsMessage: jobSms })
       }
 
-      // record notification so this job is never resent to this candidate
-      void service.from('notifications').insert({
+      // record notification so this job is never resent to this candidate — must be awaited
+      // (a void fire-and-forget write can be dropped if the invocation ends right after the
+      // response is sent, and the next run would then resend the same match indefinitely)
+      await service.from('notifications').insert({
         profile_id: candidate.profile_id,
         type: 'match_suggestion',
         title: `✨ משרה מתאימה: ${job.title}`,

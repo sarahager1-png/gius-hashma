@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server'
+﻿import { NextResponse, after } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendNewJobMatchEmail } from '@/lib/email'
 import { sendExternal } from '@/lib/notify-external'
@@ -84,9 +84,13 @@ export async function POST(request: Request) {
     }
   }
 
-  // notify matching candidates asynchronously (don't await — don't block response)
-  notifyMatchingCandidates(service, data).catch(e =>
-    console.error('[JOBS] notifyMatchingCandidates error:', e)
+  // notify matching candidates after the response is sent — after() (not a bare
+  // fire-and-forget call) keeps the serverless function alive until this finishes,
+  // instead of racing the platform tearing down the invocation once we respond
+  after(() =>
+    notifyMatchingCandidates(service, data).catch(e =>
+      console.error('[JOBS] notifyMatchingCandidates error:', e)
+    )
   )
 
   return NextResponse.json(data, { status: 201 })

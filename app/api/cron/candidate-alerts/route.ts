@@ -164,7 +164,8 @@ export async function GET(request: Request) {
       smsMessage: `נמצאו ${count} מוסדות מתאימים לפרופיל שלך. לפנייה: ${appUrl}/profile`,
     })
 
-    void service.from('notifications').insert(
+    // must be awaited — this insert is the dedup guard against resending the same alert
+    await service.from('notifications').insert(
       uniqueInsts.map(p => ({
         profile_id: candProfileId,
         type: 'candidate_match_alert',
@@ -246,7 +247,8 @@ export async function GET(request: Request) {
       smsMessage: `נמצאו ${count} מועמדות מתאימות למשרותך: ${appUrl}/institution/matches`,
     })
 
-    void service.from('notifications').insert(
+    // must be awaited — this insert is the dedup guard against resending the same alert
+    await service.from('notifications').insert(
       freshCandIds.map(candProfileId => ({
         profile_id: entry.profileId,
         type: 'institution_match_alert',
