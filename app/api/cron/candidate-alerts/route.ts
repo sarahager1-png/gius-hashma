@@ -181,12 +181,13 @@ export async function GET(request: Request) {
 
   // ── 2. Institution notifications ───────────────────────────────────
 
+  type InstCand = { candidateId: string; name: string }
   type InstInfo = {
     profileId: string
     name: string
     phone: string | null
     waPref: boolean | null
-    candSet: Set<string>
+    cands: Map<string, InstCand>  // keyed by candidate profile_id (dedupes a candidate matching several jobs)
   }
   const instInfoMap = new Map<string, InstInfo>()
 
@@ -199,10 +200,16 @@ export async function GET(request: Request) {
           name: inst.institution_name,
           phone: inst.profiles?.phone ?? null,
           waPref: inst.whatsapp_preference,
-          candSet: new Set(),
+          cands: new Map(),
         })
       }
-      instInfoMap.get(inst.id)!.candSet.add(candProfileId)
+      const info = instInfoMap.get(inst.id)!
+      if (!info.cands.has(candProfileId)) {
+        info.cands.set(candProfileId, {
+          candidateId: p.cand.id,
+          name: p.cand.profiles?.full_name ?? '',
+        })
+      }
     }
   }
 
@@ -224,37 +231,54 @@ export async function GET(request: Request) {
   let instSent = 0
 
   for (const [, entry] of instInfoMap) {
-    const freshCandIds: string[] = []
-    for (const candProfileId of entry.candSet) {
-      const key = `${entry.profileId}::/institution/matches?cand=${candProfileId}`
-      if (!notifiedInstSet.has(key)) freshCandIds.push(candProfileId)
+    const freshCands: InstCand[] = []
+    for (const [, c] of entry.cands) {
+      const key = `${entry.profileId}::/candidates/${c.candidateId}`
+      if (!notifiedInstSet.has(key)) freshCands.push(c)
     }
-    if (!freshCandIds.length || !entry.phone) continue
+    if (!freshCands.length || !entry.phone) continue
 
-    const count = freshCandIds.length
-    const waMessage = [
-      `✨ *שלום!*`,
-      `נמצאו ${count} מועמד${count !== 1 ? 'ות' : 'ת'} חדש${count !== 1 ? 'ות' : 'ה'} שמתאימ${count !== 1 ? 'ות' : 'ה'} למשרות ${entry.name}.`,
-      ``,
-      `הן קיבלו הודעה ועשויות לפנות אליך בקרוב — כדאי להכיר אותן מראש כדי שתוכלי להגיב מהר:`,
-      `${appUrl}/institution/matches`,
-    ].join('\n')
+    const count = freshCands.length
+    const cardUrl = (c: InstCand) => `${appUrl}/candidates/${c.candidateId}`
+
+    // Deep-link straight to each candidate's own profile card so the principal
+    // sees exactly who she was notified about (not a generic list).
+    const waMessage = count === 1
+      ? [
+          `✨ *שלום!*`,
+          `נמצאה מועמדת חדשה שמתאימה למשרות ${entry.name}${freshCands[0].name ? `: *${freshCands[0].name}*` : ''}.`,
+          ``,
+          `היא קיבלה הודעה ועשויה לפנות אליך בקרוב — כדאי להכיר אותה מראש. לצפייה בפרופיל המלא:`,
+          cardUrl(freshCands[0]),
+        ].join('\n')
+      : [
+          `✨ *שלום!*`,
+          `נמצאו ${count} מועמדות חדשות שמתאימות למשרות ${entry.name}:`,
+          ``,
+          freshCands.map((c, i) => `${i + 1}. *${c.name || 'מועמדת'}*\n   ${cardUrl(c)}`).join('\n'),
+          ``,
+          `הן קיבלו הודעה ועשויות לפנות אליך בקרוב — כדאי להכיר אותן מראש כדי שתוכלי להגיב מהר.`,
+        ].join('\n')
+
+    const smsMessage = count === 1
+      ? `נמצאה מועמדת מתאימה למשרתך${freshCands[0].name ? ` (${freshCands[0].name})` : ''}. לצפייה: ${cardUrl(freshCands[0])}`
+      : `נמצאו ${count} מועמדות מתאימות למשרותך: ${appUrl}/institution/matches`
 
     void sendExternal({
       phone: entry.phone,
       whatsapp_preference: entry.waPref,
       waMessage,
-      smsMessage: `נמצאו ${count} מועמדות מתאימות למשרותך: ${appUrl}/institution/matches`,
+      smsMessage,
     })
 
     // must be awaited — this insert is the dedup guard against resending the same alert
     await service.from('notifications').insert(
-      freshCandIds.map(candProfileId => ({
+      freshCands.map(c => ({
         profile_id: entry.profileId,
         type: 'institution_match_alert',
-        title: `✨ ${count} מועמדות חדשות`,
-        body: entry.name,
-        url: `/institution/matches?cand=${candProfileId}`,
+        title: count === 1 ? `✨ מועמדת חדשה` : `✨ ${count} מועמדות חדשות`,
+        body: c.name ? `${c.name} · ${entry.name}` : entry.name,
+        url: `/candidates/${c.candidateId}`,
       }))
     )
 
