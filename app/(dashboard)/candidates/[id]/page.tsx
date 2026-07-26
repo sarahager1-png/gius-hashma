@@ -45,7 +45,9 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  // Preserve the card as the post-login destination (proxy.ts does the same for
+  // the usual no-session case; this covers a session that dies mid-render)
+  if (!user) redirect(`/login?next=${encodeURIComponent(`/candidates/${id}`)}`)
 
   const service = createServiceClient()
   const { data: viewerProfile } = await service

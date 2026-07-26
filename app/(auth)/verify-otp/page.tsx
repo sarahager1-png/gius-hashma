@@ -4,6 +4,13 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { ShieldCheck, RefreshCw, Phone } from 'lucide-react'
+import { safeNext } from '@/lib/auth/safe-next'
+
+// Read on click rather than via useSearchParams so the page needs no Suspense boundary
+function nextTarget(): string {
+  if (typeof window === 'undefined') return '/dashboard'
+  return safeNext(new URLSearchParams(window.location.search).get('next')) ?? '/dashboard'
+}
 
 export default function VerifyOtpPage() {
   const router = useRouter()
@@ -24,7 +31,7 @@ export default function VerifyOtpPage() {
     setStatus('loading')
     const res  = await fetch('/api/auth/send-otp', { method: 'POST' })
     const data = await res.json()
-    if (data.skip) { router.push('/dashboard'); return }
+    if (data.skip) { router.push(nextTarget()); return }
     if (data.noPhone) { setStatus('no-phone'); return }
     if (data.error) { setSendErr(data.error); setStatus('error'); return }
     setMasked(data.maskedPhone ?? '')
@@ -91,7 +98,7 @@ export default function VerifyOtpPage() {
     const data = await res.json()
     setVerifying(false)
     if (data.ok) {
-      router.push('/dashboard')
+      router.push(nextTarget())
     } else {
       setVerifyErr(data.error ?? 'קוד שגוי')
       setDigits(['', '', '', '', '', ''])

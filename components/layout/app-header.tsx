@@ -18,6 +18,7 @@ interface Notif {
   title: string
   body: string
   read: boolean
+  url: string | null
   created_at: string
 }
 
@@ -115,6 +116,14 @@ export default function AppHeader({ fullName, role }: Props) {
       body: JSON.stringify({ id }),
     })
     setNotifs(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+  }
+
+  // Open the notification's target (e.g. a candidate card) instead of only marking it read
+  function openNotif(n: Notif) {
+    void markRead(n.id)
+    if (!n.url) return
+    setBellOpen(false)
+    router.push(n.url)
   }
 
   async function signOut() {
@@ -310,7 +319,7 @@ export default function AppHeader({ fullName, role }: Props) {
                 ) : notifs.slice(0, 15).map(n => (
                   <div
                     key={n.id}
-                    onClick={() => markRead(n.id)}
+                    onClick={() => openNotif(n)}
                     className="flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors"
                     style={{
                       background: n.read ? 'transparent' : 'var(--purple-050)',

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Bell, BellOff, Check, CheckCheck, X, Calendar } from 'lucide-react'
 import { Notification } from '@/lib/types'
 
@@ -45,6 +46,7 @@ interface Props {
 }
 
 export default function NotificationsClient({ notifications: initial }: Props) {
+  const router = useRouter()
   const [items, setItems] = useState<Notification[]>(initial)
   const [marking, setMarking] = useState(false)
   const [responding, setResponding] = useState<string | null>(null)
@@ -59,6 +61,12 @@ export default function NotificationsClient({ notifications: initial }: Props) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
     })
+  }
+
+  // Open the notification's target (e.g. the candidate card it announced)
+  function openNotif(n: Notification) {
+    if (!n.read) void markOne(n.id)
+    if (n.url) router.push(n.url)
   }
 
   async function markAll() {
@@ -152,11 +160,13 @@ export default function NotificationsClient({ notifications: initial }: Props) {
                   return (
                     <div
                       key={n.id}
+                      onClick={() => openNotif(n)}
                       className="flex items-start gap-3 rounded-[12px] border p-4 transition-all"
                       style={{
                         background: n.read ? '#fff' : '#F5F3FF',
                         borderColor: n.read ? 'var(--line)' : 'var(--purple)',
                         borderRight: `3px solid ${n.read ? 'var(--line)' : 'var(--purple)'}`,
+                        cursor: n.url ? 'pointer' : 'default',
                       }}
                     >
                       <div
@@ -191,7 +201,7 @@ export default function NotificationsClient({ notifications: initial }: Props) {
                         {isInvite && !responded && (
                           <div className="flex gap-2 mt-3 flex-wrap">
                             <button
-                              onClick={() => respondInvitation(n.id, n.related_id!, 'התקבלה')}
+                              onClick={e => { e.stopPropagation(); respondInvitation(n.id, n.related_id!, 'התקבלה') }}
                               disabled={!!isResponding}
                               className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12.5px] font-bold transition-all"
                               style={{ background: '#E4F6ED', color: '#1A7A4A', opacity: isResponding ? 0.6 : 1 }}
@@ -199,7 +209,7 @@ export default function NotificationsClient({ notifications: initial }: Props) {
                               <Check size={12} />קבלת ההזמנה
                             </button>
                             <button
-                              onClick={() => respondInvitation(n.id, n.related_id!, 'נדחתה')}
+                              onClick={e => { e.stopPropagation(); respondInvitation(n.id, n.related_id!, 'נדחתה') }}
                               disabled={!!isResponding}
                               className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12.5px] font-bold transition-all"
                               style={{ background: '#F4F4F5', color: '#71717A', opacity: isResponding ? 0.6 : 1 }}

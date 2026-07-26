@@ -153,9 +153,12 @@ export default function NehalLanding() {
     setLoading(true)
     setError('')
     const supabase = createClient()
+    // A preserved destination (e.g. a candidate link opened from WhatsApp before login)
+    const n = new URLSearchParams(window.location.search).get('next')
+    const next = n && n.startsWith('/') && !n.startsWith('//') ? n : null
     const { error: err } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${window.location.origin}/auth/callback${next ? `?next=${encodeURIComponent(next)}` : ''}` },
     })
     if (err) { setError('שגיאה בכניסה עם גוגל'); setLoading(false) }
   }

@@ -13,13 +13,16 @@ interface NotifyInput {
 export async function notify(input: NotifyInput) {
   const service = createServiceClient()
 
-  // Insert in-app notification
+  // Insert in-app notification.
+  // url must be persisted — the bell and the notifications page navigate by it,
+  // and without it a candidate alert becomes a dead-end row.
   await service.from('notifications').insert({
     profile_id:  input.profile_id,
     type:        input.type,
     title:       input.title,
     body:        input.body ?? null,
     related_id:  input.related_id ?? null,
+    url:         input.url ?? null,
   })
 
   // Fire web push to all active subscriptions for this user
