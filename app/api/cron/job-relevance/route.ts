@@ -78,7 +78,7 @@ export async function GET(request: Request) {
       `בברכה 💜\n*השביל — רשת חינוך חב"ד*`
 
     await service.from('wa_sessions').insert({
-      phone: inst.phone,
+      phone: intlFormat,
       session_type: 'relevance_check',
       state: 'awaiting_reply',
       data: { profile_id: inst.profileId, institution_id: instId, institution_name: inst.name, user_type: 'institution' },
