@@ -170,7 +170,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     // 2. Create or update profile
-    const { data: existingProfile } = await service.from('profiles').select('id').eq('id', authUserId).single()
+    const { data: existingProfile } = await service
+      .from('profiles').select('id, full_name, phone').eq('id', authUserId).single()
     if (!existingProfile) {
       await service.from('profiles').insert({
         id: authUserId,
@@ -178,6 +179,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         full_name: req.full_name,
         phone: req.phone,
       })
+    } else {
+      // profile already exists (prior Google sign-in, or an auth trigger created a bare row) —
+      // still apply name+phone from the request, otherwise the candidate shows up with no phone
+      await service.from('profiles').update({
+        full_name: req.full_name || existingProfile.full_name,
+        phone:     req.phone     || existingProfile.phone,
+      }).eq('id', authUserId)
     }
 
     // 3. Upsert candidates row — always populate data from the request,

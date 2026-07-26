@@ -12,23 +12,51 @@ export async function POST(request: Request) {
   if (!profile || !['מנהלת מערכת', 'אדמין מערכת'].includes(profile.role))
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { name, city, phone, level, status, placement_location, prev_employer, prev_role, exp } = await request.json()
+  const { name, city, phone, email, level, status, placement_location, prev_employer, prev_role, exp } = await request.json()
 
-  const { data: newProfile, error: pe } = await service
-    .from('profiles').insert({ role: 'מועמדת', full_name: name, phone: phone || null }).select().single()
+  if (!name?.trim())  return NextResponse.json({ error: 'שם הוא שדה חובה' }, { status: 400 })
+  if (!phone?.trim()) return NextResponse.json({ error: 'טלפון הוא שדה חובה' }, { status: 400 })
+
+  const localPhone = phone.trim()
+  const digits = localPhone.replace(/\D/g, '').replace(/^972/, '').replace(/^0/, '')
+
+  // profiles.id is a FK to auth.users — the auth user has to exist first
+  const loginEmail = email?.trim() || `cand-${digits}@wa.giuus.app`
+  let profileId: string | null = null
+
+  const { data: authData, error: authErr } = await service.auth.admin.createUser({
+    email: loginEmail,
+    email_confirm: true,
+    user_metadata: { full_name: name.trim() },
+  })
+
+  if (authErr) {
+    // user already exists — reuse her profile instead of failing
+    const { data: existing } = await service
+      .from('profiles').select('id').eq('phone', localPhone).maybeSingle()
+    profileId = existing?.id ?? null
+    if (!profileId) return NextResponse.json({ error: 'מועמדת עם הטלפון הזה כבר קיימת במערכת' }, { status: 409 })
+  } else {
+    profileId = authData.user?.id ?? null
+  }
+  if (!profileId) return NextResponse.json({ error: 'לא ניתן ליצור משתמש למועמדת' }, { status: 500 })
+
+  const { error: pe } = await service
+    .from('profiles')
+    .upsert({ id: profileId, role: 'מועמדת', full_name: name.trim(), phone: localPhone }, { onConflict: 'id' })
   if (pe) return NextResponse.json({ error: pe.message }, { status: 500 })
 
   const { data: newCand, error: ce } = await service
-    .from('candidates').insert({
-      profile_id: newProfile.id, city: city || null,
+    .from('candidates').upsert({
+      profile_id: profileId, city: city || null,
       academic_level: level, availability_status: status, specialization: 'יסודי',
       placement_location: placement_location || null,
       prev_employer: prev_employer || null, prev_role: prev_role || null,
       years_experience: exp ? parseInt(exp) : null,
-    }).select().single()
+    }, { onConflict: 'profile_id' }).select().single()
   if (ce) return NextResponse.json({ error: ce.message }, { status: 500 })
 
-  void notifyMatchingInstitutions(service, newCand.id, newProfile.id, name, 'יסודי', null, city || null)
+  void notifyMatchingInstitutions(service, newCand.id, profileId, name.trim(), 'יסודי', null, city || null)
 
   return NextResponse.json({ ok: true, id: newCand.id }, { status: 201 })
 }

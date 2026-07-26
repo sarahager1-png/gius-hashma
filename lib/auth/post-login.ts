@@ -101,8 +101,26 @@ export async function resolvePostLogin(
     return autoApprove ? '/institution/jobs' : '/institution/profile'
   }
 
-  const { data: profile } = await service.from('profiles').select('role').eq('id', userId).single()
+  const { data: profile } = await service
+    .from('profiles').select('role, full_name, phone').eq('id', userId).single()
   if (profile) {
+    // A candidate who signed in with Google *before* her request was approved got a bare
+    // profile with no phone — backfill it from her request so she isn't listed without a phone.
+    if (profile.role === 'מועמדת' && !profile.phone) {
+      const { data: req } = await service
+        .from('candidate_requests')
+        .select('full_name, phone')
+        .eq('email', email)
+        .not('phone', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (req?.phone) {
+        await service.from('profiles')
+          .update({ phone: req.phone, full_name: profile.full_name || req.full_name })
+          .eq('id', userId)
+      }
+    }
     return roleHome(profile.role)
   }
 
@@ -151,6 +169,9 @@ export async function resolvePostLogin(
       availability_to:      approvedReq.availability_to || null,
       study_day:            approvedReq.study_day || null,
       work_cities:          approvedReq.work_cities || null,
+      photo_url:            approvedReq.photo_url || null,
+      graduation_year:      approvedReq.graduation_year || null,
+      whatsapp_preference:  typeof approvedReq.whatsapp_preference === 'boolean' ? approvedReq.whatsapp_preference : true,
     }, { onConflict: 'profile_id' })
 
     await service.from('candidate_requests').update({ profile_id: userId }).eq('id', approvedReq.id)
