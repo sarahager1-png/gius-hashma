@@ -329,7 +329,7 @@ function LoginPageInner() {
           </div>
 
           <div className="lg-form-footer">
-            © 2026 רשת חינוך חב״ד · פיתוח: שרה הגר&nbsp;<a href="tel:0503339770" style={{ color:'inherit', textDecoration:'none' }}>0503339770</a>
+            © 2026 רשת חינוך חב״ד
           </div>
         </div>
       </div>

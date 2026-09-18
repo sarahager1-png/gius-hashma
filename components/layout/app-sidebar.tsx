@@ -407,21 +407,13 @@ export default function AppSidebar({
         borderTop: '1px solid rgba(255,255,255,.06)',
         padding: '10px 10px 14px',
       }}>
-        <a
-          href="https://wa.me/972503339770"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block w-full text-center no-underline mb-2"
-          style={{
-            fontSize: '10.5px',
-            color: 'rgba(255,255,255,.5)',
-            padding: '6px 8px',
-            lineHeight: 1.6,
-            borderTop: '1px solid rgba(255,255,255,.08)',
-          }}
+        <Link
+          href="/contact"
+          className="block w-full text-center no-underline"
+          style={{ fontSize: '11.5px', fontWeight: 600, color: 'rgba(255,255,255,.55)', padding: '2px 8px 6px' }}
         >
-          בנוי ופיתוח: שרה הגר · 0503339770 · יעוץ ארגוני | פתרונות דיגיטליים · מהבנת הארגון לפתרון שעובד.
-        </a>
+          יצירת קשר
+        </Link>
         <button
           onClick={signOut}
           className="w-full flex items-center gap-2.5 rounded-[10px] transition-all"
