@@ -199,10 +199,10 @@ export default function ApplicationsInboxClient({
       )}
 
       {/* Job status bar */}
-      <div className="flex items-center gap-3 mb-5 p-4 rounded-[14px]"
+      <div className="flex flex-wrap items-center gap-3 mb-5 p-4 rounded-[14px]"
         style={{ background: '#fff', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>
         <span className="text-[13px] font-semibold" style={{ color: 'var(--ink-3)' }}>סטטוס משרה</span>
-        <div className="even-grid xs flex-1 min-w-0" style={{ gap: 6 }}>
+        <div className="even-grid xs order-last w-full sm:order-none sm:w-auto sm:flex-1 min-w-0" style={{ gap: 6 }}>
           {JOB_STATUSES.map(s => (
             <button key={s}
               onClick={() => updateJobStatus(s)}

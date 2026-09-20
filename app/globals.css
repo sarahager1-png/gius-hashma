@@ -333,7 +333,7 @@ select { cursor: pointer; }
 .even-grid.xs { --even-min: 72px; }
 .even-grid.sm { --even-min: 104px; }
 .even-grid.lg { --even-min: 220px; }
-.even-grid > * { width: 100%; height: 100%; min-width: 0; }
+.even-grid > * { width: 100%; height: 100%; min-width: 0; text-wrap: balance; }
 
 /* ─────────────────────────────────────────────────────────────
    Table system
