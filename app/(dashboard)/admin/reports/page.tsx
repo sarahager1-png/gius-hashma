@@ -263,7 +263,7 @@ export default async function AdminReportsPage({
       )}
 
       {/* KPI row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-fr gap-3 md:gap-4 mb-8">
         <KpiBox icon={<TrendingUp size={18} />} label="שיבוצים שבוצעו" value={totalPlacements} sub="סה״כ במערכת" color="var(--green)" bg="var(--green-bg)" />
         <KpiBox icon={<Users size={18} />} label="מועמדות פעילות" value={activeCandidates} sub={`${placed} משובצות`} color="var(--purple)" bg="var(--purple-050)" />
         <KpiBox icon={<Briefcase size={18} />} label="משרות פתוחות" value={activeJobs?.length ?? 0} sub="בהמתנה למועמדות" color="var(--teal)" bg="var(--teal-050)" />
@@ -339,7 +339,7 @@ export default async function AdminReportsPage({
                 <div key={i} style={{ width: `${(s.v / totalClosed) * 100}%`, background: s.c }} />
               ))}
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-fr gap-3">
               {[
                 { label: 'דרך המערכת', hint: 'שיבוץ אמיתי',   value: filledThroughSystem, color: 'var(--green)' },
                 { label: 'אוישו מבחוץ', hint: 'עצמאית / ידני', value: filledExternal,      color: 'var(--amber)' },

@@ -202,11 +202,11 @@ export default function ApplicationsInboxClient({
       <div className="flex items-center gap-3 mb-5 p-4 rounded-[14px]"
         style={{ background: '#fff', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)' }}>
         <span className="text-[13px] font-semibold" style={{ color: 'var(--ink-3)' }}>סטטוס משרה</span>
-        <div className="flex gap-1.5 flex-wrap">
+        <div className="even-grid xs flex-1 min-w-0" style={{ gap: 6 }}>
           {JOB_STATUSES.map(s => (
             <button key={s}
               onClick={() => updateJobStatus(s)}
-              className="h-7 px-3 rounded-full text-[12px] font-bold transition-all"
+              className="min-h-7 px-2 rounded-full text-[12px] leading-tight font-bold transition-all"
               style={jobStatus === s
                 ? { background: JOB_STATUS_BG[s] ?? '#F3F4F6', color: JOB_STATUS_COLOR[s] ?? '#6B7280', boxShadow: '0 0 0 2px ' + (JOB_STATUS_COLOR[s] ?? '#6B7280') + '40' }
                 : { background: 'var(--bg-2)', color: 'var(--ink-3)' }}>

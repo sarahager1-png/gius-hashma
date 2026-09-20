@@ -154,7 +154,7 @@ export default function InstitutionFormClient({ lead }: { lead: Lead }) {
           </div>
           <div className="col-span-full space-y-2">
             <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>סוג מוסד <span style={{ color: '#DC2626' }}>*</span></label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 auto-rows-fr gap-2">
               {ALL_TYPES.map(t => {
                 const sel = form.school_type === t
                 const c = TYPE_COLORS[t] ?? { bg: '#F3F4F6', color: '#374151' }

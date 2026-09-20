@@ -112,11 +112,11 @@ export default function DashboardClient({ fullName }: Props) {
 
       {/* Summary strip */}
       {kpis.length > 0 && (
-        <div className="flex flex-wrap items-center gap-0 mb-5 rounded-[12px] border overflow-hidden"
+        <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-fr mb-5 rounded-[12px] border overflow-hidden"
           style={{ background: 'linear-gradient(90deg, #4B2E83 0%, #2A6B77 50%, #00A7B5 100%)', borderColor: 'transparent' }}>
           {kpis.map((kpi, i) => (
             <div key={kpi.id}
-              className="flex-1 min-w-[120px] flex flex-col items-center py-3 px-4"
+              className="min-w-0 flex flex-col items-center justify-center text-center py-3 px-4"
               style={{ borderInlineEnd: i < kpis.length - 1 ? '1px solid rgba(255,255,255,.15)' : 'none' }}>
               <span className="text-[20px] font-bold leading-none text-white" style={{ letterSpacing: '-.02em' }}>
                 {kpi.value.toLocaleString('he-IL')}{kpi.unit ? <span className="text-[13px] font-semibold ms-1 opacity-80">{kpi.unit}</span> : null}
@@ -131,7 +131,7 @@ export default function DashboardClient({ fullName }: Props) {
 
       {/* KPI row */}
       <section
-        className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-5 md:mb-6"
+        className="grid grid-cols-2 md:grid-cols-4 auto-rows-fr gap-3 md:gap-4 mb-5 md:mb-6"
         aria-label="מדדי ביצועים"
       >
         {kpis.map(kpi => <KpiCard key={kpi.id} kpi={kpi} />)}

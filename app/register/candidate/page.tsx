@@ -61,7 +61,7 @@ function NativeSelect({ value, onChange, placeholder, options }: {
 function SpecChip({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) {
   return (
     <button type="button" onClick={onChange}
-      className="flex items-center gap-1.5 px-3 py-2 rounded-[9px] text-[13px] font-semibold border transition-all"
+      className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-[9px] text-[13px] leading-tight font-semibold border transition-all"
       style={checked
         ? { background: 'var(--purple)', borderColor: 'var(--purple)', color: '#fff' }
         : { background: 'var(--purple-050)', borderColor: 'var(--purple-200)', color: 'var(--purple)' }}>
@@ -250,7 +250,7 @@ function StepEducation({ form, set, specs, toggleSpec, customSpec, setCustomSpec
       )}
       <div>
         <Label>התמחויות</Label>
-        <div className="flex flex-wrap gap-2">
+        <div className="even-grid sm">
           {SPEC_OPTIONS.map(s => (
             <SpecChip key={s} label={s} checked={specs.includes(s)} onChange={() => toggleSpec(s)} />
           ))}

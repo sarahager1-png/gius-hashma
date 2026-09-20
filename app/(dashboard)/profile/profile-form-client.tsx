@@ -59,10 +59,10 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function Chips({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: string[] }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="even-grid sm">
       {options.map(o => (
         <button key={o} type="button" onClick={() => onChange(value === o ? '' : o)}
-          className="h-8 px-3 rounded-full text-[12px] font-semibold border transition-all"
+          className="min-h-8 px-3 py-1 rounded-full text-[12px] leading-tight font-semibold border transition-all"
           style={{ borderColor: value === o ? 'var(--purple)' : 'var(--line)', background: value === o ? 'var(--purple-050)' : '#fff', color: value === o ? 'var(--purple)' : 'var(--ink-3)' }}>
           {o}
         </button>

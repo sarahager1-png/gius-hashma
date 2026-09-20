@@ -124,14 +124,14 @@ export default function StaleJobsClient({ jobs: initial }: { jobs: Job[] }) {
       </div>
 
       {/* Filter chips */}
-      <div className="flex flex-wrap gap-2 mb-5">
+      <div className="even-grid mb-5">
         {FILTERS.map(f => {
           const active = filter === f.key
           return (
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
-              className="px-3.5 py-1.5 rounded-full text-[12.5px] font-bold border transition-all"
+              className="px-3.5 py-1.5 rounded-full text-[12.5px] leading-tight font-bold border transition-all"
               style={{
                 background: active ? 'var(--purple)' : '#fff',
                 color: active ? '#fff' : 'var(--ink-3)',

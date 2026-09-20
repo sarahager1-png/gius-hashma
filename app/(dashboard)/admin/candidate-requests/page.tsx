@@ -416,11 +416,11 @@ export default function CandidateRequestsPage() {
                   <div className="mt-3 rounded-[12px] border p-3 space-y-2"
                     style={{ borderColor: 'var(--red-border, #FECACA)', background: '#FFF5F5' }}>
                     <p className="text-[12.5px] font-bold" style={{ color: 'var(--red)' }}>סיבת הדחייה (תישלח למועמדת):</p>
-                    <div className="flex flex-wrap gap-1.5 mb-1">
+                    <div className="even-grid mb-1" style={{ gap: 6 }}>
                       {['פרטים חסרים', 'אין התאמה לדרישות', 'אין מקום פנוי', 'בקשה כפולה'].map(r => (
                         <button key={r} type="button"
                           onClick={() => setRejectReason(r)}
-                          className="px-2.5 py-1 rounded-full text-[11.5px] font-semibold transition-all"
+                          className="px-2.5 py-1 rounded-full text-[11.5px] leading-tight font-semibold transition-all"
                           style={{
                             border: `1.5px solid ${rejectReason === r ? 'var(--red)' : '#FECACA'}`,
                             background: rejectReason === r ? '#FEE2E2' : '#fff',

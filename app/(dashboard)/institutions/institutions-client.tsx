@@ -132,7 +132,7 @@ export default function InstitutionsClient({ institutions }: Props) {
         </div>
 
         {/* Status filter */}
-        <div className="flex rounded-lg p-0.5 gap-0.5" style={{ background: 'var(--bg-2)' }}>
+        <div className="grid grid-flow-col auto-cols-fr rounded-lg p-0.5 gap-0.5" style={{ background: 'var(--bg-2)' }}>
           {['הכל', 'פעילים', 'ממתינים'].map(s => (
             <button key={s} onClick={() => setFilter(s)}
               className="px-3 py-1.5 rounded-md text-[12.5px] font-semibold transition-all"

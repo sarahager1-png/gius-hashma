@@ -165,7 +165,7 @@ export default function AdminJobFormClient({ institutions }: Props) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="סוג משרה (ניתן לבחור מספר)">
-            <div className="flex flex-wrap gap-2 pt-1">
+            <div className="even-grid sm pt-1">
               {JOB_TYPE_OPTIONS.map(jt => {
                 const selected = form.job_types.includes(jt)
                 return (

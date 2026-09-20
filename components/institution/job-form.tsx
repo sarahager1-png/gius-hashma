@@ -64,12 +64,12 @@ function NativeSelect({ value, onChange, placeholder, options }: {
 
 function Chips({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: string[] }) {
   return (
-    <div className="flex flex-wrap gap-2 pt-1">
+    <div className="even-grid pt-1">
       {options.map(o => {
         const sel = value === o
         return (
           <button key={o} type="button" onClick={() => onChange(sel ? '' : o)}
-            className="px-3.5 py-1.5 rounded-full text-[13px] font-semibold border transition-all"
+            className="px-3.5 py-1.5 rounded-full text-[13px] leading-tight font-semibold border transition-all"
             style={{ background: sel ? 'var(--purple-050)' : '#fff', borderColor: sel ? 'var(--purple)' : 'var(--line)', color: sel ? 'var(--purple)' : 'var(--ink-3)' }}>
             {sel ? '✓ ' : ''}{o}
           </button>
@@ -248,10 +248,10 @@ export default function JobFormClient({ institutionId, school, job, templates = 
       {templates.length > 0 && (
         <div className="rounded-[14px] border p-4" style={{ background: 'var(--purple-050)', borderColor: 'var(--purple-100)' }}>
           <p className="text-[12px] font-bold mb-2" style={{ color: 'var(--purple)' }}>טען מתבנית:</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="even-grid">
             {templates.map(t => (
               <button key={t.id} type="button" onClick={() => loadTemplate(t)}
-                className="px-3 py-1.5 rounded-full text-[12.5px] font-semibold border transition-all"
+                className="px-3 py-1.5 rounded-full text-[12.5px] leading-tight font-semibold border transition-all"
                 style={{ background: '#fff', borderColor: 'var(--purple-200)', color: 'var(--purple)' }}>
                 {t.title}
               </button>

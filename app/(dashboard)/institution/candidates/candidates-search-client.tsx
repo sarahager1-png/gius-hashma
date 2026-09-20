@@ -163,10 +163,10 @@ export default function CandidateSearchClient({ candidates, institutionId, insti
           {STATUSES.map(s => <option key={s} value={s}>{s}{s === 'מועדפות' && favorites.size > 0 ? ` (${favorites.size})` : ''}</option>)}
         </select>
         {/* Desktop: tabs */}
-        <div className="hidden md:flex rounded-lg p-0.5 gap-0.5" style={{ background: 'var(--bg-2)' }}>
+        <div className="hidden md:grid grid-flow-col auto-cols-fr rounded-lg p-0.5 gap-0.5" style={{ background: 'var(--bg-2)' }}>
           {STATUSES.map(s => (
             <button key={s} onClick={() => setFilter(s)}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-md text-[12.5px] font-semibold transition-all"
+              className="flex items-center justify-center gap-1 px-3 py-1.5 rounded-md text-[12.5px] font-semibold transition-all"
               style={filter === s
                 ? { background: '#fff', color: s === 'מועדפות' ? '#B45309' : 'var(--purple)', boxShadow: '0 1px 2px rgba(0,0,0,.05)' }
                 : { color: 'var(--ink-3)' }}>

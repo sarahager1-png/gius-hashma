@@ -229,7 +229,7 @@ export default function CandidateDashboard({ fullName, availabilityStatus, profi
       )}
 
       {/* KPI row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-fr gap-3 md:gap-4 mb-6">
         {kpis.map(k => (
           <div key={k.label} className="rounded-[20px] border overflow-hidden relative"
             style={{ background: 'linear-gradient(145deg, #FDFCFF 0%, #FAF8FE 100%)', borderColor: 'var(--line)', boxShadow: '0 2px 12px rgba(75,46,131,.10)', transition: 'box-shadow 240ms, transform 240ms' }}
@@ -609,19 +609,19 @@ export default function CandidateDashboard({ fullName, availabilityStatus, profi
       {/* Quick actions */}
       <div className="rounded-[16px] border p-5" style={{ background: '#fff', borderColor: 'var(--line)', boxShadow: 'var(--shadow-sm)' }}>
         <h2 className="text-[13px] font-bold uppercase tracking-[.08em] mb-4" style={{ color: 'var(--ink-3)' }}>פעולות מהירות</h2>
-        <div className="flex gap-3" style={{ flexWrap: 'wrap' }}>
+        <div className="even-grid" style={{ gap: 12 }}>
           <Link href="/jobs"
-            className="flex items-center gap-2 h-10 px-5 rounded-[10px] text-[14px] font-semibold text-white"
+            className="flex items-center justify-center gap-2 min-h-10 px-5 rounded-[10px] text-[14px] font-semibold text-white"
             style={{ background: 'var(--purple)' }}>
             <Briefcase size={15} />חפשי משרות
           </Link>
           <Link href="/my-applications"
-            className="flex items-center gap-2 h-10 px-5 rounded-[10px] border text-[14px] font-semibold"
+            className="flex items-center justify-center gap-2 min-h-10 px-5 rounded-[10px] border text-[14px] font-semibold"
             style={{ borderColor: 'var(--line)', color: 'var(--ink)', background: '#fff' }}>
             <ClipboardList size={15} />הגשות שלי
           </Link>
           <Link href="/profile"
-            className="flex items-center gap-2 h-10 px-5 rounded-[10px] border text-[14px] font-semibold"
+            className="flex items-center justify-center gap-2 min-h-10 px-5 rounded-[10px] border text-[14px] font-semibold"
             style={{ borderColor: 'var(--line)', color: 'var(--ink)', background: '#fff' }}>
             <User size={15} />הפרופיל שלי
           </Link>

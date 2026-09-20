@@ -225,7 +225,7 @@ export default function MatchesClient({ institutionId }: { institutionId: string
           style={{ background: 'var(--bg-2)', border: '1px solid var(--line-soft)' }}>
           <span className="text-[12px] font-semibold shrink-0" style={{ color: 'var(--ink-3)' }}>סינון:</span>
 
-          <div className="flex gap-1">
+          <div className="grid grid-flow-col auto-cols-fr gap-1">
             {[0, 6, 9].map(s => (
               <button key={s} onClick={() => setMinScore(s)}
                 className="h-7 px-2.5 rounded-full text-[11.5px] font-bold transition-all"

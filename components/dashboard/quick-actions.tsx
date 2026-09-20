@@ -41,7 +41,7 @@ export default function QuickActions() {
         <p className="text-[13px] font-medium mt-0.5" style={{ color: 'var(--ink-4)' }}>כל מה שהמערכת עושה</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-2.5 px-5 pb-5">
+      <div className="grid grid-cols-2 auto-rows-fr gap-2.5 px-5 pb-5">
         {ACTIONS.map(action => {
           const Icon = action.icon
           return (

@@ -82,7 +82,7 @@ export default function JobsAdminClient({ jobs, initialSearch = '' }: Props) {
             onBlur={e => { e.currentTarget.style.borderColor = 'var(--line)'; e.currentTarget.style.boxShadow = 'none' }}
           />
         </div>
-        <div className="flex rounded-[10px] border p-0.5 gap-0.5" style={{ background: 'var(--bg-2)', borderColor: 'var(--line)' }}>
+        <div className="grid grid-flow-col auto-cols-fr rounded-[10px] border p-0.5 gap-0.5" style={{ background: 'var(--bg-2)', borderColor: 'var(--line)' }}>
           {STATUSES.map(s => (
             <button key={s} onClick={() => setStatus(s)}
               className="px-3.5 py-1.5 rounded-[8px] text-[13px] font-semibold transition-all"

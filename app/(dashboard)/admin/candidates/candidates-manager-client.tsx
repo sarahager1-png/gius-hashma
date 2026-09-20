@@ -150,13 +150,13 @@ export default function CandidateManagerClient({ candidates: initial }: Props) {
       </div>
 
       {/* Status counters */}
-      <div className="flex flex-wrap gap-2 mb-5">
+      <div className="even-grid mb-5">
         {ALL_STATUSES.map(s => {
           const sc = STATUS_COLORS[s] ?? { bg: '#F4F4F5', color: '#71717A' }
           const count = statusCounts[s] ?? 0
           return (
             <button key={s} onClick={() => setStatus(statusFilter === s ? 'הכל' : s)}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-bold border-2 transition-all"
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full text-[12px] leading-tight font-bold border-2 transition-all"
               style={{
                 background: statusFilter === s ? sc.bg : 'transparent',
                 color: sc.color,

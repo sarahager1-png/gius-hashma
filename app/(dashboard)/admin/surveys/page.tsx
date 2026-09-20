@@ -61,7 +61,7 @@ export default async function AdminSurveysPage() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-fr gap-4 mb-8">
         {[
           { label: 'סקרים נשלחו', value: rows.length, icon: <MessageSquare size={18} />, color: 'var(--purple)' },
           { label: 'הושלמו', value: `${submitted.length} (${responseRate}%)`, icon: <ThumbsUp size={18} />, color: '#1A7A4A' },

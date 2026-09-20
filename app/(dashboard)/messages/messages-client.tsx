@@ -95,10 +95,10 @@ export default function MessagesClient({ candidates }: Props) {
                   : <><Square size={14} />בחרי הכל ({filtered.length})</>}
               </button>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="even-grid">
               {STATUSES.map(s => (
                 <button key={s} onClick={() => { setStatusFilter(s); setSelected(new Set()) }}
-                  className="px-3 py-1.5 rounded-full text-[12.5px] font-semibold transition-all border"
+                  className="px-3 py-1.5 rounded-full text-[12.5px] leading-tight font-semibold transition-all border"
                   style={statusFilter === s
                     ? { background: 'var(--purple)', color: '#fff', borderColor: 'var(--purple)' }
                     : { background: '#fff', color: 'var(--ink-3)', borderColor: 'var(--line)' }}>

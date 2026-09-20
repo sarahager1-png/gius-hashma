@@ -41,7 +41,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function Chips({ options, value, onChange }: { options: string[]; value: string; onChange: (v: string) => void }) {
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="even-grid sm" style={{ gap: 6 }}>
       {options.map(opt => (
         <button key={opt} type="button"
           onClick={() => onChange(opt)}

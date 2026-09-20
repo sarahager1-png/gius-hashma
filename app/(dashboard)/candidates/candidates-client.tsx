@@ -449,7 +449,7 @@ export default function CandidatesClient({ candidates: initial, initialSearch = 
           style={{ background: '#fff', borderColor: 'var(--line)', color: 'var(--ink)' }}>
           {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-        <div className="hidden md:flex rounded-[10px] p-1 gap-0.5" style={{ background: 'var(--bg-2)', border: '1px solid var(--line)' }}>
+        <div className="hidden md:grid grid-flow-col auto-cols-fr rounded-[10px] p-1 gap-0.5" style={{ background: 'var(--bg-2)', border: '1px solid var(--line)' }}>
           {STATUSES.map(s => (
             <button key={s} onClick={() => setFilter(s)}
               className="px-3.5 py-1.5 rounded-[8px] text-[12.5px] font-semibold transition-all"

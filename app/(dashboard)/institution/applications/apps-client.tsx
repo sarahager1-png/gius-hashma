@@ -293,12 +293,12 @@ export default function AppsAllClient({ apps: initial, institutionName }: Props)
             return <option key={t.key} value={t.key}>{t.label}{cnt > 0 ? ` (${cnt})` : ''}</option>
           })}
         </select>
-        <div className="hidden md:flex rounded-lg p-0.5 gap-0.5" style={{ background: 'var(--bg-2)' }}>
+        <div className="hidden md:grid grid-flow-col auto-cols-fr rounded-lg p-0.5 gap-0.5" style={{ background: 'var(--bg-2)' }}>
           {TABS.map(t => {
             const cnt = counts[t.key as keyof typeof counts] ?? 0
             return (
               <button key={t.key} onClick={() => setTab(t.key as AppStatus | 'הכל')}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12.5px] font-semibold transition-all"
+                className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-[12.5px] font-semibold transition-all"
                 style={tab === t.key
                   ? { background: '#fff', color: 'var(--purple)', boxShadow: '0 1px 4px rgba(0,0,0,.07)' }
                   : { color: 'var(--ink-3)' }}>

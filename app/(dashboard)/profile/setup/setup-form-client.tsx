@@ -107,7 +107,7 @@ export default function SetupFormClient({ candidateName, current }: Props) {
               רמת חינוך <span style={{ color: '#DC2626' }}>*</span>
               <span className="text-[11px] font-normal ms-1" style={{ color: 'var(--ink-4)' }}>(ניתן לבחור יותר מאחת)</span>
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="even-grid sm">
               {INSTITUTION_LEVELS.map(l => {
                 const sel = levels.includes(l)
                 return (
