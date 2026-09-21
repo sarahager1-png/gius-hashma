@@ -92,7 +92,8 @@ export default function InstitutionProfileFormClient({ institution, profile }: P
           </div>
           <div className="col-span-2 space-y-2">
             <label className="text-[13px] font-semibold" style={{ color: 'var(--ink-2)' }}>סוג בית הספר</label>
-            <div className="even-grid">
+            {/* 130px — שתי עמודות גם במכל של ~300px בנייד, במקום עמודה אחת של חמש שורות */}
+            <div className="even-grid" style={{ ['--even-min' as string]: '130px' }}>
               {SCHOOL_TYPES.map(t => {
                 const sel = form.school_type === t
                 const c = SCHOOL_TYPE_COLORS[t]

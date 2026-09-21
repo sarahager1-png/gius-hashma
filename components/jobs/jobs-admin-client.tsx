@@ -70,8 +70,9 @@ export default function JobsAdminClient({ jobs, initialSearch = '' }: Props) {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-3 mb-7">
-        <div className="relative" style={{ flex: '0 0 240px' }}>
+      {/* בנייד: החיפוש ברוחב מלא והלשוניות בשורה משלהן — אחרת הרשת השווה נמעכת ל-30px ללשונית */}
+      <div className="flex flex-wrap items-center gap-3 mb-7">
+        <div className="relative w-full sm:w-auto" style={{ flex: '1 1 240px', maxWidth: 360, minWidth: 0 }}>
           <Search size={14} className="absolute top-1/2 -translate-y-1/2 end-3 pointer-events-none" style={{ color: 'var(--ink-4)' }} />
           <input
             value={search} onChange={e => setSearch(e.target.value)} placeholder="חיפוש..."
@@ -82,7 +83,7 @@ export default function JobsAdminClient({ jobs, initialSearch = '' }: Props) {
             onBlur={e => { e.currentTarget.style.borderColor = 'var(--line)'; e.currentTarget.style.boxShadow = 'none' }}
           />
         </div>
-        <div className="grid grid-flow-col auto-cols-fr rounded-[10px] border p-0.5 gap-0.5" style={{ background: 'var(--bg-2)', borderColor: 'var(--line)' }}>
+        <div className="grid grid-flow-col auto-cols-fr w-full sm:w-auto rounded-[10px] border p-0.5 gap-0.5" style={{ background: 'var(--bg-2)', borderColor: 'var(--line)' }}>
           {STATUSES.map(s => (
             <button key={s} onClick={() => setStatus(s)}
               className="px-3.5 py-1.5 rounded-[8px] text-[13px] font-semibold transition-all"
